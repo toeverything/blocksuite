@@ -15,9 +15,9 @@
     "@blocksuite/affine-components": "workspace:*",
     "@blocksuite/affine-model": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
-    "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/icons": "^2.2.6",
+    "@blocksuite/icons": "^2.2.10",
+    "@blocksuite/std": "workspace:*",
     "@preact/signals-core": "^1.8.0",
     "@toeverything/theme": "^1.1.12",
     "lit": "^3.2.0",
@@ -33,5 +33,5 @@
     "!src/__tests__",
     "!dist/__tests__"
   ],
-  "version": "0.20.0"
+  "version": "0.21.0"
 }

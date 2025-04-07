@@ -6,13 +6,13 @@ import {
   type TelemetryEvent,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
-import { FONT_XS, PANEL_BASE } from '@blocksuite/affine-shared/styles';
+import { fontXSStyle, panelBaseStyle } from '@blocksuite/affine-shared/styles';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
-import { type BlockStdScope, ShadowlessElement } from '@blocksuite/block-std';
-import type { InlineEditor, InlineRange } from '@blocksuite/block-std/inline';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { DoneIcon, ResetIcon } from '@blocksuite/icons/lit';
+import { type BlockStdScope, ShadowlessElement } from '@blocksuite/std';
+import type { InlineEditor, InlineRange } from '@blocksuite/std/inline';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { signal } from '@preact/signals-core';
 import { css, html } from 'lit';
@@ -36,12 +36,10 @@ export class ReferencePopup extends SignalWatcher(
       height: 100vh;
     }
 
+    ${panelBaseStyle('.popover-container')}
     .popover-container {
-      ${PANEL_BASE};
       position: absolute;
       display: flex;
-      width: 321px;
-      height: 37px;
       gap: 8px;
       box-sizing: content-box;
       justify-content: space-between;
@@ -68,8 +66,8 @@ export class ReferencePopup extends SignalWatcher(
       border: none;
       background: transparent;
       color: var(--affine-text-primary-color);
-      ${FONT_XS};
     }
+    ${fontXSStyle('input')}
     input::placeholder {
       color: var(--affine-placeholder-color);
     }
@@ -77,8 +75,8 @@ export class ReferencePopup extends SignalWatcher(
       outline: none;
     }
 
+    ${fontXSStyle('editor-icon-button.save .label')}
     editor-icon-button.save .label {
-      ${FONT_XS};
       color: inherit;
       text-transform: none;
     }

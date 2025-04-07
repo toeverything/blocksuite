@@ -1,18 +1,24 @@
-import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
+import {
+  EmbedOptionProvider,
+  VirtualKeyboardProvider,
+} from '@blocksuite/affine-shared/services';
 import { isValidUrl, stopPropagation } from '@blocksuite/affine-shared/utils';
-import type { EditorHost } from '@blocksuite/block-std';
-import { ShadowlessElement } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
-import { WithDisposable } from '@blocksuite/global/lit';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import type { EditorHost } from '@blocksuite/std';
+import { ShadowlessElement } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import type { BlockModel } from '@blocksuite/store';
 import { html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit-html/directives/style-map.js';
 
 import { toast } from '../toast';
 import { embedCardModalStyles } from './styles.js';
 
-export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
+export class EmbedCardCreateModal extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   static override styles = embedCardModalStyles;
 
   private readonly _onCancel = () => {
@@ -98,7 +104,14 @@ export class EmbedCardCreateModal extends WithDisposable(ShadowlessElement) {
   }
 
   override render() {
-    return html`<div class="embed-card-modal">
+    const keyboard = this.host.std.getOptional(VirtualKeyboardProvider);
+    const style = styleMap({
+      height: keyboard?.visible$.value
+        ? `calc(100% - ${keyboard.height$.value}px)`
+        : undefined,
+    });
+
+    return html`<div class="embed-card-modal" style=${style}>
       <div class="embed-card-modal-mask" @click=${this._onCancel}></div>
       <div class="embed-card-modal-wrapper">
         <div class="embed-card-modal-row">

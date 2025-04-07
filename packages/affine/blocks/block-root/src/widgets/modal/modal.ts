@@ -1,4 +1,4 @@
-import { WidgetComponent } from '@blocksuite/block-std';
+import { WidgetComponent } from '@blocksuite/std';
 import { nothing } from 'lit';
 
 import { createCustomModal } from './custom-modal.js';

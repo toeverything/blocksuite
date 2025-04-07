@@ -1,10 +1,10 @@
 import { FrameBlockModel } from '@blocksuite/affine-model';
 import type { RichText } from '@blocksuite/affine-rich-text';
-import { type BlockComponent, ShadowlessElement } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
-import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std/inline';
 import { Bound } from '@blocksuite/global/gfx';
 import { WithDisposable } from '@blocksuite/global/lit';
+import { type BlockComponent, ShadowlessElement } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/std/inline';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';

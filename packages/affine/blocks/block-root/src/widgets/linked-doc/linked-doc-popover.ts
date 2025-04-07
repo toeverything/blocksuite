@@ -11,10 +11,10 @@ import {
   getPopperPosition,
   getViewportElement,
 } from '@blocksuite/affine-shared/utils';
-import { PropTypes, requiredProperties } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { MoreHorizontalIcon } from '@blocksuite/icons/lit';
+import { PropTypes, requiredProperties } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import { effect } from '@preact/signals-core';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, queryAll, state } from 'lit/decorators.js';
@@ -55,7 +55,7 @@ export class LinkedDocPopover extends SignalWatcher(
     }
     this._updateLinkedDocGroupAbortController = new AbortController();
 
-    if (query === null) {
+    if (query === null || query.startsWith(' ')) {
       this.context.close();
       return;
     }
@@ -249,7 +249,7 @@ export class LinkedDocPopover extends SignalWatcher(
   }
 
   override render() {
-    const MAX_HEIGHT = 380;
+    const MAX_HEIGHT = 390;
     const style = this._position
       ? styleMap({
           transform: `translate(${this._position.x}, ${this._position.y})`,
@@ -260,17 +260,22 @@ export class LinkedDocPopover extends SignalWatcher(
         });
 
     const actionGroups = this._actionGroup.map(group => {
-      // Check if the group is loading
+      // Check if the group is loading or hidden
       const isLoading = resolveSignal(group.loading);
+      const isHidden = resolveSignal(group.hidden);
       return {
         ...group,
         isLoading,
+        isHidden,
       };
     });
 
     return html`<div class="linked-doc-popover" style="${style}">
       ${actionGroups
-        .filter(group => group.items.length || group.isLoading)
+        .filter(
+          group =>
+            (group.items.length > 0 || group.isLoading) && !group.isHidden
+        )
         .map((group, idx) => {
           return html`
             <div class="divider" ?hidden=${idx === 0}></div>
@@ -294,11 +299,16 @@ export class LinkedDocPopover extends SignalWatcher(
                     >`
                   : nothing;
                 return html`<icon-button
-                  width="280px"
+                  width="260px"
                   height="30px"
                   data-id=${key}
                   .text=${name}
                   hover=${this._activatedItemKey === key}
+                  @pointerdown=${(e: PointerEvent) => {
+                    // Prevent event listeners being registered on the root document
+                    // eg., radix-ui dialogs usePointerDownOutside hooks
+                    e.stopPropagation();
+                  }}
                   @click=${() => {
                     action()?.catch(console.error);
                   }}

@@ -1,17 +1,17 @@
 import { createLitPortal } from '@blocksuite/affine-components/portal';
 import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import {
   type BlockComponent,
   type BlockStdScope,
   ShadowlessElement,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 import {
   type InlineEditor,
   ZERO_WIDTH_NON_JOINER,
   ZERO_WIDTH_SPACE,
-} from '@blocksuite/block-std/inline';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@blocksuite/std/inline';
 import type { DeltaInsert } from '@blocksuite/store';
 import { signal } from '@preact/signals-core';
 import katex from 'katex';

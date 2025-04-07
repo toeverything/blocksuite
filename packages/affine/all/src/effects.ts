@@ -34,6 +34,7 @@ import { effects as componentHighlightDropdownMenuEffects } from '@blocksuite/af
 import { IconButton } from '@blocksuite/affine-components/icon-button';
 import { effects as componentLinkPreviewEffects } from '@blocksuite/affine-components/link-preview';
 import { effects as componentLinkedDocTitleEffects } from '@blocksuite/affine-components/linked-doc-title';
+import { effects as componentOpenDocDropdownMenuEffects } from '@blocksuite/affine-components/open-doc-dropdown-menu';
 import { effects as componentPortalEffects } from '@blocksuite/affine-components/portal';
 import { effects as componentSizeDropdownMenuEffects } from '@blocksuite/affine-components/size-dropdown-menu';
 import { SmoothCorner } from '@blocksuite/affine-components/smooth-corner';
@@ -48,6 +49,7 @@ import { effects as fragmentOutlineEffects } from '@blocksuite/affine-fragment-o
 import { effects as inlineFootnoteEffects } from '@blocksuite/affine-inline-footnote/effects';
 import { effects as inlineLatexEffects } from '@blocksuite/affine-inline-latex/effects';
 import { effects as inlineLinkEffects } from '@blocksuite/affine-inline-link/effects';
+import { effects as inlineMentionEffects } from '@blocksuite/affine-inline-mention';
 import { effects as inlinePresetEffects } from '@blocksuite/affine-inline-preset/effects';
 import { effects as inlineReferenceEffects } from '@blocksuite/affine-inline-reference/effects';
 import { effects as richTextEffects } from '@blocksuite/affine-rich-text/effects';
@@ -58,10 +60,10 @@ import { effects as widgetRemoteSelectionEffects } from '@blocksuite/affine-widg
 import { effects as widgetScrollAnchoringEffects } from '@blocksuite/affine-widget-scroll-anchoring/effects';
 import { effects as widgetSlashMenuEffects } from '@blocksuite/affine-widget-slash-menu/effects';
 import { effects as widgetToolbarEffects } from '@blocksuite/affine-widget-toolbar/effects';
-import { effects as stdEffects } from '@blocksuite/block-std/effects';
 import { effects as dataViewEffects } from '@blocksuite/data-view/effects';
+import { effects as stdEffects } from '@blocksuite/std/effects';
 
-import { registerSpecs } from './extensions/register.js';
+import { registerBlockSpecs } from './extensions';
 
 export declare const _GLOBAL_:
   | typeof stdEffects
@@ -111,8 +113,7 @@ export declare const _GLOBAL_:
   | typeof fragmentOutlineEffects;
 
 export function effects() {
-  registerSpecs();
-
+  registerBlockSpecs();
   stdEffects();
 
   dataViewEffects();
@@ -123,6 +124,7 @@ export function effects() {
   inlineLinkEffects();
   inlineFootnoteEffects();
   inlineLatexEffects();
+  inlineMentionEffects();
 
   blockNoteEffects();
   blockAttachmentEffects();
@@ -163,6 +165,7 @@ export function effects() {
   componentEdgelessLineWidthEffects();
   componentEdgelessLineStylesEffects();
   componentEdgelessShapeColorPickerEffects();
+  componentOpenDocDropdownMenuEffects();
 
   widgetScrollAnchoringEffects();
   widgetFrameTitleEffects();

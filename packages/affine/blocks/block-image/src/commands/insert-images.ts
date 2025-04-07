@@ -1,6 +1,6 @@
 import { FileSizeLimitService } from '@blocksuite/affine-shared/services';
 import { getImageFilesFromLocal } from '@blocksuite/affine-shared/utils';
-import type { Command } from '@blocksuite/block-std';
+import type { Command } from '@blocksuite/std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { addSiblingImageBlock } from '../utils.js';

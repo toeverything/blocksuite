@@ -1,9 +1,10 @@
 import { FootNoteInlineSpecExtension } from '@blocksuite/affine-inline-footnote';
 import { LatexInlineSpecExtension } from '@blocksuite/affine-inline-latex';
 import { LinkInlineSpecExtension } from '@blocksuite/affine-inline-link';
+import { MentionInlineSpecExtension } from '@blocksuite/affine-inline-mention';
 import { ReferenceInlineSpecExtension } from '@blocksuite/affine-inline-reference';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { InlineManagerExtension } from '@blocksuite/block-std/inline';
+import { InlineManagerExtension } from '@blocksuite/std/inline';
 
 import {
   BackgroundInlineSpecExtension,
@@ -30,5 +31,6 @@ export const DefaultInlineManagerExtension =
       ReferenceInlineSpecExtension.identifier,
       LinkInlineSpecExtension.identifier,
       FootNoteInlineSpecExtension.identifier,
+      MentionInlineSpecExtension.identifier,
     ],
   });

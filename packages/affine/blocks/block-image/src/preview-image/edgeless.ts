@@ -1,4 +1,4 @@
-import { toGfxBlockComponent } from '@blocksuite/block-std';
+import { toGfxBlockComponent } from '@blocksuite/std';
 import { css } from 'lit';
 
 import { ImagePlaceholderBlockComponent } from './page.js';

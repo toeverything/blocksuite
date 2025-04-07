@@ -20,6 +20,7 @@ import type { ExtensionType } from '@blocksuite/store';
 
 import { defaultBlockHtmlAdapterMatchers } from './html/block-matcher';
 import { defaultBlockMarkdownAdapterMatchers } from './markdown/block-matcher';
+import { defaultMarkdownPreprocessors } from './markdown/preprocessor';
 import { defaultBlockNotionHtmlAdapterMatchers } from './notion-html/block-matcher';
 import { defaultBlockPlainTextAdapterMatchers } from './plain-text/block-matcher';
 
@@ -44,6 +45,7 @@ export const MarkdownAdapterExtension: ExtensionType[] = [
   ...MarkdownInlineToDeltaAdapterExtensions,
   ...defaultBlockMarkdownAdapterMatchers,
   ...InlineDeltaToMarkdownAdapterExtensions,
+  ...defaultMarkdownPreprocessors,
 ];
 
 export const NotionHtmlAdapterExtension: ExtensionType[] = [

@@ -26,3 +26,86 @@ export const EdgelessTooltip = html`<svg width="170" height="106" viewBox="0 0 1
 </g>
 </svg>
 `;
+
+// prettier-ignore
+export const FrameTooltip = html`<svg width="170" height="89" viewBox="0 0 170 89" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_5269_147682)">
+<rect width="170" height="89" fill="white"/>
+<text fill="#8E8D91" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="10" letter-spacing="0px"><tspan x="8" y="16.6364">Create a blank frame in Edgeless</tspan></text>
+<rect x="16" y="45" width="164" height="59" rx="3" stroke="black" stroke-opacity="0.52" stroke-width="2"/>
+<rect x="15" y="27" width="32" height="13" rx="3" fill="black" fill-opacity="0.95"/>
+<text fill="white" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="8" font-weight="500" letter-spacing="0px"><tspan x="19" y="35.8182">Frame</tspan></text>
+</g>
+<defs>
+<clipPath id="clip0_5269_147682">
+<rect width="170" height="89" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+`
+
+// prettier-ignore
+export const MindMapTooltip = html`<svg width="170" height="106" viewBox="0 0 170 106" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_5150_67028)">
+<rect width="170" height="106" fill="white"/>
+<text fill="#8E8D91" xml:space="preserve" style="white-space: pre" font-family="Inter" font-size="10" letter-spacing="0px"><tspan x="8" y="16.6364">Create a mind map in Edgeless</tspan></text>
+<g filter="url(#filter0_d_5150_67028)">
+<rect x="21" y="53" width="59" height="19" rx="5" stroke="#29A3FA" stroke-width="2"/>
+<text fill="black" xml:space="preserve" style="white-space: pre" font-family="Poppins" font-size="8" font-weight="500" letter-spacing="0px"><tspan x="30.5" y="65.076">Mind Map</tspan></text>
+</g>
+<g filter="url(#filter1_d_5150_67028)">
+<rect x="119.75" y="30" width="28.25" height="13.125" rx="5" stroke="#6E52DF" stroke-width="2"/>
+</g>
+<g filter="url(#filter2_d_5150_67028)">
+<rect x="119.75" y="55.8013" width="28.25" height="13.125" rx="5" stroke="#E660A4" stroke-width="2"/>
+</g>
+<g filter="url(#filter3_d_5150_67028)">
+<rect x="119.75" y="81.603" width="28.25" height="13.125" rx="5" stroke="#FF8C38" stroke-width="2"/>
+</g>
+<path d="M81.5139 62.7686C104.205 62.7686 97.1139 88.7686 120.514 88.7686" stroke="#FF8C38" stroke-width="2"/>
+<path d="M81.5139 62.7686C104.205 62.7686 97.1139 62.7686 120.514 62.7686" stroke="#E660A4" stroke-width="2"/>
+<path d="M81.5139 62.7686C104.205 62.7686 97.1139 36.7686 120.514 36.7686" stroke="#6E52DF" stroke-width="2"/>
+</g>
+<defs>
+<filter id="filter0_d_5150_67028" x="8" y="46" width="85" height="45" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="6"/>
+<feGaussianBlur stdDeviation="6"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.14 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_5150_67028"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_5150_67028" result="shape"/>
+</filter>
+<filter id="filter1_d_5150_67028" x="106.75" y="23" width="54.25" height="39.125" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="6"/>
+<feGaussianBlur stdDeviation="6"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.14 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_5150_67028"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_5150_67028" result="shape"/>
+</filter>
+<filter id="filter2_d_5150_67028" x="106.75" y="48.8013" width="54.25" height="39.125" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="6"/>
+<feGaussianBlur stdDeviation="6"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.14 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_5150_67028"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_5150_67028" result="shape"/>
+</filter>
+<filter id="filter3_d_5150_67028" x="106.75" y="74.603" width="54.25" height="39.125" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="6"/>
+<feGaussianBlur stdDeviation="6"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.14 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_5150_67028"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_5150_67028" result="shape"/>
+</filter>
+<clipPath id="clip0_5150_67028">
+<rect width="170" height="106" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+`

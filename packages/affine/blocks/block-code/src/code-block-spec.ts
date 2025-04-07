@@ -3,7 +3,7 @@ import {
   BlockViewExtension,
   FlavourExtension,
   WidgetViewExtension,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 import type { ExtensionType } from '@blocksuite/store';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 

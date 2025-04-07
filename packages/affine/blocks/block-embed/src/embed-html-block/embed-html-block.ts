@@ -1,7 +1,7 @@
 import type { EmbedHtmlModel, EmbedHtmlStyles } from '@blocksuite/affine-model';
-import { BlockSelection } from '@blocksuite/block-std';
+import { BlockSelection } from '@blocksuite/std';
 import { html } from 'lit';
-import { query, state } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
@@ -12,10 +12,6 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<EmbedHtmlModel>
   static override styles = styles;
 
   override _cardStyle: (typeof EmbedHtmlStyles)[number] = 'html';
-
-  protected _isDragging = false;
-
-  protected _isResizing = false;
 
   close = () => {
     document.exitFullscreen().catch(console.error);
@@ -50,25 +46,6 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<EmbedHtmlModel>
   override connectedCallback() {
     super.connectedCallback();
     this._cardStyle = this.model.props.style;
-
-    // this is required to prevent iframe from capturing pointer events
-    this.disposables.add(
-      this.selected$.subscribe(selected => {
-        this._showOverlay = this._isResizing || this._isDragging || !selected;
-      })
-    );
-    // this is required to prevent iframe from capturing pointer events
-    this.handleEvent('dragStart', () => {
-      this._isDragging = true;
-      this._showOverlay =
-        this._isResizing || this._isDragging || !this.selected$.peek();
-    });
-
-    this.handleEvent('dragEnd', () => {
-      this._isDragging = false;
-      this._showOverlay =
-        this._isResizing || this._isDragging || !this.selected$.peek();
-    });
   }
 
   override renderBlock(): unknown {
@@ -112,10 +89,11 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<EmbedHtmlModel>
                 ></embed-html-fullscreen-toolbar>
               </div>
 
+              <!-- overlay to prevent the iframe from capturing pointer events -->
               <div
                 class=${classMap({
                   'affine-embed-html-iframe-overlay': true,
-                  hide: !this._showOverlay,
+                  hide: !this.showOverlay$.value,
                 })}
               ></div>
             </div>
@@ -130,9 +108,6 @@ export class EmbedHtmlBlockComponent extends EmbedBlockComponent<EmbedHtmlModel>
       `;
     });
   }
-
-  @state()
-  protected accessor _showOverlay = true;
 
   @query('.embed-html-block-iframe-wrapper')
   accessor iframeWrapper!: HTMLDivElement;

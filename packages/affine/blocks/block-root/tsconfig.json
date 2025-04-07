@@ -24,9 +24,13 @@
     { "path": "../block-table" },
     { "path": "../../components" },
     { "path": "../../fragments/fragment-doc-title" },
+    { "path": "../../gfx/brush" },
     { "path": "../../gfx/connector" },
+    { "path": "../../gfx/group" },
+    { "path": "../../gfx/mindmap" },
     { "path": "../../gfx/note" },
     { "path": "../../gfx/shape" },
+    { "path": "../../gfx/template" },
     { "path": "../../gfx/text" },
     { "path": "../../inlines/latex" },
     { "path": "../../inlines/link" },
@@ -43,9 +47,9 @@
     { "path": "../../widgets/widget-scroll-anchoring" },
     { "path": "../../widgets/widget-slash-menu" },
     { "path": "../../widgets/widget-toolbar" },
-    { "path": "../../../framework/block-std" },
     { "path": "../../data-view" },
     { "path": "../../../framework/global" },
+    { "path": "../../../framework/std" },
     { "path": "../../../framework/store" }
   ]
 }

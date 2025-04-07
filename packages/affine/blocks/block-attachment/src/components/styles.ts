@@ -1,9 +1,9 @@
-import { FONT_XS, PANEL_BASE } from '@blocksuite/affine-shared/styles';
+import { fontXSStyle, panelBaseStyle } from '@blocksuite/affine-shared/styles';
 import { css } from 'lit';
 
 export const renameStyles = css`
+  ${panelBaseStyle('.affine-attachment-rename-container')}
   .affine-attachment-rename-container {
-    ${PANEL_BASE};
     position: relative;
     display: flex;
     align-items: center;
@@ -35,8 +35,8 @@ export const renameStyles = css`
     outline: none;
     background: transparent;
     color: var(--affine-text-primary-color);
-    ${FONT_XS};
   }
+  ${fontXSStyle('.affine-attachment-rename-input-wrapper input')}
 
   .affine-attachment-rename-input-wrapper input::placeholder {
     color: var(--affine-placeholder-color);

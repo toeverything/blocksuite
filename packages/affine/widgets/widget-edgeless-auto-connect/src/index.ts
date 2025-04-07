@@ -13,17 +13,17 @@ import {
 } from '@blocksuite/affine-model';
 import { FeatureFlagService } from '@blocksuite/affine-shared/services';
 import { matchModels, stopPropagation } from '@blocksuite/affine-shared/utils';
-import { WidgetComponent, WidgetViewExtension } from '@blocksuite/block-std';
-import {
-  type GfxController,
-  GfxControllerIdentifier,
-} from '@blocksuite/block-std/gfx';
 import { Bound } from '@blocksuite/global/gfx';
 import {
   ArrowLeftSmallIcon,
   ArrowRightSmallIcon,
   InvisibleIcon,
 } from '@blocksuite/icons/lit';
+import { WidgetComponent, WidgetViewExtension } from '@blocksuite/std';
+import {
+  type GfxController,
+  GfxControllerIdentifier,
+} from '@blocksuite/std/gfx';
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

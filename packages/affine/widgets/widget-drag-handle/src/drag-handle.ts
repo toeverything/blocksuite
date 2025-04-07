@@ -5,10 +5,10 @@ import {
   isInsideEdgelessEditor,
   isInsidePageEditor,
 } from '@blocksuite/affine-shared/utils';
-import { type BlockComponent, WidgetComponent } from '@blocksuite/block-std';
-import type { GfxModel } from '@blocksuite/block-std/gfx';
 import { DisposableGroup } from '@blocksuite/global/disposable';
 import type { IVec, Point, Rect } from '@blocksuite/global/gfx';
+import { type BlockComponent, WidgetComponent } from '@blocksuite/std';
+import type { GfxModel } from '@blocksuite/std/gfx';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 import { html, nothing } from 'lit';
 import { query, state } from 'lit/decorators.js';

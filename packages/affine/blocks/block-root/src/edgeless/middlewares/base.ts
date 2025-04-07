@@ -3,7 +3,7 @@ import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import {
   type SurfaceMiddleware,
   SurfaceMiddlewareBuilder,
-} from '@blocksuite/block-std/gfx';
+} from '@blocksuite/std/gfx';
 
 export class EditPropsMiddlewareBuilder extends SurfaceMiddlewareBuilder {
   static override key = 'editProps';

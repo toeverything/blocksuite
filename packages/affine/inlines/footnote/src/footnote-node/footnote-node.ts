@@ -2,19 +2,19 @@ import { HoverController } from '@blocksuite/affine-components/hover';
 import type { FootNote } from '@blocksuite/affine-model';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
+import { WithDisposable } from '@blocksuite/global/lit';
 import {
   BlockSelection,
   type BlockStdScope,
   ShadowlessElement,
   TextSelection,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 import {
   INLINE_ROOT_ATTR,
   type InlineRootElement,
   ZERO_WIDTH_NON_JOINER,
   ZERO_WIDTH_SPACE,
-} from '@blocksuite/block-std/inline';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@blocksuite/std/inline';
 import type { DeltaInsert } from '@blocksuite/store';
 import { shift } from '@floating-ui/dom';
 import { baseTheme } from '@toeverything/theme';

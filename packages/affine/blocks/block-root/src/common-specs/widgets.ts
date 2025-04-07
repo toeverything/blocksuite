@@ -1,4 +1,4 @@
-import { WidgetViewExtension } from '@blocksuite/block-std';
+import { WidgetViewExtension } from '@blocksuite/std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { AFFINE_INNER_MODAL_WIDGET } from '../widgets/inner-modal/inner-modal.js';

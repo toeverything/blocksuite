@@ -2,6 +2,14 @@ import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
 import { Overlay } from '@blocksuite/affine-block-surface';
 import type { FrameBlockModel } from '@blocksuite/affine-model';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
+import { DisposableGroup } from '@blocksuite/global/disposable';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import {
+  Bound,
+  deserializeXYWH,
+  type IVec,
+  type SerializedXYWH,
+} from '@blocksuite/global/gfx';
 import {
   generateKeyBetweenV2,
   getTopElements,
@@ -12,15 +20,7 @@ import {
   type GfxModel,
   isGfxGroupCompatibleModel,
   renderableInEdgeless,
-} from '@blocksuite/block-std/gfx';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import {
-  Bound,
-  deserializeXYWH,
-  type IVec,
-  type SerializedXYWH,
-} from '@blocksuite/global/gfx';
+} from '@blocksuite/std/gfx';
 import { type BlockModel, Text } from '@blocksuite/store';
 import * as Y from 'yjs';
 

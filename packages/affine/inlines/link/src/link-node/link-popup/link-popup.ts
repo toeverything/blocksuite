@@ -5,18 +5,22 @@ import {
   normalizeUrl,
   stopPropagation,
 } from '@blocksuite/affine-shared/utils';
-import { type BlockStdScope, TextSelection } from '@blocksuite/block-std';
-import type { InlineRange } from '@blocksuite/block-std/inline';
 import { WithDisposable } from '@blocksuite/global/lit';
 import { DoneIcon } from '@blocksuite/icons/lit';
+import {
+  type BlockStdScope,
+  ShadowlessElement,
+  TextSelection,
+} from '@blocksuite/std';
+import type { InlineRange } from '@blocksuite/std/inline';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
-import { html, LitElement } from 'lit';
+import { html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 
 import { linkPopupStyle } from './styles';
 
-export class LinkPopup extends WithDisposable(LitElement) {
+export class LinkPopup extends WithDisposable(ShadowlessElement) {
   static override styles = linkPopupStyle;
 
   private _bodyOverflowStyle = '';
@@ -240,8 +244,13 @@ export class LinkPopup extends WithDisposable(LitElement) {
       }
       const mockSelection = document.createElement('div');
       mockSelection.classList.add('mock-selection');
-      mockSelection.style.left = `${domRect.left}px`;
-      mockSelection.style.top = `${domRect.top}px`;
+
+      // Get the container's bounding rect to account for its position
+      const containerRect = this.mockSelectionContainer.getBoundingClientRect();
+
+      // Adjust the position by subtracting the container's offset
+      mockSelection.style.left = `${domRect.left - containerRect.left}px`;
+      mockSelection.style.top = `${domRect.top - containerRect.top}px`;
       mockSelection.style.width = `${domRect.width}px`;
       mockSelection.style.height = `${domRect.height}px`;
 

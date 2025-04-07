@@ -1,6 +1,6 @@
 import { ParagraphBlockModel } from '@blocksuite/affine-model';
 import { matchModels } from '@blocksuite/affine-shared/utils';
-import type { BlockStdScope } from '@blocksuite/block-std';
+import type { BlockStdScope } from '@blocksuite/std';
 import type { BlockModel } from '@blocksuite/store';
 
 import { focusTextModel } from '../dom.js';

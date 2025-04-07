@@ -1,8 +1,11 @@
-import type { Bound, IVec3 } from '@blocksuite/global/gfx';
-import { almostEqual } from '@blocksuite/global/gfx';
+import { almostEqual, type Bound, type IVec3 } from '@blocksuite/global/gfx';
 
 import { Graph } from './graph.js';
 import { PriorityQueue } from './priority-queue.js';
+
+function isNullish<T>(val: T | null | undefined): val is null | undefined {
+  return val === null || val === undefined;
+}
 
 function cost(point: IVec3, point2: IVec3) {
   return Math.abs(point[0] - point2[0]) + Math.abs(point[1] - point2[1]);
@@ -66,10 +69,11 @@ export class AStarRunner {
       const froms = this._cameFrom.get(current);
       if (!froms) return result;
       const index = nextIndexs.shift();
-      if (index !== undefined && index !== null) {
-        nextIndexs.push(froms.indexs[index]);
-        current = froms.from[index];
+      if (isNullish(index)) {
+        break;
       }
+      nextIndexs.push(froms.indexs[index]);
+      current = froms.from[index];
     }
     return result;
   }
@@ -107,16 +111,16 @@ export class AStarRunner {
   private _neighbors(cur: IVec3) {
     const neighbors = this._graph.neighbors(cur);
     const cameFroms = this._cameFrom.get(cur);
-    if (!cameFroms) {
-      return [];
+
+    if (cameFroms) {
+      cameFroms.from.forEach(from => {
+        const index = neighbors.findIndex(n => pointAlmostEqual(n, from));
+        if (index >= 0) {
+          neighbors.splice(index, 1);
+        }
+      });
     }
 
-    cameFroms.from.forEach(from => {
-      const index = neighbors.findIndex(n => pointAlmostEqual(n, from));
-      if (index >= 0) {
-        neighbors.splice(index, 1);
-      }
-    });
     if (cur === this._ep) neighbors.push(this._originalEp);
     return neighbors;
   }
@@ -165,7 +169,7 @@ export class AStarRunner {
         (count, index) =>
           count + getDiagonalCount(next, current, cameFroms.from[index])
       );
-      if (!next[2]) {
+      if (isNullish(next[2])) {
         continue;
       }
       const newPointPrioritys = curPointPrioritys.map(

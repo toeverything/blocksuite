@@ -2,9 +2,9 @@ import { getEmbedCardIcons } from '@blocksuite/affine-block-embed';
 import { WebIcon16 } from '@blocksuite/affine-components/icons';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { getHostName } from '@blocksuite/affine-shared/utils';
-import { BlockSelection, ShadowlessElement } from '@blocksuite/block-std';
 import { WithDisposable } from '@blocksuite/global/lit';
 import { OpenInNewIcon } from '@blocksuite/icons/lit';
+import { BlockSelection, ShadowlessElement } from '@blocksuite/std';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -125,10 +125,15 @@ export class BookmarkCard extends WithDisposable(ShadowlessElement) {
           <div class="affine-bookmark-content-description">
             ${descriptionText}
           </div>
-          <div class="affine-bookmark-content-url" @click=${this.bookmark.open}>
-            <span>${getHostName(url)}</span>
-            <div class="affine-bookmark-content-url-icon">
-              ${OpenInNewIcon({ width: '12', height: '12' })}
+          <div
+            class="affine-bookmark-content-url-wrapper"
+            @click=${this.bookmark.open}
+          >
+            <div class="affine-bookmark-content-url">
+              <span>${getHostName(url)}</span>
+              <div class="affine-bookmark-content-url-icon">
+                ${OpenInNewIcon({ width: '12', height: '12' })}
+              </div>
             </div>
           </div>
         </div>

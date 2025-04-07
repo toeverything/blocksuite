@@ -14,7 +14,7 @@ export const embedFigmaSlashMenuConfig: SlashMenuConfig = {
         figure: FigmaTooltip,
         caption: 'Figma',
       },
-      group: '4_Content & Media@7',
+      group: '4_Content & Media@8',
       when: ({ model }) =>
         model.doc.schema.flavourSchemaMap.has('affine:embed-figma'),
       action: ({ std, model }) => {

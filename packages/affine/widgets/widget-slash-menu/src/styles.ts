@@ -20,7 +20,7 @@ export const styles = css`
     top: 0;
     box-sizing: border-box;
     padding: 8px 4px 8px 8px;
-    width: 258px;
+    width: 280px;
     overflow-y: auto;
     font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
 

@@ -7,14 +7,14 @@ import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
+import { Bound, Vec } from '@blocksuite/global/gfx';
 import {
   BlockSelection,
   type BlockStdScope,
   SurfaceSelection,
   TextSelection,
-} from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
-import { Bound, Vec } from '@blocksuite/global/gfx';
+} from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 
 interface EmbedCardProperties {
   flavour: string;
@@ -82,15 +82,14 @@ export function insertEmbedCard(
       surfaceBlock.model
     );
 
-    gfx.selection.set({
-      elements: [cardId],
-      editing: false,
-    });
-
     gfx.tool.setTool(
       // @ts-expect-error FIXME: resolve after gfx tool refactor
       'default'
     );
+    gfx.selection.set({
+      elements: [cardId],
+      editing: false,
+    });
 
     return cardId;
   }

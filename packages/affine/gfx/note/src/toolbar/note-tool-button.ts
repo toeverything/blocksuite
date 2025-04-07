@@ -3,8 +3,8 @@ import {
   type MenuPopper,
   QuickToolMixin,
 } from '@blocksuite/affine-widget-edgeless-toolbar';
-import type { GfxToolsFullOptionValue } from '@blocksuite/block-std/gfx';
 import { PageIcon } from '@blocksuite/icons/lit';
+import type { GfxToolsFullOptionValue } from '@blocksuite/std/gfx';
 import { effect } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { state } from 'lit/decorators.js';

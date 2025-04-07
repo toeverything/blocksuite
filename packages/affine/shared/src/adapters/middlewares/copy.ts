@@ -4,7 +4,7 @@ import {
   type EditorHost,
   type TextRangePoint,
   TextSelection,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 import type {
   BlockSnapshot,
   DraftModel,

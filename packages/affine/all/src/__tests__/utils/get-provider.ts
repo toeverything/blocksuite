@@ -1,9 +1,13 @@
 import { SpecProvider } from '@blocksuite/affine-shared/utils';
 import { Container } from '@blocksuite/global/di';
 
-import { registerSpecs } from '../../extensions/register';
+import {
+  registerBlockSpecs,
+  registerStoreSpecs,
+} from '../../extensions/register';
 
-registerSpecs();
+registerStoreSpecs();
+registerBlockSpecs();
 
 export function getProvider() {
   const container = new Container();

@@ -11,8 +11,8 @@ import {
   ThemeExtensionIdentifier,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
-import { BlockStdScope } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/gfx';
+import { BlockStdScope } from '@blocksuite/std';
 import { html, nothing } from 'lit';
 import { choose } from 'lit/directives/choose.js';
 import { classMap } from 'lit/directives/class-map.js';

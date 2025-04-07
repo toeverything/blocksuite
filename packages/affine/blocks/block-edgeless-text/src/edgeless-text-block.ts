@@ -1,25 +1,29 @@
 import { TextUtils } from '@blocksuite/affine-block-surface';
 import { formatBlockCommand } from '@blocksuite/affine-inline-preset';
 import {
+  EDGELESS_TEXT_BLOCK_MIN_HEIGHT,
+  EDGELESS_TEXT_BLOCK_MIN_WIDTH,
   type EdgelessTextBlockModel,
   ListBlockModel,
   ParagraphBlockModel,
 } from '@blocksuite/affine-model';
+import { focusTextModel } from '@blocksuite/affine-rich-text';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import type { BlockComponent } from '@blocksuite/block-std';
+import {
+  handleNativeRangeAtPoint,
+  matchModels,
+} from '@blocksuite/affine-shared/utils';
+import { Bound, clamp } from '@blocksuite/global/gfx';
+import type { BlockComponent } from '@blocksuite/std';
 import {
   BlockSelection,
   GfxBlockComponent,
   TextSelection,
-} from '@blocksuite/block-std';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@blocksuite/std';
+import type { SelectedContext } from '@blocksuite/std/gfx';
 import { css, html } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
-
-export const EDGELESS_TEXT_BLOCK_MIN_WIDTH = 50;
-export const EDGELESS_TEXT_BLOCK_MIN_HEIGHT = 50;
 
 export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBlockModel> {
   static override styles = css`
@@ -255,6 +259,69 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
     };
   }
 
+  override onSelected(context: SelectedContext) {
+    const { selected, multiSelect, event: e } = context;
+    const { editing } = this.gfx.selection;
+    const alreadySelected = this.gfx.selection.has(this.model.id);
+
+    if (!multiSelect && selected && (alreadySelected || editing)) {
+      if (this.model.isLocked()) return;
+
+      if (alreadySelected && editing) {
+        return;
+      }
+
+      this.gfx.selection.set({
+        elements: [this.model.id],
+        editing: true,
+      });
+
+      this.updateComplete
+        .then(() => {
+          if (!this.isConnected) {
+            return;
+          }
+
+          if (this.model.children.length === 0) {
+            const blockId = this.doc.addBlock(
+              'affine:paragraph',
+              { type: 'text' },
+              this.model.id
+            );
+
+            if (blockId) {
+              focusTextModel(this.std, blockId);
+            }
+          } else {
+            const rect = this.querySelector(
+              '.affine-block-children-container'
+            )?.getBoundingClientRect();
+
+            if (rect) {
+              const offsetY = 8 * this.gfx.viewport.zoom;
+              const offsetX = 2 * this.gfx.viewport.zoom;
+              const x = clamp(
+                e.clientX,
+                rect.left + offsetX,
+                rect.right - offsetX
+              );
+              const y = clamp(
+                e.clientY,
+                rect.top + offsetY,
+                rect.bottom - offsetY
+              );
+              handleNativeRangeAtPoint(x, y);
+            } else {
+              handleNativeRangeAtPoint(e.clientX, e.clientY);
+            }
+          }
+        })
+        .catch(console.error);
+    } else {
+      super.onSelected(context);
+    }
+  }
+
   override renderGfxBlock() {
     const { model } = this;
     const { rotate, hasMaxWidth } = model.props;
@@ -271,6 +338,8 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
       minWidth: !hasMaxWidth ? '220px' : undefined,
     };
 
+    this.contentEditable = String(editing && !this.doc.readonly$.value);
+
     return html`
       <div
         class="edgeless-text-block-container"
@@ -282,7 +351,6 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
             pointerEvents: editing ? 'auto' : 'none',
             userSelect: editing ? 'auto' : 'none',
           })}
-          contenteditable=${editing}
         >
           ${this.renderPageContent()}
         </div>

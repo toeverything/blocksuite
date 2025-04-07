@@ -7,12 +7,13 @@ import {
   type ToolbarAction,
   type ToolbarActions,
   type ToolbarContext,
+  type ToolbarPlacement,
 } from '@blocksuite/affine-shared/services';
 import { nextTick } from '@blocksuite/global/utils';
 import { MoreVerticalIcon } from '@blocksuite/icons/lit';
 import type {
   AutoUpdateOptions,
-  Placement,
+  ComputePositionConfig,
   ReferenceElement,
   SideObject,
 } from '@floating-ui/dom';
@@ -25,8 +26,9 @@ import {
   limitShift,
   offset,
   shift,
+  size,
 } from '@floating-ui/dom';
-import { html, render } from 'lit';
+import { html, nothing, render } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { join } from 'lit/directives/join.js';
 import { keyed } from 'lit/directives/keyed.js';
@@ -51,34 +53,53 @@ export function autoUpdatePosition(
   toolbar: EditorToolbar,
   referenceElement: ReferenceElement,
   flavour: string,
-  placement: Placement,
+  placement: ToolbarPlacement,
   sideOptions: Partial<SideObject> | null,
   options: AutoUpdateOptions = { elementResize: false, animationFrame: true }
 ) {
   const isInline = flavour === 'affine:note';
   const hasSurfaceScope = flavour.includes('surface');
+  const isInner = placement === 'inner';
   const offsetTop = sideOptions?.top ?? 0;
   const offsetBottom = sideOptions?.bottom ?? 0;
   const offsetY = offsetTop + (hasSurfaceScope ? 2 : 0);
-  const config = {
-    placement,
-    middleware: [
-      offset(10 + offsetY),
-      isInline ? inline() : undefined,
-      shift(state => ({
-        padding: {
-          top: 10,
-          right: 10,
-          bottom: 150,
-          left: 10,
-        },
-        crossAxis: state.placement.includes('bottom'),
-        limiter: limitShift(),
-      })),
-      flip({ padding: 10 }),
-      hide(),
-    ],
-  };
+  const config: Partial<ComputePositionConfig> = isInner
+    ? {
+        placement: 'top-start',
+        middleware: [
+          offset(({ rects }) => -rects.floating.height),
+          size({
+            apply: ({ elements }) => {
+              const { width } = elements.reference.getBoundingClientRect();
+              elements.floating.style.width = `${width}px`;
+            },
+          }),
+        ],
+      }
+    : {
+        placement,
+        middleware: [
+          offset(10 + offsetY),
+          size({
+            apply: ({ elements }) => {
+              elements.floating.style.width = 'fit-content';
+            },
+          }),
+          isInline ? inline() : undefined,
+          shift(state => ({
+            padding: {
+              top: 10,
+              right: 10,
+              bottom: 150,
+              left: 10,
+            },
+            crossAxis: state.placement.includes('bottom'),
+            limiter: limitShift(),
+          })),
+          flip({ padding: 10 }),
+          hide(),
+        ],
+      };
   const update = async () => {
     await Promise.race([
       new Promise(resolve => {
@@ -104,12 +125,14 @@ export function autoUpdatePosition(
 
     toolbar.style.transform = `translate3d(${x}px, ${y}px, 0)`;
 
-    if (toolbar.dataset.open) {
-      if (middlewareData.hide?.referenceHidden) {
-        delete toolbar.dataset.open;
+    if (middlewareData.hide) {
+      if (toolbar.dataset.open) {
+        if (middlewareData.hide.referenceHidden) {
+          delete toolbar.dataset.open;
+        }
+      } else {
+        toolbar.dataset.open = 'true';
       }
-    } else {
-      toolbar.dataset.open = 'true';
     }
   };
 
@@ -217,6 +240,14 @@ export function renderToolbar(
     a => a.placement === ActionPlacement.More
   );
 
+  // Resets
+  if (primaryActionGroup.length === 0) {
+    context.reset();
+    return;
+  }
+
+  const innerToolbar = context.placement$.value === 'inner';
+
   if (moreActionGroup.length) {
     const moreMenuItems = renderActions(
       moreActionGroup,
@@ -232,15 +263,23 @@ export function renderToolbar(
           `${flavour}:${key}`,
           html`
             <editor-menu-button
-              aria-label="more-menu"
+              aria-label="More menu"
               .contentPadding="${'8px'}"
               .button=${html`
-                <editor-icon-button aria-label="More" .tooltip="${'More'}">
+                <editor-icon-button
+                  aria-label="More"
+                  .tooltip="${'More'}"
+                  .iconContainerPadding=${innerToolbar ? 4 : 2}
+                  .iconSize=${innerToolbar ? '16px' : undefined}
+                >
                   ${MoreVerticalIcon()}
                 </editor-icon-button>
               `}
             >
-              <div data-size="large" data-orientation="vertical">
+              <div
+                data-size=${innerToolbar ? '' : 'large'}
+                data-orientation="vertical"
+              >
                 ${join(moreMenuItems, renderToolbarSeparator('horizontal'))}
               </div>
             </editor-menu-button>
@@ -251,9 +290,15 @@ export function renderToolbar(
   }
 
   render(
-    join(renderActions(primaryActionGroup, context), renderToolbarSeparator()),
+    join(
+      renderActions(primaryActionGroup, context),
+      innerToolbar ? nothing : renderToolbarSeparator()
+    ),
     toolbar
   );
+
+  if (toolbar.dataset.open) return;
+  toolbar.dataset.open = 'true';
 }
 
 function renderActions(
@@ -305,6 +350,7 @@ function renderActions(
 
 // TODO(@fundon): supports templates
 function renderActionItem(action: ToolbarAction, context: ToolbarContext) {
+  const innerToolbar = context.placement$.value === 'inner';
   const ids = action.id.split('.');
   const id = ids[ids.length - 1];
   return html`
@@ -316,6 +362,8 @@ function renderActionItem(action: ToolbarAction, context: ToolbarContext) {
         : action.active}
       ?disabled=${action.disabled}
       .tooltip=${action.tooltip}
+      .iconContainerPadding=${innerToolbar ? 4 : 2}
+      .iconSize=${innerToolbar ? '16px' : undefined}
       @click=${() => action.run?.(context)}
     >
       ${action.icon}
@@ -327,6 +375,7 @@ function renderActionItem(action: ToolbarAction, context: ToolbarContext) {
 }
 
 function renderMenuActionItem(action: ToolbarAction, context: ToolbarContext) {
+  const innerToolbar = context.placement$.value === 'inner';
   const ids = action.id.split('.');
   const id = ids[ids.length - 1];
   return html`
@@ -341,6 +390,8 @@ function renderMenuActionItem(action: ToolbarAction, context: ToolbarContext) {
         : action.active}
       ?disabled=${action.disabled}
       .tooltip=${ifDefined(action.tooltip)}
+      .iconContainerPadding=${innerToolbar ? 4 : 2}
+      .iconSize=${innerToolbar ? '16px' : undefined}
       @click=${() => action.run?.(context)}
     >
       ${action.icon}

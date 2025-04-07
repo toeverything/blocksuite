@@ -17,26 +17,28 @@ import {
   ToolbarFlag as Flag,
   ToolbarRegistryIdentifier,
 } from '@blocksuite/affine-shared/services';
+import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { matchModels } from '@blocksuite/affine-shared/utils';
-import {
-  type BlockComponent,
-  BlockSelection,
-  TextSelection,
-  WidgetComponent,
-} from '@blocksuite/block-std';
-import {
-  GfxBlockElementModel,
-  type GfxController,
-  type GfxModel,
-  GfxPrimitiveElementModel,
-} from '@blocksuite/block-std/gfx';
 import {
   Bound,
   getCommonBound,
   getCommonBoundWithRotation,
 } from '@blocksuite/global/gfx';
 import { nextTick } from '@blocksuite/global/utils';
-import type { Placement, ReferenceElement, SideObject } from '@floating-ui/dom';
+import {
+  type BlockComponent,
+  BlockSelection,
+  TextSelection,
+  WidgetComponent,
+} from '@blocksuite/std';
+import {
+  GfxBlockElementModel,
+  type GfxController,
+  type GfxModel,
+  GfxPrimitiveElementModel,
+} from '@blocksuite/std/gfx';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/std/inline';
+import type { ReferenceElement, SideObject } from '@floating-ui/dom';
 import { batch, effect, signal } from '@preact/signals-core';
 import { css, unsafeCSS } from 'lit';
 import groupBy from 'lodash-es/groupBy';
@@ -56,6 +58,7 @@ export class AffineToolbarWidget extends WidgetComponent {
       opacity: 0;
       display: none;
       width: max-content;
+      touch-action: none;
       backface-visibility: hidden;
       z-index: var(--affine-z-index-popover);
 
@@ -76,15 +79,33 @@ export class AffineToolbarWidget extends WidgetComponent {
       }
     }
 
-    editor-toolbar[data-app-theme='dark'] {
-      ${unsafeCSS(darkToolbarStyles.join('\n'))}
-    }
-    editor-toolbar[data-app-theme='light'] {
-      ${unsafeCSS(lightToolbarStyles.join('\n'))}
-    }
-  `;
+    editor-toolbar[data-placement='inner'] {
+      background-color: unset;
+      box-shadow: unset;
+      height: fit-content;
+      padding-top: 4px;
+      border-radius: 0;
+      border: unset;
+      justify-content: flex-end;
+      box-sizing: border-box;
+      gap: 4px;
 
-  placement$ = signal<Placement>('top');
+      .inner-button,
+      editor-icon-button,
+      editor-menu-button {
+        color: ${unsafeCSSVarV2('text/primary')};
+        box-shadow: ${unsafeCSSVar('buttonShadow')};
+        background: ${unsafeCSSVar('white')};
+        border-radius: 4px;
+      }
+      editor-menu-button > div {
+        gap: 4px;
+      }
+    }
+
+    ${unsafeCSS(darkToolbarStyles('editor-toolbar'))}
+    ${unsafeCSS(lightToolbarStyles('editor-toolbar'))}
+  `;
 
   sideOptions$ = signal<Partial<SideObject> | null>(null);
 
@@ -213,7 +234,7 @@ export class AffineToolbarWidget extends WidgetComponent {
 
       this.sideOptions$.value = sideOptions;
       ctx.flavour$.value = flavour;
-      this.placement$.value = hasLocked ? 'top' : 'top-start';
+      ctx.placement$.value = hasLocked ? 'top' : 'top-start';
       ctx.flags.refresh(Flag.Surface);
     });
   }
@@ -227,8 +248,9 @@ export class AffineToolbarWidget extends WidgetComponent {
   override connectedCallback() {
     super.connectedCallback();
 
+    this.setAttribute(RANGE_SYNC_EXCLUDE_ATTR, 'true');
+
     const {
-      placement$,
       sideOptions$,
       referenceElement$,
       disposables,
@@ -237,7 +259,7 @@ export class AffineToolbarWidget extends WidgetComponent {
       host,
       std,
     } = this;
-    const { flags, flavour$, message$ } = toolbarRegistry;
+    const { flags, flavour$, message$, placement$ } = toolbarRegistry;
     const context = new ToolbarContext(std);
 
     // TODO(@fundon): fix toolbar position shaking when the wheel scrolls
@@ -266,7 +288,7 @@ export class AffineToolbarWidget extends WidgetComponent {
 
           sideOptions$.value = null;
           flavour$.value = 'affine:note';
-          placement$.value = 'top';
+          placement$.value = toolbarRegistry.getModulePlacement('affine:note');
           flags.refresh(Flag.Text);
         });
       })
@@ -317,7 +339,7 @@ export class AffineToolbarWidget extends WidgetComponent {
 
         sideOptions$.value = null;
         flavour$.value = 'affine:note';
-        placement$.value = 'top';
+        placement$.value = toolbarRegistry.getModulePlacement('affine:note');
         flags.refresh(Flag.Native);
       });
     });
@@ -338,7 +360,7 @@ export class AffineToolbarWidget extends WidgetComponent {
           if (block) {
             const modelFlavour = block.model.flavour;
             const existed =
-              toolbarRegistry.modules.has(modelFlavour) ??
+              toolbarRegistry.modules.has(modelFlavour) ||
               toolbarRegistry.modules.has(`custom:${modelFlavour}`);
             if (existed) {
               flavour = modelFlavour;
@@ -366,7 +388,10 @@ export class AffineToolbarWidget extends WidgetComponent {
 
           sideOptions$.value = null;
           flavour$.value = flavour;
-          placement$.value = flavour === 'affine:note' ? 'top' : 'top-start';
+          placement$.value = toolbarRegistry.getModulePlacement(
+            flavour,
+            flavour === 'affine:note' ? 'top' : 'top-start'
+          );
           flags.refresh(Flag.Block);
         });
       })
@@ -494,7 +519,7 @@ export class AffineToolbarWidget extends WidgetComponent {
       })
     );
 
-    // Handles elemets when updating
+    // Handles elements when updating
     disposables.add(
       context.gfx.surface$.subscribe(surface => {
         if (!surface) return;
@@ -580,7 +605,7 @@ export class AffineToolbarWidget extends WidgetComponent {
 
           sideOptions$.value = null;
           flavour$.value = flavour;
-          placement$.value = 'top';
+          placement$.value = toolbarRegistry.getModulePlacement(flavour);
           flags.refresh(Flag.Hovering);
         });
       })
@@ -590,6 +615,13 @@ export class AffineToolbarWidget extends WidgetComponent {
     disposables.add(
       context.theme.app$.subscribe(theme => {
         toolbar.dataset.appTheme = theme;
+      })
+    );
+
+    // Update layout when placement changing to `inner`
+    disposables.add(
+      effect(() => {
+        toolbar.dataset.placement = placement$.value;
       })
     );
 
@@ -612,8 +644,6 @@ export class AffineToolbarWidget extends WidgetComponent {
         // 4. `Flag.Hovering`: inline links in note/database/table
         // 5. `Flag.Surface`: elements in edgeless
         renderToolbar(toolbar, context, flavour);
-        if (toolbar.dataset.open) return;
-        toolbar.dataset.open = 'true';
       })
     );
 

@@ -7,7 +7,6 @@ import {
 } from '@blocksuite/affine-components/context-menu';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { rangeWrap } from '@blocksuite/affine-shared/utils';
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { IS_MOBILE } from '@blocksuite/global/env';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import {
@@ -15,8 +14,9 @@ import {
   DeleteIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import { nanoid } from '@blocksuite/store';
-import { flip, offset, shift } from '@floating-ui/dom';
+import { autoPlacement, offset, shift } from '@floating-ui/dom';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { nothing } from 'lit';
@@ -588,7 +588,18 @@ export const popTagSelect = (target: PopupTarget, ops: TagSelectOptions) => {
   };
   const remove = createPopup(target, component, {
     onClose: ops.onComplete,
-    middleware: [flip(), offset({ mainAxis: -28, crossAxis: 112 }), shift()],
+    middleware: [
+      autoPlacement({
+        allowedPlacements: [
+          'bottom-start',
+          'bottom-end',
+          'top-start',
+          'top-end',
+        ],
+      }),
+      offset({ mainAxis: -36 }),
+      shift(),
+    ],
     container: ops.container,
   });
   return remove;

@@ -1,6 +1,6 @@
 import type { ReferenceInfo } from '@blocksuite/affine-model';
 import type { OpenDocMode } from '@blocksuite/affine-shared/services';
-import type { EditorHost } from '@blocksuite/block-std';
+import type { EditorHost } from '@blocksuite/std';
 import type { Subject } from 'rxjs';
 
 export type DocLinkClickedEvent = ReferenceInfo & {

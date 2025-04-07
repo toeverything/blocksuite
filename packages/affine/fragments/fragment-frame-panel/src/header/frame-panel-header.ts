@@ -5,11 +5,11 @@ import {
   EditPropsStore,
 } from '@blocksuite/affine-shared/services';
 import { createButtonPopper } from '@blocksuite/affine-shared/utils';
-import type { EditorHost } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { DisposableGroup } from '@blocksuite/global/disposable';
 import { WithDisposable } from '@blocksuite/global/lit';
 import { PresentationIcon, SettingsIcon } from '@blocksuite/icons/lit';
+import type { EditorHost } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 

@@ -1,18 +1,18 @@
 import type { ColorScheme } from '@blocksuite/affine-model';
-import type { BlockComponent } from '@blocksuite/block-std';
-import {
-  type GfxController,
-  GfxControllerIdentifier,
-  type GfxToolsFullOption,
-  type GfxToolsFullOptionValue,
-  type ToolController,
-} from '@blocksuite/block-std/gfx';
 import {
   // oxlint-disable-next-line no-unused-vars
   type DisposableClass,
   WithDisposable,
 } from '@blocksuite/global/lit';
 import type { Constructor } from '@blocksuite/global/utils';
+import type { BlockComponent } from '@blocksuite/std';
+import {
+  type GfxController,
+  GfxControllerIdentifier,
+  type GfxToolsFullOption,
+  type GfxToolsFullOptionValue,
+  type ToolController,
+} from '@blocksuite/std/gfx';
 import { consume } from '@lit/context';
 import { effect } from '@preact/signals-core';
 import { cssVar } from '@toeverything/theme';

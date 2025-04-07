@@ -1,6 +1,6 @@
 import type { AffineInlineEditor } from '@blocksuite/affine-shared/types';
-import type { BlockStdScope } from '@blocksuite/block-std';
-import type { InlineRange } from '@blocksuite/block-std/inline';
+import type { BlockStdScope } from '@blocksuite/std';
+import type { InlineRange } from '@blocksuite/std/inline';
 
 import { LinkPopup } from './link-popup';
 
@@ -18,7 +18,10 @@ export function toggleLinkPopup(
   popup.targetInlineRange = targetInlineRange;
   popup.abortController = abortController;
 
-  document.body.append(popup);
+  const root =
+    inlineEditor.rootElement?.closest('editor-host')?.parentElement ??
+    document.body;
+  root.append(popup);
 
   return popup;
 }

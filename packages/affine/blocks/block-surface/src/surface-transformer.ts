@@ -1,8 +1,8 @@
-import type { SurfaceBlockProps } from '@blocksuite/block-std/gfx';
+import type { SurfaceBlockProps } from '@blocksuite/std/gfx';
 import {
   SURFACE_TEXT_UNIQ_IDENTIFIER,
   SURFACE_YMAP_UNIQ_IDENTIFIER,
-} from '@blocksuite/block-std/gfx';
+} from '@blocksuite/std/gfx';
 import type {
   FromSnapshotPayload,
   SnapshotNode,

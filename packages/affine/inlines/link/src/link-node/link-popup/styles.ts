@@ -1,9 +1,8 @@
-import { FONT_XS, PANEL_BASE } from '@blocksuite/affine-shared/styles';
+import { fontXSStyle, panelBaseStyle } from '@blocksuite/affine-shared/styles';
 import { css } from 'lit';
 
 const editLinkStyle = css`
   .affine-link-edit-popover {
-    ${PANEL_BASE};
     display: grid;
     grid-template-columns: auto auto;
     grid-template-rows: repeat(2, 1fr);
@@ -18,20 +17,20 @@ const editLinkStyle = css`
     box-sizing: content-box;
   }
 
+  ${fontXSStyle('.affine-link-edit-popover label')}
   .affine-link-edit-popover label {
     box-sizing: border-box;
     color: var(--affine-icon-color);
-    ${FONT_XS};
     font-weight: 400;
   }
 
+  ${fontXSStyle('.affine-link-edit-popover input')}
   .affine-link-edit-popover input {
     color: inherit;
     padding: 0;
     border: none;
     background: transparent;
     color: var(--affine-text-primary-color);
-    ${FONT_XS};
   }
   .affine-link-edit-popover input::placeholder {
     color: var(--affine-placeholder-color);
@@ -99,6 +98,7 @@ export const linkPopupStyle = css`
     background-color: rgba(35, 131, 226, 0.28);
   }
 
+  ${panelBaseStyle('.popover-container')}
   .popover-container {
     z-index: var(--affine-z-index-popover);
     animation: affine-popover-fade-in 0.2s ease;
@@ -116,7 +116,8 @@ export const linkPopupStyle = css`
     }
   }
 
-  .overlay-mask {
+  .overlay-mask,
+  .mock-selection-container {
     position: fixed;
     top: 0;
     left: 0;
@@ -125,8 +126,12 @@ export const linkPopupStyle = css`
     z-index: var(--affine-z-index-popover);
   }
 
+  .mock-selection-container {
+    pointer-events: none;
+  }
+
   .affine-link-popover.create {
-    ${PANEL_BASE};
+    display: flex;
     gap: 12px;
     padding: 12px;
 
@@ -144,8 +149,8 @@ export const linkPopupStyle = css`
     border-style: solid;
     border-color: var(--affine-border-color);
     color: var(--affine-text-primary-color);
-    ${FONT_XS};
   }
+  ${fontXSStyle('.affine-link-popover-input')}
   .affine-link-popover-input::placeholder {
     color: var(--affine-placeholder-color);
   }

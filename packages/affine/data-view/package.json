@@ -12,9 +12,9 @@
   "dependencies": {
     "@blocksuite/affine-components": "workspace:*",
     "@blocksuite/affine-shared": "workspace:*",
-    "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/icons": "^2.2.6",
+    "@blocksuite/icons": "^2.2.10",
+    "@blocksuite/std": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@emotion/hash": "^0.9.2",
     "@floating-ui/dom": "^1.6.13",
@@ -44,5 +44,5 @@
     "!src/__tests__",
     "!dist/__tests__"
   ],
-  "version": "0.20.0"
+  "version": "0.21.0"
 }

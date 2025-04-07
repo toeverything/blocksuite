@@ -1,5 +1,5 @@
-import { ShadowlessElement } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { ShadowlessElement } from '@blocksuite/std';
 import { consume } from '@lit/context';
 import { html } from 'lit';
 

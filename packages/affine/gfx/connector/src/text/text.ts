@@ -1,10 +1,10 @@
 import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
 import type { ConnectorElementModel } from '@blocksuite/affine-model';
-import type { BlockComponent } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import type { IVec } from '@blocksuite/global/gfx';
 import { Bound } from '@blocksuite/global/gfx';
+import type { BlockComponent } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import * as Y from 'yjs';
 
 import { EdgelessConnectorLabelEditor } from './edgeless-connector-label-editor';
@@ -54,7 +54,6 @@ export function mountConnectorLabelEditor(
 
   const editor = new EdgelessConnectorLabelEditor();
   editor.connector = connector;
-  editor.edgeless = edgeless;
 
   mountElm.append(editor);
   editor.updateComplete

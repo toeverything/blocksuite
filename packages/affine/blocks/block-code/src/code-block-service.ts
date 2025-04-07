@@ -1,6 +1,6 @@
 import { ColorScheme } from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { LifeCycleWatcher } from '@blocksuite/block-std';
+import { LifeCycleWatcher } from '@blocksuite/std';
 import { type Signal, signal } from '@preact/signals-core';
 import {
   createHighlighterCore,

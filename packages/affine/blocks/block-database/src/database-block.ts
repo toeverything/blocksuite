@@ -8,7 +8,7 @@ import { DropIndicator } from '@blocksuite/affine-components/drop-indicator';
 import { PeekViewProvider } from '@blocksuite/affine-components/peek';
 import { toast } from '@blocksuite/affine-components/toast';
 import type { DatabaseBlockModel } from '@blocksuite/affine-model';
-import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
+import { EDGELESS_TOP_CONTENTEDITABLE_SELECTOR } from '@blocksuite/affine-shared/consts';
 import {
   DocModeProvider,
   NotificationProvider,
@@ -16,8 +16,6 @@ import {
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
 import { getDropResult } from '@blocksuite/affine-widget-drag-handle';
-import { type BlockComponent } from '@blocksuite/block-std';
-import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std/inline';
 import {
   createRecordDetail,
   createUniComponentFromWebComponent,
@@ -40,6 +38,8 @@ import {
   DeleteIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
+import { type BlockComponent } from '@blocksuite/std';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/std/inline';
 import { Slice } from '@blocksuite/store';
 import { autoUpdate } from '@floating-ui/dom';
 import { computed, signal } from '@preact/signals-core';
@@ -354,7 +354,9 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<DatabaseBloc
 
   override get topContenteditableElement() {
     if (this.std.get(DocModeProvider).getEditorMode() === 'edgeless') {
-      return this.closest<BlockComponent>(NOTE_SELECTOR);
+      return this.closest<BlockComponent>(
+        EDGELESS_TOP_CONTENTEDITABLE_SELECTOR
+      );
     }
     return this.rootComponent;
   }

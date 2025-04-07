@@ -17,10 +17,10 @@ import {
   ShapeType,
 } from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import type { PointerEventState } from '@blocksuite/block-std';
-import { BaseTool, type GfxModel } from '@blocksuite/block-std/gfx';
 import type { IBound, IVec } from '@blocksuite/global/gfx';
 import { Bound } from '@blocksuite/global/gfx';
+import type { PointerEventState } from '@blocksuite/std';
+import { BaseTool, type GfxModel } from '@blocksuite/std/gfx';
 
 enum ConnectorToolMode {
   // Dragging connect
@@ -222,7 +222,7 @@ export class ConnectorTool extends BaseTool<ConnectorToolOptions> {
   }
 }
 
-declare module '@blocksuite/block-std/gfx' {
+declare module '@blocksuite/std/gfx' {
   interface GfxToolsMap {
     connector: ConnectorTool;
   }

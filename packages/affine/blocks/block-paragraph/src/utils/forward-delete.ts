@@ -18,7 +18,7 @@ import {
   BlockSelection,
   type BlockStdScope,
   TextSelection,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 
 export function forwardDelete(std: BlockStdScope) {
   const { store, host } = std;

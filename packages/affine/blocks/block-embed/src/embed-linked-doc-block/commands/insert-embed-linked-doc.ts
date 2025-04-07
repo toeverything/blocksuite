@@ -1,5 +1,5 @@
 import type { EmbedCardStyle, ReferenceParams } from '@blocksuite/affine-model';
-import type { Command } from '@blocksuite/block-std';
+import type { Command } from '@blocksuite/std';
 
 import { insertEmbedCard } from '../../common/insert-embed-card.js';
 

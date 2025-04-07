@@ -5,12 +5,9 @@ import {
   isTopLevelBlock,
   requestThrottledConnectedFrame,
 } from '@blocksuite/affine-shared/utils';
-import { WidgetComponent } from '@blocksuite/block-std';
-import {
-  GfxControllerIdentifier,
-  type GfxModel,
-} from '@blocksuite/block-std/gfx';
 import { MultiCursorDuotoneIcon } from '@blocksuite/icons/lit';
+import { WidgetComponent } from '@blocksuite/std';
+import { GfxControllerIdentifier, type GfxModel } from '@blocksuite/std/gfx';
 import type { UserInfo } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
 import { state } from 'lit/decorators.js';

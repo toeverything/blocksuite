@@ -8,7 +8,6 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "@blocksuite/legacy-e2e",
     "@blocksuite/playground",
     "@blocksuite/integration-test",
     "@blocksuite/docs"

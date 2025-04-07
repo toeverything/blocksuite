@@ -1,3 +1,4 @@
+import type { SerializedXYWH } from '@blocksuite/global/gfx';
 import { z } from 'zod';
 
 export type DocMode = 'edgeless' | 'page';
@@ -26,6 +27,14 @@ export const AliasInfoSchema = z
 
 export type AliasInfo = z.infer<typeof AliasInfoSchema>;
 
+export const SerializedXYWHSchema = z.custom<SerializedXYWH>(val => {
+  if (typeof val !== 'string') return false;
+  const match = val.match(/^\[(\d+),(\d+),(\d+),(\d+)\]$/);
+  if (!match) return false;
+  // Ensure all numbers are valid
+  return match.slice(1).every(num => !isNaN(Number(num)));
+}, 'Invalid XYWH format. Expected [number,number,number,number]');
+
 export const ReferenceParamsSchema = z
   .object({
     mode: z.enum(DocModes),
@@ -33,6 +42,7 @@ export const ReferenceParamsSchema = z
     elementIds: z.string().array(),
     databaseId: z.string().optional(),
     databaseRowId: z.string().optional(),
+    xywh: SerializedXYWHSchema.optional(),
   })
   .partial();
 

@@ -1,8 +1,5 @@
 import { NotificationProvider } from '@blocksuite/affine-shared/services';
-import {
-  type BlockStdScope,
-  EditorLifeCycleExtension,
-} from '@blocksuite/block-std';
+import { type BlockStdScope, EditorLifeCycleExtension } from '@blocksuite/std';
 
 import { toast } from '../toast/toast.js';
 

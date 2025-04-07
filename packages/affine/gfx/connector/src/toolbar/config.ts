@@ -1,13 +1,16 @@
 import {
   ConnectorUtils,
   EdgelessCRUDIdentifier,
-  TextUtils,
 } from '@blocksuite/affine-block-surface';
 import {
   packColor,
   type PickColorEvent,
 } from '@blocksuite/affine-components/color-picker';
 import type { LineDetailType } from '@blocksuite/affine-components/edgeless-line-styles-panel';
+import {
+  createTextActions,
+  normalizeTextBound,
+} from '@blocksuite/affine-gfx-text';
 import {
   ConnectorElementModel,
   type ConnectorElementProps,
@@ -21,10 +24,11 @@ import {
   resolveColor,
   StrokeStyle,
 } from '@blocksuite/affine-model';
-import type {
-  ToolbarContext,
-  ToolbarGenericAction,
-  ToolbarModuleConfig,
+import {
+  type ToolbarContext,
+  type ToolbarGenericAction,
+  type ToolbarModuleConfig,
+  ToolbarModuleExtension,
 } from '@blocksuite/affine-shared/services';
 import {
   getMostCommonResolvedValue,
@@ -32,7 +36,6 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import type { MenuItem } from '@blocksuite/affine-widget-edgeless-toolbar';
 import {
-  createTextActions,
   getRootBlock,
   LINE_STYLE_LIST,
   renderMenu,
@@ -54,6 +57,7 @@ import {
   StartPointIcon,
   StartPointTriangleIcon,
 } from '@blocksuite/icons/lit';
+import { BlockFlavourIdentifier } from '@blocksuite/std';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -207,8 +211,7 @@ export const connectorToolbarConfig = {
     },
     {
       id: 'b.style',
-      // TODO(@fundon): should add a feature flag
-      when: false,
+      when: ctx => ctx.features.getFlag('enable_edgeless_scribbled_style'),
       content(ctx) {
         const models = ctx.getSurfaceModelsByType(ConnectorElementModel);
         if (!models.length) return null;
@@ -367,7 +370,7 @@ export const connectorToolbarConfig = {
         } = model;
         const prevBounds = Bound.fromXYWH(labelXYWH || [0, 0, 16, 16]);
         const center = prevBounds.center;
-        const bounds = TextUtils.normalizeTextBound(
+        const bounds = normalizeTextBound(
           {
             yText: text!,
             fontFamily,
@@ -417,3 +420,8 @@ function updateModelsWith<
       .updateElement(model.id, { [field]: value });
   }
 }
+
+export const connectorToolbarExtension = ToolbarModuleExtension({
+  id: BlockFlavourIdentifier('affine:surface:connector'),
+  config: connectorToolbarConfig,
+});

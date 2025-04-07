@@ -2,20 +2,72 @@ import {
   EdgelessCRUDIdentifier,
   TextUtils,
 } from '@blocksuite/affine-block-surface';
-import type { ShapeElementModel } from '@blocksuite/affine-model';
-import { MindmapElementModel, TextResizing } from '@blocksuite/affine-model';
+import {
+  MindmapElementModel,
+  ShapeElementModel,
+  TextResizing,
+} from '@blocksuite/affine-model';
 import type { RichText } from '@blocksuite/affine-rich-text';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { getSelectedRect } from '@blocksuite/affine-shared/utils';
-import { type BlockComponent, ShadowlessElement } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
-import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std/inline';
+import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import { Bound, toRadian, Vec } from '@blocksuite/global/gfx';
 import { WithDisposable } from '@blocksuite/global/lit';
+import {
+  type BlockComponent,
+  type BlockStdScope,
+  ShadowlessElement,
+  stdContext,
+} from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/std/inline';
+import { consume } from '@lit/context';
 import { html, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import * as Y from 'yjs';
+
+export function mountShapeTextEditor(
+  shapeElement: ShapeElementModel,
+  edgeless: BlockComponent
+) {
+  const mountElm = edgeless.querySelector('.edgeless-mount-point');
+  if (!mountElm) {
+    throw new BlockSuiteError(
+      ErrorCode.ValueNotExists,
+      "edgeless block's mount point does not exist"
+    );
+  }
+
+  const gfx = edgeless.std.get(GfxControllerIdentifier);
+  const crud = edgeless.std.get(EdgelessCRUDIdentifier);
+
+  const updatedElement = crud.getElementById(shapeElement.id);
+
+  if (!(updatedElement instanceof ShapeElementModel)) {
+    console.error('Cannot mount text editor on a non-shape element');
+    return;
+  }
+
+  // @ts-expect-error FIXME: resolve after gfx tool refactor
+  gfx.tool.setTool('default');
+  gfx.selection.set({
+    elements: [shapeElement.id],
+    editing: true,
+  });
+
+  if (!shapeElement.text) {
+    const text = new Y.Text();
+    edgeless.std
+      .get(EdgelessCRUDIdentifier)
+      .updateElement(shapeElement.id, { text });
+  }
+
+  const shapeEditor = new EdgelessShapeTextEditor();
+  shapeEditor.element = updatedElement;
+
+  mountElm.append(shapeEditor);
+}
 
 export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   private _keeping = false;
@@ -29,11 +81,11 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   }
 
   get crud() {
-    return this.edgeless.std.get(EdgelessCRUDIdentifier);
+    return this.std.get(EdgelessCRUDIdentifier);
   }
 
   get gfx() {
-    return this.edgeless.std.get(GfxControllerIdentifier);
+    return this.std.get(GfxControllerIdentifier);
   }
 
   get selection() {
@@ -179,7 +231,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   }
 
   override firstUpdated(): void {
-    const dispatcher = this.edgeless.std.event;
+    const dispatcher = this.std.event;
 
     this.element.textDisplay = false;
 
@@ -273,7 +325,7 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
     );
     const [x, y] = this.gfx.viewport.toViewCoord(leftTopX, leftTopY);
     const autoWidth = textResizing === TextResizing.AUTO_WIDTH_AND_HEIGHT;
-    const color = this.edgeless.std
+    const color = this.std
       .get(ThemeProvider)
       .generateColorProperty(this.element.color, '#000000');
 
@@ -347,15 +399,12 @@ export class EdgelessShapeTextEditor extends WithDisposable(ShadowlessElement) {
   }
 
   @property({ attribute: false })
-  accessor edgeless!: BlockComponent;
-
-  @property({ attribute: false })
   accessor element!: ShapeElementModel;
 
-  @property({ attribute: false })
-  accessor mountEditor:
-    | ((element: ShapeElementModel, edgeless: BlockComponent) => void)
-    | undefined = undefined;
+  @consume({
+    context: stdContext,
+  })
+  accessor std!: BlockStdScope;
 
   @query('rich-text')
   accessor richText!: RichText;

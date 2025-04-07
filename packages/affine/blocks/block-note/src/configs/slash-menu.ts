@@ -14,8 +14,8 @@ import {
   SlashMenuConfigExtension,
   type SlashMenuItem,
 } from '@blocksuite/affine-widget-slash-menu';
-import { BlockSelection } from '@blocksuite/block-std';
 import { HeadingsIcon } from '@blocksuite/icons/lit';
+import { BlockSelection } from '@blocksuite/std';
 
 import { updateBlockType } from '../commands';
 import { tooltips } from './tooltips';

@@ -1,7 +1,7 @@
 import type { BlockCaptionEditor } from '@blocksuite/affine-components/caption';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import type { ImageBlockModel } from '@blocksuite/affine-model';
-import { GfxBlockComponent } from '@blocksuite/block-std';
+import { GfxBlockComponent } from '@blocksuite/std';
 import { css, html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

@@ -1,5 +1,5 @@
 import { SlashMenuConfigExtension } from '@blocksuite/affine-widget-slash-menu';
-import { BlockViewExtension } from '@blocksuite/block-std';
+import { BlockViewExtension } from '@blocksuite/std';
 import type { ExtensionType } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 

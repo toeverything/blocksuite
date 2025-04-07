@@ -7,6 +7,7 @@ import { type SlashMenuConfig } from '@blocksuite/affine-widget-slash-menu';
 import { TeXIcon } from '@blocksuite/icons/lit';
 
 import { insertLatexBlockCommand } from '../commands';
+import { LatexTooltip } from './tooltips';
 
 export const latexSlashMenuConfig: SlashMenuConfig = {
   items: [
@@ -15,6 +16,14 @@ export const latexSlashMenuConfig: SlashMenuConfig = {
       group: '0_Basic@8',
       description: 'Create a inline equation.',
       icon: TeXIcon(),
+      tooltip: {
+        figure: LatexTooltip(
+          'Energy. Mass. Light. In a single equation,',
+          'E=mc^2',
+          false
+        ),
+        caption: 'Inline equation',
+      },
       searchAlias: ['inlineMath, inlineEquation', 'inlineLatex'],
       action: ({ std }) => {
         std.command
@@ -28,8 +37,16 @@ export const latexSlashMenuConfig: SlashMenuConfig = {
       name: 'Equation',
       description: 'Create a equation block.',
       icon: TeXIcon(),
+      tooltip: {
+        figure: LatexTooltip(
+          'Create a equation via LaTeX.',
+          String.raw`\frac{a}{b} \pm \frac{c}{d} = \frac{ad \pm bc}{bd}`,
+          true
+        ),
+        caption: 'Equation',
+      },
       searchAlias: ['mathBlock, equationBlock', 'latexBlock'],
-      group: '4_Content & Media@9',
+      group: '4_Content & Media@10',
       action: ({ std }) => {
         std.command
           .chain()

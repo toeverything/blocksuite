@@ -1,9 +1,9 @@
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import {
   PropTypes,
   requiredProperties,
   ShadowlessElement,
-} from '@blocksuite/block-std';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@blocksuite/std';
 import { html, nothing, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -95,6 +95,6 @@ export class AffineKeyboardToolPanel extends SignalWatcher(
   @property({ attribute: false })
   accessor context!: KeyboardToolbarContext;
 
-  @property({ type: Number })
+  @property({ attribute: false })
   accessor height = 0;
 }

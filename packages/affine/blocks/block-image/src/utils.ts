@@ -11,14 +11,20 @@ import {
 } from '@blocksuite/affine-shared/services';
 import {
   downloadBlob,
+  getBlockProps,
   humanFileSize,
+  isInsidePageEditor,
   readImageSize,
   transformModel,
   withTempBlobData,
 } from '@blocksuite/affine-shared/utils';
-import type { BlockStdScope, EditorHost } from '@blocksuite/block-std';
-import { GfxControllerIdentifier } from '@blocksuite/block-std/gfx';
 import { Bound, type IVec, Point, Vec } from '@blocksuite/global/gfx';
+import {
+  BlockSelection,
+  type BlockStdScope,
+  type EditorHost,
+} from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import type { BlockModel } from '@blocksuite/store';
 
 import {
@@ -551,4 +557,50 @@ export function calcBoundByOrigin(
   return inTopLeft
     ? new Bound(point[0], point[1], width, height)
     : Bound.fromCenter(point, width, height);
+}
+
+export function duplicate(block: ImageBlockComponent) {
+  const model = block.model;
+  const blockProps = getBlockProps(model);
+  const {
+    width: _width,
+    height: _height,
+    xywh: _xywh,
+    rotate: _rotate,
+    zIndex: _zIndex,
+    ...duplicateProps
+  } = blockProps;
+
+  const { doc } = model;
+  const parent = doc.getParent(model);
+  if (!parent) {
+    console.error(`Parent not found for block(${model.flavour}) ${model.id}`);
+    return;
+  }
+
+  const index = parent?.children.indexOf(model);
+  const duplicateId = doc.addBlock(
+    model.flavour,
+    duplicateProps,
+    parent,
+    index + 1
+  );
+
+  const editorHost = block.host;
+  editorHost.updateComplete
+    .then(() => {
+      const { selection } = editorHost;
+      selection.setGroup('note', [
+        selection.create(BlockSelection, {
+          blockId: duplicateId,
+        }),
+      ]);
+      if (isInsidePageEditor(editorHost)) {
+        const duplicateElement = editorHost.view.getBlock(duplicateId);
+        if (duplicateElement) {
+          duplicateElement.scrollIntoView(true);
+        }
+      }
+    })
+    .catch(console.error);
 }

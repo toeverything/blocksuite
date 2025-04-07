@@ -1,11 +1,8 @@
-import { SurfaceRefGenericBlockPortal } from './portal/generic-block.js';
-import { SurfaceRefNotePortal } from './portal/note.js';
-import { SurfaceRefBlockComponent } from './surface-ref-block.js';
-import { EdgelessSurfaceRefBlockComponent } from './surface-ref-block-edgeless.js';
-import {
-  AFFINE_SURFACE_REF_TOOLBAR,
-  AffineSurfaceRefToolbar,
-} from './widgets/surface-ref-toolbar.js';
+import { SurfaceRefPlaceHolder, SurfaceRefToolbarTitle } from './components';
+import { SurfaceRefGenericBlockPortal } from './portal/generic-block';
+import { SurfaceRefNotePortal } from './portal/note';
+import { SurfaceRefBlockComponent } from './surface-ref-block';
+import { EdgelessSurfaceRefBlockComponent } from './surface-ref-block-edgeless';
 
 export function effects() {
   customElements.define(
@@ -18,5 +15,6 @@ export function effects() {
     EdgelessSurfaceRefBlockComponent
   );
   customElements.define('surface-ref-note-portal', SurfaceRefNotePortal);
-  customElements.define(AFFINE_SURFACE_REF_TOOLBAR, AffineSurfaceRefToolbar);
+  customElements.define('surface-ref-toolbar-title', SurfaceRefToolbarTitle);
+  customElements.define('surface-ref-placeholder', SurfaceRefPlaceHolder);
 }

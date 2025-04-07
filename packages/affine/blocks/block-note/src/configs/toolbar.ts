@@ -23,10 +23,6 @@ import {
   ToolbarModuleExtension,
 } from '@blocksuite/affine-shared/services';
 import { getMostCommonResolvedValue } from '@blocksuite/affine-shared/utils';
-import {
-  BlockFlavourIdentifier,
-  EditorLifeCycleExtension,
-} from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/gfx';
 import {
   AutoHeightIcon,
@@ -35,6 +31,10 @@ import {
   LinkedPageIcon,
   ScissorsIcon,
 } from '@blocksuite/icons/lit';
+import {
+  BlockFlavourIdentifier,
+  EditorLifeCycleExtension,
+} from '@blocksuite/std';
 import type { ExtensionType } from '@blocksuite/store';
 import { computed } from '@preact/signals-core';
 import { html } from 'lit';
@@ -110,8 +110,8 @@ const builtinSurfaceToolbarConfig = {
         );
         const label$ = computed(() =>
           firstModel.props.displayMode$.value === NoteDisplayMode.EdgelessOnly
-            ? 'Display In Page'
-            : 'Displayed In Page'
+            ? 'Display in Page'
+            : 'Displayed in Page'
         );
         const onSelect = () => {
           const newMode =
@@ -547,7 +547,7 @@ function setDisplayMode(
   const notification = ctx.std.getOptional(NotificationProvider);
   notification?.notify({
     title: data.title,
-    message: `${data.message}. Find it in the TOC for quick navigation.`,
+    message: `${data.message} Find it in the TOC for quick navigation.`,
     accent: 'success',
     duration: 5 * 1000,
     footer: html`<div class=${styles.viewInPageNotifyFooter}>

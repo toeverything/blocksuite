@@ -1,4 +1,4 @@
-[**@blocksuite/store**](../../../@blocksuite/store/README.md)
+[**BlockSuite API Documentation**](../../../README.md)
 
 ***
 
@@ -129,5 +129,5 @@ and many other extensible components. The pattern remains the same regardless of
 ## Extended by
 
 - [`StoreExtension`](StoreExtension.md)
-- [`BlockService`](../../block-std/index/classes/BlockService.md)
-- [`LifeCycleWatcher`](../../block-std/index/classes/LifeCycleWatcher.md)
+- [`BlockService`](../../std/index/classes/BlockService.md)
+- [`LifeCycleWatcher`](../../std/index/classes/LifeCycleWatcher.md)

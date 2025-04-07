@@ -1,4 +1,7 @@
-import { PANEL_BASE } from '@blocksuite/affine-shared/styles';
+import {
+  panelBaseStyle,
+  scrollbarStyle,
+} from '@blocksuite/affine-shared/styles';
 import {
   type ButtonPopperOptions,
   createButtonPopper,
@@ -25,9 +28,10 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
     }
   `;
 
-  private _popper!: ReturnType<typeof createButtonPopper>;
+  private _popper: ReturnType<typeof createButtonPopper> | null = null;
 
-  override firstUpdated() {
+  private _updatePopper() {
+    this._popper?.dispose();
     this._popper = createButtonPopper({
       reference: this._trigger,
       popperElement: this._content,
@@ -43,21 +47,34 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
           })
         );
       },
-      mainAxis: 12,
-      ignoreShift: true,
+      mainAxis: 0,
       offsetHeight: 6 * 4,
       ...this.popperOptions,
     });
+  }
+
+  override willUpdate(changedProperties: PropertyValues) {
+    if (changedProperties.has('contentPadding')) {
+      this.style.setProperty('--content-padding', this.contentPadding ?? '');
+    }
+
+    if (this.hasUpdated && changedProperties.has('popperOptions')) {
+      this._updatePopper();
+    }
+  }
+
+  override firstUpdated() {
+    this._updatePopper();
     this._disposables.addFromEvent(this, 'keydown', (e: KeyboardEvent) => {
       e.stopPropagation();
       if (e.key === 'Escape') {
-        this._popper.hide();
+        this._popper?.hide();
       }
     });
     this._disposables.addFromEvent(this._trigger, 'click', (_: MouseEvent) => {
-      this._popper.toggle();
+      this._popper?.toggle();
     });
-    this._disposables.add(this._popper);
+    this._disposables.add(() => this._popper?.dispose());
   }
 
   hide() {
@@ -75,12 +92,6 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
 
   show(force = false) {
     this._popper?.show(force);
-  }
-
-  override willUpdate(changedProperties: PropertyValues) {
-    if (changedProperties.has('contentPadding')) {
-      this.style.setProperty('--content-padding', this.contentPadding ?? '');
-    }
   }
 
   @query('editor-menu-content')
@@ -102,15 +113,21 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
 export class EditorMenuContent extends LitElement {
   static override styles = css`
     :host {
+      padding: 12px 0;
       display: none;
       outline: none;
-      overscroll-behavior: contain;
-      overflow-y: auto;
     }
 
     :host([data-show]) {
-      ${PANEL_BASE};
+      display: flex;
       justify-content: center;
+    }
+
+    ${panelBaseStyle('.content-wrapper')}
+    ${scrollbarStyle('.content-wrapper')}
+    .content-wrapper {
+      overscroll-behavior: contain;
+      overflow-y: auto;
       padding: var(--content-padding, 0 6px);
     }
 
@@ -143,7 +160,7 @@ export class EditorMenuContent extends LitElement {
   `;
 
   override render() {
-    return html`<slot></slot>`;
+    return html`<div class="content-wrapper"><slot></slot></div>`;
   }
 }
 

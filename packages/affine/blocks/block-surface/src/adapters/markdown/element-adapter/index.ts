@@ -29,3 +29,5 @@ export class MarkdownElementModelAdapter extends ElementModelAdapter<
     return markdownAST;
   }
 }
+
+export * from './type.js';

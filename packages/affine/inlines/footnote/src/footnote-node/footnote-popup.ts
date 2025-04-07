@@ -12,9 +12,9 @@ import {
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import type { BlockStdScope } from '@blocksuite/block-std';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { DualLinkIcon, LinkIcon } from '@blocksuite/icons/lit';
+import type { BlockStdScope } from '@blocksuite/std';
 import { computed, signal } from '@preact/signals-core';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';

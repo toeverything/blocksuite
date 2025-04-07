@@ -1,31 +1,22 @@
 import type { Color } from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import type { EditorHost, SurfaceSelection } from '@blocksuite/block-std';
-import { BlockComponent } from '@blocksuite/block-std';
-import {
-  GfxControllerIdentifier,
-  type Viewport,
-} from '@blocksuite/block-std/gfx';
-import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/block-std/inline';
 import { Bound } from '@blocksuite/global/gfx';
+import type { EditorHost, SurfaceSelection } from '@blocksuite/std';
+import { BlockComponent } from '@blocksuite/std';
+import { GfxControllerIdentifier, type Viewport } from '@blocksuite/std/gfx';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/std/inline';
 import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';
 import type { Subject } from 'rxjs';
 
 import { ConnectorElementModel } from './element-model/index.js';
 import { CanvasRenderer } from './renderer/canvas-renderer.js';
-import {
-  type ElementRenderer,
-  elementRenderers,
-} from './renderer/elements/index.js';
 import { OverlayIdentifier } from './renderer/overlay.js';
 import type { SurfaceBlockModel } from './surface-model.js';
-import type { SurfaceBlockService } from './surface-service.js';
 
 export interface SurfaceContext {
   viewport: Viewport;
   host: EditorHost;
-  elementRenderers: Record<string, ElementRenderer>;
   selection: {
     selectedIds: string[];
     slots: {
@@ -34,10 +25,7 @@ export interface SurfaceContext {
   };
 }
 
-export class SurfaceBlockComponent extends BlockComponent<
-  SurfaceBlockModel,
-  SurfaceBlockService
-> {
+export class SurfaceBlockComponent extends BlockComponent<SurfaceBlockModel> {
   static isConnector = (element: unknown): element is ConnectorElementModel => {
     return element instanceof ConnectorElementModel;
   };
@@ -155,6 +143,7 @@ export class SurfaceBlockComponent extends BlockComponent<
     const themeService = this.std.get(ThemeProvider);
 
     this._renderer = new CanvasRenderer({
+      std: this.std,
       viewport: gfx.viewport,
       layerManager: gfx.layer,
       gridManager: gfx.grid,
@@ -184,7 +173,6 @@ export class SurfaceBlockComponent extends BlockComponent<
       onStackingCanvasCreated(canvas) {
         canvas.className = 'indexable-canvas';
       },
-      elementRenderers,
       surfaceModel: this.model,
     });
 

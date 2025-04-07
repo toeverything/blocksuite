@@ -10,7 +10,7 @@ import {
 import { EMBED_CARD_HEIGHT } from '@blocksuite/affine-shared/consts';
 import { NotificationProvider } from '@blocksuite/affine-shared/services';
 import { matchModels, SpecProvider } from '@blocksuite/affine-shared/utils';
-import { BlockStdScope, EditorLifeCycleExtension } from '@blocksuite/block-std';
+import { BlockStdScope, EditorLifeCycleExtension } from '@blocksuite/std';
 import {
   type BlockModel,
   type BlockSnapshot,
@@ -412,7 +412,8 @@ export function createLinkedDocFromSlice(
   snapshots: BlockSnapshot[],
   docTitle?: string
 ) {
-  const linkedDoc = doc.workspace.createDoc({});
+  const _doc = doc.workspace.createDoc();
+  const linkedDoc = _doc.getStore();
   linkedDoc.load(() => {
     const rootId = linkedDoc.addBlock('affine:page', {
       title: new Text(docTitle),

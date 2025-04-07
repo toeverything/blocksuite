@@ -7,7 +7,7 @@ import {
   EmbedOptionConfig,
   LinkPreviewerService,
 } from '@blocksuite/affine-shared/services';
-import { BlockService } from '@blocksuite/block-std';
+import { BlockService } from '@blocksuite/std';
 
 import { githubUrlRegex } from './embed-github-model.js';
 import { queryEmbedGithubApiData, queryEmbedGithubData } from './utils.js';

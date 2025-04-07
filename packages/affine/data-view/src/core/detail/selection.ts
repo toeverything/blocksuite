@@ -57,7 +57,7 @@ export class DetailSelection {
       return;
     }
 
-    container.isFocus = false;
+    container.isFocus$.value = false;
     const cell = container.cell;
 
     if (selection.isEditing) {
@@ -80,7 +80,7 @@ export class DetailSelection {
     if (!container) {
       return;
     }
-    container.isFocus = true;
+    container.isFocus$.value = true;
     const cell = container.cell;
     if (selection.isEditing) {
       if (cell?.focusCell()) {

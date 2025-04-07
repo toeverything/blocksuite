@@ -9,12 +9,12 @@ import { focusTextModel } from '@blocksuite/affine-rich-text';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import type { NoteChildrenFlavour } from '@blocksuite/affine-shared/types';
 import { handleNativeRangeAtPoint } from '@blocksuite/affine-shared/utils';
-import type { BlockStdScope } from '@blocksuite/block-std';
+import { type IPoint, type Point, serializeXYWH } from '@blocksuite/global/gfx';
+import type { BlockStdScope } from '@blocksuite/std';
 import {
   type GfxBlockElementModel,
   GfxControllerIdentifier,
-} from '@blocksuite/block-std/gfx';
-import { type IPoint, type Point, serializeXYWH } from '@blocksuite/global/gfx';
+} from '@blocksuite/std/gfx';
 
 import { DEFAULT_NOTE_OFFSET_X, DEFAULT_NOTE_OFFSET_Y } from '../consts';
 import { EdgelessCRUDIdentifier } from '../extensions/crud-extension';

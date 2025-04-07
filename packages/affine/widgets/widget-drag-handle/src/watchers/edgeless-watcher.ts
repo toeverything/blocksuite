@@ -3,11 +3,11 @@ import {
   type SurfaceBlockComponent,
 } from '@blocksuite/affine-block-surface';
 import { getSelectedRect } from '@blocksuite/affine-shared/utils';
+import { type IVec, Rect } from '@blocksuite/global/gfx';
 import {
   GfxControllerIdentifier,
   type GfxToolsFullOptionValue,
-} from '@blocksuite/block-std/gfx';
-import { type IVec, Rect } from '@blocksuite/global/gfx';
+} from '@blocksuite/std/gfx';
 import { effect } from '@preact/signals-core';
 
 import {

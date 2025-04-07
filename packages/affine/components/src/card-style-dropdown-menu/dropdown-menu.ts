@@ -3,9 +3,9 @@ import {
   type ToolbarAction,
   ToolbarContext,
 } from '@blocksuite/affine-shared/services';
-import { PropTypes, requiredProperties } from '@blocksuite/block-std';
 import { SignalWatcher } from '@blocksuite/global/lit';
 import { PaletteIcon } from '@blocksuite/icons/lit';
+import { PropTypes, requiredProperties } from '@blocksuite/std';
 import {
   computed,
   type ReadonlySignal,

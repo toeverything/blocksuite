@@ -4,7 +4,7 @@ import {
   BlockSelection,
   KeymapExtension,
   TextSelection,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 
 export const CalloutKeymapExtension = KeymapExtension(std => {
   return {

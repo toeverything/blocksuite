@@ -1,9 +1,13 @@
 import { getDocTitleByEditorHost } from '@blocksuite/affine-fragment-doc-title';
 import type { RootBlockModel } from '@blocksuite/affine-model';
-import { FeatureFlagService } from '@blocksuite/affine-shared/services';
-import { WidgetComponent } from '@blocksuite/block-std';
+import {
+  FeatureFlagService,
+  VirtualKeyboardProvider,
+  type VirtualKeyboardProviderWithAction,
+} from '@blocksuite/affine-shared/services';
 import { IS_MOBILE } from '@blocksuite/global/env';
-import { signal } from '@preact/signals-core';
+import { WidgetComponent } from '@blocksuite/std';
+import { effect, signal } from '@preact/signals-core';
 import { html, nothing } from 'lit';
 
 import type { PageRootBlockComponent } from '../../page/page-root-block.js';
@@ -22,6 +26,7 @@ export class AffineKeyboardToolbarWidget extends WidgetComponent<
     if (blur) {
       if (document.activeElement === this._docTitle?.inlineEditorContainer) {
         this._docTitle?.inlineEditor?.setInlineRange(null);
+        this._docTitle?.inlineEditor?.eventSource?.blur();
       } else if (document.activeElement === this.block?.rootComponent) {
         this.std.selection.clear();
       }
@@ -30,6 +35,27 @@ export class AffineKeyboardToolbarWidget extends WidgetComponent<
   };
 
   private readonly _show$ = signal(false);
+
+  private _initialInputMode: string = '';
+
+  get keyboard(): VirtualKeyboardProviderWithAction {
+    return {
+      // fallback keyboard actions
+      show: () => {
+        const rootComponent = this.block?.rootComponent;
+        if (rootComponent && rootComponent === document.activeElement) {
+          rootComponent.inputMode = this._initialInputMode;
+        }
+      },
+      hide: () => {
+        const rootComponent = this.block?.rootComponent;
+        if (rootComponent && rootComponent === document.activeElement) {
+          rootComponent.inputMode = 'none';
+        }
+      },
+      ...this.std.get(VirtualKeyboardProvider),
+    };
+  }
 
   private get _docTitle() {
     return getDocTitleByEditorHost(this.std.host);
@@ -48,12 +74,25 @@ export class AffineKeyboardToolbarWidget extends WidgetComponent<
 
     const rootComponent = this.block?.rootComponent;
     if (rootComponent) {
+      this._initialInputMode = rootComponent.inputMode;
+      this.disposables.add(() => {
+        rootComponent.inputMode = this._initialInputMode;
+      });
       this.disposables.addFromEvent(rootComponent, 'focus', () => {
         this._show$.value = true;
       });
       this.disposables.addFromEvent(rootComponent, 'blur', () => {
         this._show$.value = false;
       });
+
+      this.disposables.add(
+        effect(() => {
+          // recover input mode when keyboard toolbar is hidden
+          if (!this._show$.value) {
+            rootComponent.inputMode = this._initialInputMode;
+          }
+        })
+      );
     }
 
     if (this._docTitle) {
@@ -84,10 +123,11 @@ export class AffineKeyboardToolbarWidget extends WidgetComponent<
     return html`<blocksuite-portal
       .shadowDom=${false}
       .template=${html`<affine-keyboard-toolbar
+        .keyboard=${this.keyboard}
         .config=${this.config}
         .rootComponent=${this.block.rootComponent}
         .close=${this._close}
-      ></affine-keyboard-toolbar> `}
+      ></affine-keyboard-toolbar>`}
     ></blocksuite-portal>`;
   }
 }

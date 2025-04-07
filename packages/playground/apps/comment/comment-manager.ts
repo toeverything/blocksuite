@@ -1,4 +1,4 @@
-import type { EditorHost, TextSelection } from '@blocksuite/affine/block-std';
+import type { EditorHost, TextSelection } from '@blocksuite/affine/std';
 import { getSelectedBlocksCommand } from '@blocksuite/affine-shared/commands';
 import * as Y from 'yjs';
 

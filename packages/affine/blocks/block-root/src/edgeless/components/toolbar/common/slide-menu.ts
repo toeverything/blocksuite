@@ -29,14 +29,18 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       align-items: center;
       width: fit-content;
       max-width: 100%;
-      overflow-x: auto;
-      overscroll-behavior: none;
-      scrollbar-width: none;
       position: relative;
       height: calc(var(--menu-height) + 1px);
       box-sizing: border-box;
-      padding: 0 10px;
+      padding-left: 10px;
       scroll-snap-type: x mandatory;
+    }
+    .menu-container-scrollable {
+      overflow-x: auto;
+      overscroll-behavior: none;
+      scrollbar-width: none;
+      height: 100%;
+      padding-right: 10px;
     }
     .slide-menu-content {
       display: flex;
@@ -44,6 +48,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
       justify-content: center;
       height: 100%;
       transition: left 0.5s ease-in-out;
+      width: fit-content;
     }
     .next-slide-button,
     .previous-slide-button {
@@ -109,7 +114,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
     const menuWidth = this._menuContainer.clientWidth;
 
     const leftMin = 0;
-    const leftMax = this._slideMenuContent.clientWidth - menuWidth + 2; // border is 2
+    const leftMax = this._slideMenuContent.clientWidth - menuWidth;
     this.showPrevious = scrollLeft > leftMin;
     this.showNext = scrollLeft < leftMax;
   }
@@ -140,8 +145,11 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
           class="menu-container"
           style=${styleMap({ '--menu-height': this.height })}
         >
-          <div class="slide-menu-content" @wheel=${this._handleWheel}>
-            <slot></slot>
+          <slot name="prefix"></slot>
+          <div class="menu-container-scrollable">
+            <div class="slide-menu-content" @wheel=${this._handleWheel}>
+              <slot></slot>
+            </div>
           </div>
         </div>
         <div
@@ -155,7 +163,7 @@ export class EdgelessSlideMenu extends WithDisposable(LitElement) {
     `;
   }
 
-  @query('.menu-container')
+  @query('.menu-container-scrollable')
   private accessor _menuContainer!: HTMLDivElement;
 
   @query('.slide-menu-content')

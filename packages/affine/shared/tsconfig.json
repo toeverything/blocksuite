@@ -8,8 +8,8 @@
   "include": ["./src"],
   "references": [
     { "path": "../model" },
-    { "path": "../../framework/block-std" },
     { "path": "../../framework/global" },
+    { "path": "../../framework/std" },
     { "path": "../../framework/store" }
   ]
 }

@@ -7,10 +7,10 @@ import {
   insertPositionToIndex,
   type InsertToPosition,
 } from '@blocksuite/affine-shared/utils';
-import type { EditorHost } from '@blocksuite/block-std';
 import { DataSourceBase, type PropertyMetaConfig } from '@blocksuite/data-view';
 import { propertyPresets } from '@blocksuite/data-view/property-presets';
 import { BlockSuiteError } from '@blocksuite/global/exceptions';
+import type { EditorHost } from '@blocksuite/std';
 import type { Block, Store } from '@blocksuite/store';
 import { Subject } from 'rxjs';
 
@@ -86,7 +86,7 @@ export class BlockQueryDataSource extends DataSourceBase {
     this.workspace.slots.docCreated.subscribe(id => {
       const doc = this.workspace.getDoc(id);
       if (doc) {
-        this.listenToDoc(doc);
+        this.listenToDoc(doc.getStore());
       }
     });
     this.workspace.slots.docRemoved.subscribe(id => {

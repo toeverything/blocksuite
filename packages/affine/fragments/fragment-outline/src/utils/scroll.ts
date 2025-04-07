@@ -2,9 +2,9 @@ import { getDocTitleByEditorHost } from '@blocksuite/affine-fragment-doc-title';
 import { NoteDisplayMode } from '@blocksuite/affine-model';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import type { Viewport } from '@blocksuite/affine-shared/types';
-import type { EditorHost } from '@blocksuite/block-std';
 import { DisposableGroup } from '@blocksuite/global/disposable';
 import { clamp } from '@blocksuite/global/gfx';
+import type { EditorHost } from '@blocksuite/std';
 
 import { getHeadingBlocksFromDoc } from './query.js';
 

@@ -1,23 +1,26 @@
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import type { CodeBlockModel } from '@blocksuite/affine-model';
 import { focusTextModel, type RichText } from '@blocksuite/affine-rich-text';
-import { BRACKET_PAIRS, NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
+import {
+  BRACKET_PAIRS,
+  EDGELESS_TOP_CONTENTEDITABLE_SELECTOR,
+} from '@blocksuite/affine-shared/consts';
 import {
   DocModeProvider,
   NotificationProvider,
 } from '@blocksuite/affine-shared/services';
 import { getViewportElement } from '@blocksuite/affine-shared/utils';
-import type { BlockComponent } from '@blocksuite/block-std';
-import { BlockSelection, TextSelection } from '@blocksuite/block-std';
+import { IS_MAC, IS_MOBILE } from '@blocksuite/global/env';
+import { noop } from '@blocksuite/global/utils';
+import type { BlockComponent } from '@blocksuite/std';
+import { BlockSelection, TextSelection } from '@blocksuite/std';
 import {
   getInlineRangeProvider,
   INLINE_ROOT_ATTR,
   type InlineRangeProvider,
   type InlineRootElement,
   type VLine,
-} from '@blocksuite/block-std/inline';
-import { IS_MAC, IS_MOBILE } from '@blocksuite/global/env';
-import { noop } from '@blocksuite/global/utils';
+} from '@blocksuite/std/inline';
 import { Slice } from '@blocksuite/store';
 import { computed, effect, type Signal, signal } from '@preact/signals-core';
 import { html, nothing, type TemplateResult } from 'lit';
@@ -25,7 +28,6 @@ import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { bundledLanguagesInfo, type ThemedToken } from 'shiki';
 
-import { CodeClipboardController } from './clipboard/index.js';
 import { CodeBlockConfigExtension } from './code-block-config.js';
 import { CodeBlockInlineManagerExtension } from './code-block-inline.js';
 import { CodeBlockHighlighter } from './code-block-service.js';
@@ -35,8 +37,6 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
   static override styles = codeBlockStyles;
 
   private _inlineRangeProvider: InlineRangeProvider | null = null;
-
-  clipboardController = new CodeClipboardController(this);
 
   highlightTokens$: Signal<ThemedToken[][]> = signal([]);
 
@@ -82,7 +82,9 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
 
   override get topContenteditableElement() {
     if (this.std.get(DocModeProvider).getEditorMode() === 'edgeless') {
-      return this.closest<BlockComponent>(NOTE_SELECTOR);
+      return this.closest<BlockComponent>(
+        EDGELESS_TOP_CONTENTEDITABLE_SELECTOR
+      );
     }
     return this.rootComponent;
   }
@@ -144,8 +146,6 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
     super.connectedCallback();
 
     // set highlight options getter used by "exportToHtml"
-    this.clipboardController.hostConnected();
-
     this.disposables.add(
       effect(() => {
         this._updateHighlightTokens();
@@ -371,11 +371,6 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
         this.notificationService?.toast('Copied failed, something went wrong');
         console.error(e);
       });
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this.clipboardController.hostDisconnected();
   }
 
   override async getUpdateComplete() {

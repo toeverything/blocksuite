@@ -1,7 +1,7 @@
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import type { DividerBlockModel } from '@blocksuite/affine-model';
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '@blocksuite/affine-shared/consts';
-import { BlockSelection } from '@blocksuite/block-std';
+import { BlockSelection } from '@blocksuite/std';
 import { html } from 'lit';
 
 import { dividerBlockStyles } from './styles.js';

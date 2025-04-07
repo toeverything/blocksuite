@@ -19,19 +19,14 @@ import {
   getScrollContainer,
   matchModels,
 } from '@blocksuite/affine-shared/utils';
-import type { PointerEventState } from '@blocksuite/block-std';
-import {
-  BlockComponent,
-  BlockSelection,
-  TextSelection,
-} from '@blocksuite/block-std';
 import { Point } from '@blocksuite/global/gfx';
+import type { PointerEventState } from '@blocksuite/std';
+import { BlockComponent, BlockSelection, TextSelection } from '@blocksuite/std';
 import type { BlockModel, Text } from '@blocksuite/store';
 import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import { PageClipboard } from '../clipboard/index.js';
 import type { PageRootBlockWidgetName } from '../index.js';
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { PageRootService } from './page-root-service.js';
@@ -113,8 +108,6 @@ export class PageRootBlockComponent extends BlockComponent<
       }
     }
   `;
-
-  clipboardController = new PageClipboard(this);
 
   /**
    * Focus the first paragraph in the default note block.
@@ -211,7 +204,6 @@ export class PageRootBlockComponent extends BlockComponent<
 
   override connectedCallback() {
     super.connectedCallback();
-    this.clipboardController.hostConnected();
 
     this.keyboardManager = new PageKeyboardManager(this);
 
@@ -386,7 +378,6 @@ export class PageRootBlockComponent extends BlockComponent<
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this.clipboardController.hostDisconnected();
     this._disposables.dispose();
     this.keyboardManager = null;
   }
@@ -423,6 +414,8 @@ export class PageRootBlockComponent extends BlockComponent<
       // Should remove deprecated `hidden` property in the future
       return !(isNote && displayOnEdgeless);
     });
+
+    this.contentEditable = String(!this.doc.readonly$.value);
 
     return html`
       <div class="affine-page-root-block-container">${children} ${widgets}</div>

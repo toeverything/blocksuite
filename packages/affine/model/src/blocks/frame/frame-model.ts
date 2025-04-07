@@ -1,3 +1,4 @@
+import { Bound } from '@blocksuite/global/gfx';
 import type {
   GfxBlockElementModel,
   GfxCompatibleProps,
@@ -5,7 +6,7 @@ import type {
   GfxGroupCompatibleInterface,
   GfxModel,
   PointTestOptions,
-} from '@blocksuite/block-std/gfx';
+} from '@blocksuite/std/gfx';
 import {
   canSafeAddToContainer,
   descendantElementsImpl,
@@ -13,8 +14,7 @@ import {
   GfxCompatible,
   gfxGroupCompatibleSymbol,
   hasDescendantElementImpl,
-} from '@blocksuite/block-std/gfx';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@blocksuite/std/gfx';
 import {
   BlockModel,
   BlockSchemaExtension,

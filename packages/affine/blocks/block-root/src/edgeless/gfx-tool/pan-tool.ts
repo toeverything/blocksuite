@@ -1,6 +1,6 @@
 import { on } from '@blocksuite/affine-shared/utils';
-import type { PointerEventState } from '@blocksuite/block-std';
-import { BaseTool, MouseButton } from '@blocksuite/block-std/gfx';
+import type { PointerEventState } from '@blocksuite/std';
+import { BaseTool, MouseButton } from '@blocksuite/std/gfx';
 import { Signal } from '@preact/signals-core';
 
 export type PanToolOption = {
@@ -53,9 +53,11 @@ export class PanTool extends BaseTool<PanToolOption> {
 
       evt.raw.preventDefault();
 
+      const selection = this.gfx.selection.surfaceSelections;
       const currentTool = this.controller.currentToolOption$.peek();
       const restoreToPrevious = () => {
         this.controller.setTool(currentTool);
+        this.gfx.selection.set(selection);
       };
 
       this.controller.setTool('pan', {
@@ -74,7 +76,7 @@ export class PanTool extends BaseTool<PanToolOption> {
   }
 }
 
-declare module '@blocksuite/block-std/gfx' {
+declare module '@blocksuite/std/gfx' {
   interface GfxToolsMap {
     pan: PanTool;
   }

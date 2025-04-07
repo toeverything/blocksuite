@@ -3,18 +3,17 @@ import {
   ActionPlacement,
   EmbedIframeService,
   EmbedOptionProvider,
-  FeatureFlagService,
   type ToolbarAction,
   type ToolbarActionGroup,
   type ToolbarModuleConfig,
 } from '@blocksuite/affine-shared/services';
-import { BlockSelection } from '@blocksuite/block-std';
 import {
   CopyIcon,
   DeleteIcon,
   EditIcon,
   UnlinkIcon,
 } from '@blocksuite/icons/lit';
+import { BlockSelection } from '@blocksuite/std';
 import { signal } from '@preact/signals-core';
 import { html } from 'lit-html';
 import { keyed } from 'lit-html/directives/keyed.js';
@@ -196,13 +195,8 @@ export const builtinInlineLinkToolbarConfig = {
             if (!url) return false;
 
             // check if the url can be embedded as iframe block
-            const featureFlag = ctx.std.get(FeatureFlagService);
             const embedIframeService = ctx.std.get(EmbedIframeService);
-            const isEmbedIframeEnabled = featureFlag.getFlag(
-              'enable_embed_iframe_block'
-            );
-            const canEmbedAsIframe =
-              isEmbedIframeEnabled && embedIframeService.canEmbed(url);
+            const canEmbedAsIframe = embedIframeService.canEmbed(url);
 
             const options = ctx.std
               .get(EmbedOptionProvider)
@@ -234,12 +228,8 @@ export const builtinInlineLinkToolbarConfig = {
             let blockId: string | undefined;
 
             // first try to embed as iframe block
-            const featureFlag = ctx.std.get(FeatureFlagService);
-            const isEmbedIframeEnabled = featureFlag.getFlag(
-              'enable_embed_iframe_block'
-            );
             const embedIframeService = ctx.std.get(EmbedIframeService);
-            if (isEmbedIframeEnabled && embedIframeService.canEmbed(url)) {
+            if (embedIframeService.canEmbed(url)) {
               blockId = embedIframeService.addEmbedIframeBlock(
                 props,
                 parent.id,
@@ -315,6 +305,17 @@ export const builtinInlineLinkToolbarConfig = {
           target.block.closest('affine-table')
         )
           return false;
+
+        const { link } = target;
+        try {
+          const url = new URL(link);
+          if (!url.protocol.startsWith('http')) {
+            return false;
+          }
+        } catch (err) {
+          console.error(err);
+          return false;
+        }
 
         const { model } = target.block;
         const parent = model.parent;

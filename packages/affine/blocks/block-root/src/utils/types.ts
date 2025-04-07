@@ -9,7 +9,7 @@ import {
   EmbedYoutubeBlockComponent,
   type LinkableEmbedBlockComponent,
 } from '@blocksuite/affine-block-embed';
-import type { BlockComponent } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/std';
 
 export type BuiltInEmbedBlockComponent =
   | BookmarkBlockComponent

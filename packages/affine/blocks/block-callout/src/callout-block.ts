@@ -2,13 +2,13 @@ import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { createLitPortal } from '@blocksuite/affine-components/portal';
 import { DefaultInlineManagerExtension } from '@blocksuite/affine-inline-preset';
 import { type CalloutBlockModel } from '@blocksuite/affine-model';
-import { NOTE_SELECTOR } from '@blocksuite/affine-shared/consts';
+import { EDGELESS_TOP_CONTENTEDITABLE_SELECTOR } from '@blocksuite/affine-shared/consts';
 import {
   DocModeProvider,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import type { BlockComponent } from '@blocksuite/block-std';
+import type { BlockComponent } from '@blocksuite/std';
 import { flip, offset } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';
@@ -95,7 +95,9 @@ export class CalloutBlockComponent extends CaptionedBlockComponent<CalloutBlockM
 
   override get topContenteditableElement() {
     if (this.std.get(DocModeProvider).getEditorMode() === 'edgeless') {
-      return this.closest<BlockComponent>(NOTE_SELECTOR);
+      return this.closest<BlockComponent>(
+        EDGELESS_TOP_CONTENTEDITABLE_SELECTOR
+      );
     }
     return this.rootComponent;
   }

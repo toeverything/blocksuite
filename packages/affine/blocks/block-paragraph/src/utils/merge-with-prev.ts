@@ -23,7 +23,7 @@ import {
   getPrevContentBlock,
   matchModels,
 } from '@blocksuite/affine-shared/utils';
-import { BlockSelection, type EditorHost } from '@blocksuite/block-std';
+import { BlockSelection, type EditorHost } from '@blocksuite/std';
 import type { BlockModel, Text } from '@blocksuite/store';
 
 /**

@@ -1,16 +1,15 @@
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { type BlockStdScope } from '@blocksuite/block-std';
 import { EmbedIcon } from '@blocksuite/icons/lit';
+import { type BlockStdScope } from '@blocksuite/std';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { getEmbedCardIcons } from '../../common/utils';
+import { LOADING_CARD_DEFAULT_HEIGHT } from '../consts';
 import type { EmbedIframeStatusCardOptions } from '../types';
-
-const LOADING_CARD_DEFAULT_HEIGHT = 114;
 
 export class EmbedIframeLoadingCard extends LitElement {
   static override styles = css`
@@ -20,7 +19,7 @@ export class EmbedIframeLoadingCard extends LitElement {
     }
 
     .affine-embed-iframe-loading-card {
-      container: affine-embed-iframe-loading-card / inline-size;
+      container: affine-embed-iframe-loading-card / size;
       display: flex;
       box-sizing: border-box;
       border-radius: 8px;
@@ -145,6 +144,12 @@ export class EmbedIframeLoadingCard extends LitElement {
             width: 112px;
             height: 112px;
           }
+        }
+      }
+
+      @container affine-embed-iframe-loading-card (height < 240px) {
+        .loading-banner {
+          display: none;
         }
       }
     }

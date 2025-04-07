@@ -1,3 +1,4 @@
+export * from './edgeless-clipboard-config';
 export * from './embed-html-block.js';
 export * from './embed-html-spec.js';
 export {

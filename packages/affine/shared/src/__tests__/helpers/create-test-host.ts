@@ -1,4 +1,4 @@
-import { CommandManager, type EditorHost } from '@blocksuite/block-std';
+import { CommandManager, type EditorHost } from '@blocksuite/std';
 import type { Block, Store } from '@blocksuite/store';
 import { Subject } from 'rxjs';
 

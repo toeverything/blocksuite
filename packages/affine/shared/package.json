@@ -11,9 +11,9 @@
   "license": "MIT",
   "dependencies": {
     "@blocksuite/affine-model": "workspace:*",
-    "@blocksuite/block-std": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/icons": "^2.2.6",
+    "@blocksuite/icons": "^2.2.10",
+    "@blocksuite/std": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@floating-ui/dom": "^1.6.13",
     "@lit/context": "^1.1.2",
@@ -67,7 +67,7 @@
     "!dist/__tests__"
   ],
   "devDependencies": {
-    "vitest": "3.0.9"
+    "vitest": "3.1.1"
   },
-  "version": "0.20.0"
+  "version": "0.21.0"
 }

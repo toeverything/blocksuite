@@ -12,7 +12,6 @@ import {
   ToolbarModuleExtension,
 } from '@blocksuite/affine-shared/services';
 import { getBlockProps } from '@blocksuite/affine-shared/utils';
-import { BlockFlavourIdentifier } from '@blocksuite/block-std';
 import { Bound } from '@blocksuite/global/gfx';
 import {
   CaptionIcon,
@@ -22,6 +21,7 @@ import {
   ExpandFullIcon,
   OpenInNewIcon,
 } from '@blocksuite/icons/lit';
+import { BlockFlavourIdentifier } from '@blocksuite/std';
 import { type ExtensionType, Slice } from '@blocksuite/store';
 import { computed, signal } from '@preact/signals-core';
 import { html } from 'lit';

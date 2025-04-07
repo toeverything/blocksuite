@@ -8,7 +8,7 @@ import {
   type BlockStdScope,
   TextSelection,
   type UIEventHandler,
-} from '@blocksuite/block-std';
+} from '@blocksuite/std';
 
 export const textCommonKeymap = (
   std: BlockStdScope

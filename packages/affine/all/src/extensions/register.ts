@@ -10,8 +10,11 @@ import {
 } from './preview-specs.js';
 import { StoreExtensions } from './store.js';
 
-export function registerSpecs() {
+export function registerStoreSpecs() {
   SpecProvider._.addSpec('store', StoreExtensions);
+}
+
+export function registerBlockSpecs() {
   SpecProvider._.addSpec('page', PageEditorBlockSpecs);
   SpecProvider._.addSpec('edgeless', EdgelessEditorBlockSpecs);
   SpecProvider._.addSpec('preview:page', PreviewPageEditorBlockSpecs);
