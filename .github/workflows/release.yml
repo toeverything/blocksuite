@@ -69,7 +69,6 @@ jobs:
         continue-on-error: true
 
       - name: Send release notification
-        if: steps.release.outcome == 'success'
         id: slack
         uses: slackapi/slack-github-action@v2.0.0
         with:
