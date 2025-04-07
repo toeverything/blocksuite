@@ -469,9 +469,9 @@ __metadata:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -495,9 +495,9 @@ __metadata:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
@@ -520,9 +520,9 @@ __metadata:
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@emoji-mart/data": "npm:^1.2.1"
     "@floating-ui/dom": "npm:^1.6.10"
@@ -550,9 +550,9 @@ __metadata:
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -576,10 +576,10 @@ __metadata:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/data-view": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -605,10 +605,10 @@ __metadata:
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-drag-handle": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/data-view": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -632,8 +632,8 @@ __metadata:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -653,14 +653,15 @@ __metadata:
   dependencies:
     "@blocksuite/affine-block-surface": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-gfx-text": "workspace:*"
     "@blocksuite/affine-inline-preset": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -684,9 +685,9 @@ __metadata:
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -697,7 +698,7 @@ __metadata:
     lodash-es: "npm:^4.17.21"
     minimatch: "npm:^10.0.1"
     rxjs: "npm:^7.8.1"
-    vitest: "npm:3.0.9"
+    vitest: "npm:3.1.1"
     yjs: "npm:^13.6.21"
     zod: "npm:^3.23.8"
   languageName: unknown
@@ -713,9 +714,9 @@ __metadata:
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
     "@blocksuite/affine-widget-frame-title": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -740,9 +741,9 @@ __metadata:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -767,9 +768,9 @@ __metadata:
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -791,13 +792,14 @@ __metadata:
   resolution: "@blocksuite/affine-block-list@workspace:packages/affine/blocks/block-list"
   dependencies:
     "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-gfx-turbo-renderer": "workspace:*"
     "@blocksuite/affine-inline-preset": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -807,7 +809,7 @@ __metadata:
     lit: "npm:^3.2.0"
     minimatch: "npm:^10.0.1"
     rxjs: "npm:^7.8.1"
-    vitest: "npm:3.0.9"
+    vitest: "npm:3.1.1"
     zod: "npm:^3.23.8"
   languageName: unknown
   linkType: soft
@@ -825,9 +827,9 @@ __metadata:
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
@@ -853,8 +855,8 @@ __metadata:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -889,9 +891,13 @@ __metadata:
     "@blocksuite/affine-block-table": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-fragment-doc-title": "workspace:*"
+    "@blocksuite/affine-gfx-brush": "workspace:*"
     "@blocksuite/affine-gfx-connector": "workspace:*"
+    "@blocksuite/affine-gfx-group": "workspace:*"
+    "@blocksuite/affine-gfx-mindmap": "workspace:*"
     "@blocksuite/affine-gfx-note": "workspace:*"
     "@blocksuite/affine-gfx-shape": "workspace:*"
+    "@blocksuite/affine-gfx-template": "workspace:*"
     "@blocksuite/affine-gfx-text": "workspace:*"
     "@blocksuite/affine-inline-latex": "workspace:*"
     "@blocksuite/affine-inline-link": "workspace:*"
@@ -908,10 +914,10 @@ __metadata:
     "@blocksuite/affine-widget-scroll-anchoring": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
     "@blocksuite/affine-widget-toolbar": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/data-view": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -940,12 +946,13 @@ __metadata:
     "@blocksuite/affine-block-frame": "workspace:*"
     "@blocksuite/affine-block-surface": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-inline-reference": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -969,8 +976,8 @@ __metadata:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
@@ -983,7 +990,7 @@ __metadata:
     nanoid: "npm:^5.0.7"
     pdf-lib: "npm:^1.17.1"
     rxjs: "npm:^7.8.1"
-    vitest: "npm:3.0.9"
+    vitest: "npm:3.1.1"
     yjs: "npm:^13.6.21"
     zod: "npm:^3.23.8"
   languageName: unknown
@@ -1000,10 +1007,10 @@ __metadata:
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/data-view": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@preact/signals-core": "npm:^1.8.0"
@@ -1021,13 +1028,13 @@ __metadata:
   dependencies:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
-    "@lottiefiles/dotlottie-wc": "npm:^0.4.0"
+    "@lottiefiles/dotlottie-wc": "npm:^0.5.0"
     "@preact/signals-core": "npm:^1.8.0"
     "@toeverything/theme": "npm:^1.1.12"
     "@types/hast": "npm:^3.0.4"
@@ -1058,9 +1065,9 @@ __metadata:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -1083,9 +1090,9 @@ __metadata:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -1110,9 +1117,9 @@ __metadata:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -1126,9 +1133,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-gfx-connector@workspace:*, @blocksuite/affine-gfx-connector@workspace:packages/affine/gfx/connector":
+"@blocksuite/affine-gfx-brush@workspace:*, @blocksuite/affine-gfx-brush@workspace:packages/affine/gfx/brush":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-gfx-connector@workspace:packages/affine/gfx/connector"
+  resolution: "@blocksuite/affine-gfx-brush@workspace:packages/affine/gfx/brush"
   dependencies:
     "@blocksuite/affine-block-surface": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
@@ -1136,9 +1143,9 @@ __metadata:
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
@@ -1148,6 +1155,96 @@ __metadata:
     lodash-es: "npm:^4.17.21"
     minimatch: "npm:^10.0.1"
     rxjs: "npm:^7.8.1"
+    yjs: "npm:^13.6.21"
+    zod: "npm:^3.23.8"
+  languageName: unknown
+  linkType: soft
+
+"@blocksuite/affine-gfx-connector@workspace:*, @blocksuite/affine-gfx-connector@workspace:packages/affine/gfx/connector":
+  version: 0.0.0-use.local
+  resolution: "@blocksuite/affine-gfx-connector@workspace:packages/affine/gfx/connector"
+  dependencies:
+    "@blocksuite/affine-block-surface": "workspace:*"
+    "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-gfx-text": "workspace:*"
+    "@blocksuite/affine-model": "workspace:*"
+    "@blocksuite/affine-rich-text": "workspace:*"
+    "@blocksuite/affine-shared": "workspace:*"
+    "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
+    "@blocksuite/global": "workspace:*"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
+    "@blocksuite/store": "workspace:*"
+    "@lit/context": "npm:^1.1.2"
+    "@preact/signals-core": "npm:^1.8.0"
+    "@toeverything/theme": "npm:^1.1.12"
+    "@types/lodash-es": "npm:^4.17.12"
+    lit: "npm:^3.2.0"
+    lodash-es: "npm:^4.17.21"
+    minimatch: "npm:^10.0.1"
+    rxjs: "npm:^7.8.1"
+    yjs: "npm:^13.6.21"
+    zod: "npm:^3.23.8"
+  languageName: unknown
+  linkType: soft
+
+"@blocksuite/affine-gfx-group@workspace:*, @blocksuite/affine-gfx-group@workspace:packages/affine/gfx/group":
+  version: 0.0.0-use.local
+  resolution: "@blocksuite/affine-gfx-group@workspace:packages/affine/gfx/group"
+  dependencies:
+    "@blocksuite/affine-block-surface": "workspace:*"
+    "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-gfx-text": "workspace:*"
+    "@blocksuite/affine-model": "workspace:*"
+    "@blocksuite/affine-rich-text": "workspace:*"
+    "@blocksuite/affine-shared": "workspace:*"
+    "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
+    "@blocksuite/global": "workspace:*"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
+    "@blocksuite/store": "workspace:*"
+    "@lit/context": "npm:^1.1.2"
+    "@preact/signals-core": "npm:^1.8.0"
+    "@toeverything/theme": "npm:^1.1.12"
+    "@types/lodash-es": "npm:^4.17.12"
+    lit: "npm:^3.2.0"
+    lodash-es: "npm:^4.17.21"
+    minimatch: "npm:^10.0.1"
+    rxjs: "npm:^7.8.1"
+    yjs: "npm:^13.6.21"
+    zod: "npm:^3.23.8"
+  languageName: unknown
+  linkType: soft
+
+"@blocksuite/affine-gfx-mindmap@workspace:*, @blocksuite/affine-gfx-mindmap@workspace:packages/affine/gfx/mindmap":
+  version: 0.0.0-use.local
+  resolution: "@blocksuite/affine-gfx-mindmap@workspace:packages/affine/gfx/mindmap"
+  dependencies:
+    "@blocksuite/affine-block-attachment": "workspace:*"
+    "@blocksuite/affine-block-edgeless-text": "workspace:*"
+    "@blocksuite/affine-block-image": "workspace:*"
+    "@blocksuite/affine-block-surface": "workspace:*"
+    "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-gfx-connector": "workspace:*"
+    "@blocksuite/affine-gfx-shape": "workspace:*"
+    "@blocksuite/affine-gfx-text": "workspace:*"
+    "@blocksuite/affine-model": "workspace:*"
+    "@blocksuite/affine-rich-text": "workspace:*"
+    "@blocksuite/affine-shared": "workspace:*"
+    "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
+    "@blocksuite/global": "workspace:*"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
+    "@blocksuite/store": "workspace:*"
+    "@lit/context": "npm:^1.1.2"
+    "@preact/signals-core": "npm:^1.8.0"
+    "@toeverything/theme": "npm:^1.1.12"
+    "@types/lodash-es": "npm:^4.17.12"
+    lit: "npm:^3.2.0"
+    lodash-es: "npm:^4.17.21"
+    minimatch: "npm:^10.0.1"
+    rxjs: "npm:^7.8.1"
+    simple-xml-to-json: "npm:^1.2.2"
     yjs: "npm:^13.6.21"
     zod: "npm:^3.23.8"
   languageName: unknown
@@ -1166,9 +1263,9 @@ __metadata:
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
@@ -1189,14 +1286,44 @@ __metadata:
   dependencies:
     "@blocksuite/affine-block-surface": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-gfx-text": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
+    "@lit/context": "npm:^1.1.2"
+    "@preact/signals-core": "npm:^1.8.0"
+    "@toeverything/theme": "npm:^1.1.12"
+    "@types/lodash-es": "npm:^4.17.12"
+    lit: "npm:^3.2.0"
+    lodash-es: "npm:^4.17.21"
+    minimatch: "npm:^10.0.1"
+    rxjs: "npm:^7.8.1"
+    yjs: "npm:^13.6.21"
+    zod: "npm:^3.23.8"
+  languageName: unknown
+  linkType: soft
+
+"@blocksuite/affine-gfx-template@workspace:*, @blocksuite/affine-gfx-template@workspace:packages/affine/gfx/template":
+  version: 0.0.0-use.local
+  resolution: "@blocksuite/affine-gfx-template@workspace:packages/affine/gfx/template"
+  dependencies:
+    "@blocksuite/affine-block-surface": "workspace:*"
+    "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-gfx-text": "workspace:*"
+    "@blocksuite/affine-model": "workspace:*"
+    "@blocksuite/affine-rich-text": "workspace:*"
+    "@blocksuite/affine-shared": "workspace:*"
+    "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
+    "@blocksuite/global": "workspace:*"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
+    "@blocksuite/store": "workspace:*"
+    "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
     "@toeverything/theme": "npm:^1.1.12"
@@ -1214,16 +1341,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@blocksuite/affine-gfx-text@workspace:packages/affine/gfx/text"
   dependencies:
-    "@blocksuite/affine-block-edgeless-text": "workspace:*"
     "@blocksuite/affine-block-surface": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
@@ -1242,11 +1368,9 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@blocksuite/affine-gfx-turbo-renderer@workspace:packages/affine/gfx/turbo-renderer"
   dependencies:
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
-    "@types/lodash-es": "npm:^4.17.12"
-    lodash-es: "npm:^4.17.21"
     rxjs: "npm:^7.8.1"
   languageName: unknown
   linkType: soft
@@ -1259,9 +1383,9 @@ __metadata:
     "@blocksuite/affine-inline-reference": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -1288,9 +1412,9 @@ __metadata:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -1321,9 +1445,36 @@ __metadata:
     "@blocksuite/affine-inline-reference": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
+    "@blocksuite/store": "workspace:*"
+    "@floating-ui/dom": "npm:^1.6.13"
+    "@lit/context": "npm:^1.1.2"
+    "@preact/signals-core": "npm:^1.8.0"
+    "@toeverything/theme": "npm:^1.1.12"
+    "@types/lodash-es": "npm:^4.17.12"
+    collapse-white-space: "npm:^2.1.0"
+    date-fns: "npm:^4.0.0"
+    lit: "npm:^3.2.0"
+    lit-html: "npm:^3.2.1"
+    lodash-es: "npm:^4.17.21"
+    rxjs: "npm:^7.8.1"
+    yjs: "npm:^13.6.21"
+    zod: "npm:^3.23.8"
+  languageName: unknown
+  linkType: soft
+
+"@blocksuite/affine-inline-mention@workspace:*, @blocksuite/affine-inline-mention@workspace:packages/affine/inlines/mention":
+  version: 0.0.0-use.local
+  resolution: "@blocksuite/affine-inline-mention@workspace:packages/affine/inlines/mention"
+  dependencies:
+    "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-model": "workspace:*"
+    "@blocksuite/affine-shared": "workspace:*"
+    "@blocksuite/global": "workspace:*"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -1349,13 +1500,14 @@ __metadata:
     "@blocksuite/affine-inline-footnote": "workspace:*"
     "@blocksuite/affine-inline-latex": "workspace:*"
     "@blocksuite/affine-inline-link": "workspace:*"
+    "@blocksuite/affine-inline-mention": "workspace:*"
     "@blocksuite/affine-inline-reference": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -1386,9 +1538,9 @@ __metadata:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -1410,8 +1562,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@blocksuite/affine-model@workspace:packages/affine/model"
   dependencies:
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@toeverything/theme": "npm:^1.1.12"
     "@types/lodash-es": "npm:^4.17.12"
@@ -1430,9 +1582,9 @@ __metadata:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -1455,9 +1607,9 @@ __metadata:
   resolution: "@blocksuite/affine-shared@workspace:packages/affine/shared"
   dependencies:
     "@blocksuite/affine-model": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -1489,7 +1641,7 @@ __metadata:
     remark-stringify: "npm:^11.0.0"
     rxjs: "npm:^7.8.1"
     unified: "npm:^11.0.5"
-    vitest: "npm:3.0.9"
+    vitest: "npm:3.1.1"
     yjs: "npm:^13.6.21"
     zod: "npm:^3.23.8"
   languageName: unknown
@@ -1500,6 +1652,7 @@ __metadata:
   resolution: "@blocksuite/affine-widget-drag-handle@workspace:packages/affine/widgets/widget-drag-handle"
   dependencies:
     "@blocksuite/affine-block-callout": "workspace:*"
+    "@blocksuite/affine-block-embed": "workspace:*"
     "@blocksuite/affine-block-list": "workspace:*"
     "@blocksuite/affine-block-note": "workspace:*"
     "@blocksuite/affine-block-paragraph": "workspace:*"
@@ -1507,9 +1660,9 @@ __metadata:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
@@ -1533,9 +1686,9 @@ __metadata:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@preact/signals-core": "npm:^1.8.0"
     "@toeverything/theme": "npm:^1.1.12"
     lit: "npm:^3.2.0"
@@ -1552,9 +1705,9 @@ __metadata:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
@@ -1574,8 +1727,8 @@ __metadata:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
+    "@blocksuite/std": "workspace:*"
     "@lit/context": "npm:^1.1.2"
     "@preact/signals-core": "npm:^1.8.0"
     "@toeverything/theme": "npm:^1.1.12"
@@ -1592,9 +1745,9 @@ __metadata:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@preact/signals-core": "npm:^1.8.0"
     "@toeverything/theme": "npm:^1.1.12"
     "@types/lodash-es": "npm:^4.17.12"
@@ -1610,8 +1763,8 @@ __metadata:
   dependencies:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
+    "@blocksuite/std": "workspace:*"
     "@preact/signals-core": "npm:^1.8.0"
     "@toeverything/theme": "npm:^1.1.12"
     lit: "npm:^3.2.0"
@@ -1626,9 +1779,9 @@ __metadata:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@preact/signals-core": "npm:^1.8.0"
@@ -1650,9 +1803,9 @@ __metadata:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@floating-ui/dom": "npm:^1.6.13"
     "@preact/signals-core": "npm:^1.8.0"
     "@toeverything/theme": "npm:^1.1.12"
@@ -1695,14 +1848,19 @@ __metadata:
     "@blocksuite/affine-fragment-doc-title": "workspace:*"
     "@blocksuite/affine-fragment-frame-panel": "workspace:*"
     "@blocksuite/affine-fragment-outline": "workspace:*"
+    "@blocksuite/affine-gfx-brush": "workspace:*"
     "@blocksuite/affine-gfx-connector": "workspace:*"
+    "@blocksuite/affine-gfx-group": "workspace:*"
+    "@blocksuite/affine-gfx-mindmap": "workspace:*"
     "@blocksuite/affine-gfx-note": "workspace:*"
     "@blocksuite/affine-gfx-shape": "workspace:*"
+    "@blocksuite/affine-gfx-template": "workspace:*"
     "@blocksuite/affine-gfx-text": "workspace:*"
     "@blocksuite/affine-gfx-turbo-renderer": "workspace:*"
     "@blocksuite/affine-inline-footnote": "workspace:*"
     "@blocksuite/affine-inline-latex": "workspace:*"
     "@blocksuite/affine-inline-link": "workspace:*"
+    "@blocksuite/affine-inline-mention": "workspace:*"
     "@blocksuite/affine-inline-preset": "workspace:*"
     "@blocksuite/affine-inline-reference": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
@@ -1716,43 +1874,14 @@ __metadata:
     "@blocksuite/affine-widget-scroll-anchoring": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
     "@blocksuite/affine-widget-toolbar": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/data-view": "workspace:*"
     "@blocksuite/global": "workspace:*"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@blocksuite/sync": "workspace:*"
     "@vanilla-extract/vite-plugin": "npm:^5.0.0"
     rxjs: "npm:^7.8.1"
-    vitest: "npm:3.0.9"
-  languageName: unknown
-  linkType: soft
-
-"@blocksuite/block-std@workspace:*, @blocksuite/block-std@workspace:packages/framework/block-std":
-  version: 0.0.0-use.local
-  resolution: "@blocksuite/block-std@workspace:packages/framework/block-std"
-  dependencies:
-    "@atlaskit/pragmatic-drag-and-drop": "npm:^1.4.0"
-    "@atlaskit/pragmatic-drag-and-drop-auto-scroll": "npm:^2.1.0"
-    "@atlaskit/pragmatic-drag-and-drop-hitbox": "npm:^1.0.3"
-    "@blocksuite/global": "workspace:*"
-    "@blocksuite/store": "workspace:*"
-    "@lit/context": "npm:^1.1.2"
-    "@preact/signals-core": "npm:^1.8.0"
-    "@types/hast": "npm:^3.0.4"
-    "@types/lodash-es": "npm:^4.17.12"
-    dompurify: "npm:^3.2.4"
-    fractional-indexing: "npm:^3.2.0"
-    lib0: "npm:^0.2.97"
-    lit: "npm:^3.2.0"
-    lodash-es: "npm:^4.17.21"
-    lz-string: "npm:^1.5.0"
-    rehype-parse: "npm:^9.0.0"
-    rxjs: "npm:^7.8.1"
-    unified: "npm:^11.0.5"
-    vitest: "npm:3.0.9"
-    w3c-keyname: "npm:^2.2.8"
-    yjs: "npm:^13.6.21"
-    zod: "npm:^3.23.8"
+    vitest: "npm:3.1.1"
   languageName: unknown
   linkType: soft
 
@@ -1772,9 +1901,9 @@ __metadata:
   dependencies:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
-    "@blocksuite/block-std": "workspace:*"
     "@blocksuite/global": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
     "@blocksuite/store": "workspace:*"
     "@emotion/hash": "npm:^0.9.2"
     "@floating-ui/dom": "npm:^1.6.13"
@@ -1816,14 +1945,14 @@ __metadata:
     lib0: "npm:^0.2.97"
     lit: "npm:^3.2.0"
     rxjs: "npm:^7.8.1"
-    vitest: "npm:3.0.9"
+    vitest: "npm:3.1.1"
     zod: "npm:^3.23.8"
   languageName: unknown
   linkType: soft
 
-"@blocksuite/icons@npm:^2.2.6":
-  version: 2.2.8
-  resolution: "@blocksuite/icons@npm:2.2.8"
+"@blocksuite/icons@npm:^2.2.10":
+  version: 2.2.10
+  resolution: "@blocksuite/icons@npm:2.2.10"
   peerDependencies:
     "@types/react": ^18.0.25
     change-case: 4.1.2
@@ -1834,7 +1963,7 @@ __metadata:
       optional: true
     react:
       optional: true
-  checksum: 10/0b5a80c67cd5c5896406948de95f60c825453598ff8f17de2ff2b6c8784a8ba8e23bd0c39f5461d87ff46e13883714db31bbfcff4215062b730039cc141a8c6a
+  checksum: 10/b3a64ec250a317c8cb570badf434eb1b4665d0c1855546f040541dafc755925f15d253044f5f8b445cabaffbed127c23a9d122e8a016ffbc5e5548711d99ed62
   languageName: node
   linkType: hard
 
@@ -1843,10 +1972,10 @@ __metadata:
   resolution: "@blocksuite/integration-test@workspace:packages/integration-test"
   dependencies:
     "@blocksuite/affine": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
     "@floating-ui/dom": "npm:^1.6.13"
     "@lit/context": "npm:^1.1.3"
-    "@lottiefiles/dotlottie-wc": "npm:^0.4.0"
+    "@lottiefiles/dotlottie-wc": "npm:^0.5.0"
     "@preact/signals-core": "npm:^1.8.0"
     "@toeverything/theme": "npm:^1.1.12"
     "@vanilla-extract/css": "npm:^1.17.0"
@@ -1856,7 +1985,7 @@ __metadata:
     vite: "npm:^6.1.0"
     vite-plugin-istanbul: "npm:^7.0.0"
     vite-plugin-wasm: "npm:^3.4.1"
-    vitest: "npm:3.0.9"
+    vitest: "npm:3.1.1"
     yjs: "npm:^13.6.21"
     zod: "npm:^3.23.8"
   languageName: unknown
@@ -1871,7 +2000,7 @@ __metadata:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/data-view": "workspace:*"
-    "@blocksuite/icons": "npm:^2.2.6"
+    "@blocksuite/icons": "npm:^2.2.10"
     "@blocksuite/integration-test": "workspace:*"
     "@preact/signals-core": "npm:^1.8.0"
     "@shoelace-style/shoelace": "npm:2.20.1"
@@ -1901,6 +2030,35 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@blocksuite/std@workspace:*, @blocksuite/std@workspace:packages/framework/std":
+  version: 0.0.0-use.local
+  resolution: "@blocksuite/std@workspace:packages/framework/std"
+  dependencies:
+    "@atlaskit/pragmatic-drag-and-drop": "npm:^1.4.0"
+    "@atlaskit/pragmatic-drag-and-drop-auto-scroll": "npm:^2.1.0"
+    "@atlaskit/pragmatic-drag-and-drop-hitbox": "npm:^1.0.3"
+    "@blocksuite/global": "workspace:*"
+    "@blocksuite/store": "workspace:*"
+    "@lit/context": "npm:^1.1.2"
+    "@preact/signals-core": "npm:^1.8.0"
+    "@types/hast": "npm:^3.0.4"
+    "@types/lodash-es": "npm:^4.17.12"
+    dompurify: "npm:^3.2.4"
+    fractional-indexing: "npm:^3.2.0"
+    lib0: "npm:^0.2.97"
+    lit: "npm:^3.2.0"
+    lodash-es: "npm:^4.17.21"
+    lz-string: "npm:^1.5.0"
+    rehype-parse: "npm:^9.0.0"
+    rxjs: "npm:^7.8.1"
+    unified: "npm:^11.0.5"
+    vitest: "npm:3.1.1"
+    w3c-keyname: "npm:^2.2.8"
+    yjs: "npm:^13.6.21"
+    zod: "npm:^3.23.8"
+  languageName: unknown
+  linkType: soft
+
 "@blocksuite/store@workspace:*, @blocksuite/store@workspace:packages/framework/store":
   version: 0.0.0-use.local
   resolution: "@blocksuite/store@workspace:packages/framework/store"
@@ -1919,7 +2077,7 @@ __metadata:
     minimatch: "npm:^10.0.1"
     nanoid: "npm:^5.0.7"
     rxjs: "npm:^7.8.1"
-    vitest: "npm:3.0.9"
+    vitest: "npm:3.1.1"
     y-protocols: "npm:^1.0.6"
     yjs: "npm:^13.6.21"
     zod: "npm:^3.23.8"
@@ -1936,7 +2094,7 @@ __metadata:
     idb-keyval: "npm:^6.2.1"
     lodash-es: "npm:^4.17.21"
     rxjs: "npm:^7.8.1"
-    vitest: "npm:3.0.9"
+    vitest: "npm:3.1.1"
     y-protocols: "npm:^1.0.6"
   peerDependencies:
     yjs: "*"
@@ -3159,20 +3317,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lottiefiles/dotlottie-wc@npm:^0.4.0":
-  version: 0.4.6
-  resolution: "@lottiefiles/dotlottie-wc@npm:0.4.6"
+"@lottiefiles/dotlottie-wc@npm:^0.5.0":
+  version: 0.5.1
+  resolution: "@lottiefiles/dotlottie-wc@npm:0.5.1"
   dependencies:
-    "@lottiefiles/dotlottie-web": "npm:0.41.0"
+    "@lottiefiles/dotlottie-web": "npm:0.42.0"
     lit: "npm:^3.2.1"
-  checksum: 10/3c91c25249849d77454d25c8e404932a9c67a9d2756147156d68a3ae89dc17fcfd92db820414380ab0902c96d914c7ecbdce596197c3a01cbd7de50c75a59fcc
+  checksum: 10/fed4bf7c0429303a26474ded1478d18196884182f1330a91c908e547f1ff75afa43fa74c32380b6a62f93ae7eb3abfd9e017dacf532e03499d6515bdf8326ea4
   languageName: node
   linkType: hard
 
-"@lottiefiles/dotlottie-web@npm:0.41.0":
-  version: 0.41.0
-  resolution: "@lottiefiles/dotlottie-web@npm:0.41.0"
-  checksum: 10/f9084b7287ae00bc7652259876ff499229ba7bce5b54089a0b59f9e57fc2e444a7d876bdb11c536cd4b6ee4a36c15bf7059a1a0549f88c8c3c28d854c9b8de50
+"@lottiefiles/dotlottie-web@npm:0.42.0":
+  version: 0.42.0
+  resolution: "@lottiefiles/dotlottie-web@npm:0.42.0"
+  checksum: 10/ced847f8ffe353821e045c7c4ddc058d85766faebcab346485cace03202b4a4871a6a27517fe2137a9d560c0f24607dd4b9432caf26d3dfd197ceb76f7498314
   languageName: node
   linkType: hard
 
@@ -4247,23 +4405,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vitest/expect@npm:3.0.9":
-  version: 3.0.9
-  resolution: "@vitest/expect@npm:3.0.9"
+"@vitest/expect@npm:3.1.1":
+  version: 3.1.1
+  resolution: "@vitest/expect@npm:3.1.1"
   dependencies:
-    "@vitest/spy": "npm:3.0.9"
-    "@vitest/utils": "npm:3.0.9"
+    "@vitest/spy": "npm:3.1.1"
+    "@vitest/utils": "npm:3.1.1"
     chai: "npm:^5.2.0"
     tinyrainbow: "npm:^2.0.0"
-  checksum: 10/09fc02ae3a639d5db23705a393ef571001f7f1006f7527529ec7807699b739788d5b54b71cb917c56379874b006f2de49933585694927b23c0d50787f96b9e94
+  checksum: 10/79754e35fb505f6ee9636e49f78961299b99b12cebf6fd7ea6455a05d9a9589a65fa5d4537a7b4f6b837a41988ab629a6ff76252a4a5accf77f9462dbf3570c8
   languageName: node
   linkType: hard
 
-"@vitest/mocker@npm:3.0.9":
-  version: 3.0.9
-  resolution: "@vitest/mocker@npm:3.0.9"
+"@vitest/mocker@npm:3.1.1":
+  version: 3.1.1
+  resolution: "@vitest/mocker@npm:3.1.1"
   dependencies:
-    "@vitest/spy": "npm:3.0.9"
+    "@vitest/spy": "npm:3.1.1"
     estree-walker: "npm:^3.0.3"
     magic-string: "npm:^0.30.17"
   peerDependencies:
@@ -4274,57 +4432,57 @@ __metadata:
       optional: true
     vite:
       optional: true
-  checksum: 10/ef9e4e11e6c3f1d41884641a72298bd64e8440d2925e60ae5d5c8297a7b744ca41a8b6ab227dbcf523a82de6577ab610109ea155471fd1c722a157e59041d9dc
+  checksum: 10/18b72593071b4416b096c2c09899e9213804ec5e0fc90f6c5464ebd9645f34de9c2d0ecb09cbc7f3d44fbcf897fca2921ba114b185fc86a70050ccee1c6d6cc8
   languageName: node
   linkType: hard
 
-"@vitest/pretty-format@npm:3.0.9, @vitest/pretty-format@npm:^3.0.9":
-  version: 3.0.9
-  resolution: "@vitest/pretty-format@npm:3.0.9"
+"@vitest/pretty-format@npm:3.1.1, @vitest/pretty-format@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "@vitest/pretty-format@npm:3.1.1"
   dependencies:
     tinyrainbow: "npm:^2.0.0"
-  checksum: 10/cfcdda2c72cf16a5e76ad2c9b014a4e36fea3988389613497cad5a2491ebc380ded4397afc95c32a2bd2734b0386996df76f6c5cbfc6be561262b8d112fb7a27
+  checksum: 10/d1bc6a6c687d686194ef19ebc748894c543bc520d79db5e86d53ac97f004d13d5b364592a21e151031bf76bf8865ce25e60fc71cc02ca0d513d20bc0c600a63f
   languageName: node
   linkType: hard
 
-"@vitest/runner@npm:3.0.9":
-  version: 3.0.9
-  resolution: "@vitest/runner@npm:3.0.9"
+"@vitest/runner@npm:3.1.1":
+  version: 3.1.1
+  resolution: "@vitest/runner@npm:3.1.1"
   dependencies:
-    "@vitest/utils": "npm:3.0.9"
+    "@vitest/utils": "npm:3.1.1"
     pathe: "npm:^2.0.3"
-  checksum: 10/67036d3c5053aab8f2c7eb36c65a850cdc8dc395e5b27913417f39bfde82140eaf1c07204bda5809b8c44306fb0bedade2735c4f21026c2797fe4b562f47a812
+  checksum: 10/652a351e59d2f615f3b3de0bb47bfb7875117dd3e57a62c031d8f385614513dbe77847a39037aedb79818a3fde1d957bb82e2f3a5c74651d27721553ed8b4668
   languageName: node
   linkType: hard
 
-"@vitest/snapshot@npm:3.0.9":
-  version: 3.0.9
-  resolution: "@vitest/snapshot@npm:3.0.9"
+"@vitest/snapshot@npm:3.1.1":
+  version: 3.1.1
+  resolution: "@vitest/snapshot@npm:3.1.1"
   dependencies:
-    "@vitest/pretty-format": "npm:3.0.9"
+    "@vitest/pretty-format": "npm:3.1.1"
     magic-string: "npm:^0.30.17"
     pathe: "npm:^2.0.3"
-  checksum: 10/367c9390e7170b965494aff09dd69d7f678ad676d79a36c651a6237984290de53839de1a2bf5a60a6e5457a012a5f92b24298957d609705bc2d06fb5c21703aa
+  checksum: 10/517ad76c35bd55d2908349a9a5749f874927971c2d6f4ffb3a6f6345acb7a393fac4cc9778119a215caf9ee0c96c75dc27c9f9227a51bd3907c36da946652d43
   languageName: node
   linkType: hard
 
-"@vitest/spy@npm:3.0.9":
-  version: 3.0.9
-  resolution: "@vitest/spy@npm:3.0.9"
+"@vitest/spy@npm:3.1.1":
+  version: 3.1.1
+  resolution: "@vitest/spy@npm:3.1.1"
   dependencies:
     tinyspy: "npm:^3.0.2"
-  checksum: 10/967b403293c9325292be4843753bf8ae516ec158df2372a14bec98c9bfb233fa6bbf76cb319cf1a9ea1b5ab795e3abff68ca66fa7523045562d7449a95ed8bf9
+  checksum: 10/2b2c8cb2f13fe4ea48779b91c69140c596c8fe3a3ef283ef8b19c025cfdb59a60db7c65a320c84fa28b26655877570860bb44bc2d0e99639d097a7e042e3c604
   languageName: node
   linkType: hard
 
-"@vitest/utils@npm:3.0.9":
-  version: 3.0.9
-  resolution: "@vitest/utils@npm:3.0.9"
+"@vitest/utils@npm:3.1.1":
+  version: 3.1.1
+  resolution: "@vitest/utils@npm:3.1.1"
   dependencies:
-    "@vitest/pretty-format": "npm:3.0.9"
+    "@vitest/pretty-format": "npm:3.1.1"
     loupe: "npm:^3.1.3"
     tinyrainbow: "npm:^2.0.0"
-  checksum: 10/c77e2a4a5c62dabc57c0d27536428e6b4f9a7998b59161deb82cf797e1d6cb61a7531bef19f079c4bdca7b48fd656b48e4d1bcfb4a5bdf3c177931670a287163
+  checksum: 10/05f28d3e6636966803d60d4867200d6a3a5b7bc2ebaf1583bc3d5a2fc024e024c4958237eca73e420349faf326a8f62c3ae00b2cc2edb42d601b79a759f21b8f
   languageName: node
   linkType: hard
 
@@ -6009,10 +6167,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expect-type@npm:^1.1.0":
-  version: 1.2.0
-  resolution: "expect-type@npm:1.2.0"
-  checksum: 10/12a081159e87451a96e2e2f8a5e101509b63a4f0738590bb27988d2017c6e5aff6bf722889fe7afd96cf7e343b332b040460db41850fcd7a1392a4c8e26e51e3
+"expect-type@npm:^1.2.0":
+  version: 1.2.1
+  resolution: "expect-type@npm:1.2.1"
+  checksum: 10/d121d90f4f3f705ca0b656e36f28c0ba91483d0cddf2876e64e23c3dea2f2d5853e9c0c9a4e90eb4b3e4663bf09c2c02e9729c339dcd308c70b2107188e6b286
   languageName: node
   linkType: hard
 
@@ -9530,10 +9688,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"std-env@npm:^3.8.0":
-  version: 3.8.1
-  resolution: "std-env@npm:3.8.1"
-  checksum: 10/ee119570e2e449be86aa4972f119f9086a918307cc524f6e891b7a7c1327a5c970cf1b7d5898c881777845292a7e3380cf7d80ad34aee355d2c22ac5eb628542
+"std-env@npm:^3.8.1":
+  version: 3.9.0
+  resolution: "std-env@npm:3.9.0"
+  checksum: 10/3044b2c54a74be4f460db56725571241ab3ac89a91f39c7709519bc90fa37148784bc4cd7d3a301aa735f43bd174496f263563f76703ce3e81370466ab7c235b
   languageName: node
   linkType: hard
 
@@ -10117,7 +10275,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite-node@npm:3.0.9, vite-node@npm:^3.0.4":
+"vite-node@npm:3.1.1":
+  version: 3.1.1
+  resolution: "vite-node@npm:3.1.1"
+  dependencies:
+    cac: "npm:^6.7.14"
+    debug: "npm:^4.4.0"
+    es-module-lexer: "npm:^1.6.0"
+    pathe: "npm:^2.0.3"
+    vite: "npm:^5.0.0 || ^6.0.0"
+  bin:
+    vite-node: vite-node.mjs
+  checksum: 10/8243cbc2d83f7862d7882c982e85f3e45a654908de380591edd419338c4c75a7991bd22d12b290ad892b9ea102419e81fde92c87296ec7554f89d2ff2034d5e3
+  languageName: node
+  linkType: hard
+
+"vite-node@npm:^3.0.4":
   version: 3.0.9
   resolution: "vite-node@npm:3.0.9"
   dependencies:
@@ -10377,36 +10550,36 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vitest@npm:3.0.9":
-  version: 3.0.9
-  resolution: "vitest@npm:3.0.9"
+"vitest@npm:3.1.1":
+  version: 3.1.1
+  resolution: "vitest@npm:3.1.1"
   dependencies:
-    "@vitest/expect": "npm:3.0.9"
-    "@vitest/mocker": "npm:3.0.9"
-    "@vitest/pretty-format": "npm:^3.0.9"
-    "@vitest/runner": "npm:3.0.9"
-    "@vitest/snapshot": "npm:3.0.9"
-    "@vitest/spy": "npm:3.0.9"
-    "@vitest/utils": "npm:3.0.9"
+    "@vitest/expect": "npm:3.1.1"
+    "@vitest/mocker": "npm:3.1.1"
+    "@vitest/pretty-format": "npm:^3.1.1"
+    "@vitest/runner": "npm:3.1.1"
+    "@vitest/snapshot": "npm:3.1.1"
+    "@vitest/spy": "npm:3.1.1"
+    "@vitest/utils": "npm:3.1.1"
     chai: "npm:^5.2.0"
     debug: "npm:^4.4.0"
-    expect-type: "npm:^1.1.0"
+    expect-type: "npm:^1.2.0"
     magic-string: "npm:^0.30.17"
     pathe: "npm:^2.0.3"
-    std-env: "npm:^3.8.0"
+    std-env: "npm:^3.8.1"
     tinybench: "npm:^2.9.0"
     tinyexec: "npm:^0.3.2"
     tinypool: "npm:^1.0.2"
     tinyrainbow: "npm:^2.0.0"
     vite: "npm:^5.0.0 || ^6.0.0"
-    vite-node: "npm:3.0.9"
+    vite-node: "npm:3.1.1"
     why-is-node-running: "npm:^2.3.0"
   peerDependencies:
     "@edge-runtime/vm": "*"
     "@types/debug": ^4.1.12
     "@types/node": ^18.0.0 || ^20.0.0 || >=22.0.0
-    "@vitest/browser": 3.0.9
-    "@vitest/ui": 3.0.9
+    "@vitest/browser": 3.1.1
+    "@vitest/ui": 3.1.1
     happy-dom: "*"
     jsdom: "*"
   peerDependenciesMeta:
@@ -10426,7 +10599,7 @@ __metadata:
       optional: true
   bin:
     vitest: vitest.mjs
-  checksum: 10/fdecd56e6bdf145ca433c38572bf3b94adcfb59408fa140aa40d887cedc0b9d859b3f1095e1d06beef3ba9efcf7763aa9614d17fe755ebf3b2956ba0af3a067c
+  checksum: 10/9dc54ef6854f877ad524667a0f3798b6c97c8138bee15a3dbad76557a45e3a3e42d438140df7a9eeaa10e5da7b5eb74ba854f06ffd233fa3c9e5936f6ae42e97
   languageName: node
   linkType: hard
 
