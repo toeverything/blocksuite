@@ -565,6 +565,8 @@ export class Vec {
    * @param n
    * @param min
    */
+  static clampV(A: IVec, min: number, max?: number): IVec;
+
   static clampV(A: number[], min: number): number[];
 
   // eslint-disable-next-line @typescript-eslint/unified-signatures

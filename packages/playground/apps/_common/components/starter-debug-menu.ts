@@ -17,14 +17,6 @@ import '@shoelace-style/shoelace/dist/themes/dark.css';
 import './left-side-panel.js';
 
 import { defaultImageProxyMiddleware } from '@blocksuite/affine/blocks/image';
-import {
-  createAssetsArchive,
-  download,
-  HtmlTransformer,
-  MarkdownTransformer,
-  NotionHtmlTransformer,
-  ZipTransformer,
-} from '@blocksuite/affine/blocks/root';
 import { ExportManager } from '@blocksuite/affine/blocks/surface';
 import { toast } from '@blocksuite/affine/components/toast';
 import {
@@ -55,6 +47,14 @@ import {
   Text,
   type Workspace,
 } from '@blocksuite/affine/store';
+import {
+  createAssetsArchive,
+  download,
+  HtmlTransformer,
+  MarkdownTransformer,
+  NotionHtmlTransformer,
+  ZipTransformer,
+} from '@blocksuite/affine/widgets/linked-doc';
 import { NotionHtmlAdapter } from '@blocksuite/affine-shared/adapters';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import { TestAffineEditorContainer } from '@blocksuite/integration-test';

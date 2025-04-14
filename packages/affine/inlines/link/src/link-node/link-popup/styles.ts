@@ -1,4 +1,4 @@
-import { fontXSStyle, panelBaseStyle } from '@blocksuite/affine-shared/styles';
+import { fontSMStyle, panelBaseStyle } from '@blocksuite/affine-shared/styles';
 import { css } from 'lit';
 
 const editLinkStyle = css`
@@ -13,18 +13,18 @@ const editLinkStyle = css`
     align-items: center;
     width: 320px;
     gap: 8px 12px;
-    padding: 12px;
+    padding: 8px;
     box-sizing: content-box;
   }
 
-  ${fontXSStyle('.affine-link-edit-popover label')}
+  ${fontSMStyle('.affine-link-edit-popover label')}
   .affine-link-edit-popover label {
     box-sizing: border-box;
     color: var(--affine-icon-color);
     font-weight: 400;
   }
 
-  ${fontXSStyle('.affine-link-edit-popover input')}
+  ${fontSMStyle('.affine-link-edit-popover input')}
   .affine-link-edit-popover input {
     color: inherit;
     padding: 0;
@@ -116,8 +116,7 @@ export const linkPopupStyle = css`
     }
   }
 
-  .overlay-mask,
-  .mock-selection-container {
+  .overlay-root {
     position: fixed;
     top: 0;
     left: 0;
@@ -133,7 +132,7 @@ export const linkPopupStyle = css`
   .affine-link-popover.create {
     display: flex;
     gap: 12px;
-    padding: 12px;
+    padding: 8px;
 
     color: var(--affine-text-primary-color);
   }
@@ -150,7 +149,7 @@ export const linkPopupStyle = css`
     border-color: var(--affine-border-color);
     color: var(--affine-text-primary-color);
   }
-  ${fontXSStyle('.affine-link-popover-input')}
+  ${fontSMStyle('.affine-link-popover-input')}
   .affine-link-popover-input::placeholder {
     color: var(--affine-placeholder-color);
   }

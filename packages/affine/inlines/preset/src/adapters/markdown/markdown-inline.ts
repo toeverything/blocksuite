@@ -79,6 +79,17 @@ export const markdownListToDeltaMatcher = MarkdownASTToDeltaExtension({
   toDelta: () => [],
 });
 
+export const markdownHtmlToDeltaMatcher = MarkdownASTToDeltaExtension({
+  name: 'html',
+  match: ast => ast.type === 'html',
+  toDelta: ast => {
+    if (!('value' in ast)) {
+      return [];
+    }
+    return [{ insert: ast.value }];
+  },
+});
+
 export const MarkdownInlineToDeltaAdapterExtensions = [
   markdownTextToDeltaMatcher,
   markdownInlineCodeToDeltaMatcher,
@@ -89,4 +100,5 @@ export const MarkdownInlineToDeltaAdapterExtensions = [
   markdownInlineMathToDeltaMatcher,
   markdownListToDeltaMatcher,
   markdownFootnoteReferenceToDeltaMatcher,
+  markdownHtmlToDeltaMatcher,
 ];

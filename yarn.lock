@@ -459,9 +459,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@blocksuite/affine-block-attachment@workspace:*, @blocksuite/affine-block-attachment@workspace:packages/affine/blocks/block-attachment":
+"@blocksuite/affine-block-attachment@workspace:*, @blocksuite/affine-block-attachment@workspace:packages/affine/blocks/attachment":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-attachment@workspace:packages/affine/blocks/block-attachment"
+  resolution: "@blocksuite/affine-block-attachment@workspace:packages/affine/blocks/attachment"
   dependencies:
     "@blocksuite/affine-block-embed": "workspace:*"
     "@blocksuite/affine-block-surface": "workspace:*"
@@ -485,9 +485,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-bookmark@workspace:*, @blocksuite/affine-block-bookmark@workspace:packages/affine/blocks/block-bookmark":
+"@blocksuite/affine-block-bookmark@workspace:*, @blocksuite/affine-block-bookmark@workspace:packages/affine/blocks/bookmark":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-bookmark@workspace:packages/affine/blocks/block-bookmark"
+  resolution: "@blocksuite/affine-block-bookmark@workspace:packages/affine/blocks/bookmark"
   dependencies:
     "@blocksuite/affine-block-embed": "workspace:*"
     "@blocksuite/affine-block-surface": "workspace:*"
@@ -510,9 +510,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-callout@workspace:*, @blocksuite/affine-block-callout@workspace:packages/affine/blocks/block-callout":
+"@blocksuite/affine-block-callout@workspace:*, @blocksuite/affine-block-callout@workspace:packages/affine/blocks/callout":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-callout@workspace:packages/affine/blocks/block-callout"
+  resolution: "@blocksuite/affine-block-callout@workspace:packages/affine/blocks/callout"
   dependencies:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-inline-preset": "workspace:*"
@@ -538,11 +538,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-code@workspace:*, @blocksuite/affine-block-code@workspace:packages/affine/blocks/block-code":
+"@blocksuite/affine-block-code@workspace:*, @blocksuite/affine-block-code@workspace:packages/affine/blocks/code":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-code@workspace:packages/affine/blocks/block-code"
+  resolution: "@blocksuite/affine-block-code@workspace:packages/affine/blocks/code"
   dependencies:
     "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-gfx-turbo-renderer": "workspace:*"
     "@blocksuite/affine-inline-latex": "workspace:*"
     "@blocksuite/affine-inline-link": "workspace:*"
     "@blocksuite/affine-inline-preset": "workspace:*"
@@ -567,9 +568,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-data-view@workspace:*, @blocksuite/affine-block-data-view@workspace:packages/affine/blocks/block-data-view":
+"@blocksuite/affine-block-data-view@workspace:*, @blocksuite/affine-block-data-view@workspace:packages/affine/blocks/data-view":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-data-view@workspace:packages/affine/blocks/block-data-view"
+  resolution: "@blocksuite/affine-block-data-view@workspace:packages/affine/blocks/data-view"
   dependencies:
     "@blocksuite/affine-block-database": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
@@ -593,9 +594,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-database@workspace:*, @blocksuite/affine-block-database@workspace:packages/affine/blocks/block-database":
+"@blocksuite/affine-block-database@workspace:*, @blocksuite/affine-block-database@workspace:packages/affine/blocks/database":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-database@workspace:packages/affine/blocks/block-database"
+  resolution: "@blocksuite/affine-block-database@workspace:packages/affine/blocks/database"
   dependencies:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-inline-preset": "workspace:*"
@@ -625,9 +626,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-divider@workspace:*, @blocksuite/affine-block-divider@workspace:packages/affine/blocks/block-divider":
+"@blocksuite/affine-block-divider@workspace:*, @blocksuite/affine-block-divider@workspace:packages/affine/blocks/divider":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-divider@workspace:packages/affine/blocks/block-divider"
+  resolution: "@blocksuite/affine-block-divider@workspace:packages/affine/blocks/divider"
   dependencies:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
@@ -647,9 +648,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-edgeless-text@workspace:*, @blocksuite/affine-block-edgeless-text@workspace:packages/affine/blocks/block-edgeless-text":
+"@blocksuite/affine-block-edgeless-text@workspace:*, @blocksuite/affine-block-edgeless-text@workspace:packages/affine/blocks/edgeless-text":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-edgeless-text@workspace:packages/affine/blocks/block-edgeless-text"
+  resolution: "@blocksuite/affine-block-edgeless-text@workspace:packages/affine/blocks/edgeless-text"
   dependencies:
     "@blocksuite/affine-block-surface": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
@@ -674,9 +675,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-embed@workspace:*, @blocksuite/affine-block-embed@workspace:packages/affine/blocks/block-embed":
+"@blocksuite/affine-block-embed@workspace:*, @blocksuite/affine-block-embed@workspace:packages/affine/blocks/embed":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-embed@workspace:packages/affine/blocks/block-embed"
+  resolution: "@blocksuite/affine-block-embed@workspace:packages/affine/blocks/embed"
   dependencies:
     "@blocksuite/affine-block-surface": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
@@ -704,9 +705,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-frame@workspace:*, @blocksuite/affine-block-frame@workspace:packages/affine/blocks/block-frame":
+"@blocksuite/affine-block-frame@workspace:*, @blocksuite/affine-block-frame@workspace:packages/affine/blocks/frame":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-frame@workspace:packages/affine/blocks/block-frame"
+  resolution: "@blocksuite/affine-block-frame@workspace:packages/affine/blocks/frame"
   dependencies:
     "@blocksuite/affine-block-surface": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
@@ -731,13 +732,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-image@workspace:*, @blocksuite/affine-block-image@workspace:packages/affine/blocks/block-image":
+"@blocksuite/affine-block-image@workspace:*, @blocksuite/affine-block-image@workspace:packages/affine/blocks/image":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-image@workspace:packages/affine/blocks/block-image"
+  resolution: "@blocksuite/affine-block-image@workspace:packages/affine/blocks/image"
   dependencies:
     "@blocksuite/affine-block-note": "workspace:*"
     "@blocksuite/affine-block-surface": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-gfx-turbo-renderer": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
@@ -757,9 +759,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-latex@workspace:*, @blocksuite/affine-block-latex@workspace:packages/affine/blocks/block-latex":
+"@blocksuite/affine-block-latex@workspace:*, @blocksuite/affine-block-latex@workspace:packages/affine/blocks/latex":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-latex@workspace:packages/affine/blocks/block-latex"
+  resolution: "@blocksuite/affine-block-latex@workspace:packages/affine/blocks/latex"
   dependencies:
     "@blocksuite/affine-block-note": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
@@ -787,9 +789,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-list@workspace:*, @blocksuite/affine-block-list@workspace:packages/affine/blocks/block-list":
+"@blocksuite/affine-block-list@workspace:*, @blocksuite/affine-block-list@workspace:packages/affine/blocks/list":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-list@workspace:packages/affine/blocks/block-list"
+  resolution: "@blocksuite/affine-block-list@workspace:packages/affine/blocks/list"
   dependencies:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-gfx-turbo-renderer": "workspace:*"
@@ -814,14 +816,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-note@workspace:*, @blocksuite/affine-block-note@workspace:packages/affine/blocks/block-note":
+"@blocksuite/affine-block-note@workspace:*, @blocksuite/affine-block-note@workspace:packages/affine/blocks/note":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-note@workspace:packages/affine/blocks/block-note"
+  resolution: "@blocksuite/affine-block-note@workspace:packages/affine/blocks/note"
   dependencies:
     "@blocksuite/affine-block-embed": "workspace:*"
     "@blocksuite/affine-block-surface": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-fragment-doc-title": "workspace:*"
+    "@blocksuite/affine-gfx-turbo-renderer": "workspace:*"
     "@blocksuite/affine-inline-preset": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
@@ -845,9 +848,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-paragraph@workspace:*, @blocksuite/affine-block-paragraph@workspace:packages/affine/blocks/block-paragraph":
+"@blocksuite/affine-block-paragraph@workspace:*, @blocksuite/affine-block-paragraph@workspace:packages/affine/blocks/paragraph":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-paragraph@workspace:packages/affine/blocks/block-paragraph"
+  resolution: "@blocksuite/affine-block-paragraph@workspace:packages/affine/blocks/paragraph"
   dependencies:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-gfx-turbo-renderer": "workspace:*"
@@ -870,9 +873,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-root@workspace:*, @blocksuite/affine-block-root@workspace:packages/affine/blocks/block-root":
+"@blocksuite/affine-block-root@workspace:*, @blocksuite/affine-block-root@workspace:packages/affine/blocks/root":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-root@workspace:packages/affine/blocks/block-root"
+  resolution: "@blocksuite/affine-block-root@workspace:packages/affine/blocks/root"
   dependencies:
     "@blocksuite/affine-block-attachment": "workspace:*"
     "@blocksuite/affine-block-bookmark": "workspace:*"
@@ -910,6 +913,7 @@ __metadata:
     "@blocksuite/affine-widget-edgeless-auto-connect": "workspace:*"
     "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
     "@blocksuite/affine-widget-frame-title": "workspace:*"
+    "@blocksuite/affine-widget-linked-doc": "workspace:*"
     "@blocksuite/affine-widget-remote-selection": "workspace:*"
     "@blocksuite/affine-widget-scroll-anchoring": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"
@@ -939,9 +943,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-surface-ref@workspace:*, @blocksuite/affine-block-surface-ref@workspace:packages/affine/blocks/block-surface-ref":
+"@blocksuite/affine-block-surface-ref@workspace:*, @blocksuite/affine-block-surface-ref@workspace:packages/affine/blocks/surface-ref":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-surface-ref@workspace:packages/affine/blocks/block-surface-ref"
+  resolution: "@blocksuite/affine-block-surface-ref@workspace:packages/affine/blocks/surface-ref"
   dependencies:
     "@blocksuite/affine-block-frame": "workspace:*"
     "@blocksuite/affine-block-surface": "workspace:*"
@@ -968,9 +972,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-surface@workspace:*, @blocksuite/affine-block-surface@workspace:packages/affine/blocks/block-surface":
+"@blocksuite/affine-block-surface@workspace:*, @blocksuite/affine-block-surface@workspace:packages/affine/blocks/surface":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-surface@workspace:packages/affine/blocks/block-surface"
+  resolution: "@blocksuite/affine-block-surface@workspace:packages/affine/blocks/surface"
   dependencies:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
@@ -996,9 +1000,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-block-table@workspace:*, @blocksuite/affine-block-table@workspace:packages/affine/blocks/block-table":
+"@blocksuite/affine-block-table@workspace:*, @blocksuite/affine-block-table@workspace:packages/affine/blocks/table":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-block-table@workspace:packages/affine/blocks/block-table"
+  resolution: "@blocksuite/affine-block-table@workspace:packages/affine/blocks/table"
   dependencies:
     "@atlaskit/pragmatic-drag-and-drop": "npm:^1.4.0"
     "@blocksuite/affine-components": "workspace:*"
@@ -1055,9 +1059,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-fragment-doc-title@workspace:*, @blocksuite/affine-fragment-doc-title@workspace:packages/affine/fragments/fragment-doc-title":
+"@blocksuite/affine-fragment-doc-title@workspace:*, @blocksuite/affine-fragment-doc-title@workspace:packages/affine/fragments/doc-title":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-fragment-doc-title@workspace:packages/affine/fragments/fragment-doc-title"
+  resolution: "@blocksuite/affine-fragment-doc-title@workspace:packages/affine/fragments/doc-title"
   dependencies:
     "@blocksuite/affine-block-frame": "workspace:*"
     "@blocksuite/affine-block-surface": "workspace:*"
@@ -1080,9 +1084,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-fragment-frame-panel@workspace:*, @blocksuite/affine-fragment-frame-panel@workspace:packages/affine/fragments/fragment-frame-panel":
+"@blocksuite/affine-fragment-frame-panel@workspace:*, @blocksuite/affine-fragment-frame-panel@workspace:packages/affine/fragments/frame-panel":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-fragment-frame-panel@workspace:packages/affine/fragments/fragment-frame-panel"
+  resolution: "@blocksuite/affine-fragment-frame-panel@workspace:packages/affine/fragments/frame-panel"
   dependencies:
     "@blocksuite/affine-block-frame": "workspace:*"
     "@blocksuite/affine-block-surface": "workspace:*"
@@ -1107,9 +1111,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-fragment-outline@workspace:*, @blocksuite/affine-fragment-outline@workspace:packages/affine/fragments/fragment-outline":
+"@blocksuite/affine-fragment-outline@workspace:*, @blocksuite/affine-fragment-outline@workspace:packages/affine/fragments/outline":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-fragment-outline@workspace:packages/affine/fragments/fragment-outline"
+  resolution: "@blocksuite/affine-fragment-outline@workspace:packages/affine/fragments/outline"
   dependencies:
     "@blocksuite/affine-block-note": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
@@ -1647,9 +1651,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-widget-drag-handle@workspace:*, @blocksuite/affine-widget-drag-handle@workspace:packages/affine/widgets/widget-drag-handle":
+"@blocksuite/affine-widget-drag-handle@workspace:*, @blocksuite/affine-widget-drag-handle@workspace:packages/affine/widgets/drag-handle":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-widget-drag-handle@workspace:packages/affine/widgets/widget-drag-handle"
+  resolution: "@blocksuite/affine-widget-drag-handle@workspace:packages/affine/widgets/drag-handle"
   dependencies:
     "@blocksuite/affine-block-callout": "workspace:*"
     "@blocksuite/affine-block-embed": "workspace:*"
@@ -1677,9 +1681,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-widget-edgeless-auto-connect@workspace:*, @blocksuite/affine-widget-edgeless-auto-connect@workspace:packages/affine/widgets/widget-edgeless-auto-connect":
+"@blocksuite/affine-widget-edgeless-auto-connect@workspace:*, @blocksuite/affine-widget-edgeless-auto-connect@workspace:packages/affine/widgets/edgeless-auto-connect":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-widget-edgeless-auto-connect@workspace:packages/affine/widgets/widget-edgeless-auto-connect"
+  resolution: "@blocksuite/affine-widget-edgeless-auto-connect@workspace:packages/affine/widgets/edgeless-auto-connect"
   dependencies:
     "@blocksuite/affine-block-note": "workspace:*"
     "@blocksuite/affine-block-surface": "workspace:*"
@@ -1696,9 +1700,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-widget-edgeless-toolbar@workspace:*, @blocksuite/affine-widget-edgeless-toolbar@workspace:packages/affine/widgets/widget-edgeless-toolbar":
+"@blocksuite/affine-widget-edgeless-toolbar@workspace:*, @blocksuite/affine-widget-edgeless-toolbar@workspace:packages/affine/widgets/edgeless-toolbar":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-widget-edgeless-toolbar@workspace:packages/affine/widgets/widget-edgeless-toolbar"
+  resolution: "@blocksuite/affine-widget-edgeless-toolbar@workspace:packages/affine/widgets/edgeless-toolbar"
   dependencies:
     "@blocksuite/affine-block-surface": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
@@ -1719,9 +1723,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-widget-frame-title@workspace:*, @blocksuite/affine-widget-frame-title@workspace:packages/affine/widgets/widget-frame-title":
+"@blocksuite/affine-widget-frame-title@workspace:*, @blocksuite/affine-widget-frame-title@workspace:packages/affine/widgets/frame-title":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-widget-frame-title@workspace:packages/affine/widgets/widget-frame-title"
+  resolution: "@blocksuite/affine-widget-frame-title@workspace:packages/affine/widgets/frame-title"
   dependencies:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-model": "workspace:*"
@@ -1737,9 +1741,34 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-widget-remote-selection@workspace:*, @blocksuite/affine-widget-remote-selection@workspace:packages/affine/widgets/widget-remote-selection":
+"@blocksuite/affine-widget-linked-doc@workspace:*, @blocksuite/affine-widget-linked-doc@workspace:packages/affine/widgets/linked-doc":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-widget-remote-selection@workspace:packages/affine/widgets/widget-remote-selection"
+  resolution: "@blocksuite/affine-widget-linked-doc@workspace:packages/affine/widgets/linked-doc"
+  dependencies:
+    "@blocksuite/affine-block-image": "workspace:*"
+    "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-inline-reference": "workspace:*"
+    "@blocksuite/affine-model": "workspace:*"
+    "@blocksuite/affine-rich-text": "workspace:*"
+    "@blocksuite/affine-shared": "workspace:*"
+    "@blocksuite/global": "workspace:*"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
+    "@blocksuite/store": "workspace:*"
+    "@lit/context": "npm:^1.1.2"
+    "@preact/signals-core": "npm:^1.8.0"
+    "@toeverything/theme": "npm:^1.1.12"
+    "@types/lodash-es": "npm:^4.17.12"
+    fflate: "npm:^0.8.2"
+    lit: "npm:^3.2.0"
+    lodash-es: "npm:^4.17.21"
+    rxjs: "npm:^7.8.1"
+  languageName: unknown
+  linkType: soft
+
+"@blocksuite/affine-widget-remote-selection@workspace:*, @blocksuite/affine-widget-remote-selection@workspace:packages/affine/widgets/remote-selection":
+  version: 0.0.0-use.local
+  resolution: "@blocksuite/affine-widget-remote-selection@workspace:packages/affine/widgets/remote-selection"
   dependencies:
     "@blocksuite/affine-block-surface": "workspace:*"
     "@blocksuite/affine-components": "workspace:*"
@@ -1757,9 +1786,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-widget-scroll-anchoring@workspace:*, @blocksuite/affine-widget-scroll-anchoring@workspace:packages/affine/widgets/widget-scroll-anchoring":
+"@blocksuite/affine-widget-scroll-anchoring@workspace:*, @blocksuite/affine-widget-scroll-anchoring@workspace:packages/affine/widgets/scroll-anchoring":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-widget-scroll-anchoring@workspace:packages/affine/widgets/widget-scroll-anchoring"
+  resolution: "@blocksuite/affine-widget-scroll-anchoring@workspace:packages/affine/widgets/scroll-anchoring"
   dependencies:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
@@ -1772,9 +1801,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-widget-slash-menu@workspace:*, @blocksuite/affine-widget-slash-menu@workspace:packages/affine/widgets/widget-slash-menu":
+"@blocksuite/affine-widget-slash-menu@workspace:*, @blocksuite/affine-widget-slash-menu@workspace:packages/affine/widgets/slash-menu":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-widget-slash-menu@workspace:packages/affine/widgets/widget-slash-menu"
+  resolution: "@blocksuite/affine-widget-slash-menu@workspace:packages/affine/widgets/slash-menu"
   dependencies:
     "@blocksuite/affine-components": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
@@ -1793,9 +1822,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@blocksuite/affine-widget-toolbar@workspace:*, @blocksuite/affine-widget-toolbar@workspace:packages/affine/widgets/widget-toolbar":
+"@blocksuite/affine-widget-toolbar@workspace:*, @blocksuite/affine-widget-toolbar@workspace:packages/affine/widgets/toolbar":
   version: 0.0.0-use.local
-  resolution: "@blocksuite/affine-widget-toolbar@workspace:packages/affine/widgets/widget-toolbar"
+  resolution: "@blocksuite/affine-widget-toolbar@workspace:packages/affine/widgets/toolbar"
   dependencies:
     "@blocksuite/affine-block-database": "workspace:*"
     "@blocksuite/affine-block-surface": "workspace:*"
@@ -1870,6 +1899,7 @@ __metadata:
     "@blocksuite/affine-widget-edgeless-auto-connect": "workspace:*"
     "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
     "@blocksuite/affine-widget-frame-title": "workspace:*"
+    "@blocksuite/affine-widget-linked-doc": "workspace:*"
     "@blocksuite/affine-widget-remote-selection": "workspace:*"
     "@blocksuite/affine-widget-scroll-anchoring": "workspace:*"
     "@blocksuite/affine-widget-slash-menu": "workspace:*"

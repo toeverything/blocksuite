@@ -5,8 +5,8 @@ import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import type { BlockStdScope } from '@blocksuite/std';
 import { ShadowlessElement } from '@blocksuite/std';
 import {
-  ZERO_WIDTH_NON_JOINER,
-  ZERO_WIDTH_SPACE,
+  ZERO_WIDTH_FOR_EMBED_NODE,
+  ZERO_WIDTH_FOR_EMPTY_LINE,
 } from '@blocksuite/std/inline';
 import type { DeltaInsert } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -29,6 +29,7 @@ export class AffineMention extends SignalWatcher(
       line-height: 24px; /* 160% */
       padding: 0 4px;
       border-radius: 4px;
+      user-select: none;
     }
     .affine-mention:hover {
       background: var(--affine-hover-color);
@@ -87,7 +88,7 @@ export class AffineMention extends SignalWatcher(
       data-selected=${this.selected}
       data-type="error"
       class="affine-mention"
-      >@Unknown Member<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
+      >@Unknown Member<v-text .str=${ZERO_WIDTH_FOR_EMBED_NODE}></v-text
     ></span>`;
 
     const userService = this.std.getOptional(UserProvider);
@@ -106,7 +107,7 @@ export class AffineMention extends SignalWatcher(
           data-selected=${this.selected}
           data-type="removed"
           class="affine-mention"
-          >@Inactive Member<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
+          >@Inactive Member<v-text .str=${ZERO_WIDTH_FOR_EMBED_NODE}></v-text
         ></span>`;
       } else {
         return html`<span
@@ -114,7 +115,7 @@ export class AffineMention extends SignalWatcher(
           data-type="default"
           class="affine-mention"
           >@${userInfo$.value.name ?? 'Unknown'}<v-text
-            .str=${ZERO_WIDTH_NON_JOINER}
+            .str=${ZERO_WIDTH_FOR_EMBED_NODE}
           ></v-text
         ></span>`;
       }
@@ -128,7 +129,7 @@ export class AffineMention extends SignalWatcher(
         >@loading<span class="dots"
           ><span class="dot">.</span><span class="dot">.</span
           ><span class="dot">.</span></span
-        ><v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
+        ><v-text .str=${ZERO_WIDTH_FOR_EMBED_NODE}></v-text
       ></span>`;
     }
 
@@ -137,7 +138,7 @@ export class AffineMention extends SignalWatcher(
 
   @property({ type: Object })
   accessor delta: DeltaInsert<AffineTextAttributes> = {
-    insert: ZERO_WIDTH_SPACE,
+    insert: ZERO_WIDTH_FOR_EMPTY_LINE,
     attributes: {},
   };
 

@@ -11,6 +11,7 @@ import {
   HeadingBlockSchemaExtension,
   NoteBlockSchemaExtension,
   RootBlockSchemaExtension,
+  SurfaceBlockSchemaExtension,
 } from './test-schema.js';
 import { testSpecs } from './test-spec.js';
 
@@ -20,6 +21,7 @@ const extensions = [
   RootBlockSchemaExtension,
   NoteBlockSchemaExtension,
   HeadingBlockSchemaExtension,
+  SurfaceBlockSchemaExtension,
 ];
 
 function createTestOptions() {

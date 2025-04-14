@@ -1,7 +1,6 @@
 import { addAttachments } from '@blocksuite/affine-block-attachment';
 import { insertLinkByQuickSearchCommand } from '@blocksuite/affine-block-bookmark';
-import { addImages, LoadedImageIcon } from '@blocksuite/affine-block-image';
-import { AttachmentIcon, LinkIcon } from '@blocksuite/affine-components/icons';
+import { addImages } from '@blocksuite/affine-block-image';
 import { MAX_IMAGE_WIDTH } from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import type { NoteChildrenFlavour } from '@blocksuite/affine-shared/types';
@@ -10,6 +9,7 @@ import {
   openFileOrFiles,
 } from '@blocksuite/affine-shared/utils';
 import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
+import { AttachmentIcon, ImageIcon, LinkIcon } from '@blocksuite/icons/lit';
 import type { GfxToolsFullOptionValue } from '@blocksuite/std/gfx';
 import { effect } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
@@ -118,7 +118,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
               @click=${this._addImages}
               .disabled=${this._imageLoading}
             >
-              ${LoadedImageIcon}
+              ${ImageIcon()}
             </edgeless-tool-icon-button>
 
             <edgeless-tool-icon-button
@@ -131,7 +131,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
                 this._onHandleLinkButtonClick();
               }}
             >
-              ${LinkIcon}
+              ${LinkIcon()}
             </edgeless-tool-icon-button>
 
             <edgeless-tool-icon-button
@@ -154,7 +154,7 @@ export class EdgelessNoteMenu extends EdgelessToolbarToolMixin(LitElement) {
                   });
               }}
             >
-              ${AttachmentIcon}
+              ${AttachmentIcon()}
             </edgeless-tool-icon-button>
           </div>
 

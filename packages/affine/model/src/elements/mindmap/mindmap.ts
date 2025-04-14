@@ -743,7 +743,7 @@ export class MindmapElementModel extends GfxGroupLikeElementModel<MindmapElement
     const targetPos =
       typeof targetXYWH === 'string' ? deserializeXYWH(targetXYWH) : targetXYWH;
     const offsetX = targetPos[0] - x;
-    const offsetY = targetPos[1] - y + targetPos[3];
+    const offsetY = targetPos[1] - y;
 
     this.surface.doc.transact(() => {
       this.childElements.forEach(el => {

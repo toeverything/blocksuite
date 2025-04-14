@@ -193,13 +193,15 @@ export class GfxElementModelView<
     this.model.xywh = currentBound.moveDelta(dx, dy).serialize();
   }
 
-  onSelected(context: SelectedContext) {
+  onSelected(context: SelectedContext): void | boolean {
     if (this.model instanceof GfxPrimitiveElementModel) {
       if (context.multiSelect) {
         this.gfx.selection.toggle(this.model);
       } else {
         this.gfx.selection.set({ elements: [this.model.id] });
       }
+
+      return true;
     }
   }
 

@@ -7,10 +7,10 @@
   },
   "include": ["./src"],
   "references": [
-    { "path": "../../blocks/block-attachment" },
-    { "path": "../../blocks/block-edgeless-text" },
-    { "path": "../../blocks/block-image" },
-    { "path": "../../blocks/block-surface" },
+    { "path": "../../blocks/attachment" },
+    { "path": "../../blocks/edgeless-text" },
+    { "path": "../../blocks/image" },
+    { "path": "../../blocks/surface" },
     { "path": "../../components" },
     { "path": "../connector" },
     { "path": "../shape" },
@@ -18,7 +18,7 @@
     { "path": "../../model" },
     { "path": "../../rich-text" },
     { "path": "../../shared" },
-    { "path": "../../widgets/widget-edgeless-toolbar" },
+    { "path": "../../widgets/edgeless-toolbar" },
     { "path": "../../../framework/global" },
     { "path": "../../../framework/std" },
     { "path": "../../../framework/store" }

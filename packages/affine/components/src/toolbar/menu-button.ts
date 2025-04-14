@@ -46,6 +46,12 @@ export class EditorMenuButton extends WithDisposable(LitElement) {
             composed: true,
           })
         );
+
+        if (opened) {
+          this.dataset.open = 'true';
+        } else {
+          delete this.dataset.open;
+        }
       },
       mainAxis: 0,
       offsetHeight: 6 * 4,

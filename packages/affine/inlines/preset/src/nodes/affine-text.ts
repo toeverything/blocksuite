@@ -1,7 +1,7 @@
 import { affineTextStyles } from '@blocksuite/affine-shared/styles';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import { ShadowlessElement } from '@blocksuite/std';
-import { ZERO_WIDTH_SPACE } from '@blocksuite/std/inline';
+import { ZERO_WIDTH_FOR_EMPTY_LINE } from '@blocksuite/std/inline';
 import type { DeltaInsert } from '@blocksuite/store';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -30,6 +30,6 @@ export class AffineText extends ShadowlessElement {
 
   @property({ type: Object })
   accessor delta: DeltaInsert<AffineTextAttributes> = {
-    insert: ZERO_WIDTH_SPACE,
+    insert: ZERO_WIDTH_FOR_EMPTY_LINE,
   };
 }

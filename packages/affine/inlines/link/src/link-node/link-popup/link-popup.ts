@@ -13,7 +13,13 @@ import {
   TextSelection,
 } from '@blocksuite/std';
 import type { InlineRange } from '@blocksuite/std/inline';
-import { computePosition, inline, offset, shift } from '@floating-ui/dom';
+import {
+  autoUpdate,
+  computePosition,
+  inline,
+  offset,
+  shift,
+} from '@floating-ui/dom';
 import { html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
@@ -184,6 +190,36 @@ export class LinkPopup extends WithDisposable(ShadowlessElement) {
     this.confirmButton.requestUpdate();
   }
 
+  private updateMockSelection(rects: DOMRect[]) {
+    if (!this.mockSelectionContainer) {
+      return;
+    }
+
+    this.mockSelectionContainer
+      .querySelectorAll('div')
+      .forEach(e => e.remove());
+
+    const fragment = document.createDocumentFragment();
+
+    rects.forEach(domRect => {
+      const mockSelection = document.createElement('div');
+      mockSelection.classList.add('mock-selection');
+
+      // Get the container's bounding rect to account for its position
+      const containerRect = this.mockSelectionContainer.getBoundingClientRect();
+
+      // Adjust the position by subtracting the container's offset
+      mockSelection.style.left = `${domRect.left - containerRect.left}px`;
+      mockSelection.style.top = `${domRect.top - containerRect.top}px`;
+      mockSelection.style.width = `${domRect.width}px`;
+      mockSelection.style.height = `${domRect.height}px`;
+
+      fragment.append(mockSelection);
+    });
+
+    this.mockSelectionContainer.append(fragment);
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
@@ -213,6 +249,40 @@ export class LinkPopup extends WithDisposable(ShadowlessElement) {
       this.std.host.selection.setGroup('note', []);
       this.abortController.abort();
     });
+
+    const range = this.inlineEditor.toDomRange(this.targetInlineRange);
+    if (!range) {
+      return;
+    }
+
+    const visualElement = {
+      getBoundingClientRect: () => range.getBoundingClientRect(),
+      getClientRects: () => range.getClientRects(),
+    };
+    const popover = this.popoverContainer;
+
+    this.disposables.add(
+      autoUpdate(visualElement, popover, () => {
+        computePosition(visualElement, popover, {
+          middleware: [
+            offset(10),
+            inline(),
+            shift({
+              padding: 6,
+            }),
+          ],
+        })
+          .then(({ x, y }) => {
+            popover.style.left = `${x}px`;
+            popover.style.top = `${y}px`;
+
+            this.updateMockSelection(
+              Array.from(visualElement.getClientRects())
+            );
+          })
+          .catch(console.error);
+      })
+    );
   }
 
   override render() {
@@ -228,55 +298,6 @@ export class LinkPopup extends WithDisposable(ShadowlessElement) {
         <div class="mock-selection-container"></div>
       </div>
     `;
-  }
-
-  override updated() {
-    const range = this.inlineEditor.toDomRange(this.targetInlineRange);
-    if (!range) {
-      return;
-    }
-
-    const domRects = range.getClientRects();
-
-    Object.values(domRects).forEach(domRect => {
-      if (!this.mockSelectionContainer) {
-        return;
-      }
-      const mockSelection = document.createElement('div');
-      mockSelection.classList.add('mock-selection');
-
-      // Get the container's bounding rect to account for its position
-      const containerRect = this.mockSelectionContainer.getBoundingClientRect();
-
-      // Adjust the position by subtracting the container's offset
-      mockSelection.style.left = `${domRect.left - containerRect.left}px`;
-      mockSelection.style.top = `${domRect.top - containerRect.top}px`;
-      mockSelection.style.width = `${domRect.width}px`;
-      mockSelection.style.height = `${domRect.height}px`;
-
-      this.mockSelectionContainer.append(mockSelection);
-    });
-
-    const visualElement = {
-      getBoundingClientRect: () => range.getBoundingClientRect(),
-      getClientRects: () => range.getClientRects(),
-    };
-    const popover = this.popoverContainer;
-
-    computePosition(visualElement, popover, {
-      middleware: [
-        offset(10),
-        inline(),
-        shift({
-          padding: 6,
-        }),
-      ],
-    })
-      .then(({ x, y }) => {
-        popover.style.left = `${x}px`;
-        popover.style.top = `${y}px`;
-      })
-      .catch(console.error);
   }
 
   @property({ attribute: false })

@@ -214,7 +214,12 @@ export class Viewport {
    * This property is used to calculate the scale of the editor.
    */
   get viewScale() {
-    if (!this._shell || this._cachedOffsetWidth === null) return 1;
+    if (
+      !this._shell ||
+      this._cachedOffsetWidth === null ||
+      this._cachedOffsetWidth === 0
+    )
+      return 1;
     return this.boundingClientRect.width / this._cachedOffsetWidth;
   }
 

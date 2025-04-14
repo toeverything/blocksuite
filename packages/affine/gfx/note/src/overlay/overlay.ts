@@ -26,7 +26,6 @@ export class NoteOverlay extends ToolOverlay {
 
   constructor(gfx: GfxController, background: Color) {
     super(gfx);
-    this.globalAlpha = 0;
     this.backgroundColor = gfx.std
       .get(ThemeProvider)
       .getColorValue(background, DefaultTheme.noteBackgrounColor, true);

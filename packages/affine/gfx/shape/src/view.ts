@@ -13,9 +13,9 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
   }
 
   private _initDblClickToEdit(): void {
-    const edgeless = this.std.view.getBlock(this.std.store.root!.id);
-
     this.on('dblclick', () => {
+      const edgeless = this.std.view.getBlock(this.std.store.root!.id);
+
       if (edgeless && !this.model.isLocked()) {
         mountShapeTextEditor(this.model, edgeless);
       }

@@ -15,3 +15,9 @@ export interface VirtualKeyboardProviderWithAction
 export const VirtualKeyboardProvider = createIdentifier<
   VirtualKeyboardProvider | VirtualKeyboardProviderWithAction
 >('VirtualKeyboardProvider');
+
+export function isVirtualKeyboardProviderWithAction(
+  provider: VirtualKeyboardProvider
+): provider is VirtualKeyboardProviderWithAction {
+  return 'show' in provider && 'hide' in provider;
+}

@@ -103,7 +103,7 @@ async function createEditor(
 
 export function createPainterWorker() {
   const worker = new Worker(
-    new URL('./turbo-painter-entry.worker.ts', import.meta.url),
+    new URL('./turbo-painter.worker.ts', import.meta.url),
     {
       type: 'module',
     }

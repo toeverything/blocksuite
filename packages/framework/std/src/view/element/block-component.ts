@@ -53,7 +53,7 @@ export class BlockComponent<
     options?: { global?: boolean; flavour?: boolean }
   ) => {
     this._disposables.add(
-      this.host.event.add(name, handler, {
+      this.std.event.add(name, handler, {
         flavour: options?.global
           ? undefined
           : options?.flavour
@@ -135,12 +135,12 @@ export class BlockComponent<
     if (!rootId) {
       return null;
     }
-    const rootComponent = this.host.view.getBlock(rootId);
+    const rootComponent = this.std.view.getBlock(rootId);
     return rootComponent ?? null;
   }
 
   get selection() {
-    return this.host.selection;
+    return this.std.selection;
   }
 
   get service(): Service {
@@ -162,7 +162,7 @@ export class BlockComponent<
     return Object.keys(this.widgets).reduce(
       (mapping, key) => ({
         ...mapping,
-        [key]: this.host.view.getWidget(key, this.blockId),
+        [key]: this.std.view.getWidget(key, this.blockId),
       }),
       {}
     );
@@ -197,7 +197,7 @@ export class BlockComponent<
     keymap: Record<string, UIEventHandler>,
     options?: { global?: boolean; flavour?: boolean }
   ) {
-    const dispose = this.host.event.bindHotkey(keymap, {
+    const dispose = this.std.event.bindHotkey(keymap, {
       flavour: options?.global
         ? undefined
         : options?.flavour

@@ -115,8 +115,8 @@ export class ElementTransformManager extends GfxExtension {
         fallback: lockedElement !== picked,
       };
 
-      view?.onSelected(context);
-      return true;
+      const selected = view?.onSelected(context);
+      return selected ?? true;
     }
 
     return false;

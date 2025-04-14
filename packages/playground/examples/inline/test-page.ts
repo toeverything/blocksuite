@@ -5,7 +5,7 @@ import { effects } from '@blocksuite/affine/std/effects';
 import {
   type AttributeRenderer,
   InlineEditor,
-  ZERO_WIDTH_NON_JOINER,
+  ZERO_WIDTH_FOR_EMBED_NODE,
 } from '@blocksuite/affine/std/inline';
 import {
   type BaseTextAttributes,
@@ -62,7 +62,7 @@ const attributeRenderer: AttributeRenderer = ({ delta, selected }) => {
         border: selected ? '1px solid #eb763a' : '',
         background: 'rgba(135,131,120,0.15)',
       })}
-      >@flrande<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
+      >@flrande<v-text .str=${ZERO_WIDTH_FOR_EMBED_NODE}></v-text
     ></span>`;
   }
 
@@ -226,6 +226,13 @@ export class CustomToolbar extends ShadowlessElement {
       grid-template-rows: repeat(2, minmax(0, 1fr));
     }
   `;
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener('pointerdown', e => {
+      e.preventDefault();
+    });
+  }
 
   override firstUpdated() {
     const boldButton = this.querySelector('.bold');

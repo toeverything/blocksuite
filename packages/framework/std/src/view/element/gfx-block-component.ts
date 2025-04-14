@@ -103,12 +103,14 @@ export abstract class GfxBlockComponent<
     this.model.pop('xywh');
   }
 
-  onSelected(context: SelectedContext) {
+  onSelected(context: SelectedContext): void | boolean {
     if (context.multiSelect) {
       this.gfx.selection.toggle(this.model);
     } else {
       this.gfx.selection.set({ elements: [this.model.id] });
     }
+
+    return true;
   }
 
   onRotate() {}
@@ -219,12 +221,14 @@ export function toGfxBlockComponent<
     }
 
     // eslint-disable-next-line sonarjs/no-identical-functions
-    onSelected(context: SelectedContext) {
+    onSelected(context: SelectedContext): void | boolean {
       if (context.multiSelect) {
         this.gfx.selection.toggle(this.model);
       } else {
         this.gfx.selection.set({ elements: [this.model.id] });
       }
+
+      return true;
     }
 
     onRotate() {}

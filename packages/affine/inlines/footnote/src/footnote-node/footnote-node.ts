@@ -12,8 +12,8 @@ import {
 import {
   INLINE_ROOT_ATTR,
   type InlineRootElement,
-  ZERO_WIDTH_NON_JOINER,
-  ZERO_WIDTH_SPACE,
+  ZERO_WIDTH_FOR_EMBED_NODE,
+  ZERO_WIDTH_FOR_EMPTY_LINE,
 } from '@blocksuite/std/inline';
 import type { DeltaInsert } from '@blocksuite/store';
 import { shift } from '@floating-ui/dom';
@@ -186,7 +186,7 @@ export class AffineFootnoteNode extends WithDisposable(ShadowlessElement) {
     return html`<span
       ${this.hidePopup ? '' : ref(this._whenHover.setReference)}
       class=${nodeClasses}
-      >${node}<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
+      >${node}<v-text .str=${ZERO_WIDTH_FOR_EMBED_NODE}></v-text
     ></span>`;
   }
 
@@ -195,7 +195,7 @@ export class AffineFootnoteNode extends WithDisposable(ShadowlessElement) {
 
   @property({ type: Object })
   accessor delta: DeltaInsert<AffineTextAttributes> = {
-    insert: ZERO_WIDTH_SPACE,
+    insert: ZERO_WIDTH_FOR_EMPTY_LINE,
     attributes: {},
   };
 
