@@ -22,8 +22,8 @@ import { BLOCK_ID_ATTR, ShadowlessElement } from '@blocksuite/std';
 import {
   INLINE_ROOT_ATTR,
   type InlineRootElement,
-  ZERO_WIDTH_NON_JOINER,
-  ZERO_WIDTH_SPACE,
+  ZERO_WIDTH_FOR_EMBED_NODE,
+  ZERO_WIDTH_FOR_EMPTY_LINE,
 } from '@blocksuite/std/inline';
 import type { DeltaInsert, DocMeta, Store } from '@blocksuite/store';
 import { css, html, nothing } from 'lit';
@@ -274,14 +274,14 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
             >${title}</span
           >`;
 
-    // we need to add `<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text>` in an
+    // we need to add `<v-text .str=${ZERO_WIDTH_FOR_EMBED_NODE}></v-text>` in an
     // embed element to make sure inline range calculation is correct
     return html`<span
       data-selected=${this.selected}
       class="affine-reference"
       style=${styleMap(style)}
       @click=${(event: MouseEvent) => this.open({ event })}
-      >${content}<v-text .str=${ZERO_WIDTH_NON_JOINER}></v-text
+      >${content}<v-text .str=${ZERO_WIDTH_FOR_EMBED_NODE}></v-text
     ></span>`;
   }
 
@@ -299,7 +299,7 @@ export class AffineReference extends WithDisposable(ShadowlessElement) {
 
   @property({ type: Object })
   accessor delta: DeltaInsert<AffineTextAttributes> = {
-    insert: ZERO_WIDTH_SPACE,
+    insert: ZERO_WIDTH_FOR_EMPTY_LINE,
     attributes: {},
   };
 

@@ -130,7 +130,7 @@ export class BrushElementModel extends GfxPrimitiveElementModel<BrushProps> {
     instance['_local'].delete('commands');
   })
   @derive((lineWidth: number, instance: Instance) => {
-    const oldBound = instance.elementBound;
+    const oldBound = Bound.fromXYWH(instance.deserializedXYWH);
 
     if (
       lineWidth === instance.lineWidth ||

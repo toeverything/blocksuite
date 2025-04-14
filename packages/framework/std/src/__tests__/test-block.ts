@@ -1,11 +1,13 @@
 import { html } from 'lit';
 import { customElement } from 'lit/decorators.js';
 
-import { BlockComponent } from '../view/index.js';
+import { BlockComponent, GfxBlockComponent } from '../view/index.js';
 import type {
   HeadingBlockModel,
   NoteBlockModel,
   RootBlockModel,
+  SurfaceBlockModel,
+  TestGfxBlockModel,
 } from './test-schema.js';
 
 @customElement('test-root-block')
@@ -37,5 +39,23 @@ export class HeadingH1BlockComponent extends BlockComponent<HeadingBlockModel> {
 export class HeadingH2BlockComponent extends BlockComponent<HeadingBlockModel> {
   override renderBlock() {
     return html` <div class="test-heading-block h2">${this.model.text}</div> `;
+  }
+}
+
+@customElement('test-surface-block')
+export class SurfaceBlockComponent extends BlockComponent<SurfaceBlockModel> {
+  override renderBlock() {
+    return html`
+      <div class="test-surface-block">${this.renderChildren(this.model)}</div>
+    `;
+  }
+}
+
+@customElement('test-gfx-block')
+export class TestGfxBlockComponent extends GfxBlockComponent<TestGfxBlockModel> {
+  override renderGfxBlock() {
+    return html`
+      <div class="test-gfx-block">${this.renderChildren(this.model)}</div>
+    `;
   }
 }

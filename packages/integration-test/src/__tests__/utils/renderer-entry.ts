@@ -1,3 +1,5 @@
+import { ImageLayoutHandlerExtension } from '@blocksuite/affine/blocks/image';
+import { ListLayoutHandlerExtension } from '@blocksuite/affine/blocks/list';
 import { ParagraphLayoutHandlerExtension } from '@blocksuite/affine/blocks/paragraph';
 import {
   TurboRendererConfigFactory,
@@ -11,6 +13,8 @@ import { createPainterWorker, setupEditor } from './setup.js';
 async function init() {
   setupEditor('edgeless', [
     ParagraphLayoutHandlerExtension,
+    ListLayoutHandlerExtension,
+    ImageLayoutHandlerExtension,
     TurboRendererConfigFactory({
       painterWorkerEntry: createPainterWorker,
     }),

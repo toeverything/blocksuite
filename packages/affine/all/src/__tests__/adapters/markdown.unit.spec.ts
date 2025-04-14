@@ -3769,6 +3769,48 @@ bbb
       });
       expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
     });
+
+    test('escapes dollar signs followed by a digit or space and digit', async () => {
+      const markdown =
+        'The price of the T-shirt is $9.15 and the price of the hat is $ 8\n';
+      const blockSnapshot: BlockSnapshot = {
+        type: 'block',
+        id: 'matchesReplaceMap[0]',
+        flavour: 'affine:note',
+        props: {
+          xywh: '[0,0,800,95]',
+          background: DefaultTheme.noteBackgrounColor,
+          index: 'a0',
+          hidden: false,
+          displayMode: NoteDisplayMode.DocAndEdgeless,
+        },
+        children: [
+          {
+            type: 'block',
+            id: 'matchesReplaceMap[1]',
+            flavour: 'affine:paragraph',
+            props: {
+              type: 'text',
+              text: {
+                '$blocksuite:internal:text$': true,
+                delta: [
+                  {
+                    insert:
+                      'The price of the T-shirt is $9.15 and the price of the hat is $ 8',
+                  },
+                ],
+              },
+            },
+            children: [],
+          },
+        ],
+      };
+      const mdAdapter = new MarkdownAdapter(createJob(), provider);
+      const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
+        file: markdown,
+      });
+      expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+    });
   });
 
   test('reference', async () => {

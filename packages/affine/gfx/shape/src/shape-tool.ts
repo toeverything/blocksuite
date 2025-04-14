@@ -89,7 +89,6 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
 
   private _hideOverlay() {
     if (!this._shapeOverlay) return;
-
     this._shapeOverlay.globalAlpha = 0;
     (this.gfx.surfaceComponent as SurfaceBlockComponent)?.refresh();
   }

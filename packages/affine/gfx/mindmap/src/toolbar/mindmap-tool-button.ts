@@ -326,6 +326,16 @@ export class EdgelessMindmapToolButton extends EdgelessToolbarToolMixin(
       },
       { global: true }
     );
+
+    // since there is not a tool called mindmap, we need to cancel the drag when the tool is changed
+    this.disposables.add(
+      this.gfx.tool.currentToolName$.subscribe(toolName => {
+        // FIXME: remove the assertion after gfx tool refactor
+        if ((toolName as string) !== 'empty' && this.readyToDrop) {
+          this.draggableController.cancel();
+        }
+      })
+    );
   }
 
   override render() {

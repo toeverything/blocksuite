@@ -20,4 +20,8 @@ export const testSpecs: ExtensionType[] = [
 
     return literal`test-h2-block`;
   }),
+
+  BlockViewExtension('test:surface', literal`test-surface-block`),
+
+  BlockViewExtension('test:gfx-block', literal`test-gfx-block`),
 ];

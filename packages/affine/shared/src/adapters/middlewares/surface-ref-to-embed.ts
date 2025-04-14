@@ -11,12 +11,16 @@ export const surfaceRefToEmbed =
       }
     });
     slots.beforeImport.subscribe(payload => {
+      // only handle surface-ref block snapshot
       if (
-        pageId &&
-        payload.type === 'block' &&
-        payload.snapshot.flavour === 'affine:surface-ref' &&
-        !std.store.hasBlock(payload.snapshot.id)
-      ) {
+        payload.type !== 'block' ||
+        payload.snapshot.flavour !== 'affine:surface-ref'
+      )
+        return;
+
+      // turn into embed-linked-doc if the current doc is different from the pageId of the surface-ref block
+      const isNotSameDoc = pageId !== std.store.doc.id;
+      if (pageId && isNotSameDoc) {
         // The blockId of the original surface-ref block
         const blockId = payload.snapshot.id;
         payload.snapshot.id = std.workspace.idGenerator();

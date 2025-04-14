@@ -26,7 +26,7 @@ Text [delta](https://docs.yjs.dev/api/delta-format) is a format from Y.js.
 
 ### Constructor
 
-> **new Text**(`input`?): `Text`
+> **new Text**(`input?`): `Text`
 
 #### Parameters
 
@@ -176,7 +176,7 @@ text.format(7, 1, { bold: true });
 
 ### insert()
 
-> **insert**(`content`, `index`, `attributes`?): `void`
+> **insert**(`content`, `index`, `attributes?`): `void`
 
 Insert content at the specified index.
 
@@ -241,7 +241,7 @@ text.join(other);
 
 ### replace()
 
-> **replace**(`index`, `length`, `content`, `attributes`?): `void`
+> **replace**(`index`, `length`, `content`, `attributes?`): `void`
 
 Replace the text content with a new content.
 
@@ -286,7 +286,7 @@ text.replace(7, 1, ' blocksuite');
 
 ### sliceToDelta()
 
-> **sliceToDelta**(`begin`, `end`?): `DeltaOperation`[]
+> **sliceToDelta**(`begin`, `end?`): `DeltaOperation`[]
 
 Slice the text to a delta.
 

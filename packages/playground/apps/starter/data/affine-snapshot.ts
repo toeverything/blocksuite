@@ -1,6 +1,6 @@
-import { ZipTransformer } from '@blocksuite/affine/blocks/root';
 import { AffineSchemas } from '@blocksuite/affine/schemas';
 import { Schema, Text, type Workspace } from '@blocksuite/affine/store';
+import { ZipTransformer } from '@blocksuite/affine/widgets/linked-doc';
 export async function affineSnapshot(collection: Workspace, id: string) {
   const doc = collection.createDoc(id);
   doc.load();

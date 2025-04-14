@@ -236,30 +236,39 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
           const locked = this.gfx.viewport.locked;
           const selection = this.gfx.selection;
           if (locked || selection.editing) return;
-
-          if (this.readyToDrop) {
-            const activeIndex = shapes.findIndex(
-              s => s.name === this.draggingShape
-            );
-            const nextIndex = (activeIndex + 1) % shapes.length;
-            const next = shapes[nextIndex];
-            this.draggingShape = next.name;
-
-            this.draggableController.cancelWithoutAnimation();
-          }
-
-          const el = this.shapeContainer.querySelector(
-            `.shape.${this.draggingShape}`
-          ) as HTMLElement;
-          if (!el) {
-            console.error('Edgeless toolbar Shape element not found');
+          if (
+            this.gfx.tool.dragging$.peek() &&
+            this.gfx.tool.currentToolName$.peek() === 'shape'
+          ) {
             return;
           }
-          const { x, y } = this.gfx.tool.lastMousePos$.peek();
-          const { viewport } = this.edgeless.std.get(ViewportElementProvider);
-          const { left, top } = viewport;
-          const clientPos = { x: x + left, y: y + top };
-          this.draggableController.dragAndMoveTo(el, clientPos);
+
+          const activeIndex = shapes.findIndex(
+            s => s.name === this.draggingShape
+          );
+          const nextIndex = (activeIndex + 1) % shapes.length;
+          const next = shapes[nextIndex];
+          this.draggingShape = next.name;
+
+          if (this.readyToDrop) {
+            this.draggableController.cancelWithoutAnimation();
+            const el = this.shapeContainer.querySelector(
+              `.shape.${this.draggingShape}`
+            ) as HTMLElement;
+            if (!el) {
+              console.error('Edgeless toolbar Shape element not found');
+              return;
+            }
+            const { x, y } = this.gfx.tool.lastMousePos$.peek();
+            const { viewport } = this.edgeless.std.get(ViewportElementProvider);
+            const { left, top } = viewport;
+            const clientPos = { x: x + left, y: y + top };
+            this.draggableController.dragAndMoveTo(el, clientPos);
+          } else {
+            this.setEdgelessTool('shape', {
+              shapeName: this.draggingShape,
+            });
+          }
         },
       },
       { global: true }

@@ -6,7 +6,7 @@
 
 # Function: generateNKeysBetween()
 
-> **generateNKeysBetween**(`a`, `b`, `n`, `digits`?): `string`[]
+> **generateNKeysBetween**(`a`, `b`, `n`, `digits?`): `string`[]
 
 same preconditions as generateKeysBetween.
 n >= 0.

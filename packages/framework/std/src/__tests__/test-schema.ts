@@ -1,8 +1,17 @@
+import type { SerializedXYWH } from '@blocksuite/global/gfx';
 import {
   BlockModel,
   BlockSchemaExtension,
   defineBlockSchema,
 } from '@blocksuite/store';
+import * as Y from 'yjs';
+
+import { SurfaceBlockModel as BaseSurfaceModel } from '../gfx/index.js';
+import {
+  GfxCompatibleBlockModel,
+  type GfxCompatibleProps,
+} from '../gfx/model/gfx-block-model.js';
+import { TestShapeElement } from './test-gfx-element.js';
 
 export const RootBlockSchema = defineBlockSchema({
   flavour: 'test:page',
@@ -15,7 +24,7 @@ export const RootBlockSchema = defineBlockSchema({
   metadata: {
     version: 2,
     role: 'root',
-    children: ['test:note'],
+    children: ['test:note', 'test:surface'],
   },
 });
 
@@ -61,3 +70,58 @@ export const HeadingBlockSchemaExtension =
 export class HeadingBlockModel extends BlockModel<
   ReturnType<(typeof HeadingBlockSchema)['model']['props']>
 > {}
+
+export const SurfaceBlockSchema = defineBlockSchema({
+  flavour: 'test:surface',
+  props: internal => ({
+    elements: internal.Boxed<Y.Map<Y.Map<unknown>>>(new Y.Map()),
+  }),
+  metadata: {
+    version: 1,
+    role: 'hub',
+    parent: ['test:page'],
+  },
+  toModel: () => new SurfaceBlockModel(),
+});
+
+export const SurfaceBlockSchemaExtension =
+  BlockSchemaExtension(SurfaceBlockSchema);
+
+export class SurfaceBlockModel extends BaseSurfaceModel {
+  override _init() {
+    this._extendElement({
+      testShape: TestShapeElement,
+    });
+    super._init();
+  }
+}
+
+type GfxTestBlockProps = {
+  xywh: SerializedXYWH;
+  rotate: number;
+  index: string;
+} & GfxCompatibleProps;
+
+export const TestGfxBlockSchema = defineBlockSchema({
+  flavour: 'test:gfx-block',
+  props: () =>
+    ({
+      xywh: '[0,0,10,10]' as SerializedXYWH,
+      rotate: 0,
+      index: 'a0',
+      lockedBySelf: false,
+    }) as GfxTestBlockProps,
+  metadata: {
+    version: 1,
+    role: 'content',
+    parent: ['test:surface'],
+  },
+  toModel: () => new TestGfxBlockModel(),
+});
+
+export const TestGfxBlockSchemaExtension =
+  BlockSchemaExtension(TestGfxBlockSchema);
+
+export class TestGfxBlockModel extends GfxCompatibleBlockModel<GfxTestBlockProps>(
+  BlockModel
+) {}

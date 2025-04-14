@@ -4,7 +4,7 @@ import { html, LitElement, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { INLINE_ROOT_ATTR, ZERO_WIDTH_SPACE } from '../consts.js';
+import { INLINE_ROOT_ATTR, ZERO_WIDTH_FOR_EMPTY_LINE } from '../consts.js';
 import type { InlineRootElement } from '../inline-editor.js';
 import { EmbedGap } from './embed-gap.js';
 
@@ -89,7 +89,9 @@ export class VLine extends LitElement {
   renderVElements() {
     if (this.elements.length === 0) {
       // don't use v-element because it not correspond to the actual delta
-      return html`<div><v-text .str=${ZERO_WIDTH_SPACE}></v-text></div>`;
+      return html`
+        <div><v-text .str=${ZERO_WIDTH_FOR_EMPTY_LINE}></v-text></div>
+      `;
     }
 
     const inlineEditor = this.inlineEditor;

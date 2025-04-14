@@ -124,6 +124,13 @@ class PasteTr {
 
   private readonly _mergeCode = () => {
     const deltas: DeltaOperation[] = [{ retain: this.pointState.point.index }];
+    // if there is text selection, delete the text selected
+    if (this.pointState.text.length - this.pointState.point.index > 0) {
+      deltas.push({
+        delete: this.pointState.text.length - this.pointState.point.index,
+      });
+    }
+    // paste the text from the snapshot to code block
     this.snapshot.content.forEach((blockSnapshot, i) => {
       if (blockSnapshot.props.text) {
         const text = this._textFromSnapshot(blockSnapshot);
@@ -133,6 +140,11 @@ class PasteTr {
         deltas.push(...text.delta);
       }
     });
+    // paste the text after the text selection from the snapshot to code block
+    const { toDelta } = this._getDeltas();
+    if (toDelta.length > 0) {
+      deltas.push(...toDelta);
+    }
     this.pointState.text.applyDelta(deltas);
     this.snapshot.content = [];
   };
@@ -490,13 +502,13 @@ class PasteTr {
   }
 
   merge() {
-    if (this.pointState.model.flavour === 'affine:code') {
-      this._mergeCode();
+    if (this.firstSnapshot === this.lastSnapshot) {
+      this._mergeSingle();
       return;
     }
 
-    if (this.firstSnapshot === this.lastSnapshot) {
-      this._mergeSingle();
+    if (this.pointState.model.flavour === 'affine:code') {
+      this._mergeCode();
       return;
     }
 

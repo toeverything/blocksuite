@@ -2,7 +2,7 @@ import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { ZERO_WIDTH_SPACE } from '../consts.js';
+import { ZERO_WIDTH_FOR_EMPTY_LINE } from '../consts.js';
 
 export class VText extends LitElement {
   override createRenderRoot() {
@@ -24,7 +24,7 @@ export class VText extends LitElement {
   }
 
   @property({ attribute: false })
-  accessor str: string = ZERO_WIDTH_SPACE;
+  accessor str: string = ZERO_WIDTH_FOR_EMPTY_LINE;
 }
 
 declare global {

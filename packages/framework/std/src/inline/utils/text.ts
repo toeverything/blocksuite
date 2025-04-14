@@ -1,7 +1,7 @@
-import { ZERO_WIDTH_SPACE } from '../consts.js';
+import { ZERO_WIDTH_FOR_EMPTY_LINE } from '../consts.js';
 
 export function calculateTextLength(text: Text): number {
-  if (text.wholeText === ZERO_WIDTH_SPACE) {
+  if (text.wholeText === ZERO_WIDTH_FOR_EMPTY_LINE) {
     return 0;
   } else {
     return text.wholeText.length;

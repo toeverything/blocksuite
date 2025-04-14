@@ -10,7 +10,7 @@ import { css, html, LitElement, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import { penIconMap } from './icons';
+import { penIconMap, penInfoMap } from './consts';
 import type { Pen } from './types';
 
 export class EdgelessPenToolButton extends EdgelessToolbarToolMixin(
@@ -81,6 +81,18 @@ export class EdgelessPenToolButton extends EdgelessToolbarToolMixin(
     return this.penIconMap$.value[pen];
   });
 
+  private readonly penInfo$ = computed(() => {
+    const type = this.pen$.value;
+    const icon = this.penIcon$.value;
+    const color = this.color$.value;
+    return {
+      ...penInfoMap[type],
+      color,
+      icon,
+      type,
+    };
+  });
+
   private readonly pen$ = signal<Pen>('brush');
 
   override enableActiveBackground = true;
@@ -89,9 +101,20 @@ export class EdgelessPenToolButton extends EdgelessToolbarToolMixin(
 
   override firstUpdated() {
     this.disposables.add(
-      this.gfx.tool.currentToolName$.subscribe(tool => {
-        if (this.type.map(String).includes(tool)) return;
-        this.tryDisposePopper();
+      this.gfx.tool.currentToolName$.subscribe(name => {
+        const tool = this.type.find(t => t === name);
+        if (!tool) {
+          this.tryDisposePopper();
+          return;
+        }
+
+        if (tool !== this.pen$.peek()) {
+          this.pen$.value = tool;
+        }
+
+        if (this.active) return;
+
+        this._togglePenMenu();
       })
     );
   }
@@ -101,10 +124,10 @@ export class EdgelessPenToolButton extends EdgelessToolbarToolMixin(
     !this.active && this.setEdgelessTool(this.pen$.peek());
     const menu = this.createPopper('edgeless-pen-menu', this);
     Object.assign(menu.element, {
-      color$: this.color$,
       colors$: this.colors$,
-      pen$: this.pen$,
       penIconMap$: this.penIconMap$,
+      pen$: this.pen$,
+      penInfo$: this.penInfo$,
       edgeless: this.edgeless,
       onChange: (props: Record<string, unknown>) => {
         const pen = this.pen$.peek();
@@ -117,20 +140,22 @@ export class EdgelessPenToolButton extends EdgelessToolbarToolMixin(
   override render() {
     const {
       active,
-      penIcon$: { value: icon },
-      color$: { value: color },
+      penInfo$: {
+        value: { type, color, icon, tip, shortcut },
+      },
     } = this;
 
     return html`
       <edgeless-toolbar-button
         class="edgeless-pen-button"
+        data-drawing-tool="${type}"
         .tooltip=${when(
           this.popper,
           () => nothing,
           () =>
             html`<affine-tooltip-content-with-shortcut
-              data-tip="${'Pen'}"
-              data-shortcut="${'P'}"
+              data-tip="${tip}"
+              data-shortcut="${shortcut}"
             ></affine-tooltip-content-with-shortcut>`
         )}
         .tooltipOffset=${4}

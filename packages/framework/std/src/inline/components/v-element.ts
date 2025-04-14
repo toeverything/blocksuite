@@ -7,7 +7,7 @@ import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { ZERO_WIDTH_SPACE } from '../consts.js';
+import { ZERO_WIDTH_FOR_EMPTY_LINE } from '../consts.js';
 import type { InlineEditor } from '../inline-editor.js';
 import { isInlineRangeIntersect } from '../utils/inline-range.js';
 
@@ -90,7 +90,7 @@ export class VElement<
 
   @property({ type: Object })
   accessor delta: DeltaInsert<T> = {
-    insert: ZERO_WIDTH_SPACE,
+    insert: ZERO_WIDTH_FOR_EMPTY_LINE,
   };
 
   @property({ attribute: false })

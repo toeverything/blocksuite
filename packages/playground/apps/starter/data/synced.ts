@@ -1,5 +1,5 @@
-import { MarkdownTransformer } from '@blocksuite/affine/blocks/root';
 import { Text, type Workspace } from '@blocksuite/affine/store';
+import { MarkdownTransformer } from '@blocksuite/affine/widgets/linked-doc';
 
 import type { InitFn } from './utils';
 

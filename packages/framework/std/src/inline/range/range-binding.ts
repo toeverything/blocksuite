@@ -219,8 +219,8 @@ export class RangeBinding {
     const closestExclude = el.closest(`[${RANGE_SYNC_EXCLUDE_ATTR}="true"]`);
     if (closestExclude) return;
 
-    const closestEditable = el.closest('[contenteditable="false"]');
-    if (closestEditable) return;
+    const closestEditable = el.closest('[contenteditable]');
+    if (!closestEditable) return;
 
     const startElement = getElement(range.startContainer);
     const endElement = getElement(range.endContainer);

@@ -340,10 +340,6 @@ export const FontFamilyIcon = icons.FontIcon({
   height: '20',
 });
 
-export const AttachmentIcon = icons.AttachmentIcon({
-  width: '20',
-  height: '20',
-});
 export const AttachmentIcon16 = icons.AttachmentIcon({
   width: '16',
   height: '16',

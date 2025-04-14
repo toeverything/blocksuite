@@ -6,7 +6,7 @@
 
 # Function: KeymapExtension()
 
-> **KeymapExtension**(`keymapFactory`, `options`?): `ExtensionType`
+> **KeymapExtension**(`keymapFactory`, `options?`): `ExtensionType`
 
 Create a keymap extension.
 

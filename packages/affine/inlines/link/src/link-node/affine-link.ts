@@ -13,7 +13,7 @@ import { BLOCK_ID_ATTR, ShadowlessElement } from '@blocksuite/std';
 import {
   INLINE_ROOT_ATTR,
   type InlineRootElement,
-  ZERO_WIDTH_SPACE,
+  ZERO_WIDTH_FOR_EMPTY_LINE,
 } from '@blocksuite/std/inline';
 import type { DeltaInsert } from '@blocksuite/store';
 import { css, html } from 'lit';
@@ -177,7 +177,7 @@ export class AffineLink extends WithDisposable(ShadowlessElement) {
 
   @property({ type: Object })
   accessor delta: DeltaInsert<AffineTextAttributes> = {
-    insert: ZERO_WIDTH_SPACE,
+    insert: ZERO_WIDTH_FOR_EMPTY_LINE,
   };
 
   @property({ attribute: false })

@@ -7,11 +7,16 @@ import {
 import type { ColorEvent } from '@blocksuite/affine-shared/utils';
 import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
 import { SignalWatcher } from '@blocksuite/global/lit';
-import { computed, type Signal } from '@preact/signals-core';
+import {
+  computed,
+  type ReadonlySignal,
+  type Signal,
+} from '@preact/signals-core';
 import { css, html, LitElement, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { penInfoMap } from './consts';
 import type { Pen, PenMap } from './types';
 
 export class EdgelessPenMenu extends EdgelessToolbarToolMixin(
@@ -26,8 +31,14 @@ export class EdgelessPenMenu extends EdgelessToolbarToolMixin(
 
     .pens {
       display: flex;
+      height: 100%;
       padding: 0 4px;
-      align-items: center;
+      align-items: flex-end;
+
+      edgeless-tool-icon-button {
+        display: flex;
+        align-self: flex-start;
+      }
 
       .pen-wrapper {
         display: flex;
@@ -36,7 +47,7 @@ export class EdgelessPenMenu extends EdgelessToolbarToolMixin(
         align-items: flex-end;
         justify-content: center;
         position: relative;
-        transform: translateY(10px);
+        transform: translateY(-2px);
         transition-property: color, transform;
         transition-duration: 300ms;
         transition-timing-function: ease-in-out;
@@ -46,7 +57,7 @@ export class EdgelessPenMenu extends EdgelessToolbarToolMixin(
       .pen-wrapper:hover,
       .pen-wrapper:active,
       .pen-wrapper[data-active] {
-        transform: translateY(-10px);
+        transform: translateY(-22px);
       }
     }
 
@@ -56,6 +67,8 @@ export class EdgelessPenMenu extends EdgelessToolbarToolMixin(
     }
 
     menu-divider {
+      display: flex;
+      align-self: center;
       height: 24px;
       margin: 0 9px;
     }
@@ -83,42 +96,64 @@ export class EdgelessPenMenu extends EdgelessToolbarToolMixin(
   override render() {
     const {
       _theme$: { value: theme },
-      color$: { value: currentColor },
       colors$: {
         value: { brush: brushColor, highlighter: highlighterColor },
       },
-      pen$: { value: pen },
       penIconMap$: {
         value: { brush: brushIcon, highlighter: highlighterIcon },
+      },
+      penInfo$: {
+        value: { type, color },
       },
     } = this;
 
     return html`
       <edgeless-slide-menu>
         <div class="pens" slot="prefix">
-          <div
-            class="pen-wrapper edgeless-brush-button"
-            ?data-active="${pen === 'brush'}"
-            style=${styleMap({ color: brushColor })}
+          <edgeless-tool-icon-button
+            class="edgeless-brush-button"
+            .tooltip=${html`<affine-tooltip-content-with-shortcut
+              data-tip="${penInfoMap.brush.tip}"
+              data-shortcut="${penInfoMap.brush.shortcut}"
+            ></affine-tooltip-content-with-shortcut>`}
+            .tooltipOffset=${20}
+            .hover=${false}
             @click=${() => this._onPickPen('brush')}
           >
-            ${brushIcon}
-          </div>
-          <div
-            class="pen-wrapper edgeless-highlighter-button"
-            ?data-active="${pen === 'highlighter'}"
-            style=${styleMap({ color: highlighterColor })}
+            <div
+              class="pen-wrapper"
+              style=${styleMap({ color: brushColor })}
+              ?data-active="${type === 'brush'}"
+            >
+              ${brushIcon}
+            </div>
+          </edgeless-tool-icon-button>
+
+          <edgeless-tool-icon-button
+            class="edgeless-highlighter-button"
+            .tooltip=${html`<affine-tooltip-content-with-shortcut
+              data-tip="${penInfoMap.highlighter.tip}"
+              data-shortcut="${penInfoMap.highlighter.shortcut}"
+            ></affine-tooltip-content-with-shortcut>`}
+            .tooltipOffset=${20}
+            .hover=${false}
             @click=${() => this._onPickPen('highlighter')}
           >
-            ${highlighterIcon}
-          </div>
+            <div
+              class="pen-wrapper"
+              style=${styleMap({ color: highlighterColor })}
+              ?data-active="${type === 'highlighter'}"
+            >
+              ${highlighterIcon}
+            </div>
+          </edgeless-tool-icon-button>
           <menu-divider .vertical=${true}></menu-divider>
         </div>
         <div class="menu-content">
           <edgeless-color-panel
             class="one-way"
             @select=${this._onPickColor}
-            .value=${currentColor}
+            .value=${color}
             .theme=${theme}
             .palettes=${DefaultTheme.StrokeColorShortPalettes}
             .shouldKeepColor=${true}
@@ -135,14 +170,20 @@ export class EdgelessPenMenu extends EdgelessToolbarToolMixin(
   accessor onChange!: (props: Record<string, unknown>) => void;
 
   @property({ attribute: false })
-  accessor colors$!: Signal<PenMap<string>>;
+  accessor colors$!: ReadonlySignal<PenMap<string>>;
 
   @property({ attribute: false })
-  accessor color$!: Signal<string>;
+  accessor penIconMap$!: ReadonlySignal<PenMap<TemplateResult>>;
 
   @property({ attribute: false })
   accessor pen$!: Signal<Pen>;
 
   @property({ attribute: false })
-  accessor penIconMap$!: Signal<PenMap<TemplateResult>>;
+  accessor penInfo$!: ReadonlySignal<{
+    type: Pen;
+    color: string;
+    icon: TemplateResult<1>;
+    tip: string;
+    shortcut: string;
+  }>;
 }

@@ -6,7 +6,7 @@
 
 # Function: generateKeyBetween()
 
-> **generateKeyBetween**(`a`, `b`, `digits`?): `string`
+> **generateKeyBetween**(`a`, `b`, `digits?`): `string`
 
 ## Parameters
 

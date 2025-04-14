@@ -118,7 +118,7 @@ Get the root block of the store.
 
 ### addBlock()
 
-> **addBlock**(`flavour`, `blockProps`, `parent`?, `parentIndex`?): `string`
+> **addBlock**(`flavour`, `blockProps`, `parent?`, `parentIndex?`): `string`
 
 Creates and adds a new block to the store
 
@@ -162,7 +162,7 @@ When store is in readonly mode
 
 ### addBlocks()
 
-> **addBlocks**(`blocks`, `parent`?, `parentIndex`?): `string`[]
+> **addBlocks**(`blocks`, `parent?`, `parentIndex?`): `string`[]
 
 Add multiple blocks to the store
 
@@ -598,7 +598,7 @@ When the block is not found or schema validation fails
 
 #### Get Signature
 
-> **get** **get**(): \<`T`\>(`identifier`, `options`?) => `T`
+> **get** **get**(): \<`T`\>(`identifier`, `options?`) => `T`
 
 Get an extension instance from the store
 
@@ -612,7 +612,7 @@ const extension = store.get(SomeExtension);
 
 The extension instance
 
-> \<`T`\>(`identifier`, `options`?): `T`
+> \<`T`\>(`identifier`, `options?`): `T`
 
 ###### Type Parameters
 
@@ -640,7 +640,7 @@ The extension instance
 
 #### Get Signature
 
-> **get** **getOptional**(): \<`T`\>(`identifier`, `options`?) => `null` \| `T`
+> **get** **getOptional**(): \<`T`\>(`identifier`, `options?`) => `null` \| `T`
 
 Optional get an extension instance from the store.
 The major difference between `get` and `getOptional` is that `getOptional` will not throw an error if the extension is not found.
@@ -655,7 +655,7 @@ const extension = store.getOptional(SomeExtension);
 
 The extension instance
 
-> \<`T`\>(`identifier`, `options`?): `null` \| `T`
+> \<`T`\>(`identifier`, `options?`): `null` \| `T`
 
 ###### Type Parameters
 
@@ -805,7 +805,7 @@ Reset the history of the store.
 
 #### Get Signature
 
-> **get** **transact**(): (`fn`, `shouldTransact`?) => `void`
+> **get** **transact**(): (`fn`, `shouldTransact?`) => `void`
 
 Execute a transaction.
 
@@ -820,7 +820,7 @@ store.transact(() => {
 
 ##### Returns
 
-> (`fn`, `shouldTransact`?): `void`
+> (`fn`, `shouldTransact?`): `void`
 
 ###### Parameters
 
@@ -971,7 +971,7 @@ Disposes the store and releases all resources
 
 ### load()
 
-> **load**(`initFn`?): `Store`
+> **load**(`initFn?`): `Store`
 
 Initializes and loads the store
 
