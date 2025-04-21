@@ -35,6 +35,10 @@ jobs:
           rsync -av --delete --exclude '.git' affine_repo/ packages/
           rm -rf affine_repo
 
+      - name: Install dependencies
+        run: |
+          yarn install --no-frozen-lockfile
+
       - name: Commit and Push Changes
         run: |
           git config user.name "github-actions[bot]"
