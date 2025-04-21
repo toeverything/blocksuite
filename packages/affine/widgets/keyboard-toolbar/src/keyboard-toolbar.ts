@@ -3,6 +3,7 @@ import { type VirtualKeyboardProviderWithAction } from '@blocksuite/affine-share
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { ArrowLeftBigIcon, KeyboardIcon } from '@blocksuite/icons/lit';
 import {
+  BlockComponent,
   PropTypes,
   requiredProperties,
   ShadowlessElement,
@@ -14,7 +15,6 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import { PageRootBlockComponent } from '../../page/page-root-block';
 import type {
   KeyboardIconType,
   KeyboardToolbarConfig,
@@ -34,7 +34,7 @@ export const AFFINE_KEYBOARD_TOOLBAR = 'affine-keyboard-toolbar';
 
 @requiredProperties({
   config: PropTypes.object,
-  rootComponent: PropTypes.instanceOf(PageRootBlockComponent),
+  rootComponent: PropTypes.instanceOf(BlockComponent),
 })
 export class AffineKeyboardToolbar extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -338,5 +338,5 @@ export class AffineKeyboardToolbar extends SignalWatcher(
   accessor config!: KeyboardToolbarConfig;
 
   @property({ attribute: false })
-  accessor rootComponent!: PageRootBlockComponent;
+  accessor rootComponent!: BlockComponent;
 }

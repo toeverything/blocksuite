@@ -7,6 +7,7 @@ import { effects as gfxShapeEffects } from '@blocksuite/affine-gfx-shape/effects
 import { effects as gfxTemplateEffects } from '@blocksuite/affine-gfx-template/effects';
 import { effects as gfxCanvasTextEffects } from '@blocksuite/affine-gfx-text/effects';
 import { effects as widgetEdgelessToolbarEffects } from '@blocksuite/affine-widget-edgeless-toolbar/effects';
+import { effects as widgetMobileToolbarEffects } from '@blocksuite/affine-widget-keyboard-toolbar/effects';
 import { effects as widgetLinkedDocEffects } from '@blocksuite/affine-widget-linked-doc/effects';
 
 import { EdgelessAutoCompletePanel } from './edgeless/components/auto-complete/auto-complete-panel.js';
@@ -28,7 +29,6 @@ import { ToolbarArrowUpIcon } from './edgeless/components/toolbar/common/toolbar
 import { EdgelessDefaultToolButton } from './edgeless/components/toolbar/default/default-tool-button.js';
 import { EdgelessLinkToolButton } from './edgeless/components/toolbar/link/link-tool-button.js';
 import {
-  AffineModalWidget,
   EdgelessRootBlockComponent,
   EdgelessRootPreviewBlockComponent,
   PageRootBlockComponent,
@@ -44,9 +44,6 @@ import {
 } from './widgets/edgeless-zoom-toolbar/index.js';
 import { ZoomBarToggleButton } from './widgets/edgeless-zoom-toolbar/zoom-bar-toggle-button.js';
 import { EdgelessZoomToolbar } from './widgets/edgeless-zoom-toolbar/zoom-toolbar.js';
-import { effects as widgetMobileToolbarEffects } from './widgets/keyboard-toolbar/effects.js';
-import { AffineCustomModal } from './widgets/modal/custom-modal.js';
-import { AFFINE_MODAL_WIDGET } from './widgets/modal/modal.js';
 import {
   AFFINE_PAGE_DRAGGING_AREA_WIDGET,
   AffinePageDraggingAreaWidget,
@@ -92,7 +89,6 @@ function registerGfxEffects() {
 }
 
 function registerWidgets() {
-  customElements.define(AFFINE_MODAL_WIDGET, AffineModalWidget);
   customElements.define(
     AFFINE_PAGE_DRAGGING_AREA_WIDGET,
     AffinePageDraggingAreaWidget
@@ -123,9 +119,6 @@ function registerEdgelessToolbarComponents() {
 }
 
 function registerMiscComponents() {
-  // Modal and menu components
-  customElements.define('affine-custom-modal', AffineCustomModal);
-
   // Toolbar and UI components
   customElements.define('edgeless-zoom-toolbar', EdgelessZoomToolbar);
   customElements.define('zoom-bar-toggle-button', ZoomBarToggleButton);

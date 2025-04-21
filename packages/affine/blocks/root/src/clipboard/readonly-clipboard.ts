@@ -34,6 +34,12 @@ const NotionClipboardConfig = ClipboardAdapterConfigExtension({
   priority: 95,
 });
 
+const HtmlClipboardConfig = ClipboardAdapterConfigExtension({
+  mimeType: 'text/html',
+  adapter: HtmlAdapter,
+  priority: 90,
+});
+
 const imageClipboardConfigs = [
   'image/apng',
   'image/avif',
@@ -46,20 +52,14 @@ const imageClipboardConfigs = [
   return ClipboardAdapterConfigExtension({
     mimeType,
     adapter: ImageAdapter,
-    priority: 85,
+    priority: 80,
   });
 });
 
 const PlainTextClipboardConfig = ClipboardAdapterConfigExtension({
   mimeType: 'text/plain',
   adapter: MixTextAdapter,
-  priority: 80,
-});
-
-const HtmlClipboardConfig = ClipboardAdapterConfigExtension({
-  mimeType: 'text/html',
-  adapter: HtmlAdapter,
-  priority: 75,
+  priority: 70,
 });
 
 const AttachmentClipboardConfig = ClipboardAdapterConfigExtension({
@@ -84,11 +84,11 @@ export const clipboardConfigs: ExtensionType[] = [
 export class ReadOnlyClipboard extends LifeCycleWatcher {
   static override key = 'affine-readonly-clipboard';
 
-  protected readonly _copySelected = (onCopy?: () => void) => {
+  protected readonly _copySelectedInPage = (onCopy?: () => void) => {
     return this.std.command
       .chain()
       .with({ onCopy })
-      .pipe(getSelectedModelsCommand)
+      .pipe(getSelectedModelsCommand, { types: ['block', 'text', 'image'] })
       .pipe(draftSelectedModelsCommand)
       .pipe(copySelectedModelsCommand);
   };
@@ -118,7 +118,7 @@ export class ReadOnlyClipboard extends LifeCycleWatcher {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
-    this._copySelected().run();
+    this._copySelectedInPage().run();
   };
 
   override mounted(): void {

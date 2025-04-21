@@ -117,9 +117,9 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
     const nextDepth = this.depth + 1;
     const previewSpecBuilder = SpecProvider._.getSpec(name);
     const currentDisposables = this.disposables;
-    const editorSetting =
-      this.std.getOptional(EditorSettingProvider) ??
-      signal(GeneralSettingSchema.parse({}));
+    const editorSetting = this.std.getOptional(EditorSettingProvider) ?? {
+      setting$: signal(GeneralSettingSchema.parse({})),
+    };
 
     class EmbedSyncedDocWatcher extends LifeCycleWatcher {
       static override key = 'embed-synced-doc-watcher';

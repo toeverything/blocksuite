@@ -13,6 +13,7 @@ import type {
   ElementLockEvent,
   ElementUpdatedEvent,
   LinkedDocCreatedEvent,
+  LinkEvent,
   MindMapCollapseEvent,
   TelemetryEvent,
 } from './types.js';
@@ -32,7 +33,7 @@ export type TelemetryEventMap = OutDatabaseAllEvents &
     AttachmentUploadedEvent: AttachmentUploadedEvent;
     BlockCreated: BlockCreationEvent;
     EdgelessToolPicked: EdgelessToolPickedEvent;
-    CreateEmbedBlock: TelemetryEvent;
+    CreateEmbedBlock: LinkEvent;
   };
 
 export interface TelemetryService {

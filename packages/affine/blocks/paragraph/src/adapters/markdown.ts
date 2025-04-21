@@ -2,18 +2,14 @@ import { ParagraphBlockSchema } from '@blocksuite/affine-model';
 import {
   BlockMarkdownAdapterExtension,
   type BlockMarkdownAdapterMatcher,
+  IN_PARAGRAPH_NODE_CONTEXT_KEY,
   type MarkdownAST,
 } from '@blocksuite/affine-shared/adapters';
 import type { DeltaInsert } from '@blocksuite/store';
 import { nanoid } from '@blocksuite/store';
 import type { Heading } from 'mdast';
 
-const PARAGRAPH_MDAST_TYPE = new Set([
-  'paragraph',
-  'html',
-  'heading',
-  'blockquote',
-]);
+const PARAGRAPH_MDAST_TYPE = new Set(['paragraph', 'heading', 'blockquote']);
 
 const isParagraphMDASTType = (node: MarkdownAST) =>
   PARAGRAPH_MDAST_TYPE.has(node.type);
@@ -27,32 +23,8 @@ export const paragraphBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatcher =
       enter: (o, context) => {
         const { walkerContext, deltaConverter } = context;
         switch (o.node.type) {
-          case 'html': {
-            walkerContext
-              .openNode(
-                {
-                  type: 'block',
-                  id: nanoid(),
-                  flavour: 'affine:paragraph',
-                  props: {
-                    type: 'text',
-                    text: {
-                      '$blocksuite:internal:text$': true,
-                      delta: [
-                        {
-                          insert: o.node.value,
-                        },
-                      ],
-                    },
-                  },
-                  children: [],
-                },
-                'children'
-              )
-              .closeNode();
-            break;
-          }
           case 'paragraph': {
+            walkerContext.setGlobalContext(IN_PARAGRAPH_NODE_CONTEXT_KEY, true);
             walkerContext
               .openNode(
                 {
@@ -71,7 +43,6 @@ export const paragraphBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatcher =
                 'children'
               )
               .closeNode();
-            walkerContext.skipAllChildren();
             break;
           }
           case 'heading': {
@@ -117,6 +88,12 @@ export const paragraphBlockMarkdownAdapterMatcher: BlockMarkdownAdapterMatcher =
             walkerContext.skipAllChildren();
             break;
           }
+        }
+      },
+      leave: (o, context) => {
+        if (o.node.type === 'paragraph') {
+          const { walkerContext } = context;
+          walkerContext.setGlobalContext(IN_PARAGRAPH_NODE_CONTEXT_KEY, false);
         }
       },
     },

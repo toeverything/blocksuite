@@ -3,7 +3,6 @@ import type {
   AttachmentBlockModel,
   AttachmentBlockProps,
 } from '@blocksuite/affine-model';
-import { defaultAttachmentProps } from '@blocksuite/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
@@ -19,18 +18,6 @@ import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import type { BlockModel } from '@blocksuite/store';
 
 import type { AttachmentBlockComponent } from './attachment-block.js';
-
-export function cloneAttachmentProperties(model: AttachmentBlockModel) {
-  const clonedProps = {} as AttachmentBlockProps;
-  for (const cur in defaultAttachmentProps) {
-    const key = cur as keyof AttachmentBlockProps;
-    // @ts-expect-error it's safe because we just cloned the props simply
-    clonedProps[key] = model[
-      key
-    ] as AttachmentBlockProps[keyof AttachmentBlockProps];
-  }
-  return clonedProps;
-}
 
 const attachmentUploads = new Set<string>();
 export function setAttachmentUploading(blockId: string) {

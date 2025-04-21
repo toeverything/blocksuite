@@ -86,3 +86,7 @@ export interface ElementUpdatedEvent extends TelemetryEvent {
   control: string;
   type?: string;
 }
+
+export interface LinkEvent extends TelemetryEvent {
+  result?: 'success' | 'failure';
+}

@@ -23,7 +23,7 @@ export class VElement<
 
     this.disposables.add(
       effect(() => {
-        const inlineRange = this.inlineEditor.inlineRange$.value;
+        const inlineRange = this.inlineEditor?.inlineRange$.value;
         this.selected.value =
           !!inlineRange &&
           isInlineRangeIntersect(inlineRange, {

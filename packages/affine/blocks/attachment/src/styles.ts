@@ -136,4 +136,9 @@ export const styles = css`
     width: 100%;
     height: 100%;
   }
+
+  .affine-attachment-embed-event-mask {
+    position: absolute;
+    inset: 0;
+  }
 `;

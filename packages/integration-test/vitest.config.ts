@@ -18,10 +18,9 @@ export default defineConfig(_configEnv =>
       browser: {
         enabled: true,
         headless: process.env.CI === 'true',
-        name: 'chromium',
+        instances: [{ browser: 'chromium' }],
         provider: 'playwright',
         isolate: false,
-        providerOptions: {},
         viewport: {
           width: 1024,
           height: 768,

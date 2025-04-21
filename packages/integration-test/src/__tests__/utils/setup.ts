@@ -8,28 +8,35 @@ import {
   registerStoreSpecs,
   StoreExtensions,
 } from '@blocksuite/affine/extensions';
-import type { ExtensionType, Store, Transformer } from '@blocksuite/store';
-
-import { effects } from '../../effects.js';
-
-registerStoreSpecs();
-blocksEffects();
-effects();
-
 import type { DocMode } from '@blocksuite/affine/model';
 import { AffineSchemas } from '@blocksuite/affine/schemas';
 import {
   CommunityCanvasTextFonts,
   FontConfigExtension,
 } from '@blocksuite/affine/shared/services';
-import type { ViewportTurboRendererExtension } from '@blocksuite/affine-gfx-turbo-renderer';
+import {
+  type ViewportTurboRendererExtension,
+  ViewportTurboRendererIdentifier,
+} from '@blocksuite/affine-gfx-turbo-renderer';
+import type { ExtensionType, Store, Transformer } from '@blocksuite/store';
 import { Schema, Text } from '@blocksuite/store';
 import {
   createAutoIncrementIdGenerator,
   TestWorkspace,
 } from '@blocksuite/store/test';
 
+import { effects } from '../../effects.js';
 import { TestAffineEditorContainer } from '../../index.js';
+
+registerStoreSpecs();
+blocksEffects();
+effects();
+
+export function getRenderer() {
+  return editor.std.get(
+    ViewportTurboRendererIdentifier
+  ) as ViewportTurboRendererExtension;
+}
 
 function createCollectionOptions() {
   const schema = new Schema();

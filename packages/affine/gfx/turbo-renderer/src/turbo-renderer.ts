@@ -73,15 +73,19 @@ export const TurboRendererConfigFactory =
 export class ViewportTurboRendererExtension extends GfxExtension {
   static override key = 'viewportTurboRenderer';
 
-  private readonly state$ = new BehaviorSubject<RenderingState>('inactive');
+  public readonly state$ = new BehaviorSubject<RenderingState>('inactive');
   public readonly canvas: HTMLCanvasElement = document.createElement('canvas');
+  public layoutCacheData: ViewportLayoutTree | null = null;
   private readonly worker: Worker;
   private readonly disposables = new DisposableGroup();
-  private layoutCacheData: ViewportLayoutTree | null = null;
   private layoutVersion = 0;
   private bitmap: ImageBitmap | null = null;
   private viewportElement: GfxViewportElement | null = null;
   private readonly refresh$ = new Subject<void>();
+
+  public get currentState(): RenderingState {
+    return this.state$.value;
+  }
 
   constructor(gfx: GfxController) {
     super(gfx);

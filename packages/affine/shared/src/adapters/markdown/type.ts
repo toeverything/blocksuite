@@ -17,3 +17,4 @@ export const isMarkdownAST = (node: unknown): node is MarkdownAST =>
   (node as MarkdownAST).type !== undefined;
 
 export const FOOTNOTE_DEFINITION_PREFIX = 'footnoteDefinition:';
+export const IN_PARAGRAPH_NODE_CONTEXT_KEY = 'mdast:paragraph';

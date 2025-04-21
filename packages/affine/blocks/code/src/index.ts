@@ -1,4 +1,5 @@
 export * from './adapters';
+export * from './clipboard';
 export * from './code-block';
 export * from './code-block-config';
 export * from './code-block-spec';

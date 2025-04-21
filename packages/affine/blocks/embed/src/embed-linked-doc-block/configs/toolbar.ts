@@ -12,6 +12,8 @@ import {
 import {
   ActionPlacement,
   DocDisplayMetaProvider,
+  EditorSettingProvider,
+  FeatureFlagService,
   type LinkEventType,
   type OpenDocMode,
   type ToolbarAction,
@@ -33,7 +35,7 @@ import {
   ExpandFullIcon,
   OpenInNewIcon,
 } from '@blocksuite/icons/lit';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
+import { BlockFlavourIdentifier, isGfxBlockComponent } from '@blocksuite/std';
 import { type ExtensionType, Slice } from '@blocksuite/store';
 import { computed, signal } from '@preact/signals-core';
 import { html } from 'lit';
@@ -213,6 +215,20 @@ const conversionsActionGroup = {
       },
       run(ctx) {
         const block = ctx.getCurrentBlockByType(EmbedLinkedDocBlockComponent);
+
+        if (
+          ctx.std
+            .get(FeatureFlagService)
+            .getFlag('enable_embed_doc_with_alias') &&
+          isGfxBlockComponent(block)
+        ) {
+          const editorSetting = ctx.std.getOptional(EditorSettingProvider);
+          editorSetting?.set?.(
+            'docDropCanvasPreferView',
+            'affine:embed-synced-doc'
+          );
+        }
+
         block?.convertToEmbed();
 
         ctx.track('SelectedView', {

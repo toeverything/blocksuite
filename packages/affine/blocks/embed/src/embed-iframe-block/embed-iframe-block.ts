@@ -143,7 +143,7 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
       const { url } = this.model.props;
       if (!url) {
         this.status$.value = 'idle';
-        return;
+        return false;
       }
 
       // set loading status
@@ -188,11 +188,13 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
 
       // set success status
       this.status$.value = 'success';
+      return true;
     } catch (err) {
       // set error status
       this.status$.value = 'error';
       this.error$.value = err instanceof Error ? err : new Error(String(err));
       console.error('Failed to refresh iframe data:', err);
+      return false;
     }
   };
 
@@ -284,7 +286,7 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
   };
 
   private readonly _handleRetry = async () => {
-    await this.refreshData();
+    return await this.refreshData();
   };
 
   private readonly _renderIframe = () => {

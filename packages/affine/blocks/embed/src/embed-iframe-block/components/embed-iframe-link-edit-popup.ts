@@ -78,7 +78,7 @@ export class EmbedIframeLinkEditPopup extends SignalWatcher(
       segment: 'editor',
       module: 'embed block',
       control: 'edit button',
-      other: status,
+      result: status,
     });
   }
 

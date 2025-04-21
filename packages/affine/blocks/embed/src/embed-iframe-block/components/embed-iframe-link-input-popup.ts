@@ -228,7 +228,7 @@ export class EmbedIframeLinkInputPopup extends EmbedIframeLinkInputBase {
       segment: this.options?.telemetrySegment ?? 'editor',
       module: 'embed block',
       control: 'confirm embed link',
-      other: status,
+      result: status,
     });
   }
 

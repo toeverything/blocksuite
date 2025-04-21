@@ -98,7 +98,9 @@ export class EditPropsStore extends LifeCycleWatcher {
     );
 
     this.lastProps$ = computed(() => {
-      const editorSetting$ = this.std.getOptional(EditorSettingProvider);
+      const editorSetting$ = this.std.getOptional(
+        EditorSettingProvider
+      )?.setting$;
       const nextProps = mergeWith(
         clonedeep(initProps),
         editorSetting$?.value,

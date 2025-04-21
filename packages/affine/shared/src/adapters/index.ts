@@ -22,6 +22,7 @@ export {
   type BlockMarkdownAdapterMatcher,
   BlockMarkdownAdapterMatcherIdentifier,
   FOOTNOTE_DEFINITION_PREFIX,
+  IN_PARAGRAPH_NODE_CONTEXT_KEY,
   InlineDeltaToMarkdownAdapterExtension,
   type InlineDeltaToMarkdownAdapterMatcher,
   InlineDeltaToMarkdownAdapterMatcherIdentifier,

@@ -14,6 +14,7 @@ export const styles = css`
     opacity: var(--add, 1);
     background: var(--affine-background-primary-color);
     user-select: none;
+    overflow: hidden;
   }
 
   .affine-embed-github-content {
@@ -275,7 +276,7 @@ export const styles = css`
   }
 
   .affine-embed-github-block.vertical {
-    flex-direction: column;
+    flex-direction: column-reverse;
 
     .affine-embed-github-content {
       width: 100%;
@@ -383,7 +384,8 @@ export const styles = css`
     .affine-embed-github-content {
       width: 100%;
     }
-    .affine-embed-github-banner {
+
+    .affine-embed-github-block:not(.edgeless) .affine-embed-github-banner {
       display: none;
     }
   }

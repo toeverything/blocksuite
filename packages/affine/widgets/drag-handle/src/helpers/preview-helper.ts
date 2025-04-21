@@ -66,14 +66,14 @@ export class PreviewHelper {
     blockIds = blockIds.slice();
 
     const docModeService = std.get(DocModeProvider);
-    const editorSetting = std.get(EditorSettingProvider).peek();
+    const editorSetting = std.get(EditorSettingProvider);
     const query = this._calculateQuery(blockIds as string[]);
     const store = widget.doc.doc.getStore({ query });
     const previewSpec = SpecProvider._.getSpec('preview:page');
-    const settingSignal = signal({ ...editorSetting });
+    const settingSignal = signal({ ...editorSetting.setting$.peek() });
     const extensions = [
       DocModeExtension(docModeService),
-      EditorSettingExtension(settingSignal),
+      EditorSettingExtension({ setting$: settingSignal }),
       {
         setup(di) {
           di.override(
