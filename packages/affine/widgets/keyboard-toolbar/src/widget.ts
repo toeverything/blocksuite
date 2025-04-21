@@ -7,14 +7,15 @@ import {
   type VirtualKeyboardProviderWithAction,
 } from '@blocksuite/affine-shared/services';
 import { IS_MOBILE } from '@blocksuite/global/env';
-import { WidgetComponent } from '@blocksuite/std';
+import { WidgetComponent, WidgetViewExtension } from '@blocksuite/std';
 import { effect, signal } from '@preact/signals-core';
 import { html, nothing } from 'lit';
+import { literal, unsafeStatic } from 'lit/static-html.js';
 
-import { RootBlockConfigExtension } from '../../root-config.js';
-import { defaultKeyboardToolbarConfig } from './config.js';
-
-export * from './config.js';
+import {
+  defaultKeyboardToolbarConfig,
+  KeyboardToolbarConfigExtension,
+} from './config.js';
 
 export const AFFINE_KEYBOARD_TOOLBAR_WIDGET = 'affine-keyboard-toolbar-widget';
 
@@ -64,8 +65,7 @@ export class AffineKeyboardToolbarWidget extends WidgetComponent<RootBlockModel>
   get config() {
     return {
       ...defaultKeyboardToolbarConfig,
-      ...this.std.getOptional(RootBlockConfigExtension.identifier)
-        ?.keyboardToolbar,
+      ...this.std.getOptional(KeyboardToolbarConfigExtension.identifier),
     };
   }
 
@@ -133,6 +133,12 @@ export class AffineKeyboardToolbarWidget extends WidgetComponent<RootBlockModel>
     ></blocksuite-portal>`;
   }
 }
+
+export const keyboardToolbarWidget = WidgetViewExtension(
+  'affine:page',
+  AFFINE_KEYBOARD_TOOLBAR_WIDGET,
+  literal`${unsafeStatic(AFFINE_KEYBOARD_TOOLBAR_WIDGET)}`
+);
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -65,7 +65,7 @@ export class PageClipboard extends ReadOnlyClipboard {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
-    this._copySelected(() => {
+    this._copySelectedInPage(() => {
       this.std.command
         .chain()
         .try<{}>(cmd => [

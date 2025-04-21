@@ -349,7 +349,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
   private _initWheelEvent() {
     this._disposables.add(
       this.dispatcher.add('wheel', ctx => {
-        const config = this.std.getOptional(EditorSettingProvider);
+        const config = this.std.getOptional(EditorSettingProvider)?.setting$;
         const state = ctx.get('defaultState');
         const e = state.event as WheelEvent;
         const edgelessScrollZoom = config?.peek().edgelessScrollZoom ?? false;

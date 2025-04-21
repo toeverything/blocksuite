@@ -40,6 +40,13 @@ export const getInlineRangeProvider: (
       return null;
     }
 
+    if (
+      textSelection.isInSameBlock() &&
+      textSelection.from.blockId !== element.blockId
+    ) {
+      return null;
+    }
+
     const elementRange = rangeManager.textSelectionToRange(
       selectionManager.create(TextSelection, {
         from: {
@@ -86,7 +93,7 @@ export const getInlineRangeProvider: (
   };
   const inlineRange$: InlineRangeProvider['inlineRange$'] = signal(null);
 
-  editorHost.disposables.add(
+  element.disposables.add(
     selectionManager.slots.changed.subscribe(selections => {
       if (!isActiveInEditor(editorHost)) return;
 
@@ -98,6 +105,7 @@ export const getInlineRangeProvider: (
         inlineRange$.value = null;
         return;
       }
+
       const inlineRange = calculateInlineRange(range, textSelection);
       inlineRange$.value = inlineRange;
     })

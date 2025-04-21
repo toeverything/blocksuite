@@ -67,6 +67,7 @@ export class OutlineBlockPreview extends SignalWatcher(
         return html`<span
           class=${classMap({
             [styles.linkedDocPreviewUnavailable]: unavailable,
+            [styles.linkedDocPreviewAvailable]: !unavailable,
           })}
         >
           ${icon}

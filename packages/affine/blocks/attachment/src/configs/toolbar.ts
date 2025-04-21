@@ -15,6 +15,7 @@ import {
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
 } from '@blocksuite/affine-shared/services';
+import { getBlockProps } from '@blocksuite/affine-shared/utils';
 import { Bound } from '@blocksuite/global/gfx';
 import {
   CaptionIcon,
@@ -35,7 +36,6 @@ import { keyed } from 'lit/directives/keyed.js';
 import { AttachmentBlockComponent } from '../attachment-block';
 import { RenameModal } from '../components/rename-model';
 import { AttachmentEmbedProvider } from '../embed';
-import { cloneAttachmentProperties } from '../utils';
 
 const trackBaseProps = {
   category: 'attachment',
@@ -219,7 +219,7 @@ const builtinToolbarConfig = {
             ctx.store.addSiblingBlocks(model, [
               {
                 flavour: model.flavour,
-                ...cloneAttachmentProperties(model),
+                ...getBlockProps(model),
               },
             ]);
           },

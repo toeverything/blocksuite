@@ -97,12 +97,15 @@ import {
   YesterdayIcon,
   YoutubeDuotoneIcon,
 } from '@blocksuite/icons/lit';
-import type { BlockStdScope } from '@blocksuite/std';
+import {
+  type BlockComponent,
+  type BlockStdScope,
+  ConfigExtensionFactory,
+} from '@blocksuite/std';
 import { computed } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import type { TemplateResult } from 'lit';
 
-import type { PageRootBlockComponent } from '../../page/page-root-block.js';
 import {
   FigmaDuotoneIcon,
   HeadingIcon,
@@ -156,7 +159,7 @@ export type KeyboardSubToolbarConfig = {
 
 export type KeyboardToolbarContext = {
   std: BlockStdScope;
-  rootComponent: PageRootBlockComponent;
+  rootComponent: BlockComponent;
   /**
    * Close tool bar, and blur the focus if blur is true, default is false
    */
@@ -1108,7 +1111,6 @@ export const defaultKeyboardToolbarConfig: KeyboardToolbarConfig = {
         std.command
           .chain()
           .pipe(getSelectedModelsCommand)
-          .pipe(draftSelectedModelsCommand)
           .pipe(duplicateSelectedModelsCommand)
           .run();
       },
@@ -1126,3 +1128,7 @@ export const defaultKeyboardToolbarConfig: KeyboardToolbarConfig = {
     },
   ],
 };
+
+export const KeyboardToolbarConfigExtension = ConfigExtensionFactory<
+  Partial<KeyboardToolbarConfig>
+>('affine:keyboard-toolbar');

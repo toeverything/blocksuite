@@ -2448,203 +2448,262 @@ World!
 });
 
 describe('markdown to snapshot', () => {
-  test('code', async () => {
-    const markdown = '```python\nimport this\n```\n';
+  describe('code', () => {
+    test('markdown code block', async () => {
+      const markdown = '```python\nimport this\n```\n';
 
-    const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: DefaultTheme.noteBackgrounColor,
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
-      children: [
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
-          flavour: 'affine:code',
-          props: {
-            language: 'python',
-            wrap: false,
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: 'import this',
-                },
-              ],
-            },
-          },
-          children: [],
+      const blockSnapshot: BlockSnapshot = {
+        type: 'block',
+        id: 'matchesReplaceMap[0]',
+        flavour: 'affine:note',
+        props: {
+          xywh: '[0,0,800,95]',
+          background: DefaultTheme.noteBackgrounColor,
+          index: 'a0',
+          hidden: false,
+          displayMode: NoteDisplayMode.DocAndEdgeless,
         },
-      ],
-    };
-
-    const mdAdapter = new MarkdownAdapter(createJob(), provider);
-    const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
-      file: markdown,
-    });
-    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
-  });
-
-  test('code with indentation 1 - slice', async () => {
-    const markdown = '```python\n    import this\n```';
-
-    const sliceSnapshot: SliceSnapshot = {
-      type: 'slice',
-      content: [
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[0]',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: DefaultTheme.noteBackgrounColor,
-            index: 'a0',
-            hidden: false,
-            displayMode: 'both',
-          },
-          children: [
-            {
-              type: 'block',
-              id: 'matchesReplaceMap[1]',
-              flavour: 'affine:code',
-              props: {
-                language: 'python',
-                wrap: false,
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: '    import this',
-                    },
-                  ],
-                },
+        children: [
+          {
+            type: 'block',
+            id: 'matchesReplaceMap[1]',
+            flavour: 'affine:code',
+            props: {
+              language: 'python',
+              wrap: false,
+              text: {
+                '$blocksuite:internal:text$': true,
+                delta: [
+                  {
+                    insert: 'import this',
+                  },
+                ],
               },
-              children: [],
             },
-          ],
-        },
-      ],
-      workspaceId: '',
-      pageId: '',
-    };
-
-    const mdAdapter = new MarkdownAdapter(createJob(), provider);
-    const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
-      file: markdown,
-      workspaceId: '',
-      pageId: '',
-    });
-    expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
-  });
-
-  test('code with indentation 2 - slice', async () => {
-    const markdown = '````python\n```python\n    import this\n```\n````';
-
-    const sliceSnapshot: SliceSnapshot = {
-      type: 'slice',
-      content: [
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[0]',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: DefaultTheme.noteBackgrounColor,
-            index: 'a0',
-            hidden: false,
-            displayMode: 'both',
+            children: [],
           },
-          children: [
-            {
-              type: 'block',
-              id: 'matchesReplaceMap[1]',
-              flavour: 'affine:code',
-              props: {
-                language: 'python',
-                wrap: false,
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: '```python\n    import this\n```',
-                    },
-                  ],
-                },
-              },
-              children: [],
-            },
-          ],
-        },
-      ],
-      workspaceId: '',
-      pageId: '',
-    };
+        ],
+      };
 
-    const mdAdapter = new MarkdownAdapter(createJob(), provider);
-    const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
-      file: markdown,
-      workspaceId: '',
-      pageId: '',
+      const mdAdapter = new MarkdownAdapter(createJob(), provider);
+      const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
+        file: markdown,
+      });
+      expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
     });
-    expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
-  });
 
-  test('code with indentation 3 - slice', async () => {
-    const markdown = '~~~~python\n````python\n    import this\n````\n~~~~';
+    test('code with indentation 1 - slice', async () => {
+      const markdown = '```python\n    import this\n```';
 
-    const sliceSnapshot: SliceSnapshot = {
-      type: 'slice',
-      content: [
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[0]',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: DefaultTheme.noteBackgrounColor,
-            index: 'a0',
-            hidden: false,
-            displayMode: 'both',
+      const sliceSnapshot: SliceSnapshot = {
+        type: 'slice',
+        content: [
+          {
+            type: 'block',
+            id: 'matchesReplaceMap[0]',
+            flavour: 'affine:note',
+            props: {
+              xywh: '[0,0,800,95]',
+              background: DefaultTheme.noteBackgrounColor,
+              index: 'a0',
+              hidden: false,
+              displayMode: 'both',
+            },
+            children: [
+              {
+                type: 'block',
+                id: 'matchesReplaceMap[1]',
+                flavour: 'affine:code',
+                props: {
+                  language: 'python',
+                  wrap: false,
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: '    import this',
+                      },
+                    ],
+                  },
+                },
+                children: [],
+              },
+            ],
           },
-          children: [
-            {
-              type: 'block',
-              id: 'matchesReplaceMap[1]',
-              flavour: 'affine:code',
-              props: {
-                language: 'python',
-                wrap: false,
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [
-                    {
-                      insert: '````python\n    import this\n````',
-                    },
-                  ],
-                },
-              },
-              children: [],
-            },
-          ],
-        },
-      ],
-      workspaceId: '',
-      pageId: '',
-    };
+        ],
+        workspaceId: '',
+        pageId: '',
+      };
 
-    const mdAdapter = new MarkdownAdapter(createJob(), provider);
-    const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
-      file: markdown,
-      workspaceId: '',
-      pageId: '',
+      const mdAdapter = new MarkdownAdapter(createJob(), provider);
+      const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
+        file: markdown,
+        workspaceId: '',
+        pageId: '',
+      });
+      expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
     });
-    expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
+
+    test('code with indentation 2 - slice', async () => {
+      const markdown = '````python\n```python\n    import this\n```\n````';
+
+      const sliceSnapshot: SliceSnapshot = {
+        type: 'slice',
+        content: [
+          {
+            type: 'block',
+            id: 'matchesReplaceMap[0]',
+            flavour: 'affine:note',
+            props: {
+              xywh: '[0,0,800,95]',
+              background: DefaultTheme.noteBackgrounColor,
+              index: 'a0',
+              hidden: false,
+              displayMode: 'both',
+            },
+            children: [
+              {
+                type: 'block',
+                id: 'matchesReplaceMap[1]',
+                flavour: 'affine:code',
+                props: {
+                  language: 'python',
+                  wrap: false,
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: '```python\n    import this\n```',
+                      },
+                    ],
+                  },
+                },
+                children: [],
+              },
+            ],
+          },
+        ],
+        workspaceId: '',
+        pageId: '',
+      };
+
+      const mdAdapter = new MarkdownAdapter(createJob(), provider);
+      const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
+        file: markdown,
+        workspaceId: '',
+        pageId: '',
+      });
+      expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
+    });
+
+    test('code with indentation 3 - slice', async () => {
+      const markdown = '~~~~python\n````python\n    import this\n````\n~~~~';
+
+      const sliceSnapshot: SliceSnapshot = {
+        type: 'slice',
+        content: [
+          {
+            type: 'block',
+            id: 'matchesReplaceMap[0]',
+            flavour: 'affine:note',
+            props: {
+              xywh: '[0,0,800,95]',
+              background: DefaultTheme.noteBackgrounColor,
+              index: 'a0',
+              hidden: false,
+              displayMode: 'both',
+            },
+            children: [
+              {
+                type: 'block',
+                id: 'matchesReplaceMap[1]',
+                flavour: 'affine:code',
+                props: {
+                  language: 'python',
+                  wrap: false,
+                  text: {
+                    '$blocksuite:internal:text$': true,
+                    delta: [
+                      {
+                        insert: '````python\n    import this\n````',
+                      },
+                    ],
+                  },
+                },
+                children: [],
+              },
+            ],
+          },
+        ],
+        workspaceId: '',
+        pageId: '',
+      };
+
+      const mdAdapter = new MarkdownAdapter(createJob(), provider);
+      const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
+        file: markdown,
+        workspaceId: '',
+        pageId: '',
+      });
+      expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
+    });
+
+    test('html block import as code block', async () => {
+      const markdown = `<div class="container">
+  <header>
+    <h1>Welcome to My Page</h1>
+    <nav>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <p>This is a sample HTML content</p>
+  </main>
+</div>`;
+
+      const blockSnapshot: BlockSnapshot = {
+        type: 'block',
+        id: 'matchesReplaceMap[0]',
+        flavour: 'affine:note',
+        props: {
+          xywh: '[0,0,800,95]',
+          background: DefaultTheme.noteBackgrounColor,
+          index: 'a0',
+          hidden: false,
+          displayMode: NoteDisplayMode.DocAndEdgeless,
+        },
+        children: [
+          {
+            type: 'block',
+            id: 'matchesReplaceMap[1]',
+            flavour: 'affine:code',
+            props: {
+              language: 'html',
+              wrap: false,
+              text: {
+                '$blocksuite:internal:text$': true,
+                delta: [
+                  {
+                    insert:
+                      '<div class="container">\n  <header>\n    <h1>Welcome to My Page</h1>\n    <nav>\n      <ul>\n        <li><a href="#home">Home</a></li>\n        <li><a href="#about">About</a></li>\n      </ul>\n    </nav>\n  </header>\n  <main>\n    <p>This is a sample HTML content</p>\n  </main>\n</div>',
+                  },
+                ],
+              },
+            },
+            children: [],
+          },
+        ],
+      };
+
+      const mdAdapter = new MarkdownAdapter(createJob(), provider);
+      const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
+        file: markdown,
+      });
+      expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+    });
   });
 
   test('paragraph', async () => {
@@ -3638,48 +3697,6 @@ bbb
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
 
-  test('html tag', async () => {
-    const markdown = `<aaa>\n`;
-
-    const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'matchesReplaceMap[0]',
-      flavour: 'affine:note',
-      props: {
-        xywh: '[0,0,800,95]',
-        background: DefaultTheme.noteBackgrounColor,
-        index: 'a0',
-        hidden: false,
-        displayMode: NoteDisplayMode.DocAndEdgeless,
-      },
-      children: [
-        {
-          type: 'block',
-          id: 'matchesReplaceMap[1]',
-          flavour: 'affine:paragraph',
-          props: {
-            text: {
-              '$blocksuite:internal:text$': true,
-              delta: [
-                {
-                  insert: '<aaa>',
-                },
-              ],
-            },
-            type: 'text',
-          },
-          children: [],
-        },
-      ],
-    };
-
-    const mdAdapter = new MarkdownAdapter(createJob(), provider);
-    const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
-      file: markdown,
-    });
-    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
-  });
-
   describe('inline latex', () => {
     test.each([
       ['dollar sign syntax', 'inline $E=mc^2$ latex\n'],
@@ -4090,5 +4107,56 @@ hhh
       file: markdown,
     });
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
+
+  test('should not wrap url with angle brackets if it is not a url', async () => {
+    const markdown = 'prompt: How many people will live in the world in 2040?';
+    const sliceSnapshot: SliceSnapshot = {
+      type: 'slice',
+      content: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[0]',
+          flavour: 'affine:note',
+          props: {
+            xywh: '[0,0,800,95]',
+            background: DefaultTheme.noteBackgrounColor,
+            index: 'a0',
+            hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[1]',
+              flavour: 'affine:paragraph',
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [
+                    {
+                      insert:
+                        'prompt: How many people will live in the world in 2040?',
+                    },
+                  ],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+      workspaceId: '',
+      pageId: '',
+    };
+
+    const mdAdapter = new MarkdownAdapter(createJob(), provider);
+    const rawSliceSnapshot = await mdAdapter.toSliceSnapshot({
+      file: markdown,
+      workspaceId: '',
+      pageId: '',
+    });
+    expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
   });
 });

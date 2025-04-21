@@ -299,12 +299,19 @@ export const builtinToolbarConfig = {
       icon: ResetIcon(),
       run(ctx) {
         const component = ctx.getCurrentBlockByType(EmbedIframeBlockComponent);
-        component?.refreshData().catch(console.error);
-
-        ctx.track('ReloadLink', {
-          ...trackBaseProps,
-          control: 'reload link',
-        });
+        component
+          ?.refreshData()
+          .then(success => {
+            ctx.track('ReloadLink', {
+              type: 'embed iframe block',
+              page: 'doc editor',
+              segment: 'doc',
+              module: 'toolbar',
+              control: 'reload link',
+              result: success ? 'success' : 'failure',
+            });
+          })
+          .catch(console.error);
       },
     },
     {

@@ -52,6 +52,7 @@
     { "path": "../widgets/edgeless-auto-connect" },
     { "path": "../widgets/edgeless-toolbar" },
     { "path": "../widgets/frame-title" },
+    { "path": "../widgets/keyboard-toolbar" },
     { "path": "../widgets/linked-doc" },
     { "path": "../widgets/remote-selection" },
     { "path": "../widgets/scroll-anchoring" },

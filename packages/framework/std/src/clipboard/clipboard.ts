@@ -15,9 +15,9 @@ import { ClipboardAdapterConfigIdentifier } from './clipboard-adapter.js';
 import { onlyContainImgElement } from './utils.js';
 
 export class Clipboard extends LifeCycleWatcher {
-  static override readonly key = 'clipboard';
+  static override key = 'clipboard';
 
-  private get _adapters() {
+  protected get _adapters() {
     const adapterConfigs = this.std.provider.getAll(
       ClipboardAdapterConfigIdentifier
     );

@@ -217,7 +217,7 @@ export class DocDisplayMetaService
 function iconBuilder(
   icon: typeof PageIcon,
   size = '1.25em',
-  style = 'user-select:none;flex-shrink:0;vertical-align:middle;font-size:inherit;margin-bottom:0.1em;'
+  style = 'user-select:none;flex-shrink:0;vertical-align:middle;font-size:inherit;'
 ) {
   return icon({ width: size, height: size, style });
 }

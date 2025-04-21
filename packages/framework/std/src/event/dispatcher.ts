@@ -46,6 +46,7 @@ const eventNames = [
 
   'keyDown',
   'keyUp',
+  'keyPress',
 
   'selectionChange',
   'compositionStart',

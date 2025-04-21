@@ -169,7 +169,7 @@ export class EdgelessRootPreviewBlockComponent extends BlockComponent<
   }
 
   private get _disableScheduleUpdate() {
-    const editorSetting = this.std.getOptional(EditorSettingProvider);
+    const editorSetting = this.std.getOptional(EditorSettingProvider)?.setting$;
 
     return editorSetting?.peek().edgelessDisableScheduleUpdate ?? false;
   }

@@ -10,6 +10,7 @@ import {
 } from '@blocksuite/affine-block-embed';
 import { updateBlockType } from '@blocksuite/affine-block-note';
 import { toast } from '@blocksuite/affine-components/toast';
+import { EditorChevronDown } from '@blocksuite/affine-components/toolbar';
 import {
   deleteTextCommand,
   formatBlockCommand,
@@ -40,7 +41,6 @@ import { ActionPlacement } from '@blocksuite/affine-shared/services';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import { tableViewMeta } from '@blocksuite/data-view/view-presets';
 import {
-  ArrowDownSmallIcon,
   CopyIcon,
   DatabaseTableViewIcon,
   DeleteIcon,
@@ -94,7 +94,7 @@ const conversionsActionGroup = {
               aria-label="Conversions"
               .tooltip="${'Turn into'}"
             >
-              ${conversion.icon} ${ArrowDownSmallIcon()}
+              ${conversion.icon} ${EditorChevronDown}
             </editor-icon-button>
           `}
         >
@@ -325,7 +325,6 @@ export const builtinToolbarConfig = {
                 types: ['block', 'image'],
                 mode: 'highest',
               })
-              .pipe(draftSelectedModelsCommand)
               .pipe(duplicateSelectedModelsCommand)
               .run();
           },

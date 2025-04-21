@@ -9,35 +9,29 @@ export class FootNotePopupChip extends LitElement {
       border-radius: 4px;
       max-width: 173px;
       height: 24px;
-      padding: 2px 4px;
+      padding: 4px;
       align-items: center;
-      gap: 4px;
+      gap: 8px;
       box-sizing: border-box;
       cursor: default;
       transition: width 0.3s ease-in-out;
     }
 
-    .prefix-icon,
-    .suffix-icon {
+    .prefix-icon {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 16px;
       height: 16px;
+      width: 16px;
       color: ${unsafeCSSVarV2('icon/primary')};
       border-radius: 4px;
 
       svg,
-      object {
+      img {
         width: 16px;
         height: 16px;
         fill: ${unsafeCSSVarV2('icon/primary')};
       }
-    }
-
-    .suffix-icon:hover {
-      background-color: ${unsafeCSSVarV2('layer/background/hoverOverlay')};
-      cursor: pointer;
     }
 
     .popup-chip-label {
@@ -46,11 +40,11 @@ export class FootNotePopupChip extends LitElement {
       text-overflow: ellipsis;
       white-space: nowrap;
       text-align: left;
-      height: 20px;
-      line-height: 20px;
+      height: 22px;
+      line-height: 22px;
       color: ${unsafeCSSVarV2('text/primary')};
-      font-size: 12px;
-      font-weight: 400;
+      font-size: var(--affine-font-sm);
+      font-weight: 500;
     }
   `;
 
@@ -63,11 +57,6 @@ export class FootNotePopupChip extends LitElement {
             </div>`
           : nothing}
         <div class="popup-chip-label" title=${this.tooltip}>${this.label}</div>
-        ${this.suffixIcon
-          ? html`<div class="suffix-icon" @click=${this.onSuffixClick}>
-              ${this.suffixIcon}
-            </div>`
-          : nothing}
       </div>
     `;
   }
@@ -79,9 +68,6 @@ export class FootNotePopupChip extends LitElement {
   accessor label: string = '';
 
   @property({ attribute: false })
-  accessor suffixIcon: TemplateResult | undefined = undefined;
-
-  @property({ attribute: false })
   accessor tooltip: string = '';
 
   @property({ attribute: false })
@@ -89,7 +75,4 @@ export class FootNotePopupChip extends LitElement {
 
   @property({ attribute: false })
   accessor onPrefixClick: (() => void) | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor onSuffixClick: (() => void) | undefined = undefined;
 }

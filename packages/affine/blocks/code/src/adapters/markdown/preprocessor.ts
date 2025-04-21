@@ -2,6 +2,7 @@ import {
   type MarkdownAdapterPreprocessor,
   MarkdownPreprocessorExtension,
 } from '@blocksuite/affine-shared/adapters';
+import { isValidUrl } from '@blocksuite/affine-shared/utils';
 
 const codePreprocessor: MarkdownAdapterPreprocessor = {
   name: 'code',
@@ -53,14 +54,9 @@ const codePreprocessor: MarkdownAdapterPreprocessor = {
           //
           // eg. /MuawcBMT1Mzvoar09-_66?mode=page&blockIds=rL2_GXbtLU2SsJVfCSmh_
           // https://www.markdownguide.org/basic-syntax/#urls-and-email-addresses
-          try {
-            const valid =
-              URL.canParse?.(trimmedLine) ?? Boolean(new URL(trimmedLine));
-            if (valid) {
-              return `<${trimmedLine}>`;
-            }
-          } catch (err) {
-            console.log(err);
+          const valid = isValidUrl(trimmedLine);
+          if (valid) {
+            return `<${trimmedLine}>`;
           }
         }
 

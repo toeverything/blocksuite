@@ -52,6 +52,13 @@ export const linkedDocPopoverStyles = css`
     flex-shrink: 0;
     font-weight: 500;
     justify-content: space-between;
+    max-width: 240px;
+  }
+
+  .linked-doc-popover .group-title .group-title-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .linked-doc-popover .group-title .loading-icon {

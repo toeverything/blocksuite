@@ -6,7 +6,6 @@ import {
   type SurfaceBlockModel,
   type SurfaceContext,
 } from '@blocksuite/affine-block-surface';
-import { TemplateJob } from '@blocksuite/affine-gfx-template';
 import {
   type ConnectorElementModel,
   RootBlockSchema,
@@ -38,8 +37,6 @@ export class EdgelessRootService extends RootService implements SurfaceContext {
   static override readonly flavour = RootBlockSchema.model.flavour;
 
   private readonly _surface: SurfaceBlockModel;
-
-  TemplateJob = TemplateJob;
 
   get blocks(): GfxBlockElementModel[] {
     return this.layer.blocks;

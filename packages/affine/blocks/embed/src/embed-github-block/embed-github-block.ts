@@ -4,7 +4,7 @@ import type {
   EmbedGithubStyles,
 } from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { BlockSelection } from '@blocksuite/std';
+import { BlockSelection, isGfxBlockComponent } from '@blocksuite/std';
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -166,16 +166,16 @@ export class EmbedGithubBlockComponent extends EmbedBlockComponent<
             'affine-embed-github-block': true,
             loading,
             [style]: true,
+            edgeless: isGfxBlockComponent(this),
             selected: this.selected$.value,
           })}
           style=${styleMap({
-            transform: `scale(${this._scale})`,
+            // transform: `scale(${this._scale})`,
             transformOrigin: '0 0 ',
           })}
           @click=${this._handleClick}
           @dblclick=${this._handleDoubleClick}
         >
-          <div class="affine-embed-github-banner">${bannerImage}</div>
           <div class="affine-embed-github-content">
             <div class="affine-embed-github-content-title">
               <div class="affine-embed-github-content-title-icons">
@@ -260,6 +260,7 @@ export class EmbedGithubBlockComponent extends EmbedBlockComponent<
               </div>
             </div>
           </div>
+          <div class="affine-embed-github-banner">${bannerImage}</div>
         </div>
       `
     );

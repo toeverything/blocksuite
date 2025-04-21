@@ -209,9 +209,9 @@ export class EmbedIframeErrorCard extends WithDisposable(LitElement) {
     });
   };
 
-  private readonly _handleRetry = (e: MouseEvent) => {
+  private readonly _handleRetry = async (e: MouseEvent) => {
     e.stopPropagation();
-    this.onRetry();
+    const success = await this.onRetry();
 
     // track retry event
     this.telemetryService?.track('ReloadLink', {
@@ -220,6 +220,7 @@ export class EmbedIframeErrorCard extends WithDisposable(LitElement) {
       segment: 'editor',
       module: 'embed block',
       control: 'reload button',
+      result: success ? 'success' : 'failure',
     });
   };
 
@@ -301,7 +302,7 @@ export class EmbedIframeErrorCard extends WithDisposable(LitElement) {
   accessor error: Error | null = null;
 
   @property({ attribute: false })
-  accessor onRetry!: () => void;
+  accessor onRetry!: () => Promise<boolean>;
 
   @property({ attribute: false })
   accessor model!: EmbedIframeBlockModel;

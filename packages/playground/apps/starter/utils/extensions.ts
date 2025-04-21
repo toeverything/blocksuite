@@ -25,7 +25,9 @@ export function getTestCommonExtensions(
 ): ExtensionType[] {
   return [
     FontConfigExtension(CommunityCanvasTextFonts),
-    EditorSettingExtension(mockEditorSetting()),
+    EditorSettingExtension({
+      setting$: mockEditorSetting(),
+    }),
     ParseDocUrlExtension(mockParseDocUrlService(editor.doc.workspace)),
     {
       setup: di => {

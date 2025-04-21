@@ -283,7 +283,7 @@ export class LinkedDocPopover extends SignalWatcher(
           return html`
             <div class="divider" ?hidden=${idx === 0}></div>
             <div class="group-title">
-              ${group.name}
+              <div class="group-title-text">${group.name}</div>
               ${group.isLoading
                 ? html`<span class="loading-icon">${LoadingIcon}</span>`
                 : nothing}

@@ -59,6 +59,21 @@ export class KeyboardControl {
 
   private composition = false;
 
+  private readonly _press = (event: KeyboardEvent) => {
+    if (!this._shouldTrigger(event)) {
+      return;
+    }
+    const keyboardEventState = new KeyboardEventState({
+      event,
+      composing: this.composition,
+    });
+
+    this._dispatcher.run(
+      'keyPress',
+      this._createContext(event, keyboardEventState)
+    );
+  };
+
   constructor(private readonly _dispatcher: UIEventDispatcher) {}
 
   private _createContext(event: Event, keyboardState: KeyboardEventState) {
@@ -105,6 +120,11 @@ export class KeyboardControl {
   listen() {
     this._dispatcher.disposables.addFromEvent(document, 'keydown', this._down);
     this._dispatcher.disposables.addFromEvent(document, 'keyup', this._up);
+    this._dispatcher.disposables.addFromEvent(
+      document,
+      'keypress',
+      this._press
+    );
     this._dispatcher.disposables.addFromEvent(
       document,
       'compositionstart',

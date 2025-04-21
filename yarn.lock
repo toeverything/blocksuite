@@ -913,6 +913,7 @@ __metadata:
     "@blocksuite/affine-widget-edgeless-auto-connect": "workspace:*"
     "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
     "@blocksuite/affine-widget-frame-title": "workspace:*"
+    "@blocksuite/affine-widget-keyboard-toolbar": "workspace:*"
     "@blocksuite/affine-widget-linked-doc": "workspace:*"
     "@blocksuite/affine-widget-remote-selection": "workspace:*"
     "@blocksuite/affine-widget-scroll-anchoring": "workspace:*"
@@ -1741,6 +1742,45 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@blocksuite/affine-widget-keyboard-toolbar@workspace:*, @blocksuite/affine-widget-keyboard-toolbar@workspace:packages/affine/widgets/keyboard-toolbar":
+  version: 0.0.0-use.local
+  resolution: "@blocksuite/affine-widget-keyboard-toolbar@workspace:packages/affine/widgets/keyboard-toolbar"
+  dependencies:
+    "@blocksuite/affine-block-attachment": "workspace:*"
+    "@blocksuite/affine-block-database": "workspace:*"
+    "@blocksuite/affine-block-embed": "workspace:*"
+    "@blocksuite/affine-block-image": "workspace:*"
+    "@blocksuite/affine-block-latex": "workspace:*"
+    "@blocksuite/affine-block-list": "workspace:*"
+    "@blocksuite/affine-block-note": "workspace:*"
+    "@blocksuite/affine-block-paragraph": "workspace:*"
+    "@blocksuite/affine-block-surface": "workspace:*"
+    "@blocksuite/affine-block-surface-ref": "workspace:*"
+    "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-fragment-doc-title": "workspace:*"
+    "@blocksuite/affine-inline-latex": "workspace:*"
+    "@blocksuite/affine-inline-link": "workspace:*"
+    "@blocksuite/affine-inline-preset": "workspace:*"
+    "@blocksuite/affine-inline-reference": "workspace:*"
+    "@blocksuite/affine-model": "workspace:*"
+    "@blocksuite/affine-rich-text": "workspace:*"
+    "@blocksuite/affine-shared": "workspace:*"
+    "@blocksuite/data-view": "workspace:*"
+    "@blocksuite/global": "workspace:*"
+    "@blocksuite/icons": "npm:^2.2.10"
+    "@blocksuite/std": "workspace:*"
+    "@blocksuite/store": "workspace:*"
+    "@lit/context": "npm:^1.1.2"
+    "@preact/signals-core": "npm:^1.8.0"
+    "@toeverything/theme": "npm:^1.1.12"
+    "@types/lodash-es": "npm:^4.17.12"
+    fflate: "npm:^0.8.2"
+    lit: "npm:^3.2.0"
+    lodash-es: "npm:^4.17.21"
+    rxjs: "npm:^7.8.1"
+  languageName: unknown
+  linkType: soft
+
 "@blocksuite/affine-widget-linked-doc@workspace:*, @blocksuite/affine-widget-linked-doc@workspace:packages/affine/widgets/linked-doc":
   version: 0.0.0-use.local
   resolution: "@blocksuite/affine-widget-linked-doc@workspace:packages/affine/widgets/linked-doc"
@@ -1899,6 +1939,7 @@ __metadata:
     "@blocksuite/affine-widget-edgeless-auto-connect": "workspace:*"
     "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
     "@blocksuite/affine-widget-frame-title": "workspace:*"
+    "@blocksuite/affine-widget-keyboard-toolbar": "workspace:*"
     "@blocksuite/affine-widget-linked-doc": "workspace:*"
     "@blocksuite/affine-widget-remote-selection": "workspace:*"
     "@blocksuite/affine-widget-scroll-anchoring": "workspace:*"
