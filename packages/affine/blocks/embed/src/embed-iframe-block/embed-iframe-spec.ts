@@ -21,3 +21,14 @@ export const EmbedIframeBlockSpec: ExtensionType[] = [
   createBuiltinToolbarConfigExtension(flavour),
   SlashMenuConfigExtension(flavour, embedIframeSlashMenuConfig),
 ].flat();
+
+export const EmbedIframeViewExtensions: ExtensionType[] = [
+  FlavourExtension(flavour),
+  BlockViewExtension(flavour, model => {
+    return model.parent?.flavour === 'affine:surface'
+      ? literal`affine-embed-edgeless-iframe-block`
+      : literal`affine-embed-iframe-block`;
+  }),
+  createBuiltinToolbarConfigExtension(flavour),
+  SlashMenuConfigExtension(flavour, embedIframeSlashMenuConfig),
+].flat();

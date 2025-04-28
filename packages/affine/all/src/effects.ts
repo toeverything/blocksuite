@@ -63,8 +63,6 @@ import { effects as widgetToolbarEffects } from '@blocksuite/affine-widget-toolb
 import { effects as dataViewEffects } from '@blocksuite/data-view/effects';
 import { effects as stdEffects } from '@blocksuite/std/effects';
 
-import { registerBlockSpecs } from './extensions';
-
 export declare const _GLOBAL_:
   | typeof stdEffects
   | typeof dataViewEffects
@@ -113,7 +111,6 @@ export declare const _GLOBAL_:
   | typeof fragmentOutlineEffects;
 
 export function effects() {
-  registerBlockSpecs();
   stdEffects();
 
   dataViewEffects();

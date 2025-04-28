@@ -2,7 +2,7 @@ import type { ServiceIdentifier } from '@blocksuite/global/di';
 import { DisposableGroup } from '@blocksuite/global/disposable';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import type { IBound, IPoint } from '@blocksuite/global/gfx';
-import { Signal } from '@preact/signals-core';
+import { computed, Signal } from '@preact/signals-core';
 import { Subject } from 'rxjs';
 
 import type { PointerEventState } from '../../event/index.js';
@@ -123,6 +123,18 @@ export class ToolController extends GfxExtension {
   readonly lastMousePos$ = new Signal<IPoint>({
     x: 0,
     y: 0,
+  });
+
+  readonly lastMouseModelPos$ = computed(() => {
+    const [x, y] = this.gfx.viewport.toModelCoord(
+      this.lastMousePos$.value.x,
+      this.lastMousePos$.value.y
+    );
+
+    return {
+      x,
+      y,
+    };
   });
 
   get currentTool$() {
@@ -330,6 +342,10 @@ export class ToolController extends GfxExtension {
           w: 0,
           h: 0,
         };
+        this.lastMousePos$.value = {
+          x: evt.x,
+          y: evt.y,
+        };
 
         // this means the dragEnd event is not even fired
         // so we need to manually call the dragEnd method
@@ -370,6 +386,11 @@ export class ToolController extends GfxExtension {
           y: Math.min(evt.y, draggingStart.originY),
           endX: evt.x,
           endY: evt.y,
+        };
+
+        this.lastMousePos$.value = {
+          x: evt.x,
+          y: evt.y,
         };
 
         invokeToolHandler('dragMove', evt, dragContext?.tool);

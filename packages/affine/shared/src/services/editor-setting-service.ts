@@ -35,7 +35,7 @@ export function EditorSettingExtension(
 ): ExtensionType {
   return {
     setup: di => {
-      di.addImpl(EditorSettingProvider, () => service);
+      di.override(EditorSettingProvider, () => service);
     },
   };
 }

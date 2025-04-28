@@ -1,3 +1,8 @@
+import type * as BrushEffect from '@blocksuite/affine-gfx-brush';
+import type * as NoteEffect from '@blocksuite/affine-gfx-note';
+import type * as PointerEffect from '@blocksuite/affine-gfx-pointer';
+import type * as ShapeEffect from '@blocksuite/affine-gfx-shape';
+
 export * from './adapters';
 export * from './clipboard/index.js';
 export * from './common-specs/index.js';
@@ -12,3 +17,9 @@ export { RootService } from './root-service.js';
 export * from './types.js';
 export * from './utils/index.js';
 export * from './widgets/index.js';
+
+declare type _GLOBAL_ =
+  | typeof PointerEffect
+  | typeof NoteEffect
+  | typeof BrushEffect
+  | typeof ShapeEffect;

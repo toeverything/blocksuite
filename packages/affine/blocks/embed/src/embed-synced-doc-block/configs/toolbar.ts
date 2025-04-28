@@ -1,6 +1,19 @@
 import { toast } from '@blocksuite/affine-components/toast';
 import { EditorChevronDown } from '@blocksuite/affine-components/toolbar';
-import { EmbedSyncedDocModel } from '@blocksuite/affine-model';
+import {
+  DEFAULT_NOTE_HEIGHT,
+  DEFAULT_NOTE_WIDTH,
+  EmbedSyncedDocModel,
+  NoteBlockModel,
+  NoteDisplayMode,
+  type NoteProps,
+  type ParagraphProps,
+} from '@blocksuite/affine-model';
+import {
+  draftSelectedModelsCommand,
+  duplicateSelectedModelsCommand,
+} from '@blocksuite/affine-shared/commands';
+import { REFERENCE_NODE } from '@blocksuite/affine-shared/consts';
 import {
   ActionPlacement,
   EditorSettingProvider,
@@ -13,7 +26,8 @@ import {
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
 } from '@blocksuite/affine-shared/services';
-import { getBlockProps } from '@blocksuite/affine-shared/utils';
+import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
+import { getBlockProps, matchModels } from '@blocksuite/affine-shared/utils';
 import { Bound } from '@blocksuite/global/gfx';
 import {
   CaptionIcon,
@@ -21,10 +35,16 @@ import {
   DeleteIcon,
   DuplicateIcon,
   ExpandFullIcon,
+  InsertIntoPageIcon,
   OpenInNewIcon,
 } from '@blocksuite/icons/lit';
 import { BlockFlavourIdentifier, isGfxBlockComponent } from '@blocksuite/std';
-import { type ExtensionType, Slice } from '@blocksuite/store';
+import {
+  type BlockModel,
+  type ExtensionType,
+  Slice,
+  Text,
+} from '@blocksuite/store';
 import { computed, signal } from '@preact/signals-core';
 import { html } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';
@@ -192,7 +212,7 @@ const conversionsActionGroup = {
 } as const satisfies ToolbarActionGroup<ToolbarAction>;
 
 const captionAction = {
-  id: 'c.caption',
+  id: 'd.caption',
   tooltip: 'Caption',
   icon: CaptionIcon(),
   run(ctx) {
@@ -269,11 +289,134 @@ const builtinToolbarConfig = {
 
 const builtinSurfaceToolbarConfig = {
   actions: [
+    // TODO(@L-Sun): remove this after impl header toolbar for embed-edgeless-synced-doc
     openDocActionGroup,
     conversionsActionGroup,
+    {
+      id: 'b.insert-to-page',
+      label: 'Insert to page',
+      tooltip: 'Insert to page',
+      icon: InsertIntoPageIcon(),
+      when: ({ std }) =>
+        std.get(FeatureFlagService).getFlag('enable_embed_doc_with_alias'),
+      run: ctx => {
+        const model = ctx.getCurrentModelByType(EmbedSyncedDocModel);
+        if (!model) return;
+
+        const lastVisibleNote = ctx.store
+          .getModelsByFlavour('affine:note')
+          .findLast(
+            (note): note is NoteBlockModel =>
+              matchModels(note, [NoteBlockModel]) &&
+              note.props.displayMode !== NoteDisplayMode.EdgelessOnly
+          );
+
+        ctx.doc.captureSync();
+        ctx.chain
+          .pipe(duplicateSelectedModelsCommand, {
+            selectedModels: [model],
+            parentModel: lastVisibleNote,
+          })
+          .run();
+      },
+    },
+    {
+      id: 'c.duplicate-as-note',
+      label: 'Duplicate as note',
+      tooltip:
+        'Duplicate as note to create an editable copy, the original remains unchanged.',
+      icon: DuplicateIcon(),
+      when: ({ std }) =>
+        std.get(FeatureFlagService).getFlag('enable_embed_doc_with_alias'),
+      run: ctx => {
+        const { gfx } = ctx;
+
+        const syncedDocModel = ctx.getCurrentModelByType(EmbedSyncedDocModel);
+        if (!syncedDocModel) return;
+
+        let contentModels: BlockModel[] = [];
+        {
+          const doc = ctx.store.workspace.getDoc(syncedDocModel.props.pageId);
+          // TODO(@L-Sun): clear query cache
+          const store = doc?.getStore({ readonly: true });
+          if (!store) return;
+          contentModels = store
+            .getModelsByFlavour('affine:note')
+            .filter(
+              (note): note is NoteBlockModel =>
+                matchModels(note, [NoteBlockModel]) &&
+                note.props.displayMode !== NoteDisplayMode.EdgelessOnly
+            )
+            .flatMap(note => note.children);
+        }
+        if (contentModels.length === 0) return;
+
+        ctx.doc.captureSync();
+        ctx.chain
+          .pipe(draftSelectedModelsCommand, {
+            selectedModels: contentModels,
+          })
+          .pipe(({ std, draftedModels }, next) => {
+            (async () => {
+              const PADDING = 20;
+              const x =
+                syncedDocModel.elementBound.x +
+                syncedDocModel.elementBound.w +
+                PADDING;
+              const y = syncedDocModel.elementBound.y;
+
+              const children = await draftedModels;
+              const noteId = std.store.addBlock(
+                'affine:note',
+                {
+                  xywh: new Bound(
+                    x,
+                    y,
+                    DEFAULT_NOTE_WIDTH,
+                    DEFAULT_NOTE_HEIGHT
+                  ).serialize(),
+                  displayMode: NoteDisplayMode.EdgelessOnly,
+                } satisfies Partial<NoteProps>,
+                ctx.store.root
+              );
+
+              std.store.addBlock(
+                'affine:paragraph',
+                {
+                  text: new Text<AffineTextAttributes>([
+                    {
+                      insert: REFERENCE_NODE,
+                      attributes: {
+                        reference: {
+                          type: 'LinkedPage',
+                          pageId: syncedDocModel.props.pageId,
+                        },
+                      },
+                    },
+                  ]),
+                } satisfies Partial<ParagraphProps>,
+                noteId
+              );
+
+              await std.clipboard.duplicateSlice(
+                Slice.fromModels(std.store, children),
+                std.store,
+                noteId
+              );
+
+              gfx.selection.set({
+                elements: [noteId],
+                editing: false,
+              });
+            })().catch(console.error);
+            return next();
+          })
+          .run();
+      },
+    },
     captionAction,
     {
-      id: 'd.scale',
+      id: 'e.scale',
       content(ctx) {
         const model = ctx.getCurrentBlockByType(
           EmbedSyncedDocBlockComponent

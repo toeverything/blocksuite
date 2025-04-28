@@ -345,6 +345,7 @@ export class EdgelessToolbarWidget extends WidgetComponent<RootBlockModel> {
       .map(tool =>
         tool({ block, gfx, toolbarContainer: this.toolbarContainer })
       )
+      .sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
       .filter(({ enable = true }) => enable);
   }
 

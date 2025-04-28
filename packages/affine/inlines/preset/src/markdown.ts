@@ -1,5 +1,4 @@
 import { LatexExtension } from '@blocksuite/affine-inline-latex';
-import { LinkExtension } from '@blocksuite/affine-inline-link';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import { InlineMarkdownExtension } from '@blocksuite/std/inline';
 import type { ExtensionType } from '@blocksuite/store';
@@ -371,6 +370,5 @@ export const MarkdownExtensions: ExtensionType[] = [
   StrikethroughExtension,
   UnderthroughExtension,
   CodeExtension,
-  LinkExtension,
   LatexExtension,
 ];

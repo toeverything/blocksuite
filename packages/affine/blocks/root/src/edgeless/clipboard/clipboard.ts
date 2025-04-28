@@ -415,8 +415,6 @@ export class EdgelessClipboardController extends PageClipboard {
     ctx.scale(dpr, dpr);
 
     const replaceImgSrcWithSvg = this._exportManager?.replaceImgSrcWithSvg;
-    const replaceRichTextWithSvgElementFunc =
-      this._replaceRichTextWithSvgElement.bind(this);
 
     const imageProxy = host.std.clipboard.configs.get('imageProxy');
     const html2canvasOption = {
@@ -448,7 +446,6 @@ export class EdgelessClipboardController extends PageClipboard {
           }
         });
         await replaceImgSrcWithSvg?.(element);
-        replaceRichTextWithSvgElementFunc(element);
       },
       backgroundColor: 'transparent',
       useCORS: imageProxy ? false : true,
@@ -518,30 +515,6 @@ export class EdgelessClipboardController extends PageClipboard {
     ctx.drawImage(surfaceCanvas, padding, padding, bound.w, bound.h);
 
     return canvas;
-  }
-
-  private _elementToSvgElement(
-    node: HTMLElement,
-    width: number,
-    height: number
-  ) {
-    const xmlns = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(xmlns, 'svg');
-    const foreignObject = document.createElementNS(xmlns, 'foreignObject');
-
-    svg.setAttribute('width', `${width}`);
-    svg.setAttribute('height', `${height}`);
-    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-
-    foreignObject.setAttribute('width', '100%');
-    foreignObject.setAttribute('height', '100%');
-    foreignObject.setAttribute('x', '0');
-    foreignObject.setAttribute('y', '0');
-    foreignObject.setAttribute('externalResourcesRequired', 'true');
-
-    svg.append(foreignObject);
-    foreignObject.append(node);
-    return svg;
   }
 
   private _emitSelectionChangeAfterPaste(
@@ -636,19 +609,6 @@ export class EdgelessClipboardController extends PageClipboard {
       editing: false,
     });
     this.gfx.tool.setTool('default');
-  }
-
-  private _replaceRichTextWithSvgElement(element: HTMLElement) {
-    const richList = Array.from(element.querySelectorAll('.inline-editor'));
-    richList.forEach(rich => {
-      const svgEle = this._elementToSvgElement(
-        rich.cloneNode(true) as HTMLElement,
-        rich.clientWidth,
-        rich.clientHeight + 1
-      );
-      rich.parentElement?.append(svgEle);
-      rich.remove();
-    });
   }
 
   copy() {

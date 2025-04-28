@@ -12,6 +12,7 @@
     { "path": "../../blocks/image" },
     { "path": "../../blocks/surface" },
     { "path": "../../components" },
+    { "path": "../../ext-loader" },
     { "path": "../connector" },
     { "path": "../shape" },
     { "path": "../text" },

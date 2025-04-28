@@ -18,3 +18,13 @@ export const EmbedSyncedDocBlockSpec: ExtensionType[] = [
   EmbedSyncedDocBlockAdapterExtensions,
   createBuiltinToolbarConfigExtension(flavour),
 ].flat();
+
+export const EmbedSyncedDocViewExtensions: ExtensionType[] = [
+  FlavourExtension(flavour),
+  BlockViewExtension(flavour, model => {
+    return model.parent?.flavour === 'affine:surface'
+      ? literal`affine-embed-edgeless-synced-doc-block`
+      : literal`affine-embed-synced-doc-block`;
+  }),
+  createBuiltinToolbarConfigExtension(flavour),
+].flat();

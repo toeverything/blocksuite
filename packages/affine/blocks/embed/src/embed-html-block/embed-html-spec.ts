@@ -15,3 +15,12 @@ export const EmbedHtmlBlockSpec: ExtensionType[] = [
   }),
   createBuiltinToolbarConfigExtension(flavour),
 ].flat();
+
+export const EmbedHtmlViewExtensions: ExtensionType[] = [
+  BlockViewExtension(flavour, model => {
+    return model.parent?.flavour === 'affine:surface'
+      ? literal`affine-embed-edgeless-html-block`
+      : literal`affine-embed-html-block`;
+  }),
+  createBuiltinToolbarConfigExtension(flavour),
+].flat();

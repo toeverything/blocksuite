@@ -1,9 +1,11 @@
 import {
-  ConnectorPathGenerator,
   type ElementRenderer,
   ElementRendererExtension,
 } from '@blocksuite/affine-block-surface';
-import { connector as renderConnector } from '@blocksuite/affine-gfx-connector';
+import {
+  connector as renderConnector,
+  ConnectorPathGenerator,
+} from '@blocksuite/affine-gfx-connector';
 import type {
   MindmapElementModel,
   MindmapNode,

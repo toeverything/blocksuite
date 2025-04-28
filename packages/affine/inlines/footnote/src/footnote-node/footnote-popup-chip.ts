@@ -1,20 +1,23 @@
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { css, html, LitElement, nothing, type TemplateResult } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import {
+  css,
+  html,
+  LitElement,
+  nothing,
+  type TemplateResult,
+  unsafeCSS,
+} from 'lit';
 import { property } from 'lit/decorators.js';
 
 export class FootNotePopupChip extends LitElement {
   static override styles = css`
     .popup-chip-container {
       display: flex;
-      border-radius: 4px;
-      max-width: 173px;
-      height: 24px;
-      padding: 4px;
+      height: 22px;
       align-items: center;
       gap: 8px;
       box-sizing: border-box;
-      cursor: default;
-      transition: width 0.3s ease-in-out;
     }
 
     .prefix-icon {
@@ -45,16 +48,15 @@ export class FootNotePopupChip extends LitElement {
       color: ${unsafeCSSVarV2('text/primary')};
       font-size: var(--affine-font-sm);
       font-weight: 500;
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
     }
   `;
 
   override render() {
     return html`
-      <div class="popup-chip-container" @click=${this.onClick}>
+      <div class="popup-chip-container">
         ${this.prefixIcon
-          ? html`<div class="prefix-icon" @click=${this.onPrefixClick}>
-              ${this.prefixIcon}
-            </div>`
+          ? html`<div class="prefix-icon">${this.prefixIcon}</div>`
           : nothing}
         <div class="popup-chip-label" title=${this.tooltip}>${this.label}</div>
       </div>
@@ -69,10 +71,4 @@ export class FootNotePopupChip extends LitElement {
 
   @property({ attribute: false })
   accessor tooltip: string = '';
-
-  @property({ attribute: false })
-  accessor onClick: (() => void) | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor onPrefixClick: (() => void) | undefined = undefined;
 }

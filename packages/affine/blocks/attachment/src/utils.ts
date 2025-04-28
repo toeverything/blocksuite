@@ -1,7 +1,8 @@
 import { toast } from '@blocksuite/affine-components/toast';
-import type {
-  AttachmentBlockModel,
-  AttachmentBlockProps,
+import {
+  type AttachmentBlockModel,
+  type AttachmentBlockProps,
+  AttachmentBlockSchema,
 } from '@blocksuite/affine-model';
 import {
   EMBED_CARD_HEIGHT,
@@ -12,8 +13,8 @@ import {
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
-import { Bound, type IVec, Point, Vec } from '@blocksuite/global/gfx';
-import type { BlockStdScope, EditorHost } from '@blocksuite/std';
+import { Bound, type IVec, Vec } from '@blocksuite/global/gfx';
+import type { BlockStdScope } from '@blocksuite/std';
 import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -34,7 +35,7 @@ function isAttachmentUploading(blockId: string) {
  * This function will not verify the size of the file.
  */
 export async function uploadAttachmentBlob(
-  editorHost: EditorHost,
+  std: BlockStdScope,
   blockId: string,
   blob: Blob,
   filetype: string,
@@ -44,43 +45,40 @@ export async function uploadAttachmentBlob(
     return;
   }
 
-  const doc = editorHost.doc;
   let sourceId: string | undefined;
 
   try {
     setAttachmentUploading(blockId);
-    sourceId = await doc.blobSync.set(blob);
+    sourceId = await std.store.blobSync.set(blob);
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
       toast(
-        editorHost,
+        std.host,
         `Failed to upload attachment! ${error.message || error.toString()}`
       );
     }
   } finally {
     setAttachmentUploaded(blockId);
 
-    const block = doc.getBlock(blockId);
+    const block = std.store.getBlock(blockId);
 
-    doc.withoutTransact(() => {
+    std.store.withoutTransact(() => {
       if (!block) return;
 
-      doc.updateBlock(block.model, {
+      std.store.updateBlock(block.model, {
         sourceId,
       } satisfies Partial<AttachmentBlockProps>);
     });
 
-    editorHost.std
-      .getOptional(TelemetryProvider)
-      ?.track('AttachmentUploadedEvent', {
-        page: `${isEdgeless ? 'whiteboard' : 'doc'} editor`,
-        module: 'attachment',
-        segment: 'attachment',
-        control: 'uploader',
-        type: filetype,
-        category: block && sourceId ? 'success' : 'failure',
-      });
+    std.getOptional(TelemetryProvider)?.track('AttachmentUploadedEvent', {
+      page: `${isEdgeless ? 'whiteboard' : 'doc'} editor`,
+      module: 'attachment',
+      segment: 'attachment',
+      control: 'uploader',
+      type: filetype,
+      category: block && sourceId ? 'success' : 'failure',
+    });
   }
 }
 
@@ -185,9 +183,8 @@ export function downloadAttachmentBlob(block: AttachmentBlockComponent) {
 }
 
 export async function getFileType(file: File) {
-  if (file.type) {
-    return file.type;
-  }
+  if (file.type) return file.type;
+
   // If the file type is not available, try to get it from the buffer.
   const buffer = await file.arrayBuffer();
   const FileType = await import('file-type');
@@ -199,9 +196,8 @@ export async function getFileType(file: File) {
  * Add a new attachment block before / after the specified block.
  */
 export async function addSiblingAttachmentBlocks(
-  editorHost: EditorHost,
+  std: BlockStdScope,
   files: File[],
-  maxFileSize: number,
   targetModel: BlockModel,
   place: 'before' | 'after' = 'after',
   isEmbed?: boolean
@@ -210,10 +206,11 @@ export async function addSiblingAttachmentBlocks(
     return;
   }
 
+  const maxFileSize = std.store.get(FileSizeLimitService).maxFileSize;
   const isSizeExceeded = files.some(file => file.size > maxFileSize);
   if (isSizeExceeded) {
     toast(
-      editorHost,
+      std.host,
       `You can only upload files less than ${humanFileSize(
         maxFileSize,
         true,
@@ -224,29 +221,36 @@ export async function addSiblingAttachmentBlocks(
   }
 
   const doc = targetModel.doc;
+  const flavour = AttachmentBlockSchema.model.flavour;
 
-  // Get the types of all files
-  const types = await Promise.all(files.map(file => getFileType(file)));
-  const attachmentBlockProps: (Partial<AttachmentBlockProps> & {
-    flavour: 'affine:attachment';
-  })[] = files.map((file, index) => ({
-    flavour: 'affine:attachment',
-    name: file.name,
-    size: file.size,
-    type: types[index],
-    embed: isEmbed,
-  }));
+  const droppedInfos = await Promise.all(
+    files.map(async file => {
+      const { name, size } = file;
+      const type = await getFileType(file);
+      const props = {
+        flavour,
+        name,
+        size,
+        type,
+        embed: isEmbed,
+      } satisfies Partial<AttachmentBlockProps> & {
+        flavour: typeof flavour;
+      };
+      return { props, file };
+    })
+  );
 
   const blockIds = doc.addSiblingBlocks(
     targetModel,
-    attachmentBlockProps,
+    droppedInfos.map(info => info.props),
     place
   );
 
-  blockIds.forEach(
-    (blockId, index) =>
-      void uploadAttachmentBlob(editorHost, blockId, files[index], types[index])
-  );
+  const uploadPromises = blockIds.map(async (blockId, index) => {
+    const { props, file } = droppedInfos[index];
+    await uploadAttachmentBlob(std, blockId, file, props.type);
+  });
+  await Promise.all(uploadPromises);
 
   return blockIds;
 }
@@ -284,40 +288,38 @@ export async function addAttachments(
     }
   }
 
-  const CARD_STACK_GAP = 32;
+  const xy = [x, y];
+  const style = 'cubeThick';
+  const gap = 32;
+  const width = EMBED_CARD_WIDTH.cubeThick;
+  const height = EMBED_CARD_HEIGHT.cubeThick;
 
-  const dropInfos: { blockId: string; file: File }[] = files.map(
-    (file, index) => {
-      const point = new Point(
-        x + index * CARD_STACK_GAP,
-        y + index * CARD_STACK_GAP
-      );
-      const center = Vec.toVec(point);
-      const bound = Bound.fromCenter(
-        center,
-        EMBED_CARD_WIDTH.cubeThick,
-        EMBED_CARD_HEIGHT.cubeThick
-      );
-      const blockId = std.store.addBlock(
-        'affine:attachment',
-        {
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          style: 'cubeThick',
-          xywh: bound.serialize(),
-        } satisfies Partial<AttachmentBlockProps>,
-        gfx.surface
-      );
+  const droppedInfos = files.map((file, index) => {
+    const { name, size } = file;
+    const center = Vec.addScalar(xy, index * gap);
+    const xywh = Bound.fromCenter(center, width, height).serialize();
+    const props = {
+      style,
+      name,
+      size,
+      xywh,
+    } satisfies Partial<AttachmentBlockProps>;
 
-      return { blockId, file };
-    }
-  );
+    return { file, props };
+  });
 
   // upload file and update the attachment model
-  const uploadPromises = dropInfos.map(async ({ blockId, file }) => {
-    const filetype = await getFileType(file);
-    await uploadAttachmentBlob(std.host, blockId, file, filetype, true);
+  const uploadPromises = droppedInfos.map(async ({ props, file }) => {
+    const type = await getFileType(file);
+
+    const blockId = std.store.addBlock(
+      AttachmentBlockSchema.model.flavour,
+      { ...props, type },
+      gfx.surface
+    );
+
+    await uploadAttachmentBlob(std, blockId, file, type, true);
+
     return blockId;
   });
   const blockIds = await Promise.all(uploadPromises);

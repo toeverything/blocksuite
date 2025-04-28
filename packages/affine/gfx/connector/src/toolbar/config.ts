@@ -1,7 +1,4 @@
-import {
-  ConnectorUtils,
-  EdgelessCRUDIdentifier,
-} from '@blocksuite/affine-block-surface';
+import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
 import {
   packColor,
   type PickColorEvent,
@@ -61,6 +58,7 @@ import { BlockFlavourIdentifier } from '@blocksuite/std';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { isConnectorWithLabel } from '../connector-manager';
 import { mountConnectorLabelEditor } from '../text';
 
 const FRONT_ENDPOINT_STYLE_LIST = [
@@ -350,7 +348,7 @@ export const connectorToolbarConfig = {
       ConnectorElementModel,
       'connector',
       (ctx, model, props) => {
-        if (!ConnectorUtils.isConnectorWithLabel(model)) return;
+        if (!isConnectorWithLabel(model)) return;
 
         const labelStyle = { ...model.labelStyle, ...props };
 

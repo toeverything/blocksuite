@@ -2396,6 +2396,9 @@ World!
                           reference: {
                             type: 'url',
                             url: 'https://www.example.com',
+                            favicon: 'https://www.example.com/favicon.ico',
+                            title: 'Example Domain',
+                            description: 'Example Domain',
                           },
                         },
                       },
@@ -2437,7 +2440,7 @@ World!
     };
 
     const markdown =
-      'aaa[^1][^2][^3]\n\n[^1]: {"type":"url","url":"https%3A%2F%2Fwww.example.com"}\n\n[^2]: {"type":"doc","docId":"deadbeef"}\n\n[^3]: {"type":"attachment","blobId":"abcdefg","fileName":"test.txt","fileType":"text/plain"}\n';
+      'aaa[^1][^2][^3]\n\n[^1]: {"type":"url","url":"https%3A%2F%2Fwww.example.com","favicon":"https%3A%2F%2Fwww.example.com%2Ffavicon.ico","title":"Example Domain","description":"Example Domain"}\n\n[^2]: {"type":"doc","docId":"deadbeef"}\n\n[^3]: {"type":"attachment","blobId":"abcdefg","fileName":"test.txt","fileType":"text/plain"}\n';
 
     const mdAdapter = new MarkdownAdapter(createJob(), provider);
     const target = await mdAdapter.fromBlockSnapshot({
@@ -4028,11 +4031,12 @@ hhh
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
 
-  test('without footnote middleware', async () => {
-    const markdown =
-      'aaa[^1][^2][^3]\n\n[^1]: {"type":"url","url":"https%3A%2F%2Fwww.example.com"}\n\n[^2]: {"type":"doc","docId":"deadbeef"}\n\n[^3]: {"type":"attachment","blobId":"abcdefg","fileName":"test.txt","fileType":"text/plain"}\n';
-
-    const blockSnapshot: BlockSnapshot = {
+  describe('footnote', () => {
+    const url = 'https://www.example.com';
+    const favicon = 'https://www.example.com/favicon.ico';
+    const title = 'Example Domain';
+    const description = 'Example Domain';
+    const blockSnapshot = {
       type: 'block',
       id: 'matchesReplaceMap[0]',
       flavour: 'affine:note',
@@ -4063,7 +4067,10 @@ hhh
                       label: '1',
                       reference: {
                         type: 'url',
-                        url: 'https://www.example.com',
+                        url,
+                        favicon,
+                        title,
+                        description,
                       },
                     },
                   },
@@ -4102,11 +4109,27 @@ hhh
       ],
     };
 
-    const mdAdapter = new MarkdownAdapter(createJob(), provider);
-    const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
-      file: markdown,
+    test('with encoded url and favicon', async () => {
+      const encodedUrl = encodeURIComponent(url);
+      const encodedFavicon = encodeURIComponent(favicon);
+      const markdown = `aaa[^1][^2][^3]\n\n[^1]: {"type":"url","url":"${encodedUrl}","favicon":"${encodedFavicon}","title":"${title}","description":"${description}"}\n\n[^2]: {"type":"doc","docId":"deadbeef"}\n\n[^3]: {"type":"attachment","blobId":"abcdefg","fileName":"test.txt","fileType":"text/plain"}\n`;
+
+      const mdAdapter = new MarkdownAdapter(createJob(), provider);
+      const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
+        file: markdown,
+      });
+      expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
     });
-    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+
+    test('with unencoded url and favicon', async () => {
+      const markdown = `aaa[^1][^2][^3]\n\n[^1]: {"type":"url","url":"${url}","favicon":"${favicon}","title":"${title}","description":"${description}"}\n\n[^2]: {"type":"doc","docId":"deadbeef"}\n\n[^3]: {"type":"attachment","blobId":"abcdefg","fileName":"test.txt","fileType":"text/plain"}\n`;
+
+      const mdAdapter = new MarkdownAdapter(createJob(), provider);
+      const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
+        file: markdown,
+      });
+      expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+    });
   });
 
   test('should not wrap url with angle brackets if it is not a url', async () => {

@@ -10,7 +10,7 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { Bound } from '@blocksuite/global/gfx';
 import { toGfxBlockComponent } from '@blocksuite/std';
-import type { SelectedContext } from '@blocksuite/std/gfx';
+import type { BoxSelectionContext, SelectedContext } from '@blocksuite/std/gfx';
 import { html, nothing, type PropertyValues } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -370,6 +370,10 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     } else {
       super.onSelected(context);
     }
+  }
+
+  override onBoxSelected(_: BoxSelectionContext) {
+    return this.model.props.displayMode !== NoteDisplayMode.DocOnly;
   }
 
   @state()

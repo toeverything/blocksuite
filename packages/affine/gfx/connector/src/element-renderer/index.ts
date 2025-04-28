@@ -1,6 +1,5 @@
 import {
   type CanvasRenderer,
-  ConnectorUtils,
   type ElementRenderer,
   ElementRendererExtension,
   type RoughCanvas,
@@ -26,6 +25,7 @@ import {
 } from '@blocksuite/global/gfx';
 import { deltaInsertsToChunks } from '@blocksuite/std/inline';
 
+import { isConnectorWithLabel } from '../connector-manager.js';
 import {
   DEFAULT_ARROW_SIZE,
   getArrowOptions,
@@ -55,7 +55,7 @@ export const connector: ElementRenderer<
 
   ctx.setTransform(matrix);
 
-  const hasLabel = ConnectorUtils.isConnectorWithLabel(model);
+  const hasLabel = isConnectorWithLabel(model);
   let dx = 0;
   let dy = 0;
 

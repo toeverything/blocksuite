@@ -70,7 +70,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
             <div class="affine-page-viewport" data-theme=${appTheme}>
               ${new BlockStdScope({
                 store: syncedDoc,
-                extensions: this._buildPreviewSpec('preview:page'),
+                extensions: this._buildPreviewSpec('preview-page'),
               }).render()}
             </div>
           `,
@@ -81,7 +81,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
             <div class="affine-edgeless-viewport" data-theme=${edgelessTheme}>
               ${new BlockStdScope({
                 store: syncedDoc,
-                extensions: this._buildPreviewSpec('preview:edgeless'),
+                extensions: this._buildPreviewSpec('preview-edgeless'),
               }).render()}
             </div>
           `,

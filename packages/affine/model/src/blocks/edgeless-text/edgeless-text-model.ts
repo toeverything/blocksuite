@@ -20,9 +20,9 @@ import {
   TextAlign,
   TextAlignSchema,
   type TextStyleProps,
-} from '../../consts/index.js';
-import { ColorSchema } from '../../themes/color.js';
-import { DefaultTheme } from '../../themes/default.js';
+} from '../../consts/index';
+import { ColorSchema } from '../../themes/color';
+import { DefaultTheme } from '../../themes/default';
 
 type EdgelessTextProps = {
   hasMaxWidth: boolean;
@@ -33,15 +33,15 @@ export const EdgelessTextZodSchema = z
   .object({
     color: ColorSchema,
     fontFamily: FontFamilySchema,
-    fontWeight: FontWeightSchema,
     fontStyle: FontStyleSchema,
+    fontWeight: FontWeightSchema,
     textAlign: TextAlignSchema,
   })
   .default({
     color: DefaultTheme.textColor,
     fontFamily: FontFamily.Inter,
-    fontWeight: FontWeight.Regular,
     fontStyle: FontStyle.Normal,
+    fontWeight: FontWeight.Regular,
     textAlign: TextAlign.Left,
   });
 
@@ -51,14 +51,10 @@ export const EdgelessTextBlockSchema = defineBlockSchema({
     xywh: '[0,0,16,16]',
     index: 'a0',
     lockedBySelf: false,
-    color: '#000000',
-    fontFamily: FontFamily.Inter,
-    fontStyle: FontStyle.Normal,
-    fontWeight: FontWeight.Regular,
-    textAlign: TextAlign.Left,
     scale: 1,
     rotate: 0,
     hasMaxWidth: false,
+    ...EdgelessTextZodSchema.parse(undefined),
   }),
   metadata: {
     version: 1,
@@ -75,9 +71,7 @@ export const EdgelessTextBlockSchema = defineBlockSchema({
       'affine:latex',
     ],
   },
-  toModel: () => {
-    return new EdgelessTextBlockModel();
-  },
+  toModel: () => new EdgelessTextBlockModel(),
 });
 
 export const EdgelessTextBlockSchemaExtension = BlockSchemaExtension(

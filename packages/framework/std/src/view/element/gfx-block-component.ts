@@ -4,12 +4,13 @@ import { computed, effect, signal } from '@preact/signals-core';
 import { nothing } from 'lit';
 
 import type { BlockService } from '../../extension/index.js';
+import { GfxControllerIdentifier } from '../../gfx/identifiers.js';
 import type {
+  BoxSelectionContext,
   DragMoveContext,
   GfxViewTransformInterface,
   SelectedContext,
-} from '../../gfx/element-transform/view-transform.js';
-import { GfxControllerIdentifier } from '../../gfx/identifiers.js';
+} from '../../gfx/interactivity/index.js';
 import { type GfxBlockElementModel } from '../../gfx/model/gfx-block-model.js';
 import { SurfaceSelection } from '../../selection/index.js';
 import { BlockComponent } from './block-component.js';
@@ -112,6 +113,8 @@ export abstract class GfxBlockComponent<
 
     return true;
   }
+
+  onBoxSelected(_: BoxSelectionContext) {}
 
   onRotate() {}
 
@@ -230,6 +233,8 @@ export function toGfxBlockComponent<
 
       return true;
     }
+
+    onBoxSelected(_: BoxSelectionContext) {}
 
     onRotate() {}
 

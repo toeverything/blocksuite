@@ -1,14 +1,18 @@
-import { defaultImageProxyMiddleware } from '@blocksuite/affine-block-image';
 import {
+  defaultImageProxyMiddleware,
   docLinkBaseURLMiddleware,
   fileNameMiddleware,
   HtmlAdapter,
   titleMiddleware,
 } from '@blocksuite/affine-shared/adapters';
-import { SpecProvider } from '@blocksuite/affine-shared/utils';
 import { Container } from '@blocksuite/global/di';
 import { sha } from '@blocksuite/global/utils';
-import type { Schema, Store, Workspace } from '@blocksuite/store';
+import type {
+  ExtensionType,
+  Schema,
+  Store,
+  Workspace,
+} from '@blocksuite/store';
 import { extMimeMap, Transformer } from '@blocksuite/store';
 
 import { createAssetsArchive, download, Unzip } from './utils.js';
@@ -18,18 +22,19 @@ type ImportHTMLToDocOptions = {
   schema: Schema;
   html: string;
   fileName?: string;
+  extensions: ExtensionType[];
 };
 
 type ImportHTMLZipOptions = {
   collection: Workspace;
   schema: Schema;
   imported: Blob;
+  extensions: ExtensionType[];
 };
 
-function getProvider() {
+function getProvider(extensions: ExtensionType[]) {
   const container = new Container();
-  const exts = SpecProvider._.getSpec('store').value;
-  exts.forEach(ext => {
+  extensions.forEach(ext => {
     ext.setup(container);
   });
   return container.provider();
@@ -42,7 +47,7 @@ function getProvider() {
  * @returns A Promise that resolves when the export is complete.
  */
 async function exportDoc(doc: Store) {
-  const provider = getProvider();
+  const provider = doc.provider;
   const job = doc.getTransformer([
     docLinkBaseURLMiddleware(doc.workspace.id),
     titleMiddleware(doc.workspace.meta.docMetas),
@@ -90,8 +95,9 @@ async function importHTMLToDoc({
   schema,
   html,
   fileName,
+  extensions,
 }: ImportHTMLToDocOptions) {
-  const provider = getProvider();
+  const provider = getProvider(extensions);
   const job = new Transformer({
     schema,
     blobCRUD: collection.blobSync,
@@ -130,8 +136,9 @@ async function importHTMLZip({
   collection,
   schema,
   imported,
+  extensions,
 }: ImportHTMLZipOptions) {
-  const provider = getProvider();
+  const provider = getProvider(extensions);
   const unzip = new Unzip();
   await unzip.load(imported);
 

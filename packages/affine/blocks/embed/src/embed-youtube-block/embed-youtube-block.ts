@@ -3,6 +3,7 @@ import type {
   EmbedYoutubeModel,
   EmbedYoutubeStyles,
 } from '@blocksuite/affine-model';
+import { ImageProxyService } from '@blocksuite/affine-shared/adapters';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { BlockSelection } from '@blocksuite/std';
 import { html, nothing } from 'lit';
@@ -106,24 +107,22 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
 
     const loading = this.loading;
     const theme = this.std.get(ThemeProvider).theme;
+    const imageProxyService = this.doc.get(ImageProxyService);
     const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons(theme);
     const titleIcon = loading ? LoadingIcon : YoutubeIcon;
     const titleText = loading ? 'Loading...' : title;
     const descriptionText = loading ? null : description;
     const bannerImage =
       !loading && image
-        ? html`<object type="image/webp" data=${image} draggable="false">
-            ${EmbedCardBannerIcon}
-          </object>`
+        ? html`<img src=${imageProxyService.buildUrl(image)} alt="banner" />`
         : EmbedCardBannerIcon;
 
     const creatorImageEl =
       !loading && creatorImage
-        ? html`<object
-            type="image/webp"
-            data=${creatorImage}
-            draggable="false"
-          ></object>`
+        ? html`<img
+            src=${imageProxyService.buildUrl(creatorImage)}
+            alt="creator"
+          />`
         : nothing;
 
     return this.renderEmbed(

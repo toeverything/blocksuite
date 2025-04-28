@@ -1,4 +1,3 @@
-import { FileSizeLimitService } from '@blocksuite/affine-shared/services';
 import { openFileOrFiles } from '@blocksuite/affine-shared/utils';
 import { type SlashMenuConfig } from '@blocksuite/affine-widget-slash-menu';
 import { ExportToPdfIcon, FileIcon } from '@blocksuite/icons/lit';
@@ -24,14 +23,8 @@ export const attachmentSlashMenuConfig: SlashMenuConfig = {
         (async () => {
           const file = await openFileOrFiles();
           if (!file) return;
-          const maxFileSize = std.store.get(FileSizeLimitService).maxFileSize;
-          await addSiblingAttachmentBlocks(
-            std.host,
-            [file],
-            maxFileSize,
-            model,
-            'after'
-          );
+
+          await addSiblingAttachmentBlocks(std, [file], model, 'after');
           if (model.text?.length === 0) {
             std.store.deleteBlock(model);
           }
@@ -54,15 +47,7 @@ export const attachmentSlashMenuConfig: SlashMenuConfig = {
           const file = await openFileOrFiles();
           if (!file) return;
 
-          const maxFileSize = std.store.get(FileSizeLimitService).maxFileSize;
-
-          await addSiblingAttachmentBlocks(
-            std.host,
-            [file],
-            maxFileSize,
-            model,
-            'after'
-          );
+          await addSiblingAttachmentBlocks(std, [file], model, 'after');
           if (model.text?.length === 0) {
             std.store.deleteBlock(model);
           }

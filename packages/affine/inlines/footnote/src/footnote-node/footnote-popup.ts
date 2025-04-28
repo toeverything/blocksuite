@@ -14,7 +14,8 @@ import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import type { BlockStdScope } from '@blocksuite/std';
 import { computed, signal } from '@preact/signals-core';
-import { css, html, LitElement } from 'lit';
+import { baseTheme } from '@toeverything/theme';
+import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import type { FootNotePopupClickHandler } from './footnote-config';
@@ -22,18 +23,43 @@ import type { FootNotePopupClickHandler } from './footnote-config';
 export class FootNotePopup extends SignalWatcher(WithDisposable(LitElement)) {
   static override styles = css`
     .footnote-popup-container {
-      border-radius: 4px;
+      border-radius: 8px;
       box-shadow: ${unsafeCSSVar('overlayPanelShadow')};
       background-color: ${unsafeCSSVarV2('layer/background/primary')};
       border: 0.5px solid ${unsafeCSSVarV2('layer/insideBorder/border')};
+      max-width: 260px;
+      padding: 4px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: 0.3s ease-in-out;
+      cursor: pointer;
+    }
+
+    .footnote-popup-description {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
+      font-size: var(--affine-font-xs);
+      font-style: normal;
+      font-weight: 400;
+      line-height: 20px;
+      height: 20px;
     }
   `;
 
   private readonly _isLoading$ = signal(false);
 
-  private readonly _linkPreview$ = signal<
-    { favicon: string | undefined; title?: string } | undefined
-  >({ favicon: undefined, title: undefined });
+  private readonly _linkPreview$ = signal<{
+    favicon: string | undefined;
+    title?: string;
+    description?: string;
+  }>({
+    favicon: undefined,
+    title: undefined,
+    description: undefined,
+  });
 
   private readonly _prefixIcon$ = computed(() => {
     const referenceType = this.footnote.reference.type;
@@ -90,7 +116,9 @@ export class FootNotePopup extends SignalWatcher(WithDisposable(LitElement)) {
   private readonly _tooltip$ = computed(() => {
     const referenceType = this.footnote.reference.type;
     if (referenceType === 'url') {
-      return this.footnote.reference.url ?? '';
+      const title = this._linkPreview$.value?.title;
+      const url = this.footnote.reference.url;
+      return [title, url].filter(Boolean).join(' ') || '';
     }
     return this._popupLabel$.value;
   });
@@ -100,14 +128,34 @@ export class FootNotePopup extends SignalWatcher(WithDisposable(LitElement)) {
     return theme === ColorScheme.Light ? LightLoadingIcon : DarkLoadingIcon;
   };
 
-  private readonly _onChipClick = () => {
+  private readonly _onClick = () => {
     this.onPopupClick(this.footnote, this.abortController);
     this.abortController.abort();
   };
 
+  private readonly _initLinkPreviewData = () => {
+    this._linkPreview$.value = {
+      favicon: this.footnote.reference.favicon,
+      title: this.footnote.reference.title,
+      description: this.footnote.reference.description,
+    };
+  };
+
   override connectedCallback() {
     super.connectedCallback();
-    if (this.footnote.reference.type === 'url' && this.footnote.reference.url) {
+
+    this._initLinkPreviewData();
+
+    // If the reference is a url, and the url exists
+    // and the link preview data is not already set, fetch the link preview data
+    const isTitleAndDescriptionEmpty =
+      !this._linkPreview$.value?.title &&
+      !this._linkPreview$.value?.description;
+    if (
+      this.footnote.reference.type === 'url' &&
+      this.footnote.reference.url &&
+      isTitleAndDescriptionEmpty
+    ) {
       this._isLoading$.value = true;
       this.std.store
         .get(LinkPreviewerService)
@@ -116,6 +164,7 @@ export class FootNotePopup extends SignalWatcher(WithDisposable(LitElement)) {
           this._linkPreview$.value = {
             favicon: data.icon ?? undefined,
             title: data.title ?? undefined,
+            description: data.description ?? undefined,
           };
         })
         .catch(console.error)
@@ -126,14 +175,18 @@ export class FootNotePopup extends SignalWatcher(WithDisposable(LitElement)) {
   }
 
   override render() {
+    const description = this._linkPreview$.value?.description;
+
     return html`
-      <div class="footnote-popup-container">
+      <div class="footnote-popup-container" @click=${this._onClick}>
         <footnote-popup-chip
           .prefixIcon=${this._prefixIcon$.value}
           .label=${this._popupLabel$.value}
-          .onClick=${this._onChipClick}
           .tooltip=${this._tooltip$.value}
         ></footnote-popup-chip>
+        ${description
+          ? html` <div class="footnote-popup-description">${description}</div> `
+          : nothing}
       </div>
     `;
   }

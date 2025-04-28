@@ -11,7 +11,6 @@ export const styles = css`
     border-radius: 8px;
     border: 1px solid var(--affine-background-tertiary-color);
 
-    opacity: var(--add, 1);
     background: var(--affine-background-primary-color);
     user-select: none;
     overflow: hidden;
@@ -24,8 +23,6 @@ export const styles = css`
     align-self: stretch;
     gap: 4px;
     padding: 12px;
-    border-radius: var(--1, 0px);
-    opacity: var(--add, 1);
     overflow: hidden;
   }
 
@@ -37,9 +34,6 @@ export const styles = css`
     align-items: center;
 
     align-self: stretch;
-    padding: var(--1, 0px);
-    border-radius: var(--1, 0px);
-    opacity: var(--add, 1);
   }
 
   .affine-embed-github-content-title-icons {
@@ -214,7 +208,6 @@ export const styles = css`
     margin: 12px 0px 0px 12px;
     width: 204px;
     height: 102px;
-    opacity: var(--add, 1);
   }
 
   .affine-embed-github-banner img,
@@ -223,7 +216,7 @@ export const styles = css`
     width: 204px;
     height: 102px;
     object-fit: cover;
-    border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
+    border-radius: 4px;
   }
 
   .affine-embed-github-block.loading {
@@ -288,7 +281,6 @@ export const styles = css`
 
     .affine-embed-github-content-assignees {
       display: flex;
-      padding: var(--1, 0px);
       align-items: center;
       justify-content: flex-start;
       gap: 2px;

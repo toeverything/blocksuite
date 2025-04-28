@@ -97,6 +97,10 @@ export function mockNotificationService(editor: TestAffineEditorContainer) {
       // todo: implement in playground
       console.log(notification);
     },
+    notifyWithUndoAction: notification => {
+      // todo: implement in playground
+      console.log(notification);
+    },
   };
   return notificationService;
 }

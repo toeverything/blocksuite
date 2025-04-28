@@ -80,6 +80,7 @@ export class PageClipboard extends ReadOnlyClipboard {
     const e = ctx.get('clipboardState').raw;
     e.preventDefault();
 
+    if (this.std.store.readonly) return;
     this.std.store.captureSync();
     this.std.command
       .chain()

@@ -27,7 +27,6 @@ import type {
   GfxModel,
   GfxPrimitiveElementModel,
   GfxToolsFullOptionValue,
-  Viewport,
 } from '@blocksuite/std/gfx';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -102,14 +101,6 @@ export function isEmbedIframeBlock(element: BlockModel | GfxModel | null) {
     !!element &&
     'flavour' in element &&
     element.flavour === 'affine:embed-iframe'
-  );
-}
-
-export function isEmbeddedLinkBlock(element: BlockModel | GfxModel | null) {
-  return (
-    isEmbeddedBlock(element) &&
-    !isEmbedSyncedDocBlock(element) &&
-    !isEmbedLinkedDocBlock(element)
   );
 }
 
@@ -197,12 +188,6 @@ export function isConnectable(
   element: GfxModel | null
 ): element is Connectable {
   return !!element && element.connectable;
-}
-
-export function getSelectionBoxBound(viewport: Viewport, bound: Bound) {
-  const { w, h } = bound;
-  const [x, y] = viewport.toViewCoord(bound.x, bound.y);
-  return new DOMRect(x, y, w * viewport.zoom, h * viewport.zoom);
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/cursor

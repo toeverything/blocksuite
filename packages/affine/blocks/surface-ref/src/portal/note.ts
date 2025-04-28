@@ -1,4 +1,5 @@
 import type { CanvasRenderer } from '@blocksuite/affine-block-surface';
+import { ViewExtensionManagerIdentifier } from '@blocksuite/affine-ext-loader';
 import type { NoteBlockModel } from '@blocksuite/affine-model';
 import {
   DefaultTheme,
@@ -10,7 +11,6 @@ import {
   EDGELESS_BLOCK_CHILD_PADDING,
 } from '@blocksuite/affine-shared/consts';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { SpecProvider } from '@blocksuite/affine-shared/utils';
 import { deserializeXYWH } from '@blocksuite/global/gfx';
 import { WithDisposable } from '@blocksuite/global/lit';
 import {
@@ -122,10 +122,12 @@ export class SurfaceRefNotePortal extends WithDisposable(ShadowlessElement) {
       query: this.query,
       readonly: true,
     });
-    const previewSpec = SpecProvider._.getSpec('preview:page');
+    const previewSpec = this.host.std
+      .get(ViewExtensionManagerIdentifier)
+      .get('preview-page');
     return new BlockStdScope({
       store: doc,
-      extensions: previewSpec.value.slice(),
+      extensions: previewSpec,
     }).render();
   }
 

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-restricted-imports */
 import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
 
-import { defaultImageProxyMiddleware } from '@blocksuite/affine/blocks/image';
 import { WithDisposable } from '@blocksuite/affine/global/lit';
 import {
+  defaultImageProxyMiddleware,
   docLinkBaseURLMiddlewareBuilder,
   embedSyncedDocMiddleware,
   type HtmlAdapter,

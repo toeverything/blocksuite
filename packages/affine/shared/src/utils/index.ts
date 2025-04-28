@@ -20,7 +20,6 @@ export * from './print-to-pdf';
 export * from './reference';
 export * from './reordering';
 export * from './signal';
-export * from './spec';
 export * from './string';
 export * from './title';
 export * from './url';

@@ -1,19 +1,15 @@
 import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
 import type { RootBlockModel } from '@blocksuite/affine-model';
 import { WidgetComponent } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import { effect } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { state } from 'lit/decorators.js';
 
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
-
 export const AFFINE_EDGELESS_ZOOM_TOOLBAR_WIDGET =
   'affine-edgeless-zoom-toolbar-widget';
 
-export class AffineEdgelessZoomToolbarWidget extends WidgetComponent<
-  RootBlockModel,
-  EdgelessRootBlockComponent
-> {
+export class AffineEdgelessZoomToolbarWidget extends WidgetComponent<RootBlockModel> {
   static override styles = css`
     :host {
       position: absolute;
@@ -43,12 +39,16 @@ export class AffineEdgelessZoomToolbarWidget extends WidgetComponent<
     return this.block;
   }
 
+  get gfx() {
+    return this.std.get(GfxControllerIdentifier);
+  }
+
   override connectedCallback() {
     super.connectedCallback();
 
     this.disposables.add(
       effect(() => {
-        const currentTool = this.edgeless?.gfx.tool.currentToolName$.value;
+        const currentTool = this.gfx.tool.currentToolName$.value;
 
         if (currentTool !== 'frameNavigator') {
           this._hide = false;
@@ -77,10 +77,8 @@ export class AffineEdgelessZoomToolbarWidget extends WidgetComponent<
     }
 
     return html`
-      <edgeless-zoom-toolbar .edgeless=${this.edgeless}></edgeless-zoom-toolbar>
-      <zoom-bar-toggle-button
-        .edgeless=${this.edgeless}
-      ></zoom-bar-toggle-button>
+      <edgeless-zoom-toolbar .std=${this.std}></edgeless-zoom-toolbar>
+      <zoom-bar-toggle-button .std=${this.std}></zoom-bar-toggle-button>
     `;
   }
 

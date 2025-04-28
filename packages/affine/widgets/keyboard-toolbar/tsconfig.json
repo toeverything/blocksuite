@@ -18,6 +18,7 @@
     { "path": "../../blocks/surface" },
     { "path": "../../blocks/surface-ref" },
     { "path": "../../components" },
+    { "path": "../../ext-loader" },
     { "path": "../../fragments/doc-title" },
     { "path": "../../inlines/latex" },
     { "path": "../../inlines/link" },

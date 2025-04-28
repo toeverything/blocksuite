@@ -17,7 +17,6 @@ export const styles = css`
     border-radius: 12px;
     border: 1px solid var(--affine-background-tertiary-color);
 
-    opacity: var(--add, 1);
     background: var(--affine-background-primary-color);
     user-select: none;
   }
@@ -25,7 +24,6 @@ export const styles = css`
   .affine-embed-html {
     flex-grow: 1;
     width: 100%;
-    opacity: var(--add, 1);
   }
 
   .affine-embed-html img,
@@ -34,7 +32,7 @@ export const styles = css`
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
+    border-radius: 4px;
   }
 
   .affine-embed-html-iframe-container {
@@ -94,10 +92,6 @@ export const styles = css`
     display: flex;
     align-items: center;
     gap: 8px;
-
-    padding: var(--1, 0px);
-    border-radius: var(--1, 0px);
-    opacity: var(--add, 1);
   }
 
   .affine-embed-html-title-icon {

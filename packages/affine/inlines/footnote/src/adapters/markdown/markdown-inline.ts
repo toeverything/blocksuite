@@ -26,6 +26,11 @@ export const markdownFootnoteReferenceToDeltaMatcher =
             footnoteDefinitionJson.url
           );
         }
+        if (footnoteDefinitionJson.favicon) {
+          footnoteDefinitionJson.favicon = decodeURIComponent(
+            footnoteDefinitionJson.favicon
+          );
+        }
         const footnoteReference = FootNoteReferenceParamsSchema.parse(
           footnoteDefinitionJson
         );

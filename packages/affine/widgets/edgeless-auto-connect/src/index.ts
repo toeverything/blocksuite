@@ -288,8 +288,7 @@ export class EdgelessAutoConnectWidget extends WidgetComponent<RootBlockModel> {
     if (!this.block) {
       return;
     }
-    const { service } = this.block;
-    const surfaceRefs = service.doc
+    const surfaceRefs = this.block.std.store
       .getBlocksByFlavour('affine:surface-ref')
       .map(block => block.model) as SurfaceRefBlockModel[];
 

@@ -125,7 +125,7 @@ describe('snapshot to html', () => {
     };
 
     const html = template(
-      `<pre class="shiki light-plus" style="background-color:#FFFFFF;color:#000000" tabindex="0"><code><span class="line"><span style="color:#AF00DB">import</span><span style="color:#000000"> this</span></span></code></pre>`
+      `<pre><code class="code-python">import this</code></pre>`
     );
 
     const htmlAdapter = new HtmlAdapter(createJob(), provider);
@@ -191,7 +191,7 @@ describe('snapshot to html', () => {
     };
 
     const html = template(
-      `<pre class="shiki light-plus" style="background-color:#FFFFFF;color:#000000" tabindex="0"><code><span class="line"><span>import this</span></span></code></pre>`
+      `<pre><code class="code-PYTHON">import this</code></pre>`
     );
 
     const htmlAdapter = new HtmlAdapter(createJob(), provider);
@@ -257,7 +257,7 @@ describe('snapshot to html', () => {
     };
 
     const html = template(
-      `<pre class="shiki light-plus" style="background-color:#FFFFFF;color:#000000" tabindex="0"><code><span class="line"><span>import this</span></span></code></pre>`
+      `<pre><code class="code-unknown">import this</code></pre>`
     );
 
     const htmlAdapter = new HtmlAdapter(createJob(), provider);

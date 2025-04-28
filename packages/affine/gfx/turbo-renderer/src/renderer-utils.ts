@@ -58,7 +58,9 @@ export function getViewportLayoutTree(
     const handler = providersArray.find(p => p.blockType === model.flavour);
 
     // Determine the correct viewport state to use
-    const component = host.std.view.getBlock(model.id) as GfxBlockComponent;
+    const component = host.std.view.getBlock(
+      model.id
+    ) as GfxBlockComponent | null;
     const currentViewportState = component?.dataset.viewportState;
     const effectiveViewportState =
       currentViewportState ?? ancestorViewportState;
@@ -77,14 +79,24 @@ export function getViewportLayoutTree(
       : defaultViewportState;
 
     const layoutData = handler?.queryLayout(model, host, viewportRecord);
+    let layout: BlockLayout = baseLayout;
 
     if (handler && layoutData) {
-      const { rect } = handler.calculateBound(layoutData);
-      baseLayout.rect = rect;
-      layoutMinX = Math.min(layoutMinX, rect.x);
-      layoutMinY = Math.min(layoutMinY, rect.y);
-      layoutMaxX = Math.max(layoutMaxX, rect.x + rect.w);
-      layoutMaxY = Math.max(layoutMaxY, rect.y + rect.h);
+      const { rect: calculatedRect } = handler.calculateBound(layoutData);
+      layout = {
+        ...layoutData,
+        ...baseLayout,
+        rect: calculatedRect,
+      };
+      layoutMinX = Math.min(layoutMinX, calculatedRect.x);
+      layoutMinY = Math.min(layoutMinY, calculatedRect.y);
+      layoutMaxX = Math.max(layoutMaxX, calculatedRect.x + calculatedRect.w);
+      layoutMaxY = Math.max(layoutMaxY, calculatedRect.y + calculatedRect.h);
+    } else {
+      layoutMinX = Math.min(layoutMinX, baseLayout.rect.x);
+      layoutMinY = Math.min(layoutMinY, baseLayout.rect.y);
+      layoutMaxX = Math.max(layoutMaxX, baseLayout.rect.x + baseLayout.rect.w);
+      layoutMaxY = Math.max(layoutMaxY, baseLayout.rect.y + baseLayout.rect.h);
     }
 
     const children: BlockLayoutTreeNode[] = [];
@@ -95,12 +107,10 @@ export function getViewportLayoutTree(
       }
     }
 
-    // Create node for this block - ALWAYS return a node
-    // Return the node structure including the layout (either real or fallback)
     return {
       blockId: model.id,
       type: model.flavour,
-      layout: layoutData ? { ...baseLayout, ...layoutData } : baseLayout,
+      layout,
       children,
     };
   };

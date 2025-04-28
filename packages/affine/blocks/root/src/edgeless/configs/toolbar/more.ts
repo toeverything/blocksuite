@@ -347,7 +347,7 @@ export const moreActions = [
               other: 'new doc',
             });
 
-            notifyDocCreated(ctx.std, ctx.store);
+            notifyDocCreated(ctx.std);
           };
 
           create().catch(console.error);
