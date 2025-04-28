@@ -1,5 +1,6 @@
 import { Text, type Workspace } from '@blocksuite/affine/store';
 import { MarkdownTransformer } from '@blocksuite/affine/widgets/linked-doc';
+import { getTestStoreManager } from '@blocksuite/integration-test/store';
 
 import type { InitFn } from './utils.js';
 
@@ -26,6 +27,7 @@ export const preset: InitFn = async (collection: Workspace, id: string) => {
     doc,
     blockId: noteId,
     markdown: presetMarkdown,
+    extensions: getTestStoreManager().get('store'),
   });
 
   doc.resetHistory();

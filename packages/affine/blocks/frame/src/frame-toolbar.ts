@@ -16,6 +16,7 @@ import {
   SurfaceRefBlockSchema,
 } from '@blocksuite/affine-model';
 import {
+  NotificationProvider,
   type ToolbarContext,
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
@@ -26,7 +27,11 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { mountFrameTitleEditor } from '@blocksuite/affine-widget-frame-title';
 import { Bound } from '@blocksuite/global/gfx';
-import { EditIcon, PageIcon, UngroupIcon } from '@blocksuite/icons/lit';
+import {
+  EditIcon,
+  InsertIntoPageIcon,
+  UngroupIcon,
+} from '@blocksuite/icons/lit';
 import { type BlockComponent, BlockFlavourIdentifier } from '@blocksuite/std';
 import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import type { ExtensionType } from '@blocksuite/store';
@@ -46,9 +51,8 @@ const builtinSurfaceToolbarConfig = {
     {
       id: 'a.insert-into-page',
       label: 'Insert into Page',
-      showLabel: true,
       tooltip: 'Insert into Page',
-      icon: PageIcon(),
+      icon: InsertIntoPageIcon(),
       when: ctx => ctx.getSurfaceModelsByType(FrameBlockModel).length === 1,
       run(ctx) {
         const model = ctx.getCurrentModelByType(FrameBlockModel);
@@ -78,13 +82,23 @@ const builtinSurfaceToolbarConfig = {
           );
         }
 
+        ctx.store.captureSync();
         ctx.store.addBlock(
           SurfaceRefBlockSchema.model.flavour,
           { reference: frameId, refFlavour: FrameBlockSchema.model.flavour },
           lastNoteId
         );
 
-        toast(ctx.host, 'Frame has been inserted into doc');
+        const notification = ctx.std.getOptional(NotificationProvider);
+        if (notification) {
+          notification.notifyWithUndoAction({
+            title: 'Frame inserted into Page.',
+            message: 'Frame has been inserted into doc',
+            accent: 'success',
+          });
+        } else {
+          toast(ctx.host, 'Frame has been inserted into doc');
+        }
       },
     },
     {

@@ -13,6 +13,7 @@
     "@blocksuite/affine-block-embed": "workspace:*",
     "@blocksuite/affine-block-surface": "workspace:*",
     "@blocksuite/affine-components": "workspace:*",
+    "@blocksuite/affine-ext-loader": "workspace:*",
     "@blocksuite/affine-fragment-doc-title": "workspace:*",
     "@blocksuite/affine-gfx-turbo-renderer": "workspace:*",
     "@blocksuite/affine-inline-preset": "workspace:*",
@@ -21,7 +22,7 @@
     "@blocksuite/affine-shared": "workspace:*",
     "@blocksuite/affine-widget-slash-menu": "workspace:*",
     "@blocksuite/global": "workspace:*",
-    "@blocksuite/icons": "^2.2.10",
+    "@blocksuite/icons": "^2.2.12",
     "@blocksuite/std": "workspace:*",
     "@blocksuite/store": "workspace:*",
     "@lit/context": "^1.1.2",
@@ -39,7 +40,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./effects": "./src/effects.ts",
-    "./turbo-painter": "./src/turbo/note-painter.worker.ts"
+    "./turbo-painter": "./src/turbo/note-painter.worker.ts",
+    "./store": "./src/store.ts",
+    "./view": "./src/view.ts"
   },
   "files": [
     "src",

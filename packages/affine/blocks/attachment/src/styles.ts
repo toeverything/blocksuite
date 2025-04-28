@@ -26,9 +26,6 @@ export const styles = css`
     align-items: flex-start;
     gap: 12px;
     flex: 1 0 0;
-
-    border-radius: var(--1, 0px);
-    opacity: var(--add, 1);
   }
 
   .affine-attachment-content-title {
@@ -38,9 +35,6 @@ export const styles = css`
     align-items: center;
 
     align-self: stretch;
-    padding: var(--1, 0px);
-    border-radius: var(--1, 0px);
-    opacity: var(--add, 1);
   }
 
   .affine-attachment-content-title-icon {
@@ -96,11 +90,6 @@ export const styles = css`
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .affine-attachment-banner svg {
-    width: 40px;
-    height: 40px;
   }
 
   .affine-attachment-card.loading {

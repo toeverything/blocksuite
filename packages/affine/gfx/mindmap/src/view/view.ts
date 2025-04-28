@@ -7,8 +7,13 @@ import {
 } from '@blocksuite/affine-model';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { requestThrottledConnectedFrame } from '@blocksuite/affine-shared/utils';
+import { Bound } from '@blocksuite/global/gfx';
 import type { PointerEventState } from '@blocksuite/std';
-import { GfxElementModelView } from '@blocksuite/std/gfx';
+import {
+  type BoxSelectionContext,
+  GfxElementModelView,
+  type SelectedContext,
+} from '@blocksuite/std/gfx';
 
 import { handleLayout } from './utils.js';
 
@@ -327,6 +332,40 @@ export class MindMapView extends GfxElementModelView<MindmapElementModel> {
     }
 
     return collapseButton;
+  }
+
+  override onSelected(context: SelectedContext): void | boolean {
+    const { position } = context;
+    const target = this.model.childElements.find(child => {
+      if (child.elementBound.containsPoint([position.x, position.y])) {
+        return true;
+      }
+
+      return false;
+    });
+
+    if (target) {
+      if (this.model.isLocked()) {
+        return super.onSelected(context);
+      }
+
+      if (context.multiSelect) {
+        this.gfx.selection.toggle(target);
+      } else {
+        this.gfx.selection.set({ elements: [target.id] });
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+
+  override onBoxSelected(context: BoxSelectionContext) {
+    const { box } = context;
+    const bound = new Bound(box.x, box.y, box.w, box.h);
+
+    return bound.contains(this.model.elementBound);
   }
 
   override onCreated(): void {

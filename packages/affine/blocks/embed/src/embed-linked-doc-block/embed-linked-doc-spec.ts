@@ -19,3 +19,13 @@ export const EmbedLinkedDocBlockSpec: ExtensionType[] = [
   createBuiltinToolbarConfigExtension(flavour),
   LinkedDocSlashMenuConfigExtension,
 ].flat();
+
+export const EmbedLinkedDocViewExtensions: ExtensionType[] = [
+  BlockViewExtension(flavour, model => {
+    return model.parent?.flavour === 'affine:surface'
+      ? literal`affine-embed-edgeless-linked-doc-block`
+      : literal`affine-embed-linked-doc-block`;
+  }),
+  createBuiltinToolbarConfigExtension(flavour),
+  LinkedDocSlashMenuConfigExtension,
+].flat();

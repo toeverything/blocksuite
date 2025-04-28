@@ -1,12 +1,12 @@
+import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
 import { createLitPortal } from '@blocksuite/affine-components/portal';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/global/lit';
 import { MoreHorizontalIcon } from '@blocksuite/icons/lit';
+import type { BlockStdScope } from '@blocksuite/std';
 import { offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
-
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
 
 export class ZoomBarToggleButton extends WithDisposable(LitElement) {
   static override styles = css`
@@ -33,6 +33,10 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
     }
   }
 
+  private get _slots() {
+    return this.std.get(EdgelessLegacySlotIdentifier);
+  }
+
   private _toggleZoomMenu() {
     if (this._abortController && !this._abortController.signal.aborted) {
       this._closeZoomMenu();
@@ -45,7 +49,7 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
     });
     createLitPortal({
       template: html`<edgeless-zoom-toolbar
-        .edgeless=${this.edgeless}
+        .std=${this.std}
         .layout=${'vertical'}
       ></edgeless-zoom-toolbar>`,
       container: this._toggleButton,
@@ -69,14 +73,14 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
   override firstUpdated() {
     const { disposables } = this;
     disposables.add(
-      this.edgeless.slots.readonlyUpdated.subscribe(() => {
+      this._slots.readonlyUpdated.subscribe(() => {
         this.requestUpdate();
       })
     );
   }
 
   override render() {
-    if (this.edgeless.doc.readonly) {
+    if (this.std.store.readonly) {
       return nothing;
     }
 
@@ -105,5 +109,5 @@ export class ZoomBarToggleButton extends WithDisposable(LitElement) {
   private accessor _toggleButton!: HTMLElement;
 
   @property({ attribute: false })
-  accessor edgeless!: EdgelessRootBlockComponent;
+  accessor std!: BlockStdScope;
 }

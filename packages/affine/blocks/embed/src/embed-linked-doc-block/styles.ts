@@ -11,7 +11,6 @@ export const styles = css`
     height: 100%;
     border-radius: 8px;
     border: 1px solid var(--affine-background-tertiary-color);
-    opacity: var(--add, 1);
     background: var(--affine-background-primary-color);
     user-select: none;
     position: relative;
@@ -25,8 +24,6 @@ export const styles = css`
     align-self: stretch;
     gap: 4px;
     padding: 12px;
-    border-radius: var(--1, 0px);
-    opacity: var(--add, 1);
     max-width: 100%;
   }
 
@@ -36,9 +33,6 @@ export const styles = css`
     gap: 8px;
     align-items: center;
     align-self: stretch;
-    padding: var(--1, 0px);
-    border-radius: var(--1, 0px);
-    opacity: var(--add, 1);
   }
 
   .affine-embed-linked-doc-content-title-icon {
@@ -169,7 +163,6 @@ export const styles = css`
     width: 204px;
     max-width: 100%;
     height: 102px;
-    opacity: var(--add, 1);
     pointer-events: none;
   }
   .affine-embed-linked-doc-banner img,
@@ -179,7 +172,7 @@ export const styles = css`
     max-width: 100%;
     height: 102px;
     object-fit: cover;
-    border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
+    border-radius: 4px;
   }
 
   .affine-embed-linked-doc-block.loading {

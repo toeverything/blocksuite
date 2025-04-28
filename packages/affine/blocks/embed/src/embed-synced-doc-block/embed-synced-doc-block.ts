@@ -1,4 +1,5 @@
 import { Peekable } from '@blocksuite/affine-components/peek';
+import { ViewExtensionManagerIdentifier } from '@blocksuite/affine-ext-loader';
 import {
   type DocLinkClickedEvent,
   RefNodeSlotsProvider,
@@ -20,10 +21,7 @@ import {
   ThemeExtensionIdentifier,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
-import {
-  cloneReferenceInfo,
-  SpecProvider,
-} from '@blocksuite/affine-shared/utils';
+import { cloneReferenceInfo } from '@blocksuite/affine-shared/utils';
 import { Bound, getCommonBound } from '@blocksuite/global/gfx';
 import {
   BlockSelection,
@@ -113,9 +111,10 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
     ],
   };
 
-  protected _buildPreviewSpec = (name: 'preview:page' | 'preview:edgeless') => {
+  protected _buildPreviewSpec = (name: 'preview-page' | 'preview-edgeless') => {
     const nextDepth = this.depth + 1;
-    const previewSpecBuilder = SpecProvider._.getSpec(name);
+    const viewExtensionManager = this.std.get(ViewExtensionManagerIdentifier);
+    const previewSpec = viewExtensionManager.get(name);
     const currentDisposables = this.disposables;
     const editorSetting = this.std.getOptional(EditorSettingProvider) ?? {
       setting$: signal(GeneralSettingSchema.parse({})),
@@ -157,13 +156,11 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
       }
     }
 
-    previewSpecBuilder.extend([
+    return previewSpec.concat([
       EmbedSyncedDocWatcher,
       GfxViewportInitializer,
       EditorSettingExtension(editorSetting),
     ]);
-
-    return previewSpecBuilder.value;
   };
 
   protected _renderSyncedView = () => {
@@ -204,7 +201,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
             <div class="affine-page-viewport" data-theme=${appTheme}>
               ${new BlockStdScope({
                 store: syncedDoc,
-                extensions: this._buildPreviewSpec('preview:page'),
+                extensions: this._buildPreviewSpec('preview-page'),
               }).render()}
             </div>
           `,
@@ -215,7 +212,7 @@ export class EmbedSyncedDocBlockComponent extends EmbedBlockComponent<EmbedSynce
             <div class="affine-edgeless-viewport" data-theme=${edgelessTheme}>
               ${new BlockStdScope({
                 store: syncedDoc,
-                extensions: this._buildPreviewSpec('preview:edgeless'),
+                extensions: this._buildPreviewSpec('preview-edgeless'),
               }).render()}
             </div>
           `,

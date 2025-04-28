@@ -11,5 +11,6 @@ export const frameQuickTool = QuickToolExtension('frame', ({ block, gfx }) => {
     ></edgeless-frame-tool-button>`,
     menu: buildFrameDenseMenu(block, gfx),
     enable: !block.doc.readonly,
+    priority: 90,
   };
 });

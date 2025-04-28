@@ -7,18 +7,6 @@ export {
   SurfaceGroupLikeModel,
 } from './element-model/base.js';
 export { CanvasElementType } from './element-model/index.js';
-import {
-  isConnectorAndBindingsAllSelected,
-  isConnectorWithLabel,
-} from './managers/connector-manager.js';
-export {
-  calculateNearestLocation,
-  ConnectionOverlay,
-  ConnectorEndpointLocations,
-  ConnectorEndpointLocationsOnTriangle,
-  ConnectorPathGenerator,
-  PathGenerator,
-} from './managers/connector-manager.js';
 export { CanvasRenderer } from './renderer/canvas-renderer.js';
 export type { ElementRenderer } from './renderer/elements/index.js';
 export * from './renderer/elements/type.js';
@@ -59,11 +47,6 @@ export { RoughCanvas } from './utils/rough/canvas.js';
 export type { Options } from './utils/rough/core';
 export { sortIndex } from './utils/sort';
 export { updateXYWH } from './utils/update-xywh.js';
-
-export const ConnectorUtils = {
-  isConnectorAndBindingsAllSelected,
-  isConnectorWithLabel,
-};
 
 export const TextUtils = {
   wrapFontFamily,

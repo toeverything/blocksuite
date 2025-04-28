@@ -1,5 +1,4 @@
 import {
-  type ConnectionOverlay,
   EdgelessLegacySlotIdentifier,
   OverlayIdentifier,
 } from '@blocksuite/affine-block-surface';
@@ -19,6 +18,8 @@ import { consume } from '@lit/context';
 import { css, html, LitElement } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import type { ConnectionOverlay } from '../connector-manager';
 
 const SIZE = 12;
 const HALF_SIZE = SIZE / 2;

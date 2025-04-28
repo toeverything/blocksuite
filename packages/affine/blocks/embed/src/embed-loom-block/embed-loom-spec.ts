@@ -28,3 +28,16 @@ export const EmbedLoomBlockSpec: ExtensionType[] = [
   createBuiltinToolbarConfigExtension(flavour, EmbedLoomBlockComponent),
   SlashMenuConfigExtension(flavour, embedLoomSlashMenuConfig),
 ].flat();
+
+export const EmbedLoomViewExtensions: ExtensionType[] = [
+  FlavourExtension(flavour),
+  EmbedLoomBlockService,
+  BlockViewExtension(flavour, model => {
+    return model.parent?.flavour === 'affine:surface'
+      ? literal`affine-embed-edgeless-loom-block`
+      : literal`affine-embed-loom-block`;
+  }),
+  EmbedLoomBlockOptionConfig,
+  createBuiltinToolbarConfigExtension(flavour, EmbedLoomBlockComponent),
+  SlashMenuConfigExtension(flavour, embedLoomSlashMenuConfig),
+].flat();

@@ -28,3 +28,16 @@ export const EmbedGithubBlockSpec: ExtensionType[] = [
   createBuiltinToolbarConfigExtension(flavour, EmbedGithubBlockComponent),
   SlashMenuConfigExtension(flavour, embedGithubSlashMenuConfig),
 ].flat();
+
+export const EmbedGithubViewExtensions: ExtensionType[] = [
+  FlavourExtension(flavour),
+  EmbedGithubBlockService,
+  BlockViewExtension(flavour, model => {
+    return model.parent?.flavour === 'affine:surface'
+      ? literal`affine-embed-edgeless-github-block`
+      : literal`affine-embed-github-block`;
+  }),
+  EmbedGithubBlockOptionConfig,
+  createBuiltinToolbarConfigExtension(flavour, EmbedGithubBlockComponent),
+  SlashMenuConfigExtension(flavour, embedGithubSlashMenuConfig),
+].flat();

@@ -13,6 +13,7 @@ export interface QuickTool {
    * if not configured, the tool will not be shown in dense mode
    */
   menu?: MenuConfig;
+  priority?: number;
 }
 
 export interface SeniorTool {

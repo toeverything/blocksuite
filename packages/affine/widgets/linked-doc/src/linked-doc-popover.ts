@@ -249,6 +249,7 @@ export class LinkedDocPopover extends SignalWatcher(
   override disconnectedCallback() {
     super.disconnectedCallback();
     this._menusItemsEffectCleanup();
+    this._updateLinkedDocGroupAbortController?.abort();
   }
 
   override render() {

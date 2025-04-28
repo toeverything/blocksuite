@@ -45,7 +45,6 @@ import {
   getTextSelectionCommand,
 } from '@blocksuite/affine-shared/commands';
 import { REFERENCE_NODE } from '@blocksuite/affine-shared/consts';
-import { FileSizeLimitService } from '@blocksuite/affine-shared/services';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import {
   createDefaultDoc,
@@ -415,9 +414,7 @@ const contentMediaToolGroup: KeyboardToolPanelGroup = {
         const file = await openFileOrFiles();
         if (!file) return;
 
-        const maxFileSize = std.store.get(FileSizeLimitService).maxFileSize;
-
-        await addSiblingAttachmentBlocks(std.host, [file], maxFileSize, model);
+        await addSiblingAttachmentBlocks(std, [file], model);
         if (model.text?.length === 0) {
           std.store.deleteBlock(model);
         }
@@ -1015,9 +1012,7 @@ export const defaultKeyboardToolbarConfig: KeyboardToolbarConfig = {
         const file = await openFileOrFiles();
         if (!file) return;
 
-        const maxFileSize = std.store.get(FileSizeLimitService).maxFileSize;
-
-        await addSiblingAttachmentBlocks(std.host, [file], maxFileSize, model);
+        await addSiblingAttachmentBlocks(std, [file], model);
         if (model.text?.length === 0) {
           std.store.deleteBlock(model);
         }

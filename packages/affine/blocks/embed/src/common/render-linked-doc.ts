@@ -1,4 +1,5 @@
 import { getSurfaceBlock } from '@blocksuite/affine-block-surface';
+import { ViewExtensionManagerIdentifier } from '@blocksuite/affine-ext-loader';
 import {
   type DocMode,
   ImageBlockModel,
@@ -9,8 +10,8 @@ import {
 } from '@blocksuite/affine-model';
 import { EMBED_CARD_HEIGHT } from '@blocksuite/affine-shared/consts';
 import { NotificationProvider } from '@blocksuite/affine-shared/services';
-import { matchModels, SpecProvider } from '@blocksuite/affine-shared/utils';
-import { BlockStdScope, EditorLifeCycleExtension } from '@blocksuite/std';
+import { matchModels } from '@blocksuite/affine-shared/utils';
+import { BlockStdScope } from '@blocksuite/std';
 import {
   type BlockModel,
   type BlockSnapshot,
@@ -202,10 +203,13 @@ async function renderNoteContent(
     match: ids.map(id => ({ id, viewType: 'display' })),
   };
   const previewDoc = doc.doc.getStore({ query });
-  const previewSpec = SpecProvider._.getSpec('preview:page');
+  const std = card.host.std;
+  const previewSpec = std
+    .get(ViewExtensionManagerIdentifier)
+    .get('preview-page');
   const previewStd = new BlockStdScope({
     store: previewDoc,
-    extensions: previewSpec.value,
+    extensions: previewSpec,
   });
   const previewTemplate = previewStd.render();
   const fragment = document.createDocumentFragment();
@@ -333,42 +337,12 @@ export function promptDocTitle(std: BlockStdScope, autofill?: string) {
   });
 }
 
-export function notifyDocCreated(std: BlockStdScope, doc: Store) {
-  const notification = std.getOptional(NotificationProvider);
-  if (!notification) return;
-
-  const abortController = new AbortController();
-  const clear = () => {
-    doc.history.off('stack-item-added', addHandler);
-    doc.history.off('stack-item-popped', popHandler);
-    disposable.unsubscribe();
-  };
-  const closeNotify = () => {
-    abortController.abort();
-    clear();
-  };
-
-  // edit or undo or switch doc, close notify toast
-  const addHandler = doc.history.on('stack-item-added', closeNotify);
-  const popHandler = doc.history.on('stack-item-popped', closeNotify);
-  const disposable = std
-    .get(EditorLifeCycleExtension)
-    .slots.unmounted.subscribe(closeNotify);
-
-  notification.notify({
+export function notifyDocCreated(std: BlockStdScope) {
+  std.getOptional(NotificationProvider)?.notifyWithUndoAction({
     title: 'Linked doc created',
     message: 'You can click undo to recovery block content',
     accent: 'info',
     duration: 10 * 1000,
-    action: {
-      label: 'Undo',
-      onClick: () => {
-        doc.undo();
-        clear();
-      },
-    },
-    abort: abortController.signal,
-    onClose: clear,
   });
 }
 

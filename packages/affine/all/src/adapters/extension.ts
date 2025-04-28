@@ -2,7 +2,6 @@ import {
   HtmlInlineToDeltaAdapterExtensions,
   InlineDeltaToHtmlAdapterExtensions,
   InlineDeltaToMarkdownAdapterExtensions,
-  InlineDeltaToPlainTextAdapterExtensions,
   MarkdownInlineToDeltaAdapterExtensions,
   NotionHtmlInlineToDeltaAdapterExtensions,
 } from '@blocksuite/affine-inline-preset';
@@ -62,8 +61,5 @@ export function getNotionHtmlAdapterExtensions(): ExtensionType[] {
 }
 
 export function getPlainTextAdapterExtensions(): ExtensionType[] {
-  return [
-    ...defaultBlockPlainTextAdapterMatchers,
-    ...InlineDeltaToPlainTextAdapterExtensions,
-  ];
+  return [...defaultBlockPlainTextAdapterMatchers];
 }

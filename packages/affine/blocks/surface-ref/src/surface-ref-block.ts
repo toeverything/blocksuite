@@ -6,6 +6,7 @@ import {
 import type { BlockCaptionEditor } from '@blocksuite/affine-components/caption';
 import { whenHover } from '@blocksuite/affine-components/hover';
 import { Peekable } from '@blocksuite/affine-components/peek';
+import { ViewExtensionManagerIdentifier } from '@blocksuite/affine-ext-loader';
 import { RefNodeSlotsProvider } from '@blocksuite/affine-inline-reference';
 import {
   FrameBlockModel,
@@ -20,10 +21,7 @@ import {
   ViewportElementExtension,
 } from '@blocksuite/affine-shared/services';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import {
-  requestConnectedFrame,
-  SpecProvider,
-} from '@blocksuite/affine-shared/utils';
+import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { DisposableGroup } from '@blocksuite/global/disposable';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
 import {
@@ -46,7 +44,7 @@ import {
   type GfxModel,
   GfxPrimitiveElementModel,
 } from '@blocksuite/std/gfx';
-import type { BaseSelection, Store } from '@blocksuite/store';
+import type { BaseSelection, ExtensionType, Store } from '@blocksuite/store';
 import { effect, signal } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { query } from 'lit/decorators.js';
@@ -114,9 +112,18 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
 
   private _previewDoc: Store | null = null;
 
-  private readonly _previewSpec = SpecProvider._.getSpec(
-    'preview:edgeless'
-  ).extend([ViewportElementExtension('.ref-viewport')]);
+  private _runtimePreviewExt: ExtensionType[] = [];
+
+  private get _viewExtensionManager() {
+    return this.std.get(ViewExtensionManagerIdentifier);
+  }
+
+  private get _previewSpec() {
+    return [
+      ...this._viewExtensionManager.get('preview-edgeless'),
+      ViewportElementExtension('.ref-viewport'),
+    ];
+  }
 
   private _referencedModel: GfxModel | null = null;
 
@@ -338,7 +345,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
       }
     }
 
-    this._previewSpec.extend([SurfaceRefViewportWatcher]);
+    this._runtimePreviewExt = [SurfaceRefViewportWatcher];
   }
 
   private _initHover() {
@@ -366,7 +373,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
 
   private _renderRefContent(referencedModel: GfxModel) {
     const [, , w, h] = deserializeXYWH(referencedModel.xywh);
-    const _previewSpec = this._previewSpec.value;
+    const _previewSpec = this._previewSpec.concat(this._runtimePreviewExt);
 
     return html`<div class="ref-content">
       <div

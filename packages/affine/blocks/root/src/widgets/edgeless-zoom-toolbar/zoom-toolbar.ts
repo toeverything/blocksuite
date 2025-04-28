@@ -1,13 +1,19 @@
+import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
 import { stopPropagation } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/global/lit';
 import { MinusIcon, PlusIcon, ViewBarIcon } from '@blocksuite/icons/lit';
-import { ZOOM_STEP } from '@blocksuite/std/gfx';
+import type { BlockStdScope } from '@blocksuite/std';
+import {
+  GfxControllerIdentifier,
+  ZOOM_MAX,
+  ZOOM_MIN,
+  ZOOM_STEP,
+} from '@blocksuite/std/gfx';
 import { effect } from '@preact/signals-core';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
-
-import type { EdgelessRootBlockComponent } from '../../edgeless/edgeless-root-block.js';
+import clamp from 'lodash-es/clamp';
 
 export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
   static override styles = css`
@@ -79,25 +85,29 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
     }
   `;
 
-  get edgelessService() {
-    return this.edgeless.service;
+  get slots() {
+    return this.std.get(EdgelessLegacySlotIdentifier);
   }
 
   get gfx() {
-    return this.edgeless.gfx;
+    return this.std.get(GfxControllerIdentifier);
   }
 
   get edgelessTool() {
-    return this.edgeless.gfx.tool.currentToolOption$.peek();
+    return this.gfx.tool.currentToolOption$.peek();
   }
 
   get locked() {
-    return this.edgelessService.locked;
+    return this.viewport.locked;
   }
 
   get viewport() {
-    return this.edgelessService.viewport;
+    return this.gfx.viewport;
   }
+
+  setZoomByStep = (step: number) => {
+    this.viewport.smoothZoom(clamp(this.zoom + step, ZOOM_MIN, ZOOM_MAX));
+  };
 
   get zoom() {
     if (!this.viewport) {
@@ -105,11 +115,6 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
       return 1;
     }
     return this.viewport.zoom;
-  }
-
-  constructor(edgeless: EdgelessRootBlockComponent) {
-    super();
-    this.edgeless = edgeless;
   }
 
   private _isVerticalBar() {
@@ -121,7 +126,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
 
     this.disposables.add(
       effect(() => {
-        this.edgeless.gfx.tool.currentToolName$.value;
+        this.gfx.tool.currentToolName$.value;
         this.requestUpdate();
       })
     );
@@ -130,19 +135,17 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
   override firstUpdated() {
     const { disposables } = this;
     disposables.add(
-      this.edgeless.service.viewport.viewportUpdated.subscribe(() =>
-        this.requestUpdate()
-      )
+      this.viewport.viewportUpdated.subscribe(() => this.requestUpdate())
     );
     disposables.add(
-      this.edgeless.slots.readonlyUpdated.subscribe(() => {
+      this.slots.readonlyUpdated.subscribe(() => {
         this.requestUpdate();
       })
     );
   }
 
   override render() {
-    if (this.edgeless.doc.readonly) {
+    if (this.std.store.readonly) {
       return nothing;
     }
 
@@ -173,7 +176,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
           .tooltip=${'Zoom out'}
           .tipPosition=${this._isVerticalBar() ? 'right' : 'top'}
           .arrow=${!this._isVerticalBar()}
-          @click=${() => this.edgelessService.setZoomByStep(-ZOOM_STEP)}
+          @click=${() => this.setZoomByStep(-ZOOM_STEP)}
           .iconContainerPadding=${4}
           .iconSize=${'24px'}
           .disabled=${locked}
@@ -191,7 +194,7 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
           .tooltip=${'Zoom in'}
           .tipPosition=${this._isVerticalBar() ? 'right' : 'top'}
           .arrow=${!this._isVerticalBar()}
-          @click=${() => this.edgelessService.setZoomByStep(ZOOM_STEP)}
+          @click=${() => this.setZoomByStep(ZOOM_STEP)}
           .iconContainerPadding=${4}
           .iconSize=${'24px'}
           .disabled=${locked}
@@ -203,8 +206,8 @@ export class EdgelessZoomToolbar extends WithDisposable(LitElement) {
   }
 
   @property({ attribute: false })
-  accessor edgeless: EdgelessRootBlockComponent;
+  accessor layout: 'horizontal' | 'vertical' = 'horizontal';
 
   @property({ attribute: false })
-  accessor layout: 'horizontal' | 'vertical' = 'horizontal';
+  accessor std!: BlockStdScope;
 }

@@ -1,10 +1,15 @@
 import { getEmbedCardIcons } from '@blocksuite/affine-block-embed';
 import { WebIcon16 } from '@blocksuite/affine-components/icons';
+import { ImageProxyService } from '@blocksuite/affine-shared/adapters';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { getHostName } from '@blocksuite/affine-shared/utils';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { OpenInNewIcon } from '@blocksuite/icons/lit';
-import { BlockSelection, ShadowlessElement } from '@blocksuite/std';
+import {
+  BlockSelection,
+  isGfxBlockComponent,
+  ShadowlessElement,
+} from '@blocksuite/std';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -64,6 +69,7 @@ export class BookmarkCard extends SignalWatcher(
       error: this.error,
       [style]: true,
       selected: this.bookmark.selected$.value,
+      edgeless: isGfxBlockComponent(this.bookmark),
     });
 
     const domainName = url.match(
@@ -80,11 +86,12 @@ export class BookmarkCard extends SignalWatcher(
 
     const theme = this.bookmark.std.get(ThemeProvider).theme;
     const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons(theme);
+    const imageProxyService = this.bookmark.doc.get(ImageProxyService);
 
     const titleIcon = this.loading
       ? LoadingIcon
       : icon
-        ? html`<img src=${icon} alt="icon" />`
+        ? html`<img src=${imageProxyService.buildUrl(icon)} alt="icon" />`
         : WebIcon16;
 
     const descriptionText = this.loading
@@ -97,7 +104,7 @@ export class BookmarkCard extends SignalWatcher(
 
     const bannerImage =
       !this.loading && image
-        ? html`<img src=${image} alt="banner" />`
+        ? html`<img src=${imageProxyService.buildUrl(image)} alt="banner" />`
         : EmbedCardBannerIcon;
 
     return html`

@@ -1,19 +1,17 @@
+import {
+  DefaultModeDragType,
+  DefaultTool,
+} from '@blocksuite/affine-gfx-pointer';
 import type { RootBlockModel } from '@blocksuite/affine-model';
 import { WidgetComponent } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, nothing, unsafeCSS } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { EdgelessRootBlockComponent } from '../../edgeless-root-block.js';
-import { DefaultTool } from '../../gfx-tool/default-tool.js';
-import { DefaultModeDragType } from '../../gfx-tool/default-tool-ext/ext.js';
-
 export const EDGELESS_DRAGGING_AREA_WIDGET = 'edgeless-dragging-area-rect';
 
-export class EdgelessDraggingAreaRectWidget extends WidgetComponent<
-  RootBlockModel,
-  EdgelessRootBlockComponent
-> {
+export class EdgelessDraggingAreaRectWidget extends WidgetComponent<RootBlockModel> {
   static override styles = css`
     .affine-edgeless-dragging-area {
       position: absolute;
@@ -32,12 +30,13 @@ export class EdgelessDraggingAreaRectWidget extends WidgetComponent<
     }
   `;
 
+  get gfx() {
+    return this.std.get(GfxControllerIdentifier);
+  }
+
   override render() {
-    if (!this.block) {
-      return nothing;
-    }
-    const rect = this.block.gfx.tool.draggingViewArea$.value;
-    const tool = this.block.gfx.tool.currentTool$.value;
+    const rect = this.gfx.tool.draggingViewArea$.value;
+    const tool = this.gfx.tool.currentTool$.value;
 
     if (
       rect.w === 0 ||

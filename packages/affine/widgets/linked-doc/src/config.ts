@@ -5,6 +5,7 @@ import {
   NewDocIcon,
 } from '@blocksuite/affine-components/icons';
 import { toast } from '@blocksuite/affine-components/toast';
+import { StoreExtensionManagerIdentifier } from '@blocksuite/affine-ext-loader';
 import { insertLinkedNode } from '@blocksuite/affine-inline-reference';
 import {
   DocModeProvider,
@@ -235,9 +236,13 @@ export function createNewDocMenuGroup(
         const onFail = (message: string) => {
           toast(editorHost, message);
         };
+        const storeManager = editorHost.std.get(
+          StoreExtensionManagerIdentifier
+        );
         showImportModal({
           collection: doc.workspace,
           schema: doc.schema,
+          extensions: storeManager.get('store'),
           onSuccess,
           onFail,
         });

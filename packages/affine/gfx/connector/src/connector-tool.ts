@@ -1,9 +1,5 @@
 import {
-  calculateNearestLocation,
   CanvasElementType,
-  type ConnectionOverlay,
-  ConnectorEndpointLocations,
-  ConnectorEndpointLocationsOnTriangle,
   OverlayIdentifier,
 } from '@blocksuite/affine-block-surface';
 import type {
@@ -21,6 +17,13 @@ import type { IBound, IVec } from '@blocksuite/global/gfx';
 import { Bound } from '@blocksuite/global/gfx';
 import type { PointerEventState } from '@blocksuite/std';
 import { BaseTool, type GfxModel } from '@blocksuite/std/gfx';
+
+import {
+  calculateNearestLocation,
+  type ConnectionOverlay,
+  ConnectorEndpointLocations,
+  ConnectorEndpointLocationsOnTriangle,
+} from './connector-manager';
 
 enum ConnectorToolMode {
   // Dragging connect

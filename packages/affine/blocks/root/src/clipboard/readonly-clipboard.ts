@@ -1,8 +1,8 @@
-import { defaultImageProxyMiddleware } from '@blocksuite/affine-block-image';
 import {
   AttachmentAdapter,
   ClipboardAdapter,
   copyMiddleware,
+  defaultImageProxyMiddleware,
   HtmlAdapter,
   ImageAdapter,
   MixTextAdapter,

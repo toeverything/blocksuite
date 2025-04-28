@@ -1,4 +1,3 @@
-import { htmlLinkElementToDeltaMatcher } from '@blocksuite/affine-inline-link';
 import {
   type HtmlAST,
   HtmlASTToDeltaExtension,
@@ -169,7 +168,6 @@ export const HtmlInlineToDeltaAdapterExtensions = [
   htmlCodeElementToDeltaMatcher,
   htmlDelElementToDeltaMatcher,
   htmlUnderlineElementToDeltaMatcher,
-  htmlLinkElementToDeltaMatcher,
   htmlMarkElementToDeltaMatcher,
   htmlBrElementToDeltaMatcher,
 ];

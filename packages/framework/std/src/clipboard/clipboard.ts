@@ -93,7 +93,7 @@ export class Clipboard extends LifeCycleWatcher {
       }
       if (item) {
         const job = this._getJob();
-        const adapterInstance = new adapter(job, this.std.provider);
+        const adapterInstance = new adapter(job, this.std.store.provider);
         const payload = {
           file: item,
           assets: job.assetsManager,
@@ -225,7 +225,7 @@ export class Clipboard extends LifeCycleWatcher {
       return;
     }
     const { adapter } = adapterItem;
-    const adapterInstance = new adapter(job, this.std.provider);
+    const adapterInstance = new adapter(job, this.std.store.provider);
     const result = await adapterInstance.fromSlice(slice);
     if (!result) {
       return;

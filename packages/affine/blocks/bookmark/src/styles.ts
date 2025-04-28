@@ -19,7 +19,6 @@ export const styles = css`
     border-radius: 8px;
     border: 1px solid var(--affine-background-tertiary-color);
 
-    opacity: var(--add, 1);
     background: var(--affine-background-primary-color);
     user-select: none;
   }
@@ -28,11 +27,10 @@ export const styles = css`
     width: calc(100% - 204px);
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
     align-self: stretch;
     gap: 4px;
     padding: 12px;
-    border-radius: var(--1, 0px);
-    opacity: var(--add, 1);
   }
 
   .affine-bookmark-content-title {
@@ -42,9 +40,6 @@ export const styles = css`
     align-items: center;
 
     align-self: stretch;
-    padding: var(--1, 0px);
-    border-radius: var(--1, 0px);
-    opacity: var(--add, 1);
   }
 
   .affine-bookmark-content-title-icon {
@@ -151,7 +146,6 @@ export const styles = css`
     width: 204px;
     max-width: 100%;
     height: 102px;
-    opacity: var(--add, 1);
   }
 
   .affine-bookmark-banner img,
@@ -161,7 +155,7 @@ export const styles = css`
     max-width: 100%;
     height: 102px;
     object-fit: cover;
-    border-radius: 4px 4px var(--1, 0px) var(--1, 0px);
+    border-radius: 4px;
   }
 
   .affine-bookmark-card.loading {
@@ -277,7 +271,7 @@ export const styles = css`
     .affine-bookmark-content {
       width: 100%;
     }
-    .affine-bookmark-banner {
+    .affine-bookmark-card:not(.edgeless) .affine-bookmark-banner {
       display: none;
     }
   }
