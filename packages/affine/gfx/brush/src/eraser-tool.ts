@@ -155,9 +155,3 @@ export class EraserTool extends BaseTool {
     );
   }
 }
-
-declare module '@blocksuite/std/gfx' {
-  interface GfxToolsMap {
-    eraser: EraserTool;
-  }
-}

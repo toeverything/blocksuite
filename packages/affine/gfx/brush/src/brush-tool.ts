@@ -177,9 +177,3 @@ export class BrushTool extends BaseTool {
     });
   }
 }
-
-declare module '@blocksuite/std/gfx' {
-  interface GfxToolsMap {
-    brush: BrushTool;
-  }
-}

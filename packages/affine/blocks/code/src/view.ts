@@ -41,7 +41,6 @@ export class CodeBlockViewExtension extends ViewExtensionProvider {
       FlavourExtension('affine:code'),
       CodeBlockHighlighter,
       BlockViewExtension('affine:code', literal`affine-code`),
-      codeToolbarWidget,
       SlashMenuConfigExtension('affine:code', codeSlashMenuConfig),
       CodeKeymapExtension,
       ...getCodeClipboardExtensions(),
@@ -50,5 +49,8 @@ export class CodeBlockViewExtension extends ViewExtensionProvider {
       CodeBlockInlineManagerExtension,
       CodeBlockUnitSpecExtension,
     ]);
+    if (!this.isMobile(context.scope)) {
+      context.register(codeToolbarWidget);
+    }
   }
 }

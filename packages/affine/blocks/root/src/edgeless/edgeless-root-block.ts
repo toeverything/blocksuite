@@ -1,14 +1,14 @@
 import { NoteConfigExtension } from '@blocksuite/affine-block-note';
-import type {
-  SurfaceBlockComponent,
-  SurfaceBlockModel,
-} from '@blocksuite/affine-block-surface';
 import {
+  DefaultTool,
   EdgelessLegacySlotIdentifier,
   getBgGridGap,
   normalizeWheelDeltaY,
+  type SurfaceBlockComponent,
+  type SurfaceBlockModel,
 } from '@blocksuite/affine-block-surface';
 import { isSingleMindMapNode } from '@blocksuite/affine-gfx-mindmap';
+import { PanTool } from '@blocksuite/affine-gfx-pointer';
 import { mountShapeTextEditor } from '@blocksuite/affine-gfx-shape';
 import {
   NoteBlockModel,
@@ -468,9 +468,9 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     this._initPinchEvent();
 
     if (this.doc.readonly) {
-      this.gfx.tool.setTool('pan', { panning: true });
+      this.gfx.tool.setTool(PanTool, { panning: true });
     } else {
-      this.gfx.tool.setTool('default');
+      this.gfx.tool.setTool(DefaultTool);
     }
 
     this.gfx.viewport.elementReady.next(this.gfxViewportElm);

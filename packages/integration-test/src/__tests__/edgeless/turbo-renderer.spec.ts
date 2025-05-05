@@ -18,6 +18,8 @@ import {
   setupEditor,
 } from '../utils/setup.js';
 
+const FRAME = 16;
+
 describe('viewport turbo renderer', () => {
   let cleanup: () => void;
 
@@ -36,7 +38,7 @@ describe('viewport turbo renderer', () => {
 
   test('should render 6 notes in viewport', async () => {
     addSampleNotes(doc, 6);
-    await wait();
+    await wait(FRAME);
 
     const notes = document.querySelectorAll('affine-edgeless-note');
     expect(notes.length).toBe(6);
@@ -57,7 +59,7 @@ describe('viewport turbo renderer', () => {
   test('zooming should change internal state and populate optimized block ids', async () => {
     const renderer = getRenderer();
     addSampleNotes(doc, 1);
-    await wait();
+    await wait(FRAME);
     expect(renderer.optimizedBlockIds.length).toBe(0);
 
     renderer.viewport.zooming$.next(true);
@@ -68,7 +70,7 @@ describe('viewport turbo renderer', () => {
     expect(canUseCache).toBe(false);
 
     await renderer.refresh();
-    await wait();
+    await wait(FRAME);
     expect(renderer.optimizedBlockIds.length).toBe(1);
 
     renderer.viewport.zooming$.next(false);
@@ -82,7 +84,7 @@ describe('viewport turbo renderer', () => {
     const renderer = getRenderer();
 
     addSampleNotes(doc, 1);
-    await wait();
+    await wait(FRAME);
     expect(renderer.state$.value).toBe('pending');
 
     // Ensure zooming is off and wait for debounce + buffer
@@ -116,7 +118,7 @@ describe('viewport turbo renderer', () => {
   test('accessing layoutCache getter should populate cache data', async () => {
     const renderer = getRenderer();
     addSampleNotes(doc, 1);
-    await wait();
+    await wait(FRAME);
     expect(renderer.layoutCacheData).toBeNull();
 
     const _cache = renderer.layoutCache;

@@ -5,7 +5,6 @@ export * from './image-block';
 export * from './image-edgeless-block';
 export * from './image-service';
 export * from './image-spec';
-export * from './styles';
 export * from './turbo/image-layout-handler';
 export * from './turbo/image-painter.worker';
 export { addImages, downloadImageBlob, uploadBlobForImage } from './utils';

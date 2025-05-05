@@ -1,4 +1,5 @@
 import type { CanvasElementWithText } from '@blocksuite/affine-block-surface';
+import type { PanTool } from '@blocksuite/affine-gfx-pointer';
 import {
   type AttachmentBlockModel,
   type BookmarkBlockModel,
@@ -26,7 +27,7 @@ import { Bound } from '@blocksuite/global/gfx';
 import type {
   GfxModel,
   GfxPrimitiveElementModel,
-  GfxToolsFullOptionValue,
+  ToolOptionWithType,
 } from '@blocksuite/std/gfx';
 import type { BlockModel } from '@blocksuite/store';
 
@@ -191,15 +192,17 @@ export function isConnectable(
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/CSS/cursor
-export function getCursorMode(edgelessTool: GfxToolsFullOptionValue | null) {
+export function getCursorMode(edgelessTool: ToolOptionWithType) {
   if (!edgelessTool) {
     return 'default';
   }
-  switch (edgelessTool.type) {
+  switch (edgelessTool.toolType?.toolName) {
     case 'default':
       return 'default';
     case 'pan':
-      return edgelessTool.panning ? 'grabbing' : 'grab';
+      return (edgelessTool as ToolOptionWithType<PanTool>).options?.panning
+        ? 'grabbing'
+        : 'grab';
     case 'brush':
     case 'highlighter':
       return drawingCursor;

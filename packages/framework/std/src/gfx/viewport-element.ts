@@ -10,7 +10,7 @@ import {
 } from '../view';
 import { PropTypes, requiredProperties } from '../view/decorators/required';
 import { GfxControllerIdentifier } from './identifiers';
-import type { GfxBlockElementModel } from './model/gfx-block-model';
+import { GfxBlockElementModel } from './model/gfx-block-model';
 import { Viewport } from './viewport';
 
 /**
@@ -66,14 +66,17 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  private readonly _hideOutsideBlock = () => {
+  private readonly _hideOutsideNoEditingBlock = () => {
     if (!this.host) return;
 
     const gfx = this.host.std.get(GfxControllerIdentifier);
-    const modelsInViewport = this.getModelsInViewport();
+    const nextVisibleModels = new Set([
+      ...this.getModelsInViewport(),
+      ...this._getEditingModels(),
+    ]);
 
     batch(() => {
-      modelsInViewport.forEach(model => {
+      nextVisibleModels.forEach(model => {
         const view = gfx.view.get(model);
         if (isGfxBlockComponent(view)) {
           view.transformState$.value = 'active';
@@ -92,7 +95,7 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
       });
     });
 
-    this._lastVisibleModels = modelsInViewport;
+    this._lastVisibleModels = nextVisibleModels;
   };
 
   private _lastVisibleModels?: Set<GfxBlockElementModel>;
@@ -103,7 +106,7 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
   }[] = [];
 
   private readonly _refreshViewport = requestThrottledConnectedFrame(() => {
-    this._hideOutsideBlock();
+    this._hideOutsideNoEditingBlock();
   }, this);
 
   private _updatingChildrenFlag = false;
@@ -119,7 +122,7 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
       delete this.scheduleUpdateChildren;
     }
 
-    this._hideOutsideBlock();
+    this._hideOutsideNoEditingBlock();
     this.disposables.add(
       this.viewport.viewportUpdated.subscribe(() => viewportUpdateCallback())
     );
@@ -165,6 +168,18 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
 
     return promise;
   };
+
+  private _getEditingModels(): Set<GfxBlockElementModel> {
+    if (!this.host) return new Set();
+    const gfx = this.host.std.get(GfxControllerIdentifier);
+    return new Set(
+      gfx.selection.surfaceSelections
+        .filter(s => s.editing)
+        .flatMap(({ elements }) => elements)
+        .map(id => gfx.getElementById(id))
+        .filter(e => e instanceof GfxBlockElementModel)
+    );
+  }
 
   @property({ attribute: false })
   accessor getModelsInViewport: () => Set<GfxBlockElementModel> = () =>

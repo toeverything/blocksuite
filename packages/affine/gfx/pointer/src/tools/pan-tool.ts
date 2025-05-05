@@ -56,11 +56,14 @@ export class PanTool extends BaseTool<PanToolOption> {
       const selection = this.gfx.selection.surfaceSelections;
       const currentTool = this.controller.currentToolOption$.peek();
       const restoreToPrevious = () => {
-        this.controller.setTool(currentTool);
-        this.gfx.selection.set(selection);
+        const { toolType, options } = currentTool;
+        if (toolType && options) {
+          this.controller.setTool(toolType, options);
+          this.gfx.selection.set(selection);
+        }
       };
 
-      this.controller.setTool('pan', {
+      this.controller.setTool(PanTool, {
         panning: true,
       });
 
@@ -73,15 +76,5 @@ export class PanTool extends BaseTool<PanToolOption> {
 
       return false;
     });
-  }
-}
-
-declare module '@blocksuite/std/gfx' {
-  interface GfxToolsMap {
-    pan: PanTool;
-  }
-
-  interface GfxToolsOption {
-    pan: PanToolOption;
   }
 }

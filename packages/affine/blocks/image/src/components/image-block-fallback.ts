@@ -1,13 +1,13 @@
-import type { ImageBlockModel } from '@blocksuite/affine-model';
+import { getLoadingIconWith } from '@blocksuite/affine-components/icons';
+import type { ColorScheme, ImageBlockModel } from '@blocksuite/affine-model';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/global/lit';
+import { BrokenImageIcon, ImageIcon } from '@blocksuite/icons/lit';
 import { modelContext, ShadowlessElement } from '@blocksuite/std';
 import { consume } from '@lit/context';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-
-import { FailedImageIcon, LoadedImageIcon, LoadingIcon } from '../styles.js';
 
 export const SURFACE_IMAGE_CARD_WIDTH = 220;
 export const SURFACE_IMAGE_CARD_HEIGHT = 122;
@@ -62,7 +62,7 @@ export class ImageBlockFallbackCard extends WithDisposable(ShadowlessElement) {
   `;
 
   override render() {
-    const { mode, loading, error, model } = this;
+    const { theme, mode, loading, error, model } = this;
 
     const isEdgeless = mode === 'edgeless';
     const width = isEdgeless
@@ -82,10 +82,10 @@ export class ImageBlockFallbackCard extends WithDisposable(ShadowlessElement) {
     });
 
     const titleIcon = loading
-      ? LoadingIcon
+      ? getLoadingIconWith(theme)
       : error
-        ? FailedImageIcon
-        : LoadedImageIcon;
+        ? BrokenImageIcon()
+        : ImageIcon();
 
     const titleText = loading
       ? 'Loading image...'
@@ -124,6 +124,9 @@ export class ImageBlockFallbackCard extends WithDisposable(ShadowlessElement) {
 
   @property({ attribute: false })
   accessor mode!: 'page' | 'edgeless';
+
+  @property({ attribute: false })
+  accessor theme!: ColorScheme;
 
   @consume({ context: modelContext })
   accessor model!: ImageBlockModel;

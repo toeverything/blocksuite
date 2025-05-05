@@ -78,8 +78,7 @@ export class ImageResizeManager {
     const rootComponent = getClosestRootBlockComponent(this._activeComponent);
     if (
       rootComponent &&
-      rootComponent.service.std.get(DocModeProvider).getEditorMode() ===
-        'edgeless'
+      rootComponent.std.get(DocModeProvider).getEditorMode() === 'edgeless'
     ) {
       const viewport = rootComponent.std.get(GfxControllerIdentifier).viewport;
       this._zoom = viewport.zoom;

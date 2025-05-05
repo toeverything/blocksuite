@@ -9,12 +9,15 @@ import {
 
 export const SYNCED_MIN_WIDTH = 370;
 export const SYNCED_MIN_HEIGHT = 64;
+// the default max height of embed doc, user can adjust height by selected rect over this value
+export const SYNCED_DEFAULT_MAX_HEIGHT = 800;
 
 export const defaultEmbedSyncedDocBlockProps: EmbedSyncedDocBlockProps = {
   pageId: '',
   style: EmbedSyncedDocStyles[0],
   caption: undefined,
   scale: undefined,
+  preFoldHeight: undefined,
   // title & description aliases
   title: undefined,
   description: undefined,

@@ -2,7 +2,10 @@ import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { whenHover } from '@blocksuite/affine-components/hover';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import type { ImageBlockModel } from '@blocksuite/affine-model';
-import { ToolbarRegistryIdentifier } from '@blocksuite/affine-shared/services';
+import {
+  ThemeProvider,
+  ToolbarRegistryIdentifier,
+} from '@blocksuite/affine-shared/services';
 import { IS_MOBILE } from '@blocksuite/global/env';
 import { BlockSelection } from '@blocksuite/std';
 import { html } from 'lit';
@@ -111,6 +114,7 @@ export class ImageBlockComponent extends CaptionedBlockComponent<ImageBlockModel
       position: 'relative',
       width: '100%',
     });
+    const theme = this.std.get(ThemeProvider).theme$.value;
 
     return html`
       <div class="affine-image-container" style=${containerStyleMap}>
@@ -120,7 +124,8 @@ export class ImageBlockComponent extends CaptionedBlockComponent<ImageBlockModel
             html`<affine-image-fallback-card
               .error=${this.error}
               .loading=${this.loading}
-              .mode=${'page'}
+              .mode="${'page'}"
+              .theme=${theme}
             ></affine-image-fallback-card>`,
           () => html`<affine-page-image .block=${this}></affine-page-image>`
         )}

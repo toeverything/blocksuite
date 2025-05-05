@@ -155,11 +155,14 @@ export class NoteSlicer extends WidgetComponent<RootBlockModel> {
     const doc = this.doc;
 
     const {
-      index: originIndex,
+      index: originalIndex,
       xywh,
       background,
       displayMode,
     } = this._anchorNote.props;
+    const originalNoteIndex = this._anchorNote.parent?.children.findIndex(
+      child => child === this._anchorNote
+    );
     const { children } = this._anchorNote;
     const {
       collapse: _,
@@ -180,10 +183,11 @@ export class NoteSlicer extends WidgetComponent<RootBlockModel> {
         background,
         displayMode,
         xywh: serializeXYWH(x, newY + NEW_NOTE_GAP, width, DEFAULT_NOTE_HEIGHT),
-        index: originIndex + 1,
+        index: originalIndex + 1,
         edgeless: restOfEdgeless,
       },
-      doc.root?.id
+      doc.root?.id,
+      originalNoteIndex ? originalNoteIndex + 1 : undefined
     );
 
     doc.moveBlocks(resetBlocks, doc.getModelById(newNoteId) as NoteBlockModel);

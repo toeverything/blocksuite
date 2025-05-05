@@ -9,8 +9,7 @@ import { LEFT_TOOL_BAR_WIDTH, STATS_BAR_HEIGHT } from '../consts.js';
 import type { TableSingleView } from '../table-view-manager.js';
 
 const styles = css`
-  .affine-database-column-stats {
-    width: 100%;
+  affine-database-column-stats {
     margin-left: ${LEFT_TOOL_BAR_WIDTH}px;
     height: ${STATS_BAR_HEIGHT}px;
     display: flex;
@@ -24,20 +23,17 @@ export class DataBaseColumnStats extends SignalWatcher(
 
   protected override render() {
     const cols = this.view.properties$.value;
-
     return html`
-      <div class="affine-database-column-stats">
-        ${repeat(
-          cols,
-          col => col.id,
-          col => {
-            return html`<affine-database-column-stats-cell
-              .column=${col}
-              .group=${this.group}
-            ></affine-database-column-stats-cell>`;
-          }
-        )}
-      </div>
+      ${repeat(
+        cols,
+        col => col.id,
+        col => {
+          return html`<affine-database-column-stats-cell
+            .column=${col}
+            .group=${this.group}
+          ></affine-database-column-stats-cell>`;
+        }
+      )}
     `;
   }
 

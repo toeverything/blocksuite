@@ -34,7 +34,7 @@ const styles = css`
     user-select: none;
   }
 
-  .affine-database-column-stats:hover .stats-cell {
+  affine-database-column-stats:hover .stats-cell {
     opacity: 1;
   }
 

@@ -11,7 +11,7 @@ import { FrameBlockSpec } from './frame-spec';
 import { FrameTool } from './frame-tool';
 import { frameToolbarExtension } from './frame-toolbar';
 import { edgelessNavigatorBgWidget } from './present/navigator-bg-widget';
-import { PresentTool } from './preset-tool';
+import { PresentTool } from './present-tool';
 
 export class FrameViewExtension extends ViewExtensionProvider {
   override name = 'affine-frame-block';

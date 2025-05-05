@@ -3,7 +3,7 @@ import {
   type ImageBlockProps,
   MAX_IMAGE_WIDTH,
 } from '@blocksuite/affine-model';
-import { FileSizeLimitService } from '@blocksuite/affine-shared/services';
+import { FileSizeLimitProvider } from '@blocksuite/affine-shared/services';
 import {
   readImageSize,
   transformModel,
@@ -68,7 +68,7 @@ export const AttachmentEmbedProvider = createIdentifier<AttachmentEmbedService>(
 
 export class AttachmentEmbedService extends Extension {
   private get _maxFileSize() {
-    return this.std.store.get(FileSizeLimitService).maxFileSize;
+    return this.std.get(FileSizeLimitProvider).maxFileSize;
   }
 
   get keys() {
@@ -187,7 +187,7 @@ const embedConfig: AttachmentEmbedConfig[] = [
 /**
  * Turn the attachment block into an image block.
  */
-export async function turnIntoImageBlock(model: AttachmentBlockModel) {
+async function turnIntoImageBlock(model: AttachmentBlockModel) {
   if (!model.doc.schema.flavourSchemaMap.has('affine:image')) {
     console.error('The image flavour is not supported!');
     return;

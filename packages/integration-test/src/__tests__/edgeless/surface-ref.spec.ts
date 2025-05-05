@@ -270,12 +270,8 @@ import snapshot from '../snapshots/edgeless/surface-ref.spec.ts/surface-ref.json
 describe('clipboard', () => {
   test('import surface-ref snapshot should render content correctly', async () => {
     await setupEditor('page');
-
-    const pageRoot = getDocRootBlock(doc, editor, 'page');
-    const pageRootService = pageRoot.service;
-
     const newDoc = await importFromSnapshot(
-      pageRootService.collection,
+      doc.workspace,
       snapshot as DocSnapshot
     );
     expect(newDoc).toBeTruthy();

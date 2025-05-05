@@ -2448,6 +2448,121 @@ World!
     });
     expect(target.file).toBe(markdown);
   });
+
+  test('callout', async () => {
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'block:vu6SK6WJpW',
+      flavour: 'affine:page',
+      props: {
+        title: {
+          '$blocksuite:internal:text$': true,
+          delta: [],
+        },
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'block:Tk4gSPocAt',
+          flavour: 'affine:surface',
+          props: {
+            elements: {},
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'block:WfnS5ZDCJT',
+          flavour: 'affine:note',
+          props: {
+            xywh: '[0,0,800,95]',
+            background: DefaultTheme.noteBackgrounColor,
+            index: 'a0',
+            hidden: false,
+            displayMode: NoteDisplayMode.DocAndEdgeless,
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'block:8hOLxad5Fv',
+              flavour: 'affine:callout',
+              props: {
+                emoji: '💡',
+              },
+              children: [
+                {
+                  type: 'block',
+                  id: 'block:8hOLxad5Fv',
+                  flavour: 'affine:paragraph',
+                  props: {
+                    type: 'text',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [{ insert: 'First callout' }],
+                    },
+                  },
+                  children: [],
+                },
+              ],
+            },
+            {
+              type: 'block',
+              id: 'block:8hOLxadvdv',
+              flavour: 'affine:callout',
+              props: {
+                emoji: '',
+              },
+              children: [
+                {
+                  type: 'block',
+                  id: 'block:8hOLxad5Fv',
+                  flavour: 'affine:paragraph',
+                  props: {
+                    type: 'text',
+                    text: {
+                      '$blocksuite:internal:text$': true,
+                      delta: [{ insert: 'Second callout without emoji' }],
+                    },
+                  },
+                  children: [],
+                },
+              ],
+            },
+            {
+              type: 'block',
+              id: 'block:8hOLxbfdb',
+              flavour: 'affine:paragraph',
+              props: {
+                type: 'quote',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [{ insert: 'This is a regular blockquote' }],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    };
+
+    const markdown = `> \\[!💡]
+>
+> First callout
+
+> \\[!]
+>
+> Second callout without emoji
+
+> This is a regular blockquote
+`;
+
+    const mdAdapter = new MarkdownAdapter(createJob(), provider);
+    const target = await mdAdapter.fromBlockSnapshot({
+      snapshot: blockSnapshot,
+    });
+    expect(target.file).toBe(markdown);
+  });
 });
 
 describe('markdown to snapshot', () => {
@@ -3588,7 +3703,7 @@ bbb
       props: {
         xywh: '[0,0,800,95]',
         background: {
-          dark: '#000000',
+          dark: '#252525',
           light: '#ffffff',
         },
         index: 'a0',
@@ -4181,5 +4296,63 @@ hhh
       pageId: '',
     });
     expect(nanoidReplacement(rawSliceSnapshot!)).toEqual(sliceSnapshot);
+  });
+
+  describe('callout', () => {
+    const calloutBlockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: DefaultTheme.noteBackgrounColor,
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:callout',
+          props: {
+            emoji: '💬',
+          },
+          children: [
+            {
+              type: 'block',
+              id: 'matchesReplaceMap[2]',
+              flavour: 'affine:paragraph',
+              props: {
+                type: 'text',
+                text: {
+                  '$blocksuite:internal:text$': true,
+                  delta: [{ insert: 'This is a callout' }],
+                },
+              },
+              children: [],
+            },
+          ],
+        },
+      ],
+    };
+
+    test('callout start with escape character', async () => {
+      const markdown = '> \\[!💬]\n> This is a callout';
+      const mdAdapter = new MarkdownAdapter(createJob(), provider);
+      const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
+        file: markdown,
+      });
+      expect(nanoidReplacement(rawBlockSnapshot)).toEqual(calloutBlockSnapshot);
+    });
+
+    test('callout start without escape character', async () => {
+      const markdown = '> [!💬]\n> This is a callout';
+      const mdAdapter = new MarkdownAdapter(createJob(), provider);
+      const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
+        file: markdown,
+      });
+      expect(nanoidReplacement(rawBlockSnapshot)).toEqual(calloutBlockSnapshot);
+    });
   });
 });

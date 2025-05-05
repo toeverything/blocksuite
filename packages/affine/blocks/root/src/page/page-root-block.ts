@@ -28,7 +28,6 @@ import { query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
-import type { PageRootService } from './page-root-service.js';
 
 const DOC_BLOCK_CHILD_PADDING = 24;
 const DOC_BOTTOM_PADDING = 32;
@@ -49,10 +48,7 @@ function testClickOnBlankArea(
   return state.raw.clientX < blankLeft || state.raw.clientX > blankRight;
 }
 
-export class PageRootBlockComponent extends BlockComponent<
-  RootBlockModel,
-  PageRootService
-> {
+export class PageRootBlockComponent extends BlockComponent<RootBlockModel> {
   static override styles = css`
     editor-host:has(> affine-page-root, * > affine-page-root) {
       display: block;

@@ -1,4 +1,4 @@
-import { type FrameBlockComponent } from '@blocksuite/affine-block-frame';
+import { FrameBlockComponent } from '@blocksuite/affine-block-frame';
 import {
   EdgelessCRUDIdentifier,
   getSurfaceBlock,
@@ -24,12 +24,7 @@ import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
 import { DisposableGroup } from '@blocksuite/global/disposable';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import {
-  Bound,
-  deserializeXYWH,
-  type SerializedXYWH,
-} from '@blocksuite/global/gfx';
-import { assertType } from '@blocksuite/global/utils';
+import { Bound, type SerializedXYWH } from '@blocksuite/global/gfx';
 import {
   BlockComponent,
   BlockSelection,
@@ -127,6 +122,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
 
   private _referencedModel: GfxModel | null = null;
 
+  // since the xywh of edgeless element is not a signal, we need to use a signal to store the xywh
   private readonly _referenceXYWH$ = signal<SerializedXYWH | null>(null);
 
   private get _shouldRender() {
@@ -263,6 +259,8 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
   }
 
   private _initViewport() {
+    this._referenceXYWH$.value = this.referenceModel?.xywh ?? null;
+
     const refreshViewport = () => {
       if (!this._referenceXYWH$.value) return;
       const previewEditorHost = this.previewEditor;
@@ -270,14 +268,12 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
       const gfx = previewEditorHost.std.get(GfxControllerIdentifier);
       const viewport = gfx.viewport;
 
-      let bound = Bound.deserialize(this._referenceXYWH$.value);
-      const w = Math.max(this.getBoundingClientRect().width, bound.w);
-      const aspectRatio = bound.w / bound.h;
-      const h = w / aspectRatio;
-
-      bound = Bound.fromCenter(bound.center, w, h);
-
-      viewport.setViewportByBound(bound);
+      viewport.setViewportByBound(
+        Bound.deserialize(this._referenceXYWH$.value),
+        this.referenceModel instanceof FrameBlockModel
+          ? undefined
+          : [20, 20, 20, 20]
+      );
     };
     this.disposables.add(effect(refreshViewport));
 
@@ -304,28 +300,15 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
         referenceXYWH$.value = referenceElement.xywh;
 
         const { _disposable } = this;
+        refreshViewport();
         _disposable.add(viewport.sizeUpdated.subscribe(refreshViewport));
 
-        if (referenceElement instanceof FrameBlockModel) {
+        if (referenceElement instanceof GfxBlockElementModel) {
           _disposable.add(
             referenceElement.xywh$.subscribe(xywh => {
               referenceXYWH$.value = xywh;
             })
           );
-          const subscription = this.std.view.viewUpdated.subscribe(
-            ({ id, type, method, view }) => {
-              if (
-                id === referenceElement.id &&
-                type === 'block' &&
-                method === 'add'
-              ) {
-                assertType<FrameBlockComponent>(view);
-                view.showBorder = false;
-                subscription.unsubscribe();
-              }
-            }
-          );
-          _disposable.add(subscription);
         } else if (referenceElement instanceof GfxPrimitiveElementModel) {
           _disposable.add(
             surface.elementUpdated.subscribe(({ id, oldValues }) => {
@@ -338,6 +321,21 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
             })
           );
         }
+
+        const subscription = this.std.view.viewUpdated.subscribe(
+          ({ id, type, method, view }) => {
+            if (
+              id === referenceElement.id &&
+              type === 'block' &&
+              method === 'add' &&
+              view instanceof FrameBlockComponent
+            ) {
+              view.showBorder = false;
+              subscription.unsubscribe();
+            }
+          }
+        );
+        _disposable.add(subscription);
       }
 
       override unmounted() {
@@ -371,15 +369,17 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
     this._disposables.add(dispose);
   }
 
-  private _renderRefContent(referencedModel: GfxModel) {
-    const [, , w, h] = deserializeXYWH(referencedModel.xywh);
+  private _renderRefContent() {
+    if (!this._referenceXYWH$.value) return nothing;
+    const { w, h } = Bound.deserialize(this._referenceXYWH$.value);
+    const aspectRatio = h !== 0 ? w / h : 1;
     const _previewSpec = this._previewSpec.concat(this._runtimePreviewExt);
 
     return html`<div class="ref-content">
       <div
         class="ref-viewport"
         style=${styleMap({
-          aspectRatio: `${w} / ${h}`,
+          aspectRatio: `${aspectRatio}`,
         })}
       >
         ${guard(this._previewDoc, () => {
@@ -424,9 +424,9 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
 
     if (!this._shouldRender) return;
 
+    this._initReferencedModel();
     this._initHotkey();
     this._initViewport();
-    this._initReferencedModel();
   }
 
   override firstUpdated() {
@@ -445,7 +445,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
           .referenceModel=${_referencedModel}
           .refFlavour=${model.props.refFlavour$.value}
         ></surface-ref-placeholder>`
-      : this._renderRefContent(_referencedModel);
+      : this._renderRefContent();
     const edgelessTheme = this.std.get(ThemeProvider).edgeless$.value;
 
     return html`
@@ -471,7 +471,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
 
     const viewport = {
       xywh: this._referenceXYWH$.value,
-      padding: [60, 20, 20, 20] as [number, number, number, number],
+      padding: [20, 20, 20, 20] as [number, number, number, number],
     };
 
     this.std.get(EditPropsStore).setStorage('viewport', viewport);
