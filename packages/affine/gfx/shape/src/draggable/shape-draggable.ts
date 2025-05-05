@@ -1,5 +1,6 @@
 import {
   CanvasElementType,
+  DefaultTool,
   EdgelessCRUDIdentifier,
 } from '@blocksuite/affine-block-surface';
 import {
@@ -137,7 +138,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
 
   draggingShape: DraggableShape['name'] = 'roundedRect';
 
-  override type = 'shape' as const;
+  override type = ShapeTool;
 
   get crud() {
     return this.edgeless.std.get(EdgelessCRUDIdentifier);
@@ -169,8 +170,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
           this.draggableController.states.draggingElement?.data.name;
         if (!shapeName) return;
 
-        this.setEdgelessTool({
-          type: 'shape',
+        this.setEdgelessTool(ShapeTool, {
           shapeName,
         });
         const controller = this.gfx.tool.currentTool$.peek();
@@ -206,8 +206,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
         this._setShapeOverlayLock(false);
         this.readyToDrop = false;
 
-        // @ts-expect-error FIXME: resolve after gfx tool refactor
-        this.gfx.tool.setTool('default');
+        this.gfx.tool.setTool(DefaultTool);
         this.gfx.selection.set({
           elements: [id],
           editing: false,
@@ -265,7 +264,7 @@ export class EdgelessToolbarShapeDraggable extends EdgelessToolbarToolMixin(
             const clientPos = { x: x + left, y: y + top };
             this.draggableController.dragAndMoveTo(el, clientPos);
           } else {
-            this.setEdgelessTool('shape', {
+            this.setEdgelessTool(ShapeTool, {
               shapeName: this.draggingShape,
             });
           }

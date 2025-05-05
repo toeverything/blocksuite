@@ -5,10 +5,11 @@ import {
 import { type Color, DefaultTheme } from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import type { XYWH } from '@blocksuite/global/gfx';
-import type { GfxController, GfxToolsMap } from '@blocksuite/std/gfx';
+import type { GfxController } from '@blocksuite/std/gfx';
 import { effect } from '@preact/signals-core';
 import { Subject } from 'rxjs';
 
+import type { NoteTool } from '../note-tool';
 import {
   NOTE_OVERLAY_CORNER_RADIUS,
   NOTE_OVERLAY_HEIGHT,
@@ -33,8 +34,7 @@ export class NoteOverlay extends ToolOverlay {
       effect(() => {
         // when change note child type, update overlay text
         if (this.gfx.tool.currentToolName$.value !== 'affine:note') return;
-        const tool =
-          this.gfx.tool.currentTool$.peek() as GfxToolsMap['affine:note'];
+        const tool = this.gfx.tool.currentTool$.peek() as NoteTool;
         this.text = this._getOverlayText(tool.activatedOption.tip);
         (this.gfx.surfaceComponent as SurfaceBlockComponent).refresh();
       })

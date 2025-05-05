@@ -24,7 +24,7 @@ export const attachmentSlashMenuConfig: SlashMenuConfig = {
           const file = await openFileOrFiles();
           if (!file) return;
 
-          await addSiblingAttachmentBlocks(std, [file], model, 'after');
+          await addSiblingAttachmentBlocks(std, [file], model);
           if (model.text?.length === 0) {
             std.store.deleteBlock(model);
           }
@@ -47,7 +47,7 @@ export const attachmentSlashMenuConfig: SlashMenuConfig = {
           const file = await openFileOrFiles();
           if (!file) return;
 
-          await addSiblingAttachmentBlocks(std, [file], model, 'after');
+          await addSiblingAttachmentBlocks(std, [file], model);
           if (model.text?.length === 0) {
             std.store.deleteBlock(model);
           }

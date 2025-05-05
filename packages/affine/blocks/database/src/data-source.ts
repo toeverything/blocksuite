@@ -71,11 +71,15 @@ export class DatabaseBlockDataSource extends DataSourceBase {
 
   override featureFlags$: ReadonlySignal<DatabaseFlags> = computed(() => {
     const featureFlagService = this.doc.get(FeatureFlagService);
-    const flag = featureFlagService.getFlag(
+    const enableNumberFormat = featureFlagService.getFlag(
       'enable_database_number_formatting'
     );
+    const enableTableVirtualScroll = featureFlagService.getFlag(
+      'enable_table_virtual_scroll'
+    );
     return {
-      enable_number_formatting: flag ?? false,
+      enable_number_formatting: enableNumberFormat ?? false,
+      enable_table_virtual_scroll: enableTableVirtualScroll ?? false,
     };
   });
 

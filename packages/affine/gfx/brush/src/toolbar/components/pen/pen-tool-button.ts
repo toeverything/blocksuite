@@ -10,6 +10,8 @@ import { css, html, LitElement, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
+import { BrushTool } from '../../../brush-tool';
+import { HighlighterTool } from '../../../highlighter-tool';
 import { penIconMap, penInfoMap } from './consts';
 import type { Pen } from './types';
 
@@ -97,19 +99,19 @@ export class EdgelessPenToolButton extends EdgelessToolbarToolMixin(
 
   override enableActiveBackground = true;
 
-  override type: Pen[] = ['brush', 'highlighter'];
+  override type = [BrushTool, HighlighterTool];
 
   override firstUpdated() {
     this.disposables.add(
       this.gfx.tool.currentToolName$.subscribe(name => {
-        const tool = this.type.find(t => t === name);
+        const tool = this.type.find(t => t.toolName === name);
         if (!tool) {
           this.tryDisposePopper();
           return;
         }
 
-        if (tool !== this.pen$.peek()) {
-          this.pen$.value = tool;
+        if (tool.toolName !== this.pen$.peek()) {
+          this.pen$.value = tool.toolName as Pen;
         }
 
         if (this.active) return;
@@ -121,7 +123,17 @@ export class EdgelessPenToolButton extends EdgelessToolbarToolMixin(
 
   private _togglePenMenu() {
     if (this.tryDisposePopper()) return;
-    !this.active && this.setEdgelessTool(this.pen$.peek());
+    const setPenByType = (pen: Pen) => {
+      if (pen === 'brush') {
+        this.setEdgelessTool(BrushTool);
+      } else {
+        this.setEdgelessTool(HighlighterTool);
+      }
+    };
+    if (!this.active) {
+      const pen = this.pen$.peek();
+      setPenByType(pen);
+    }
     const menu = this.createPopper('edgeless-pen-menu', this);
     Object.assign(menu.element, {
       colors$: this.colors$,
@@ -132,7 +144,7 @@ export class EdgelessPenToolButton extends EdgelessToolbarToolMixin(
       onChange: (props: Record<string, unknown>) => {
         const pen = this.pen$.peek();
         this.edgeless.std.get(EditPropsStore).recordLastProps(pen, props);
-        this.setEdgelessTool(pen);
+        setPenByType(pen);
       },
     });
   }

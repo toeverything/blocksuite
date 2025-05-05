@@ -16,6 +16,8 @@ import { css, html, LitElement, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
+import { BrushTool } from '../../../brush-tool';
+import { HighlighterTool } from '../../../highlighter-tool';
 import { penInfoMap } from './consts';
 import type { Pen, PenMap } from './types';
 
@@ -80,7 +82,11 @@ export class EdgelessPenMenu extends EdgelessToolbarToolMixin(
 
   private readonly _onPickPen = (tool: Pen) => {
     this.pen$.value = tool;
-    this.setEdgelessTool(tool);
+    if (tool === 'brush') {
+      this.setEdgelessTool(BrushTool);
+    } else {
+      this.setEdgelessTool(HighlighterTool);
+    }
   };
 
   private readonly _onPickColor = (e: ColorEvent) => {
@@ -91,7 +97,7 @@ export class EdgelessPenMenu extends EdgelessToolbarToolMixin(
     this.onChange({ color });
   };
 
-  override type: Pen[] = ['brush', 'highlighter'];
+  override type = [BrushTool, HighlighterTool];
 
   override render() {
     const {

@@ -5,11 +5,7 @@ import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { getHostName } from '@blocksuite/affine-shared/utils';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { OpenInNewIcon } from '@blocksuite/icons/lit';
-import {
-  BlockSelection,
-  isGfxBlockComponent,
-  ShadowlessElement,
-} from '@blocksuite/std';
+import { isGfxBlockComponent, ShadowlessElement } from '@blocksuite/std';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -21,28 +17,6 @@ export class BookmarkCard extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
   static override styles = styles;
-
-  private _handleClick(event: MouseEvent) {
-    event.stopPropagation();
-    const model = this.bookmark.model;
-
-    if (model.parent?.flavour !== 'affine:surface') {
-      this._selectBlock();
-    }
-  }
-
-  private _handleDoubleClick(event: MouseEvent) {
-    event.stopPropagation();
-    this.bookmark.open();
-  }
-
-  private _selectBlock() {
-    const selectionManager = this.bookmark.host.selection;
-    const blockSelection = selectionManager.create(BlockSelection, {
-      blockId: this.bookmark.blockId,
-    });
-    selectionManager.setGroup('note', [blockSelection]);
-  }
 
   override connectedCallback(): void {
     super.connectedCallback();
@@ -61,8 +35,9 @@ export class BookmarkCard extends SignalWatcher(
   }
 
   override render() {
-    const { icon, title, url, description, image, style } =
-      this.bookmark.model.props;
+    const { url, style } = this.bookmark.model.props;
+    const { icon, title, description, image } =
+      this.bookmark.linkPreview$.value;
 
     const cardClassMap = classMap({
       loading: this.loading,
@@ -110,8 +85,8 @@ export class BookmarkCard extends SignalWatcher(
     return html`
       <div
         class="affine-bookmark-card ${cardClassMap}"
-        @click=${this._handleClick}
-        @dblclick=${this._handleDoubleClick}
+        @click=${this.bookmark.handleClick}
+        @dblclick=${this.bookmark.handleDoubleClick}
       >
         <div class="affine-bookmark-content">
           <div class="affine-bookmark-content-title">

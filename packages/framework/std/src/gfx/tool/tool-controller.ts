@@ -10,10 +10,10 @@ import type { GfxController } from '../controller.js';
 import { GfxExtension, GfxExtensionIdentifier } from '../extension.js';
 import {
   type BaseTool,
-  type GfxToolsFullOptionValue,
-  type GfxToolsMap,
-  type GfxToolsOption,
   ToolIdentifier,
+  type ToolOptions,
+  type ToolOptionWithType,
+  type ToolType,
 } from './tool.js';
 
 type BuiltInHookEvent<T> = {
@@ -23,9 +23,9 @@ type BuiltInHookEvent<T> = {
 
 type BuiltInEventMap = {
   beforeToolUpdate: BuiltInHookEvent<{
-    toolName: keyof GfxToolsMap;
+    toolName: string;
   }>;
-  toolUpdate: BuiltInHookEvent<{ toolName: keyof GfxToolsMap }>;
+  toolUpdate: BuiltInHookEvent<{ toolName: string }>;
 };
 
 type BuiltInSlotContext = {
@@ -75,8 +75,6 @@ export interface ToolEventTarget {
   ): void;
 }
 
-export const eventTarget = Symbol('eventTarget');
-
 export class ToolController extends GfxExtension {
   static override key = 'ToolController';
 
@@ -84,13 +82,11 @@ export class ToolController extends GfxExtension {
 
   private readonly _disposableGroup = new DisposableGroup();
 
-  private readonly _toolOption$ = new Signal<GfxToolsFullOptionValue>(
-    {} as GfxToolsFullOptionValue
-  );
+  private readonly _toolOption$ = new Signal<ToolOptionWithType>({});
 
   private readonly _tools = new Map<string, BaseTool>();
 
-  readonly currentToolName$ = new Signal<keyof GfxToolsMap>();
+  readonly currentToolName$ = new Signal<string>();
 
   readonly dragging$ = new Signal<boolean>(false);
 
@@ -157,23 +153,11 @@ export class ToolController extends GfxExtension {
 
     return {
       peek() {
-        const option = self._toolOption$.peek() as unknown as { type: string };
-
-        if (!option.type) {
-          option.type = '';
-        }
-
-        return option as GfxToolsFullOptionValue;
+        return self._toolOption$.peek();
       },
 
-      get value(): GfxToolsFullOptionValue {
-        const option = self._toolOption$.value as unknown as { type: string };
-
-        if (!option.type) {
-          option.type = '';
-        }
-
-        return option as GfxToolsFullOptionValue;
+      get value() {
+        return self._toolOption$.value;
       },
     };
   }
@@ -481,9 +465,16 @@ export class ToolController extends GfxExtension {
     tools.mounted();
   }
 
-  get<K extends keyof GfxToolsMap>(key: K): GfxToolsMap[K] {
-    return this._tools.get(key) as GfxToolsMap[K];
-  }
+  get = <T extends BaseTool>(type: ToolType<T>): T => {
+    const instance = this._tools.get(type.toolName) as T | undefined;
+    if (!instance) {
+      throw new BlockSuiteError(
+        BlockSuiteError.ErrorCode.ValueNotExists,
+        `Trying to get tool "${type.toolName}" is not registered`
+      );
+    }
+    return instance;
+  };
 
   override mounted(): void {
     const { addHook } = this._initializeEvents();
@@ -499,24 +490,11 @@ export class ToolController extends GfxExtension {
     });
   }
 
-  setTool(toolName: GfxToolsFullOptionValue, ...args: [void]): void;
-  setTool<K extends keyof GfxToolsMap>(
-    toolName: K,
-    ...args: K extends keyof GfxToolsOption
-      ? [option: GfxToolsOption[K]]
-      : [void]
-  ): void;
-  setTool<K extends keyof GfxToolsMap>(
-    toolName: K | GfxToolsFullOptionValue,
-    ...args: K extends keyof GfxToolsOption
-      ? [option: GfxToolsOption[K]]
-      : [void]
-  ): void {
-    const option = typeof toolName === 'string' ? args[0] : toolName;
-    const toolNameStr =
-      typeof toolName === 'string'
-        ? toolName
-        : ((toolName as { type: string }).type as K);
+  setTool = <T extends BaseTool>(
+    toolType: ToolType<T>,
+    options?: ToolOptions<T>
+  ): void => {
+    const toolNameStr = toolType.toolName;
 
     const beforeUpdateCtx = this._createBuiltInHookCtx('beforeToolUpdate', {
       toolName: toolNameStr,
@@ -541,18 +519,18 @@ export class ToolController extends GfxExtension {
       );
     }
 
-    currentTool.activatedOption = option ?? {};
+    currentTool.activatedOption = options ?? {};
     this._toolOption$.value = {
-      ...currentTool.activatedOption,
-      type: toolNameStr,
-    } as GfxToolsFullOptionValue;
+      toolType,
+      options: currentTool.activatedOption,
+    };
     currentTool.activate(currentTool.activatedOption);
 
     const afterUpdateCtx = this._createBuiltInHookCtx('toolUpdate', {
       toolName: toolNameStr,
     });
     this._builtInHookSlot.next(afterUpdateCtx.slotCtx);
-  }
+  };
 
   override unmounted(): void {
     this.currentTool$.peek()?.deactivate();

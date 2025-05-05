@@ -54,6 +54,7 @@ export class AffineFootnoteNode extends WithDisposable(ShadowlessElement) {
         text-overflow: ellipsis;
         font-family: ${unsafeCSS(baseTheme.fontSansFamily)};
         transition: background 0.3s ease-in-out;
+        transform: translateY(-0.2em);
       }
     }
 
@@ -137,10 +138,6 @@ export class AffineFootnoteNode extends WithDisposable(ShadowlessElement) {
   };
 
   private readonly _handleDocReference = (docId: string) => {
-    if (this.readonly) {
-      return;
-    }
-
     this.std
       .getOptional(PeekViewProvider)
       ?.peek({

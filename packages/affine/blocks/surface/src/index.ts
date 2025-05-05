@@ -32,9 +32,8 @@ export {
   PageSurfaceBlockSpec,
 } from './surface-spec.js';
 export { SurfaceBlockTransformer } from './surface-transformer.js';
+export * from './tool/default-tool.js';
 export {
-  addNote,
-  addNoteAtPoint,
   generateElementId,
   getBgGridGap,
   getLastPropsKey,

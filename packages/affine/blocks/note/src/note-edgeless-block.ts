@@ -31,10 +31,10 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
 ) {
   private get _isShowCollapsedContent() {
     return (
-      this.model.props.edgeless.collapse &&
-      this.gfx.selection.has(this.model.id) &&
+      !!this.model.props.edgeless.collapse &&
+      this.selected$.value &&
       !this._dragging &&
-      (this._isResizing || this._isHover)
+      (this._isResizing || this._isHover || this._editing)
     );
   }
 
@@ -93,12 +93,33 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
         sel => sel.type === 'surface' && sel.blockId === this.model.id
       )
     ) {
+      if (this._hoverTimeout) {
+        clearTimeout(this._hoverTimeout);
+        this._hoverTimeout = null;
+      }
       this._isHover = true;
     }
   }
 
-  private _leaved() {
-    if (this._isHover) {
+  private _hoverTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  private _leaved(e: MouseEvent) {
+    if (this._hoverTimeout) {
+      clearTimeout(this._hoverTimeout);
+      this._hoverTimeout = null;
+    }
+    const rect = this.getBoundingClientRect();
+    const threshold = -10;
+    const leavedFromBottom =
+      e.clientY - rect.bottom > threshold &&
+      rect.left < e.clientX &&
+      e.clientX < rect.right;
+
+    if (leavedFromBottom) {
+      this._hoverTimeout = setTimeout(() => {
+        this._isHover = false;
+      }, 300);
+    } else {
       this._isHover = false;
     }
   }
@@ -142,6 +163,14 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     );
 
     this.disposables.addFromEvent(this, 'keydown', this._handleKeyDown);
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this._hoverTimeout) {
+      clearTimeout(this._hoverTimeout);
+      this._hoverTimeout = null;
+    }
   }
 
   get edgelessSlots() {

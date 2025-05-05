@@ -20,12 +20,14 @@ export const BookmarkStyles: EmbedCardStyle[] = [
   'horizontal',
   'list',
   'cube',
+  'citation',
 ] as const;
 
 export type BookmarkBlockProps = {
   style: (typeof BookmarkStyles)[number];
   url: string;
   caption: string | null;
+  footnoteIdentifier: string | null;
 } & LinkPreviewData &
   Omit<GfxCommonBlockProps, 'scale'> &
   BlockMeta;
@@ -48,6 +50,8 @@ const defaultBookmarkProps: BookmarkBlockProps = {
   'meta:updatedAt': undefined,
   'meta:createdBy': undefined,
   'meta:updatedBy': undefined,
+
+  footnoteIdentifier: null,
 };
 
 export const BookmarkBlockSchema = defineBlockSchema({

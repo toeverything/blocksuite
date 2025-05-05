@@ -196,7 +196,7 @@ Array of IDs of the newly created blocks
 
 ### addSiblingBlocks()
 
-> **addSiblingBlocks**(`targetModel`, `props`, `place`): `string`[]
+> **addSiblingBlocks**(`targetModel`, `props`, `placement`): `string`[]
 
 Add sibling blocks to the store
 
@@ -214,7 +214,7 @@ The target block model
 
 Array of block properties
 
-##### place
+##### placement
 
 Optional position to place the new blocks ('after' or 'before')
 

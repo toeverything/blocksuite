@@ -10,11 +10,13 @@ export const EmbedLinkedDocStyles: EmbedCardStyle[] = [
   'list',
   'cube',
   'horizontalThin',
+  'citation',
 ];
 
 export type EmbedLinkedDocBlockProps = {
   style: EmbedCardStyle;
   caption: string | null;
+  footnoteIdentifier: string | null;
 } & ReferenceInfo;
 
 export class EmbedLinkedDocModel extends defineEmbedModel<EmbedLinkedDocBlockProps>(

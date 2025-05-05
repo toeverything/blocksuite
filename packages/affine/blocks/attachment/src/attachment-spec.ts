@@ -4,7 +4,7 @@ import { BlockViewExtension, FlavourExtension } from '@blocksuite/std';
 import type { ExtensionType } from '@blocksuite/store';
 import { literal } from 'lit/static-html.js';
 
-import { AttachmentBlockNotionHtmlAdapterExtension } from './adapters/notion-html.js';
+import { AttachmentBlockAdapterExtensions } from './adapters/extension.js';
 import { AttachmentDropOption } from './attachment-service.js';
 import { attachmentSlashMenuConfig } from './configs/slash-menu.js';
 import { createBuiltinToolbarConfigExtension } from './configs/toolbar';
@@ -25,7 +25,7 @@ export const AttachmentBlockSpec: ExtensionType[] = [
   AttachmentDropOption,
   AttachmentEmbedConfigExtension(),
   AttachmentEmbedService,
-  AttachmentBlockNotionHtmlAdapterExtension,
+  AttachmentBlockAdapterExtensions,
   createBuiltinToolbarConfigExtension(flavour),
   SlashMenuConfigExtension(flavour, attachmentSlashMenuConfig),
 ].flat();

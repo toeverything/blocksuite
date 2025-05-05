@@ -1,7 +1,7 @@
 import {
   DefaultModeDragType,
   DefaultTool,
-} from '@blocksuite/affine-gfx-pointer';
+} from '@blocksuite/affine-block-surface';
 import type { RootBlockModel } from '@blocksuite/affine-model';
 import { WidgetComponent } from '@blocksuite/std';
 import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
@@ -41,6 +41,7 @@ export class EdgelessDraggingAreaRectWidget extends WidgetComponent<RootBlockMod
     if (
       rect.w === 0 ||
       rect.h === 0 ||
+      !tool ||
       !(tool instanceof DefaultTool) ||
       tool.dragType !== DefaultModeDragType.Selecting
     )

@@ -11,9 +11,14 @@ export type EmbedSyncedDocBlockProps = {
   style: EmbedCardStyle;
   caption?: string | null;
   scale?: number;
+  preFoldHeight?: number;
 } & ReferenceInfo &
   GfxCompatibleProps;
 
 export class EmbedSyncedDocModel extends defineEmbedModel<EmbedSyncedDocBlockProps>(
   BlockModel
-) {}
+) {
+  get isFolded() {
+    return !!this.props.preFoldHeight$.value;
+  }
+}

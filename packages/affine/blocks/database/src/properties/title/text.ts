@@ -12,7 +12,7 @@ import { BaseCellRenderer } from '@blocksuite/data-view';
 import { IS_MAC } from '@blocksuite/global/env';
 import { LinkedPageIcon } from '@blocksuite/icons/lit';
 import type { BlockSnapshot, DeltaInsert, Text } from '@blocksuite/store';
-import { signal } from '@preact/signals-core';
+import { computed, signal } from '@preact/signals-core';
 import { property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
@@ -217,17 +217,23 @@ export class HeaderAreaTextCell extends BaseCellRenderer<Text, string> {
     super.firstUpdated(props);
     this.richText.value?.updateComplete
       .then(() => {
-        this.disposables.addFromEvent(
-          this.richText.value,
-          'copy',
-          this._onCopy
-        );
-        this.disposables.addFromEvent(this.richText.value, 'cut', this._onCut);
-        this.disposables.addFromEvent(
-          this.richText.value,
-          'paste',
-          this._onPaste
-        );
+        if (this.richText.value) {
+          this.disposables.addFromEvent(
+            this.richText.value,
+            'copy',
+            this._onCopy
+          );
+          this.disposables.addFromEvent(
+            this.richText.value,
+            'cut',
+            this._onCut
+          );
+          this.disposables.addFromEvent(
+            this.richText.value,
+            'paste',
+            this._onPaste
+          );
+        }
       })
       .catch(console.error);
   }
@@ -261,7 +267,14 @@ export class HeaderAreaTextCell extends BaseCellRenderer<Text, string> {
       class="${titleRichTextStyle}"
     ></rich-text>`;
   }
+  icon$ = computed(() => {
+    const iconColumn = this.view.mainProperties$.value.iconColumn;
+    if (!iconColumn) return;
 
+    const icon = this.view.cellValueGet(this.cell.rowId, iconColumn) as string;
+    if (!icon) return;
+    return icon;
+  });
   renderIcon() {
     if (!this.showIcon) {
       return;
@@ -271,10 +284,7 @@ export class HeaderAreaTextCell extends BaseCellRenderer<Text, string> {
         ${LinkedPageIcon({})}
       </div>`;
     }
-    const iconColumn = this.view.mainProperties$.value.iconColumn;
-    if (!iconColumn) return;
-
-    const icon = this.view.cellValueGet(this.cell.rowId, iconColumn) as string;
+    const icon = this.icon$.value;
     if (!icon) return;
 
     return html` <div class="${headerAreaIconStyle}">${icon}</div>`;

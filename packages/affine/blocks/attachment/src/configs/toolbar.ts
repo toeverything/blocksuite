@@ -69,6 +69,10 @@ export const attachmentViewDropdownMenu = {
     {
       id: 'embed',
       label: 'Embed view',
+      disabled: ctx => {
+        const block = ctx.getCurrentBlockByType(AttachmentBlockComponent);
+        return block ? !block.embedded() : true;
+      },
       run(ctx) {
         const model = ctx.getCurrentModelByType(AttachmentBlockModel);
         if (!model) return;
@@ -135,6 +139,12 @@ const downloadAction = {
     const block = ctx.getCurrentBlockByType(AttachmentBlockComponent);
     block?.download();
   },
+  when: ctx => {
+    const model = ctx.getCurrentModelByType(AttachmentBlockModel);
+    if (!model) return false;
+    // Current citation attachment block does not support download
+    return model.props.style !== 'citation' && !model.props.footnoteIdentifier;
+  },
 } as const satisfies ToolbarAction;
 
 const captionAction = {
@@ -156,24 +166,24 @@ const builtinToolbarConfig = {
   actions: [
     {
       id: 'a.rename',
-      content(cx) {
-        const block = cx.getCurrentBlockByType(AttachmentBlockComponent);
+      content(ctx) {
+        const block = ctx.getCurrentBlockByType(AttachmentBlockComponent);
         if (!block) return null;
 
         const abortController = new AbortController();
-        abortController.signal.onabort = () => cx.show();
+        abortController.signal.onabort = () => ctx.show();
 
         return html`
           <editor-icon-button
             aria-label="Rename"
             .tooltip="${'Rename'}"
             @click=${() => {
-              cx.hide();
+              ctx.hide();
 
               createLitPortal({
                 template: RenameModal({
                   model: block.model,
-                  editorHost: cx.host,
+                  editorHost: ctx.host,
                   abortController,
                 }),
                 computePosition: {
@@ -327,7 +337,6 @@ const builtinSurfaceToolbarConfig = {
       id: 'e.caption',
     },
   ],
-
   when: ctx => ctx.getSurfaceModelsByType(AttachmentBlockModel).length === 1,
 } as const satisfies ToolbarModuleConfig;
 

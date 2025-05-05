@@ -11,7 +11,7 @@ import {
   RootBlockSchema,
 } from '@blocksuite/affine-model';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import type { BlockStdScope } from '@blocksuite/std';
+import { BlockService, type BlockStdScope } from '@blocksuite/std';
 import type {
   GfxController,
   GfxModel,
@@ -30,10 +30,12 @@ import {
 import { effect } from '@preact/signals-core';
 import clamp from 'lodash-es/clamp';
 
-import { RootService } from '../root-service.js';
 import { getCursorMode } from './utils/query.js';
 
-export class EdgelessRootService extends RootService implements SurfaceContext {
+export class EdgelessRootService
+  extends BlockService
+  implements SurfaceContext
+{
   static override readonly flavour = RootBlockSchema.model.flavour;
 
   private readonly _surface: SurfaceBlockModel;

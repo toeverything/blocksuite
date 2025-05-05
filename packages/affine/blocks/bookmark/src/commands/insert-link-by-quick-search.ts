@@ -1,9 +1,9 @@
+import { insertEmbedIframeWithUrlCommand } from '@blocksuite/affine-block-embed';
 import {
   type InsertedLinkType,
-  insertEmbedIframeWithUrlCommand,
   insertEmbedLinkedDocCommand,
   type LinkableFlavour,
-} from '@blocksuite/affine-block-embed';
+} from '@blocksuite/affine-block-embed-doc';
 import { QuickSearchProvider } from '@blocksuite/affine-shared/services';
 import type { Command } from '@blocksuite/std';
 

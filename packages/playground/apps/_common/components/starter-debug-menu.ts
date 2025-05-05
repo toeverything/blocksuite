@@ -16,6 +16,7 @@ import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
 import './left-side-panel.js';
 
+import { PresentTool } from '@blocksuite/affine/blocks/frame';
 import { ExportManager } from '@blocksuite/affine/blocks/surface';
 import { toast } from '@blocksuite/affine/components/toast';
 import { StoreExtensionManagerIdentifier } from '@blocksuite/affine/ext-loader';
@@ -554,7 +555,7 @@ export class StarterDebugMenu extends ShadowlessElement {
   private _present() {
     if (!this.editor.std || !this.editor.host) return;
     const gfx = this.editor.std.get(GfxControllerIdentifier);
-    gfx.tool.setTool('frameNavigator', {
+    gfx.tool.setTool(PresentTool, {
       mode: 'fit',
     });
   }

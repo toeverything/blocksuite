@@ -764,7 +764,7 @@ export class Store {
    * Add sibling blocks to the store
    * @param targetModel - The target block model
    * @param props - Array of block properties
-   * @param place - Optional position to place the new blocks ('after' or 'before')
+   * @param placement - Optional position to place the new blocks ('after' or 'before')
    * @returns Array of IDs of the newly created blocks
    *
    * @category Block CRUD
@@ -772,7 +772,7 @@ export class Store {
   addSiblingBlocks(
     targetModel: BlockModel,
     props: Array<Partial<BlockProps>>,
-    place: 'after' | 'before' = 'after'
+    placement: 'after' | 'before' = 'after'
   ): string[] {
     if (!props.length) return [];
     const parent = this.getParent(targetModel);
@@ -780,7 +780,7 @@ export class Store {
 
     const targetIndex =
       parent.children.findIndex(({ id }) => id === targetModel.id) ?? 0;
-    const insertIndex = place === 'before' ? targetIndex : targetIndex + 1;
+    const insertIndex = placement === 'before' ? targetIndex : targetIndex + 1;
 
     if (props.length <= 1) {
       if (!props[0]?.flavour) return [];

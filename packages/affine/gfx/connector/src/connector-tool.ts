@@ -1,5 +1,6 @@
 import {
   CanvasElementType,
+  DefaultTool,
   OverlayIdentifier,
 } from '@blocksuite/affine-block-surface';
 import type {
@@ -104,8 +105,7 @@ export class ConnectorTool extends BaseTool<ConnectorToolOptions> {
       this._allowCancel = true;
     }
 
-    // @ts-expect-error FIXME: resolve after gfx tool refactor
-    this.gfx.tool.setTool('default');
+    this.gfx.tool.setTool(DefaultTool);
     this.gfx.selection.set({ elements: [focusedId] });
   }
 
@@ -132,8 +132,8 @@ export class ConnectorTool extends BaseTool<ConnectorToolOptions> {
     const connector = this._connector;
 
     this.doc.captureSync();
-    // @ts-expect-error FIXME: resolve after gfx tool refactor
-    this.gfx.tool.setTool('default');
+
+    this.gfx.tool.setTool(DefaultTool);
     this.gfx.selection.set({ elements: [connector.id] });
   }
 
@@ -222,15 +222,5 @@ export class ConnectorTool extends BaseTool<ConnectorToolOptions> {
     }
 
     this.findTargetByPoint(point);
-  }
-}
-
-declare module '@blocksuite/std/gfx' {
-  interface GfxToolsMap {
-    connector: ConnectorTool;
-  }
-
-  interface GfxToolsOption {
-    connector: ConnectorToolOptions;
   }
 }

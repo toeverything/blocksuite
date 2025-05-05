@@ -16,7 +16,7 @@ import {
   dedentParagraphCommand,
   indentParagraphCommand,
 } from '@blocksuite/affine-block-paragraph';
-import { getSurfaceBlock } from '@blocksuite/affine-block-surface';
+import { DefaultTool, getSurfaceBlock } from '@blocksuite/affine-block-surface';
 import { insertSurfaceRefBlockCommand } from '@blocksuite/affine-block-surface-ref';
 import { toggleEmbedCardCreateModal } from '@blocksuite/affine-components/embed-card-modal';
 import { toast } from '@blocksuite/affine-components/toast';
@@ -101,6 +101,7 @@ import {
   type BlockStdScope,
   ConfigExtensionFactory,
 } from '@blocksuite/std';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import { computed } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import type { TemplateResult } from 'lit';
@@ -393,7 +394,13 @@ const contentMediaToolGroup: KeyboardToolPanelGroup = {
           std.host,
           'Links',
           'The added link will be displayed as a card view.',
-          { mode: 'page', parentModel, index }
+          { mode: 'page', parentModel, index },
+          ({ mode }) => {
+            if (mode === 'edgeless') {
+              const gfx = std.get(GfxControllerIdentifier);
+              gfx.tool.setTool(DefaultTool);
+            }
+          }
         );
         if (model.text?.length === 0) {
           std.store.deleteBlock(model);
@@ -486,7 +493,13 @@ const embedToolGroup: KeyboardToolPanelGroup = {
           std.host,
           'YouTube',
           'The added YouTube video link will be displayed as an embed view.',
-          { mode: 'page', parentModel, index }
+          { mode: 'page', parentModel, index },
+          ({ mode }) => {
+            if (mode === 'edgeless') {
+              const gfx = std.get(GfxControllerIdentifier);
+              gfx.tool.setTool(DefaultTool);
+            }
+          }
         );
         if (model.text?.length === 0) {
           std.store.deleteBlock(model);
@@ -513,7 +526,13 @@ const embedToolGroup: KeyboardToolPanelGroup = {
           std.host,
           'GitHub',
           'The added GitHub issue or pull request link will be displayed as a card view.',
-          { mode: 'page', parentModel, index }
+          { mode: 'page', parentModel, index },
+          ({ mode }) => {
+            if (mode === 'edgeless') {
+              const gfx = std.get(GfxControllerIdentifier);
+              gfx.tool.setTool(DefaultTool);
+            }
+          }
         );
         if (model.text?.length === 0) {
           std.store.deleteBlock(model);
@@ -541,7 +560,13 @@ const embedToolGroup: KeyboardToolPanelGroup = {
           std.host,
           'Figma',
           'The added Figma link will be displayed as an embed view.',
-          { mode: 'page', parentModel, index }
+          { mode: 'page', parentModel, index },
+          ({ mode }) => {
+            if (mode === 'edgeless') {
+              const gfx = std.get(GfxControllerIdentifier);
+              gfx.tool.setTool(DefaultTool);
+            }
+          }
         );
         if (model.text?.length === 0) {
           std.store.deleteBlock(model);
@@ -568,7 +593,13 @@ const embedToolGroup: KeyboardToolPanelGroup = {
           std.host,
           'Loom',
           'The added Loom video link will be displayed as an embed view.',
-          { mode: 'page', parentModel, index }
+          { mode: 'page', parentModel, index },
+          ({ mode }) => {
+            if (mode === 'edgeless') {
+              const gfx = std.get(GfxControllerIdentifier);
+              gfx.tool.setTool(DefaultTool);
+            }
+          }
         );
         if (model.text?.length === 0) {
           std.store.deleteBlock(model);

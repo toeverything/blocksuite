@@ -1,5 +1,4 @@
 import {
-  DarkLoadingIcon,
   EmbedCardDarkBannerIcon,
   EmbedCardDarkCubeIcon,
   EmbedCardDarkHorizontalIcon,
@@ -10,7 +9,7 @@ import {
   EmbedCardLightHorizontalIcon,
   EmbedCardLightListIcon,
   EmbedCardLightVerticalIcon,
-  LightLoadingIcon,
+  getLoadingIconWith,
 } from '@blocksuite/affine-components/icons';
 import { ColorScheme } from '@blocksuite/affine-model';
 import type { TemplateResult } from 'lit';
@@ -25,9 +24,11 @@ type EmbedCardIcons = {
 };
 
 export function getEmbedCardIcons(theme: ColorScheme): EmbedCardIcons {
+  const LoadingIcon = getLoadingIconWith(theme);
+
   if (theme === ColorScheme.Light) {
     return {
-      LoadingIcon: LightLoadingIcon,
+      LoadingIcon,
       EmbedCardBannerIcon: EmbedCardLightBannerIcon,
       EmbedCardHorizontalIcon: EmbedCardLightHorizontalIcon,
       EmbedCardListIcon: EmbedCardLightListIcon,
@@ -36,7 +37,7 @@ export function getEmbedCardIcons(theme: ColorScheme): EmbedCardIcons {
     };
   } else {
     return {
-      LoadingIcon: DarkLoadingIcon,
+      LoadingIcon,
       EmbedCardBannerIcon: EmbedCardDarkBannerIcon,
       EmbedCardHorizontalIcon: EmbedCardDarkHorizontalIcon,
       EmbedCardListIcon: EmbedCardDarkListIcon,

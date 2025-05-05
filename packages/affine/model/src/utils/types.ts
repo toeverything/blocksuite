@@ -17,7 +17,8 @@ export type EmbedCardStyle =
   | 'figma'
   | 'html'
   | 'syncedDoc'
-  | 'pdf';
+  | 'pdf'
+  | 'citation';
 
 export type LinkPreviewData = {
   description: string | null;
