@@ -21,17 +21,9 @@ import {
   EmbedIframeViewExtensions,
 } from './embed-iframe-block';
 import {
-  EdgelessClipboardEmbedLinkedDocConfig,
-  EmbedLinkedDocViewExtensions,
-} from './embed-linked-doc-block';
-import {
   EdgelessClipboardEmbedLoomConfig,
   EmbedLoomViewExtensions,
 } from './embed-loom-block';
-import {
-  EdgelessClipboardEmbedSyncedDocConfig,
-  EmbedSyncedDocViewExtensions,
-} from './embed-synced-doc-block';
 import {
   EdgelessClipboardEmbedYoutubeConfig,
   EmbedYoutubeViewExtensions,
@@ -52,8 +44,6 @@ export class EmbedViewExtension extends ViewExtensionProvider {
     context.register(EmbedLoomViewExtensions);
     context.register(EmbedYoutubeViewExtensions);
     context.register(EmbedHtmlViewExtensions);
-    context.register(EmbedLinkedDocViewExtensions);
-    context.register(EmbedSyncedDocViewExtensions);
     context.register(EmbedIframeViewExtensions);
     const isEdgeless = this.isEdgeless(context.scope);
     if (isEdgeless) {
@@ -64,8 +54,6 @@ export class EmbedViewExtension extends ViewExtensionProvider {
         EdgelessClipboardEmbedLoomConfig,
         EdgelessClipboardEmbedYoutubeConfig,
         EdgelessClipboardEmbedIframeConfig,
-        EdgelessClipboardEmbedLinkedDocConfig,
-        EdgelessClipboardEmbedSyncedDocConfig,
       ]);
     }
   }

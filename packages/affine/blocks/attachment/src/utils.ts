@@ -9,7 +9,8 @@ import {
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
 import {
-  FileSizeLimitService,
+  type AttachmentUploadedEvent,
+  FileSizeLimitProvider,
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
@@ -18,130 +19,21 @@ import type { BlockStdScope } from '@blocksuite/std';
 import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import type { BlockModel } from '@blocksuite/store';
 
-import type { AttachmentBlockComponent } from './attachment-block.js';
-
-const attachmentUploads = new Set<string>();
-export function setAttachmentUploading(blockId: string) {
-  attachmentUploads.add(blockId);
-}
-export function setAttachmentUploaded(blockId: string) {
-  attachmentUploads.delete(blockId);
-}
-function isAttachmentUploading(blockId: string) {
-  return attachmentUploads.has(blockId);
-}
-
-/**
- * This function will not verify the size of the file.
- */
-export async function uploadAttachmentBlob(
-  std: BlockStdScope,
-  blockId: string,
-  blob: Blob,
-  filetype: string,
-  isEdgeless?: boolean
-): Promise<void> {
-  if (isAttachmentUploading(blockId)) {
-    return;
-  }
-
-  let sourceId: string | undefined;
-
-  try {
-    setAttachmentUploading(blockId);
-    sourceId = await std.store.blobSync.set(blob);
-  } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      toast(
-        std.host,
-        `Failed to upload attachment! ${error.message || error.toString()}`
-      );
-    }
-  } finally {
-    setAttachmentUploaded(blockId);
-
-    const block = std.store.getBlock(blockId);
-
-    std.store.withoutTransact(() => {
-      if (!block) return;
-
-      std.store.updateBlock(block.model, {
-        sourceId,
-      } satisfies Partial<AttachmentBlockProps>);
-    });
-
-    std.getOptional(TelemetryProvider)?.track('AttachmentUploadedEvent', {
-      page: `${isEdgeless ? 'whiteboard' : 'doc'} editor`,
-      module: 'attachment',
-      segment: 'attachment',
-      control: 'uploader',
-      type: filetype,
-      category: block && sourceId ? 'success' : 'failure',
-    });
-  }
-}
+import type { AttachmentBlockComponent } from './attachment-block';
 
 export async function getAttachmentBlob(model: AttachmentBlockModel) {
-  const sourceId = model.props.sourceId;
-  if (!sourceId) {
-    return null;
-  }
+  const {
+    sourceId$: { value: sourceId },
+    type$: { value: type },
+  } = model.props;
+  if (!sourceId) return null;
 
   const doc = model.doc;
   let blob = await doc.blobSync.get(sourceId);
 
-  if (blob) {
-    blob = new Blob([blob], { type: model.props.type });
-  }
+  if (!blob) return null;
 
-  return blob;
-}
-
-export async function checkAttachmentBlob(block: AttachmentBlockComponent) {
-  const model = block.model;
-  const { id } = model;
-  const { sourceId } = model.props;
-
-  if (isAttachmentUploading(id)) {
-    block.loading = true;
-    block.error = false;
-    block.allowEmbed = false;
-    if (block.blobUrl) {
-      URL.revokeObjectURL(block.blobUrl);
-      block.blobUrl = undefined;
-    }
-    return;
-  }
-
-  try {
-    if (!sourceId) {
-      return;
-    }
-
-    const blob = await getAttachmentBlob(model);
-    if (!blob) {
-      return;
-    }
-
-    block.loading = false;
-    block.error = false;
-    block.allowEmbed = block.embedded();
-    if (block.blobUrl) {
-      URL.revokeObjectURL(block.blobUrl);
-    }
-    block.blobUrl = URL.createObjectURL(blob);
-  } catch (error) {
-    console.warn(error, model, sourceId);
-
-    block.loading = false;
-    block.error = true;
-    block.allowEmbed = false;
-    if (block.blobUrl) {
-      URL.revokeObjectURL(block.blobUrl);
-      block.blobUrl = undefined;
-    }
-  }
+  return new Blob([blob], { type });
 }
 
 /**
@@ -149,26 +41,22 @@ export async function checkAttachmentBlob(block: AttachmentBlockComponent) {
  * the download process may take a long time!
  */
 export function downloadAttachmentBlob(block: AttachmentBlockComponent) {
-  const { host, model, loading, error, downloading, blobUrl } = block;
-  if (downloading) {
-    toast(host, 'Download in progress...');
-    return;
-  }
+  const { host, model, blobUrl, blobState$ } = block;
 
-  if (loading) {
-    toast(host, 'Please wait, file is loading...');
+  if (blobState$.peek().downloading) {
+    toast(host, 'Download in progress...');
     return;
   }
 
   const name = model.props.name;
   const shortName = name.length < 20 ? name : name.slice(0, 20) + '...';
 
-  if (error || !blobUrl) {
+  if (!blobUrl) {
     toast(host, `Failed to download ${shortName}!`);
     return;
   }
 
-  block.downloading = true;
+  block.updateBlobState({ downloading: true });
 
   toast(host, `Downloading ${shortName}`);
 
@@ -179,7 +67,34 @@ export function downloadAttachmentBlob(block: AttachmentBlockComponent) {
   tmpLink.dispatchEvent(event);
   tmpLink.remove();
 
-  block.downloading = false;
+  block.updateBlobState({ downloading: false });
+}
+
+export async function refreshData(
+  std: BlockStdScope,
+  block: AttachmentBlockComponent
+) {
+  const model = block.model;
+  const sourceId = model.props.sourceId$.peek();
+  if (!sourceId) return;
+
+  const blobUrl = block.blobUrl;
+  if (blobUrl) {
+    URL.revokeObjectURL(blobUrl);
+    block.blobUrl = null;
+  }
+
+  let blob = await std.store.blobSync.get(sourceId);
+  if (!blob) {
+    block.updateBlobState({ errorMessage: 'File not found' });
+    return;
+  }
+
+  const type = model.props.type$.peek();
+
+  blob = new Blob([blob], { type });
+
+  block.blobUrl = URL.createObjectURL(blob);
 }
 
 export async function getFileType(file: File) {
@@ -192,6 +107,59 @@ export async function getFileType(file: File) {
   return fileType ? fileType.mime : '';
 }
 
+function hasExceeded(
+  std: BlockStdScope,
+  files: File[],
+  maxFileSize = std.get(FileSizeLimitProvider).maxFileSize
+) {
+  const exceeded = files.some(file => file.size > maxFileSize);
+
+  if (exceeded) {
+    const size = humanFileSize(maxFileSize, true, 0);
+    toast(std.host, `You can only upload files less than ${size}`);
+  }
+
+  return exceeded;
+}
+
+async function buildPropsWith(
+  std: BlockStdScope,
+  file: File,
+  embed?: boolean,
+  mode: 'doc' | 'whiteboard' = 'doc'
+) {
+  let type = file.type;
+  let category: AttachmentUploadedEvent['category'] = 'success';
+
+  try {
+    const { name, size } = file;
+    // TODO(@fundon): should re-upload when upload timeout
+    const sourceId = await std.store.blobSync.set(file);
+    type = await getFileType(file);
+
+    return {
+      name,
+      size,
+      type,
+      sourceId,
+      embed,
+    } satisfies Partial<AttachmentBlockProps>;
+  } catch (err) {
+    category = 'failure';
+    throw err;
+  } finally {
+    // TODO(@fundon): should change event name because this is just a local operation.
+    std.getOptional(TelemetryProvider)?.track('AttachmentUploadedEvent', {
+      page: `${mode} editor`,
+      module: 'attachment',
+      segment: 'attachment',
+      control: 'uploader',
+      type,
+      category,
+    });
+  }
+}
+
 /**
  * Add a new attachment block before / after the specified block.
  */
@@ -199,58 +167,24 @@ export async function addSiblingAttachmentBlocks(
   std: BlockStdScope,
   files: File[],
   targetModel: BlockModel,
-  place: 'before' | 'after' = 'after',
-  isEmbed?: boolean
+  placement: 'before' | 'after' = 'after',
+  embed?: boolean
 ) {
-  if (!files.length) {
-    return;
-  }
+  if (!files.length) return [];
 
-  const maxFileSize = std.store.get(FileSizeLimitService).maxFileSize;
-  const isSizeExceeded = files.some(file => file.size > maxFileSize);
-  if (isSizeExceeded) {
-    toast(
-      std.host,
-      `You can only upload files less than ${humanFileSize(
-        maxFileSize,
-        true,
-        0
-      )}`
-    );
-    return;
-  }
+  if (hasExceeded(std, files)) return [];
 
-  const doc = targetModel.doc;
   const flavour = AttachmentBlockSchema.model.flavour;
 
-  const droppedInfos = await Promise.all(
-    files.map(async file => {
-      const { name, size } = file;
-      const type = await getFileType(file);
-      const props = {
-        flavour,
-        name,
-        size,
-        type,
-        embed: isEmbed,
-      } satisfies Partial<AttachmentBlockProps> & {
-        flavour: typeof flavour;
-      };
-      return { props, file };
-    })
+  const propsArray = await Promise.all(
+    files.map(file => buildPropsWith(std, file, embed))
   );
 
-  const blockIds = doc.addSiblingBlocks(
+  const blockIds = std.store.addSiblingBlocks(
     targetModel,
-    droppedInfos.map(info => info.props),
-    place
+    propsArray.map(props => ({ ...props, flavour })),
+    placement
   );
-
-  const uploadPromises = blockIds.map(async (blockId, index) => {
-    const { props, file } = droppedInfos[index];
-    await uploadAttachmentBlob(std, blockId, file, props.type);
-  });
-  await Promise.all(uploadPromises);
 
   return blockIds;
 }
@@ -259,29 +193,21 @@ export async function addAttachments(
   std: BlockStdScope,
   files: File[],
   point?: IVec,
-  transformPoint?: boolean // determines whether we should use `toModelCoord` to convert the point
+  shouldTransformPoint?: boolean // determines whether we should use `toModelCoord` to convert the point
 ): Promise<string[]> {
   if (!files.length) return [];
 
-  const gfx = std.get(GfxControllerIdentifier);
-  const maxFileSize = std.store.get(FileSizeLimitService).maxFileSize;
-  const isSizeExceeded = files.some(file => file.size > maxFileSize);
-  if (isSizeExceeded) {
-    toast(
-      std.host,
-      `You can only upload files less than ${humanFileSize(
-        maxFileSize,
-        true,
-        0
-      )}`
-    );
-    return [];
-  }
+  if (hasExceeded(std, files)) return [];
 
+  const propsArray = await Promise.all(
+    files.map(file => buildPropsWith(std, file, undefined, 'whiteboard'))
+  );
+
+  const gfx = std.get(GfxControllerIdentifier);
   let { x, y } = gfx.viewport.center;
   if (point) {
-    let transform = transformPoint ?? true;
-    if (transform) {
+    shouldTransformPoint = shouldTransformPoint ?? true;
+    if (shouldTransformPoint) {
       [x, y] = gfx.viewport.toModelCoord(...point);
     } else {
       [x, y] = point;
@@ -293,36 +219,15 @@ export async function addAttachments(
   const gap = 32;
   const width = EMBED_CARD_WIDTH.cubeThick;
   const height = EMBED_CARD_HEIGHT.cubeThick;
+  const flavour = AttachmentBlockSchema.model.flavour;
 
-  const droppedInfos = files.map((file, index) => {
-    const { name, size } = file;
+  const blocks = propsArray.map((props, index) => {
     const center = Vec.addScalar(xy, index * gap);
     const xywh = Bound.fromCenter(center, width, height).serialize();
-    const props = {
-      style,
-      name,
-      size,
-      xywh,
-    } satisfies Partial<AttachmentBlockProps>;
-
-    return { file, props };
+    return { flavour, blockProps: { ...props, style, xywh } };
   });
 
-  // upload file and update the attachment model
-  const uploadPromises = droppedInfos.map(async ({ props, file }) => {
-    const type = await getFileType(file);
-
-    const blockId = std.store.addBlock(
-      AttachmentBlockSchema.model.flavour,
-      { ...props, type },
-      gfx.surface
-    );
-
-    await uploadAttachmentBlob(std, blockId, file, type, true);
-
-    return blockId;
-  });
-  const blockIds = await Promise.all(uploadPromises);
+  const blockIds = std.store.addBlocks(blocks, gfx.surface);
 
   gfx.selection.set({
     elements: blockIds,

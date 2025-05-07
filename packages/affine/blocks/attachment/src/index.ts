@@ -1,4 +1,4 @@
-export * from './adapters/notion-html';
+export * from './adapters';
 export * from './attachment-block';
 export * from './attachment-service';
 export * from './attachment-spec';

@@ -1,5 +1,9 @@
-import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
+import {
+  DefaultTool,
+  EdgelessLegacySlotIdentifier,
+} from '@blocksuite/affine-block-surface';
 import { toast } from '@blocksuite/affine-components/toast';
+import { PanTool } from '@blocksuite/affine-gfx-pointer';
 import type { FrameBlockModel } from '@blocksuite/affine-model';
 import {
   EditPropsStore,
@@ -16,7 +20,7 @@ import {
   StopAiIcon,
 } from '@blocksuite/icons/lit';
 import type { BlockComponent } from '@blocksuite/std';
-import type { GfxToolsFullOptionValue } from '@blocksuite/std/gfx';
+import type { ToolOptions } from '@blocksuite/std/gfx';
 import { effect } from '@preact/signals-core';
 import { cssVar } from '@toeverything/theme';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';
@@ -27,6 +31,7 @@ import {
   isFrameBlock,
   type NavigatorMode,
 } from '../frame-manager';
+import { PresentTool } from '../present-tool';
 
 export class PresentationToolbar extends EdgelessToolbarToolMixin(
   SignalWatcher(LitElement)
@@ -114,7 +119,7 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(
 
   private _timer?: ReturnType<typeof setTimeout>;
 
-  override type: GfxToolsFullOptionValue['type'] = 'frameNavigator';
+  override type = PresentTool;
 
   private get _cachedPresentHideToolbar() {
     return !!this.edgeless.std
@@ -151,7 +156,7 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(
 
   private _bindHotKey() {
     const handleKeyIfFrameNavigator = (action: () => void) => () => {
-      if (this.edgelessTool.type === 'frameNavigator') {
+      if (this.edgelessTool.toolType === PresentTool) {
         action();
       }
     };
@@ -171,11 +176,11 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(
   private _exitPresentation() {
     // When exit presentation mode, we need to set the tool to default or pan
     // And exit fullscreen
-    const tool = this.edgeless.doc.readonly
-      ? { type: 'pan', panning: false }
-      : { type: 'default' };
-    // @ts-expect-error FIXME: resolve after gfx tool refactor
-    this.setEdgelessTool(tool);
+    if (this.edgeless.doc.readonly) {
+      this.setEdgelessTool(PanTool, { panning: false });
+    } else {
+      this.setEdgelessTool(DefaultTool);
+    }
 
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(console.error);
@@ -261,9 +266,11 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(
         const currentTool = this.gfx.tool.currentToolOption$.value;
         const selection = this.gfx.selection;
 
-        if (currentTool?.type === 'frameNavigator') {
+        if (currentTool?.toolType === PresentTool) {
           this._cachedIndex = this._currentFrameIndex;
-          this._navigatorMode = currentTool.mode ?? this._navigatorMode;
+          this._navigatorMode =
+            (currentTool.options as ToolOptions<PresentTool>)?.mode ??
+            this._navigatorMode;
           if (isFrameBlock(selection.selectedElements[0])) {
             this._cachedIndex = this._frames.findIndex(
               frame => frame.id === selection.selectedElements[0].id
@@ -306,14 +313,14 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(
         // When exit fullscreen, we need to clear the timer
         clearTimeout(this._timer);
         if (
-          this.edgelessTool.type === 'frameNavigator' &&
+          this.edgelessTool.toolType === PresentTool &&
           this._fullScreenMode
         ) {
-          const tool = this.edgeless.doc.readonly
-            ? { type: 'pan', panning: false }
-            : { type: 'default' };
-          // @ts-expect-error FIXME: resolve after gfx tool refactor
-          this.setEdgelessTool(tool);
+          if (this.edgeless.doc.readonly) {
+            this.setEdgelessTool(PanTool, { panning: false });
+          } else {
+            this.setEdgelessTool(DefaultTool);
+          }
         }
       }
 
@@ -425,7 +432,7 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(
   protected override updated(changedProperties: PropertyValues) {
     if (
       changedProperties.has('_currentFrameIndex') &&
-      this.edgelessTool.type === 'frameNavigator'
+      this.edgelessTool.toolType === PresentTool
     ) {
       this._moveToCurrentFrame();
     }

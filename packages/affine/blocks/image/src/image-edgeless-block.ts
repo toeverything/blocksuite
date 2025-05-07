@@ -1,6 +1,7 @@
 import type { BlockCaptionEditor } from '@blocksuite/affine-components/caption';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import type { ImageBlockModel } from '@blocksuite/affine-model';
+import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { GfxBlockComponent } from '@blocksuite/std';
 import { css, html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
@@ -85,6 +86,7 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockMod
       transform: `rotate(${rotate}deg)`,
       transformOrigin: 'center',
     });
+    const theme = this.std.get(ThemeProvider).theme$.value;
 
     return html`
       <div class="affine-image-container" style=${containerStyleMap}>
@@ -94,7 +96,8 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockMod
             html`<affine-image-fallback-card
               .error=${this.error}
               .loading=${this.loading}
-              .mode=${'page'}
+              .mode="${'edgeless'}"
+              .theme=${theme}
             ></affine-image-fallback-card>`,
           () =>
             html`<div class="resizable-img">

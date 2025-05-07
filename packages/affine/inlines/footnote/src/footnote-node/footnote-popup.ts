@@ -1,10 +1,9 @@
 import {
-  DarkLoadingIcon,
   getAttachmentFileIcon,
-  LightLoadingIcon,
+  getLoadingIconWith,
   WebIcon16,
 } from '@blocksuite/affine-components/icons';
-import { ColorScheme, type FootNote } from '@blocksuite/affine-model';
+import type { FootNote } from '@blocksuite/affine-model';
 import {
   DocDisplayMetaProvider,
   LinkPreviewerService,
@@ -125,7 +124,7 @@ export class FootNotePopup extends SignalWatcher(WithDisposable(LitElement)) {
 
   private readonly _LoadingIcon = () => {
     const theme = this.std.get(ThemeProvider).theme;
-    return theme === ColorScheme.Light ? LightLoadingIcon : DarkLoadingIcon;
+    return getLoadingIconWith(theme);
   };
 
   private readonly _onClick = () => {

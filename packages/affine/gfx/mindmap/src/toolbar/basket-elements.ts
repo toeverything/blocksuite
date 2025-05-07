@@ -170,7 +170,7 @@ export const mediaRender: DraggableTool['render'] = async (bound, edgeless) => {
     const [id] = await addImages(edgeless.std, [file], {
       point: [bound.x, bound.y],
       maxWidth: MAX_IMAGE_WIDTH,
-      transformPoint: false,
+      shouldTransformPoint: false,
     });
     if (id) return id;
     return null;

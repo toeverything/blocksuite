@@ -55,6 +55,8 @@ export type AttachmentBlockProps = {
   embed: boolean | BackwardCompatibleUndefined;
 
   style?: (typeof AttachmentBlockStyles)[number];
+
+  footnoteIdentifier: string | null;
 } & Omit<GfxCommonBlockProps, 'scale'> &
   BlockMeta;
 
@@ -74,6 +76,7 @@ export const defaultAttachmentProps: AttachmentBlockProps = {
   'meta:updatedAt': undefined,
   'meta:createdBy': undefined,
   'meta:updatedBy': undefined,
+  footnoteIdentifier: null,
 };
 
 export const AttachmentBlockSchema = defineBlockSchema({

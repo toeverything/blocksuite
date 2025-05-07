@@ -2,9 +2,11 @@ import type { EdgelessTextBlockComponent } from '@blocksuite/affine-block-edgele
 import {
   EMBED_HTML_MIN_HEIGHT,
   EMBED_HTML_MIN_WIDTH,
+} from '@blocksuite/affine-block-embed';
+import {
   SYNCED_MIN_HEIGHT,
   SYNCED_MIN_WIDTH,
-} from '@blocksuite/affine-block-embed';
+} from '@blocksuite/affine-block-embed-doc';
 import {
   EdgelessFrameManagerIdentifier,
   type FrameOverlay,
@@ -1125,6 +1127,18 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
     bound: Bound,
     direction: HandleDirection
   ) {
+    const block = this.std.view.getBlock(element.id);
+    if (!block) return;
+    const headerHeight =
+      block
+        .querySelector('.affine-embed-synced-doc-edgeless-header-wrapper')
+        ?.getBoundingClientRect().height ?? 0;
+    const contentHeight =
+      block.querySelector('affine-preview-root')?.getBoundingClientRect()
+        .height ?? 0;
+
+    const maxHeight = (headerHeight + contentHeight) / this.zoom;
+
     const curBound = Bound.deserialize(element.xywh);
 
     let scale = element.props.scale ?? 1;
@@ -1141,11 +1155,11 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
     bound.w = width * scale;
 
     height = bound.h / scale;
-    height = clamp(height, SYNCED_MIN_HEIGHT, Infinity);
+    height = clamp(height, SYNCED_MIN_HEIGHT, maxHeight);
     bound.h = height * scale;
 
     this._isWidthLimit = width === SYNCED_MIN_WIDTH;
-    this._isHeightLimit = height === SYNCED_MIN_HEIGHT;
+    this._isHeightLimit = height === SYNCED_MIN_HEIGHT || height === maxHeight;
 
     this.gfx.updateElement(element.id, {
       scale,

@@ -1,6 +1,8 @@
+import { DefaultTool } from '@blocksuite/affine-block-surface';
 import { toggleEmbedCardCreateModal } from '@blocksuite/affine-components/embed-card-modal';
 import type { SlashMenuConfig } from '@blocksuite/affine-widget-slash-menu';
 import { LoomLogoDuotoneIcon } from '@blocksuite/icons/lit';
+import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 
 import { LoomTooltip } from './tooltips';
 
@@ -29,7 +31,13 @@ export const embedLoomSlashMenuConfig: SlashMenuConfig = {
             host,
             'Loom',
             'The added Loom video link will be displayed as an embed view.',
-            { mode: 'page', parentModel, index }
+            { mode: 'page', parentModel, index },
+            ({ mode }) => {
+              if (mode === 'edgeless') {
+                const gfx = std.get(GfxControllerIdentifier);
+                gfx.tool.setTool(DefaultTool);
+              }
+            }
           );
           if (model.text?.length === 0) std.store.deleteBlock(model);
         })().catch(console.error);

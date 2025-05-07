@@ -2,6 +2,7 @@ import { addAttachments } from '@blocksuite/affine-block-attachment';
 import { EdgelessFrameManagerIdentifier } from '@blocksuite/affine-block-frame';
 import { addImages } from '@blocksuite/affine-block-image';
 import {
+  DefaultTool,
   EdgelessCRUDIdentifier,
   ExportManager,
   getSurfaceComponent,
@@ -608,7 +609,7 @@ export class EdgelessClipboardController extends PageClipboard {
       elements: [noteId],
       editing: false,
     });
-    this.gfx.tool.setTool('default');
+    this.gfx.tool.setTool(DefaultTool);
   }
 
   copy() {

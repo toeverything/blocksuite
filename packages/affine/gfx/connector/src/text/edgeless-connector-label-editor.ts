@@ -1,4 +1,7 @@
-import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
+import {
+  DefaultTool,
+  EdgelessCRUDIdentifier,
+} from '@blocksuite/affine-block-surface';
 import { getLineHeight } from '@blocksuite/affine-gfx-text';
 import type { ConnectorElementModel } from '@blocksuite/affine-model';
 import type { RichText } from '@blocksuite/affine-rich-text';
@@ -40,8 +43,7 @@ export function mountConnectorLabelEditor(
 
   const gfx = edgeless.std.get(GfxControllerIdentifier);
 
-  // @ts-expect-error default tool should be migrated to std
-  gfx.tool.setTool('default');
+  gfx.tool.setTool(DefaultTool);
   gfx.selection.set({
     elements: [connector.id],
     editing: true,

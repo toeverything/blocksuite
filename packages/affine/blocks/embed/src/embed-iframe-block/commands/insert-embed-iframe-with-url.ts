@@ -1,4 +1,5 @@
 import {
+  DefaultTool,
   EdgelessCRUDIdentifier,
   SurfaceBlockComponent,
 } from '@blocksuite/affine-block-surface';
@@ -90,10 +91,7 @@ export const insertEmbedIframeWithUrlCommand: Command<
       surfaceBlock.model
     );
 
-    gfx.tool.setTool(
-      // @ts-expect-error FIXME: resolve after gfx tool refactor
-      'default'
-    );
+    gfx.tool.setTool(DefaultTool);
 
     gfx.selection.set({
       elements: [newBlockId],

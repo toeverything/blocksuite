@@ -46,10 +46,7 @@ import { computed, signal } from '@preact/signals-core';
 import { css, html, nothing, unsafeCSS } from 'lit';
 
 import { popSideDetail } from './components/layout.js';
-import {
-  DatabaseConfigExtension,
-  type DatabaseOptionsConfig,
-} from './config.js';
+import { DatabaseConfigExtension } from './config.js';
 import { HostContextKey } from './context/host-context.js';
 import { DatabaseBlockDataSource } from './data-source.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
@@ -57,6 +54,7 @@ import { NoteRenderer } from './detail-panel/note-renderer.js';
 import { DatabaseSelection } from './selection.js';
 import { currentViewStorage } from './utils/current-view.js';
 import { getSingleDocIdFromText } from './utils/title-doc.js';
+import type { DatabaseViewExtensionOptions } from './view';
 
 export class DatabaseBlockComponent extends CaptionedBlockComponent<DatabaseBlockModel> {
   static override styles = css`
@@ -345,7 +343,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<DatabaseBloc
     return this._dataSource;
   }
 
-  get optionsConfig(): DatabaseOptionsConfig {
+  get optionsConfig(): DatabaseViewExtensionOptions {
     return {
       configure: (_model, options) => options,
       ...this.std.getOptional(DatabaseConfigExtension.identifier),
