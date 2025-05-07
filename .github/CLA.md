@@ -131,4 +131,5 @@ Example:
 - Samuel Golmann, @goldsam, 2024/07/29
 - satoren, @satoren, 2024/08/09
 - Nikita Minaev, @majula2111, 2024/09/26
+- Soong Ming Liang, @ML, 2025/05/04
 - Edgar Eduardo Moreno, @ededuardomoreno, 2025/04/30
