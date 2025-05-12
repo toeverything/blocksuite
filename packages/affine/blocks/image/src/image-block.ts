@@ -1,31 +1,44 @@
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { whenHover } from '@blocksuite/affine-components/hover';
+import { getLoadingIconWith } from '@blocksuite/affine-components/icons';
 import { Peekable } from '@blocksuite/affine-components/peek';
+import { ResourceController } from '@blocksuite/affine-components/resource';
 import type { ImageBlockModel } from '@blocksuite/affine-model';
 import {
   ThemeProvider,
   ToolbarRegistryIdentifier,
 } from '@blocksuite/affine-shared/services';
+import { humanFileSize } from '@blocksuite/affine-shared/utils';
 import { IS_MOBILE } from '@blocksuite/global/env';
+import { BrokenImageIcon, ImageIcon } from '@blocksuite/icons/lit';
 import { BlockSelection } from '@blocksuite/std';
+import { computed } from '@preact/signals-core';
 import { html } from 'lit';
-import { property, query, state } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
-import type { ImageBlockFallbackCard } from './components/image-block-fallback.js';
-import type { ImageBlockPageComponent } from './components/page-image-block.js';
+import type { ImageBlockPageComponent } from './components/page-image-block';
 import {
   copyImageBlob,
   downloadImageBlob,
-  fetchImageBlob,
+  refreshData,
   turnImageIntoCardView,
-} from './utils.js';
+} from './utils';
 
 @Peekable({
   enableOn: () => !IS_MOBILE,
 })
 export class ImageBlockComponent extends CaptionedBlockComponent<ImageBlockModel> {
+  resourceController = new ResourceController(
+    computed(() => this.model.props.sourceId$.value),
+    'Image'
+  );
+
+  get blobUrl() {
+    return this.resourceController.blobUrl$.value;
+  }
+
   convertToCardView = () => {
     turnImageIntoCardView(this).catch(console.error);
   };
@@ -39,8 +52,7 @@ export class ImageBlockComponent extends CaptionedBlockComponent<ImageBlockModel
   };
 
   refreshData = () => {
-    this.retryCount = 0;
-    fetchImageBlob(this).catch(console.error);
+    refreshData(this).catch(console.error);
   };
 
   get resizableImg() {
@@ -85,22 +97,14 @@ export class ImageBlockComponent extends CaptionedBlockComponent<ImageBlockModel
   override connectedCallback() {
     super.connectedCallback();
 
-    this.refreshData();
     this.contentEditable = 'false';
-    this._disposables.add(
-      this.model.propsUpdated.subscribe(({ key }) => {
-        if (key === 'sourceId') {
-          this.refreshData();
-        }
-      })
-    );
-  }
 
-  override disconnectedCallback() {
-    if (this.blobUrl) {
-      URL.revokeObjectURL(this.blobUrl);
-    }
-    super.disconnectedCallback();
+    this.resourceController.setEngine(this.std.store.blobSync);
+
+    this.disposables.add(this.resourceController.subscribe());
+    this.disposables.add(this.resourceController);
+
+    this.refreshData();
   }
 
   override firstUpdated() {
@@ -110,24 +114,38 @@ export class ImageBlockComponent extends CaptionedBlockComponent<ImageBlockModel
   }
 
   override renderBlock() {
+    const theme = this.std.get(ThemeProvider).theme$.value;
+    const loadingIcon = getLoadingIconWith(theme);
+
+    const blobUrl = this.blobUrl;
+    const { size = 0 } = this.model.props;
+
     const containerStyleMap = styleMap({
       position: 'relative',
       width: '100%',
     });
-    const theme = this.std.get(ThemeProvider).theme$.value;
+
+    const resovledState = this.resourceController.resolveStateWith({
+      loadingIcon,
+      errorIcon: BrokenImageIcon(),
+      icon: ImageIcon(),
+      title: 'Image',
+      description: humanFileSize(size),
+    });
 
     return html`
       <div class="affine-image-container" style=${containerStyleMap}>
         ${when(
-          this.loading || this.error,
+          blobUrl,
+          () =>
+            html`<affine-page-image
+              .block=${this}
+              .state=${resovledState}
+            ></affine-page-image>`,
           () =>
             html`<affine-image-fallback-card
-              .error=${this.error}
-              .loading=${this.loading}
-              .mode="${'page'}"
-              .theme=${theme}
-            ></affine-image-fallback-card>`,
-          () => html`<affine-page-image .block=${this}></affine-page-image>`
+              .state=${resovledState}
+            ></affine-image-fallback-card>`
         )}
       </div>
 
@@ -135,41 +153,13 @@ export class ImageBlockComponent extends CaptionedBlockComponent<ImageBlockModel
     `;
   }
 
-  override updated() {
-    this.fallbackCard?.requestUpdate();
-  }
-
-  @property({ attribute: false })
-  accessor blob: Blob | undefined = undefined;
-
-  @property({ attribute: false })
-  accessor blobUrl: string | undefined = undefined;
-
   override accessor blockContainerStyles = { margin: '18px 0' };
-
-  @property({ attribute: false })
-  accessor downloading = false;
-
-  @property({ attribute: false })
-  accessor error = false;
-
-  @query('affine-image-fallback-card')
-  accessor fallbackCard: ImageBlockFallbackCard | null = null;
-
-  @state()
-  accessor lastSourceId!: string;
-
-  @property({ attribute: false })
-  accessor loading = false;
 
   @query('affine-page-image')
   private accessor pageImage: ImageBlockPageComponent | null = null;
 
   @query('.affine-image-container')
   accessor hoverableContainer!: HTMLDivElement;
-
-  @property({ attribute: false })
-  accessor retryCount = 0;
 
   override accessor useCaptionEditor = true;
 

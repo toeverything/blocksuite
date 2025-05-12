@@ -26,11 +26,13 @@ import { computed, effect, type Signal, signal } from '@preact/signals-core';
 import { html, nothing, type TemplateResult } from 'lit';
 import { query } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
+import { styleMap } from 'lit/directives/style-map.js';
 import { bundledLanguagesInfo, type ThemedToken } from 'shiki';
 
 import { CodeBlockConfigExtension } from './code-block-config.js';
 import { CodeBlockInlineManagerExtension } from './code-block-inline.js';
 import { CodeBlockHighlighter } from './code-block-service.js';
+import { CodeBlockPreviewIdentifier } from './code-preview-extension.js';
 import { codeBlockStyles } from './styles.js';
 
 export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> {
@@ -66,7 +68,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
   }
 
   get readonly() {
-    return this.doc.readonly;
+    return this.store.readonly;
   }
 
   get langs() {
@@ -224,7 +226,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
         return;
       },
       Tab: ctx => {
-        if (this.doc.readonly) return;
+        if (this.store.readonly) return;
         const state = ctx.get('keyboardState');
         const event = state.raw;
         const inlineEditor = this.inlineEditor;
@@ -332,10 +334,10 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
         return true;
       },
       Delete: () => {
-        return true;
+        return;
       },
       Enter: () => {
-        this.doc.captureSync();
+        this.store.captureSync();
         return true;
       },
       'Mod-Enter': () => {
@@ -346,11 +348,16 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
         if (!inlineRange || !inlineEditor) return;
         const isEnd = model.props.text.length === inlineRange.index;
         if (!isEnd) return;
-        const parent = this.doc.getParent(model);
+        const parent = this.store.getParent(model);
         if (!parent) return;
         const index = parent.children.indexOf(model);
         if (index === -1) return;
-        const id = this.doc.addBlock('affine:paragraph', {}, parent, index + 1);
+        const id = this.store.addBlock(
+          'affine:paragraph',
+          {},
+          parent,
+          index + 1
+        );
         focusTextModel(std, id);
         return true;
       },
@@ -361,7 +368,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
 
   copyCode() {
     const model = this.model;
-    const slice = Slice.fromModels(model.doc, [model]);
+    const slice = Slice.fromModels(model.store, [model]);
     this.std.clipboard
       .copySlice(slice)
       .then(() => {
@@ -384,6 +391,12 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
       this.std.getOptional(CodeBlockConfigExtension.identifier)
         ?.showLineNumbers ?? true;
 
+    const preview = !!this.model.props.preview;
+    const previewContext = this.std.getOptional(
+      CodeBlockPreviewIdentifier(this.model.props.language ?? '')
+    );
+    const shouldRenderPreview = preview && previewContext;
+
     return html`
       <div
         class=${classMap({
@@ -393,12 +406,15 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
         })}
       >
         <rich-text
+          style=${styleMap({
+            display: shouldRenderPreview ? 'none' : undefined,
+          })}
           .yText=${this.model.props.text.yText}
           .inlineEventSource=${this.topContenteditableElement ?? nothing}
-          .undoManager=${this.doc.history}
+          .undoManager=${this.store.history}
           .attributesSchema=${this.inlineManager.getSchema()}
           .attributeRenderer=${this.inlineManager.getRenderer()}
-          .readonly=${this.doc.readonly}
+          .readonly=${this.store.readonly}
           .inlineRangeProvider=${this._inlineRangeProvider}
           .enableClipboard=${false}
           .enableUndoRedo=${false}
@@ -416,14 +432,22 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
             : undefined}
         >
         </rich-text>
-
+        <div
+          style=${styleMap({
+            display: shouldRenderPreview ? undefined : 'none',
+          })}
+          contenteditable="false"
+          class="affine-code-block-preview"
+        >
+          ${previewContext?.renderer(this.model)}
+        </div>
         ${this.renderChildren(this.model)} ${Object.values(this.widgets)}
       </div>
     `;
   }
 
   setWrap(wrap: boolean) {
-    this.doc.updateBlock(this.model, { wrap });
+    this.store.updateBlock(this.model, { wrap });
   }
 
   @query('rich-text')

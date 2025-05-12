@@ -19,7 +19,7 @@ import {
 import type { VirtualTableView } from '../table-view';
 import type { TableGridCell } from '../types';
 import { popRowMenu } from './menu';
-import { rowSelectedBg } from './row-header.css';
+import { rowSelectedBg } from './row-header-css';
 export class DatabaseCellContainer extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
@@ -45,7 +45,7 @@ export class DatabaseCellContainer extends SignalWatcher(
   private readonly _cell = signal<DataViewCellLifeCycle>();
 
   cell$ = computed(() => {
-    return this.view.cellGet(this.rowId, this.columnId);
+    return this.view.cellGetOrCreate(this.rowId, this.columnId);
   });
 
   selectCurrentCell = (editing: boolean) => {

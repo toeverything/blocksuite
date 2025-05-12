@@ -15,6 +15,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { DataViewRenderer } from '../../../core/data-view.js';
 import { GroupTitle } from '../../../core/group-by/group-title.js';
 import type { GroupData } from '../../../core/group-by/trait.js';
+import type { Row } from '../../../core/index.js';
 import { createDndContext } from '../../../core/utils/wc-dnd/dnd-context.js';
 import { defaultActivators } from '../../../core/utils/wc-dnd/sensors/index.js';
 import { linearMove } from '../../../core/utils/wc-dnd/utils/linear-move.js';
@@ -117,15 +118,15 @@ export class TableGroup extends SignalWatcher(
         name: 'Ungroup',
         hide: () => group.value == null,
         select: () => {
-          group.rows.forEach(id => {
-            group.manager.removeFromGroup(id, group.key);
+          group.rows.forEach(row => {
+            group.manager.removeFromGroup(row.rowId, group.key);
           });
         },
       }),
       menu.action({
         name: 'Delete Cards',
         select: () => {
-          this.view.rowDelete(group.rows);
+          this.view.rowsDelete(group.rows.map(row => row.rowId));
         },
       }),
     ]);
@@ -173,7 +174,7 @@ export class TableGroup extends SignalWatcher(
         const overIndex = this.view.properties$.value.findIndex(
           data => data.id === over.id
         );
-        this.view.propertyMove(active.id, {
+        this.view.propertyGetOrCreate(active.id).move({
           before: activeIndex > overIndex,
           id: over.id,
         });
@@ -181,7 +182,7 @@ export class TableGroup extends SignalWatcher(
     },
     collisionDetection: linearMove(true),
     createOverlay: active => {
-      const column = this.view.propertyGet(active.id);
+      const column = this.view.propertyGetOrCreate(active.id);
       const preview = new DataViewColumnPreview();
       preview.column = column;
       preview.group = this.group;
@@ -241,7 +242,7 @@ export class TableGroup extends SignalWatcher(
     return this.group?.rows ?? this.view.rows$.value;
   }
 
-  private renderRows(ids: string[]) {
+  private renderRows(rows: Row[]) {
     return html`
       <affine-database-column-header
         .renderGroupHeader="${this.renderGroupHeader}"
@@ -249,15 +250,15 @@ export class TableGroup extends SignalWatcher(
       ></affine-database-column-header>
       <div class="affine-database-block-rows">
         ${repeat(
-          ids,
-          id => id,
-          (id, idx) => {
+          rows,
+          row => row.rowId,
+          (row, idx) => {
             return html` <data-view-table-row
               data-row-index="${idx}"
-              data-row-id="${id}"
+              data-row-id="${row.rowId}"
               .dataViewEle="${this.dataViewEle}"
               .view="${this.view}"
-              .rowId="${id}"
+              .rowId="${row.rowId}"
               .rowIndex="${idx}"
             ></data-view-table-row>`;
           }

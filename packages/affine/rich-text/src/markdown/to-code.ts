@@ -18,7 +18,7 @@ export function toCode(
     return;
   }
 
-  const doc = model.doc;
+  const doc = model.store;
   const parent = doc.getParent(model);
   if (!parent) {
     return;

@@ -36,7 +36,7 @@ The payload can have three types:
 
 > **historyUpdated**: `Subject`\<`void`\>
 
-This fires when the doc history is updated.
+This fires when the history is updated.
 
 ***
 

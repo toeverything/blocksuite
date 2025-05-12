@@ -43,6 +43,18 @@ export const PRIMARY_GROUPS: MenuItemGroup<CodeBlockToolbarContext>[] = [
         },
       },
       {
+        type: 'preview',
+        generate: ({ blockComponent }) => {
+          return {
+            action: noop,
+            render: () => html`
+              <preview-button .blockComponent=${blockComponent}>
+              </preview-button>
+            `,
+          };
+        },
+      },
+      {
         type: 'copy-code',
         label: 'Copy code',
         icon: CopyIcon,

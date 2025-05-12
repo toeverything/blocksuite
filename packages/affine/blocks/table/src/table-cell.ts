@@ -57,7 +57,7 @@ import {
   rowTopIndicatorStyle,
   threePointerIconDotStyle,
   threePointerIconStyle,
-} from './table-cell.css';
+} from './table-cell-css';
 import type { TableDataManager } from './table-data-manager';
 export const TableCellComponentName = 'affine-table-cell';
 export class TableCell extends SignalWatcher(

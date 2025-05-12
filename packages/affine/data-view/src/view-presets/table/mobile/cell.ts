@@ -11,7 +11,7 @@ import {
   type SingleView,
 } from '../../../core/index.js';
 import { TableViewAreaSelection } from '../selection';
-import type { TableColumn } from '../table-view-manager.js';
+import type { TableProperty } from '../table-view-manager.js';
 
 export class MobileTableCell extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -38,13 +38,13 @@ export class MobileTableCell extends SignalWatcher(
   private readonly _cell = signal<DataViewCellLifeCycle>();
 
   @property({ attribute: false })
-  accessor column!: TableColumn;
+  accessor column!: TableProperty;
 
   @property({ attribute: false })
   accessor rowId!: string;
 
   cell$ = computed(() => {
-    return this.column.cellGet(this.rowId);
+    return this.column.cellGetOrCreate(this.rowId);
   });
 
   isSelectionEditing$ = computed(() => {

@@ -130,14 +130,14 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
     const { collapse, collapsedHeight } = this.model.props.edgeless;
 
     if (collapse) {
-      this.model.doc.updateBlock(this.model, () => {
+      this.model.store.updateBlock(this.model, () => {
         this.model.props.edgeless.collapse = false;
       });
     } else if (collapsedHeight) {
       const { xywh, edgeless } = this.model.props;
       const bound = Bound.deserialize(xywh);
       bound.h = collapsedHeight * (edgeless.scale ?? 1);
-      this.model.doc.updateBlock(this.model, () => {
+      this.model.store.updateBlock(this.model, () => {
         this.model.props.edgeless.collapse = true;
         this.model.props.xywh = bound.serialize();
       });
@@ -298,7 +298,7 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
               .note=${this.model}
             ></edgeless-page-block-title>
             <div
-              contenteditable=${String(!this.doc.readonly$.value)}
+              contenteditable=${String(!this.store.readonly$.value)}
               class="edgeless-note-page-content"
             >
               ${this.renderPageContent()}
@@ -362,7 +362,7 @@ export class EdgelessNoteBlockComponent extends toGfxBlockComponent(
           }
 
           if (this.model.children.length === 0) {
-            const blockId = this.doc.addBlock(
+            const blockId = this.store.addBlock(
               'affine:paragraph',
               { type: 'text' },
               this.model.id

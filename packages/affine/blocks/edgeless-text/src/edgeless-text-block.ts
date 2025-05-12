@@ -44,7 +44,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
   `;
 
   private readonly _resizeObserver = new ResizeObserver(() => {
-    if (this.doc.readonly) {
+    if (this.store.readonly) {
       return;
     }
 
@@ -60,7 +60,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
     const rect = this._textContainer.getBoundingClientRect();
     bound.h = rect.height / this.gfx.viewport.zoom;
 
-    this.doc.updateBlock(this.model, {
+    this.store.updateBlock(this.model, {
       xywh: bound.serialize(),
     });
   }
@@ -73,7 +73,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
       EDGELESS_TEXT_BLOCK_MIN_WIDTH * this.gfx.viewport.zoom
     );
 
-    this.doc.updateBlock(this.model, {
+    this.store.updateBlock(this.model, {
       xywh: bound.serialize(),
     });
   }
@@ -169,7 +169,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
           !firstChild ||
           !matchModels(firstChild, [ListBlockModel, ParagraphBlockModel])
         ) {
-          newParagraphId = this.doc.addBlock(
+          newParagraphId = this.store.addBlock(
             'affine:paragraph',
             {},
             this.model.id,
@@ -182,7 +182,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
           !lastChild ||
           !matchModels(lastChild, [ListBlockModel, ParagraphBlockModel])
         ) {
-          newParagraphId = this.doc.addBlock(
+          newParagraphId = this.store.addBlock(
             'affine:paragraph',
             {},
             this.model.id
@@ -284,7 +284,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
           }
 
           if (this.model.children.length === 0) {
-            const blockId = this.doc.addBlock(
+            const blockId = this.store.addBlock(
               'affine:paragraph',
               { type: 'text' },
               this.model.id
@@ -339,7 +339,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
       minWidth: !hasMaxWidth ? '220px' : undefined,
     };
 
-    this.contentEditable = String(editing && !this.doc.readonly$.value);
+    this.contentEditable = String(editing && !this.store.readonly$.value);
 
     return html`
       <div

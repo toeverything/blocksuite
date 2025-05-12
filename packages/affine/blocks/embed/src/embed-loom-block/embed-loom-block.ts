@@ -60,12 +60,12 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
     this._cardStyle = this.model.props.style;
 
     if (!this.model.props.videoId) {
-      this.doc.withoutTransact(() => {
+      this.store.withoutTransact(() => {
         const url = this.model.props.url;
         const urlMatch = url.match(loomUrlRegex);
         if (urlMatch) {
           const [, videoId] = urlMatch;
-          this.doc.updateBlock(this.model, {
+          this.store.updateBlock(this.model, {
             videoId,
           });
         }
@@ -73,7 +73,7 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
     }
 
     if (!this.model.props.description && !this.model.props.title) {
-      this.doc.withoutTransact(() => {
+      this.store.withoutTransact(() => {
         this.refreshData();
       });
     }
@@ -93,7 +93,7 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
 
     const loading = this.loading;
     const theme = this.std.get(ThemeProvider).theme;
-    const imageProxyService = this.doc.get(ImageProxyService);
+    const imageProxyService = this.store.get(ImageProxyService);
     const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons(theme);
     const titleIcon = loading ? LoadingIcon : LoomIcon;
     const titleText = loading ? 'Loading...' : title;
@@ -127,6 +127,7 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
                       frameborder="0"
                       allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       loading="lazy"
+                      credentialless
                     ></iframe>
 
                     <!-- overlay to prevent the iframe from capturing pointer events -->

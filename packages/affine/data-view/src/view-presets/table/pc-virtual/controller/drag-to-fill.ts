@@ -95,7 +95,7 @@ export function fillSelectionWithFocusCellData(
 
       const curCell = cellContainer.cell$.value;
 
-      if (t.richText.is(curCol.dataType$.value)) {
+      if (curCol.dataType$.value && t.richText.is(curCol.dataType$.value)) {
         const focusCellText = focusData as Text | undefined;
 
         const delta = focusCellText?.toDelta() ?? [{ insert: '' }];

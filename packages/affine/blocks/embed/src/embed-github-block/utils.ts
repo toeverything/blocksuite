@@ -110,7 +110,7 @@ export async function refreshEmbedGithubUrlData(
 
     if (signal?.aborted) return;
 
-    embedGithubElement.doc.updateBlock(embedGithubElement.model, {
+    embedGithubElement.store.updateBlock(embedGithubElement.model, {
       image,
       status,
       statusReason,
@@ -144,7 +144,7 @@ export async function refreshEmbedGithubStatus(
 
   if (!githubApiData.status || signal?.aborted) return;
 
-  embedGithubElement.doc.updateBlock(embedGithubElement.model, {
+  embedGithubElement.store.updateBlock(embedGithubElement.model, {
     status: githubApiData.status,
     statusReason: githubApiData.statusReason,
     createdAt: githubApiData.createdAt,

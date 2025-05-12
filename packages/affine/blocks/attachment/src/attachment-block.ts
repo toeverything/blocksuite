@@ -7,6 +7,10 @@ import {
   getLoadingIconWith,
 } from '@blocksuite/affine-components/icons';
 import { Peekable } from '@blocksuite/affine-components/peek';
+import {
+  type ResolvedStateInfo,
+  ResourceController,
+} from '@blocksuite/affine-components/resource';
 import { toast } from '@blocksuite/affine-components/toast';
 import {
   type AttachmentBlockModel,
@@ -24,13 +28,12 @@ import {
   WarningIcon,
 } from '@blocksuite/icons/lit';
 import { BlockSelection } from '@blocksuite/std';
-import { Slice } from '@blocksuite/store';
-import { type BlobState } from '@blocksuite/sync';
-import { effect, signal } from '@preact/signals-core';
+import { nanoid, Slice } from '@blocksuite/store';
+import { computed, signal } from '@preact/signals-core';
 import { html, type TemplateResult } from 'lit';
-import { property } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { type ClassInfo, classMap } from 'lit/directives/class-map.js';
+import { guard } from 'lit/directives/guard.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
@@ -38,11 +41,13 @@ import { AttachmentEmbedProvider } from './embed';
 import { styles } from './styles';
 import { downloadAttachmentBlob, refreshData } from './utils';
 
-type State = 'loading' | 'uploading' | 'warning' | 'oversize' | 'none';
+type AttachmentResolvedStateInfo = ResolvedStateInfo & {
+  kind?: TemplateResult;
+};
 
 @Peekable({
   enableOn: ({ model }: AttachmentBlockComponent) => {
-    return !model.doc.readonly && model.props.type.endsWith('pdf');
+    return !model.store.readonly && model.props.type.endsWith('pdf');
   },
 })
 export class AttachmentBlockComponent extends CaptionedBlockComponent<AttachmentBlockModel> {
@@ -50,7 +55,13 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
 
   blockDraggable = true;
 
-  blobState$ = signal<Partial<BlobState>>({});
+  resourceController = new ResourceController(
+    computed(() => this.model.props.sourceId$.value)
+  );
+
+  get blobUrl() {
+    return this.resourceController.blobUrl$.value;
+  }
 
   protected containerStyleMap = styleMap({
     position: 'relative',
@@ -73,7 +84,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
   };
 
   copy = () => {
-    const slice = Slice.fromModels(this.doc, [this.model]);
+    const slice = Slice.fromModels(this.store, [this.model]);
     this.std.clipboard.copySlice(slice).catch(console.error);
     toast(this.host, 'Copied to clipboard');
   };
@@ -97,32 +108,22 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
     window.open(blobUrl, '_blank');
   };
 
+  // Refreshes data.
   refreshData = () => {
-    refreshData(this.std, this).catch(console.error);
+    refreshData(this).catch(console.error);
   };
 
-  updateBlobState(state: Partial<BlobState>) {
-    this.blobState$.value = { ...this.blobState$.value, ...state };
-  }
+  private readonly _refreshKey$ = signal<string | null>(null);
 
-  determineState = (
-    downloading: boolean,
-    uploading: boolean,
-    overSize: boolean,
-    error: boolean
-  ): State => {
-    if (overSize) return 'oversize';
-    if (error) return 'warning';
-    if (uploading) return 'uploading';
-    if (downloading) return 'loading';
-    return 'none';
+  // Refreshes the embed component.
+  reload = () => {
+    if (this.model.props.embed) {
+      this._refreshKey$.value = nanoid();
+      return;
+    }
+
+    this.refreshData();
   };
-
-  protected get embedView() {
-    return this.std
-      .get(AttachmentEmbedProvider)
-      .render(this.model, this.blobUrl ?? undefined, this._maxFileSize);
-  }
 
   private _selectBlock() {
     const selectionManager = this.host.selection;
@@ -137,44 +138,20 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
 
     this.contentEditable = 'false';
 
+    this.resourceController.setEngine(this.std.store.blobSync);
+
+    this.disposables.add(this.resourceController.subscribe());
+    this.disposables.add(this.resourceController);
+
     this.refreshData();
 
-    this.disposables.add(
-      effect(() => {
-        const blobId = this.model.props.sourceId$.value;
-        if (!blobId) return;
-
-        const blobState$ = this.std.store.blobSync.blobState$(blobId);
-        if (!blobState$) return;
-
-        const subscription = blobState$.subscribe(state => {
-          if (state.overSize || state.errorMessage) {
-            state.uploading = false;
-            state.downloading = false;
-          }
-
-          this.updateBlobState(state);
-        });
-
-        return () => subscription.unsubscribe();
-      })
-    );
-
-    if (!this.model.props.style && !this.doc.readonly) {
-      this.doc.withoutTransact(() => {
-        this.doc.updateBlock(this.model, {
+    if (!this.model.props.style && !this.store.readonly) {
+      this.store.withoutTransact(() => {
+        this.store.updateBlock(this.model, {
           style: AttachmentBlockStyles[1],
         });
       });
     }
-  }
-
-  override disconnectedCallback() {
-    const blobUrl = this.blobUrl;
-    if (blobUrl) {
-      URL.revokeObjectURL(blobUrl);
-    }
-    super.disconnectedCallback();
   }
 
   override firstUpdated() {
@@ -230,126 +207,133 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
 
   protected renderWithHorizontal(
     classInfo: ClassInfo,
-    icon: TemplateResult,
-    title: string,
-    description: string,
-    kind: TemplateResult,
-    state: State
+    { icon, title, description, kind, state }: AttachmentResolvedStateInfo
   ) {
-    return html`<div class=${classMap(classInfo)}>
-      <div class="affine-attachment-content">
-        <div class="affine-attachment-content-title">
-          <div class="affine-attachment-content-title-icon">${icon}</div>
+    return html`
+      <div class=${classMap(classInfo)}>
+        <div class="affine-attachment-content">
+          <div class="affine-attachment-content-title">
+            <div class="affine-attachment-content-title-icon">${icon}</div>
+            <div class="affine-attachment-content-title-text truncate">
+              ${title}
+            </div>
+          </div>
 
-          <div class="affine-attachment-content-title-text truncate">
-            ${title}
+          <div class="affine-attachment-content-description">
+            <div class="affine-attachment-content-info truncate">
+              ${description}
+            </div>
+            ${choose(state, [
+              ['error', this.renderReloadButton],
+              ['error:oversize', this.renderUpgradeButton],
+            ])}
           </div>
         </div>
 
-        <div class="affine-attachment-content-description">
-          <div class="affine-attachment-content-info truncate">
-            ${description}
-          </div>
-          ${choose(state, [
-            ['oversize', this.renderUpgradeButton],
-            ['warning', this.renderReloadButton],
-          ])}
-        </div>
+        <div class="affine-attachment-banner">${kind}</div>
       </div>
-
-      <div class="affine-attachment-banner">${kind}</div>
-    </div>`;
+    `;
   }
 
   protected renderWithVertical(
     classInfo: ClassInfo,
-    icon: TemplateResult,
-    title: string,
-    description: string,
-    kind: TemplateResult,
-    state?: State
+    { icon, title, description, kind, state }: AttachmentResolvedStateInfo
   ) {
-    return html`<div class=${classMap(classInfo)}>
-      <div class="affine-attachment-content">
-        <div class="affine-attachment-content-title">
-          <div class="affine-attachment-content-title-icon">${icon}</div>
+    return html`
+      <div class=${classMap(classInfo)}>
+        <div class="affine-attachment-content">
+          <div class="affine-attachment-content-title">
+            <div class="affine-attachment-content-title-icon">${icon}</div>
+            <div class="affine-attachment-content-title-text truncate">
+              ${title}
+            </div>
+          </div>
 
-          <div class="affine-attachment-content-title-text truncate">
-            ${title}
+          <div class="affine-attachment-content-info truncate">
+            ${description}
           </div>
         </div>
 
-        <div class="affine-attachment-content-info truncate">
-          ${description}
+        <div class="affine-attachment-banner">
+          ${kind}
+          ${choose(state, [
+            ['error', this.renderReloadButton],
+            ['error:oversize', this.renderUpgradeButton],
+          ])}
         </div>
       </div>
-
-      <div class="affine-attachment-banner">
-        ${kind}
-        ${choose(state, [
-          ['oversize', this.renderUpgradeButton],
-          ['warning', this.renderReloadButton],
-        ])}
-      </div>
-    </div>`;
+    `;
   }
 
-  protected renderCard = () => {
-    const { name, size, style } = this.model.props;
-    const cardStyle = style ?? AttachmentBlockStyles[1];
-
+  protected resolvedState$ = computed<AttachmentResolvedStateInfo>(() => {
     const theme = this.std.get(ThemeProvider).theme$.value;
     const loadingIcon = getLoadingIconWith(theme);
 
-    const blobState = this.blobState$.value;
-    const {
-      uploading = false,
-      downloading = false,
-      overSize = false,
-      errorMessage,
-    } = blobState;
-    const warning = !overSize && Boolean(errorMessage);
-    const error = overSize || warning;
-    const state = this.determineState(downloading, uploading, overSize, error);
-    const loading = state === 'loading' || state === 'uploading';
+    const size = this.model.props.size;
+    const name = this.model.props.name$.value;
+    const kind = getAttachmentFileIcon(name.split('.').pop() ?? '');
+
+    const resolvedState = this.resourceController.resolveStateWith({
+      loadingIcon,
+      errorIcon: WarningIcon(),
+      icon: AttachmentIcon(),
+      title: name,
+      description: humanFileSize(size),
+    });
+
+    return { ...resolvedState, kind };
+  });
+
+  protected renderCardView = () => {
+    const resolvedState = this.resolvedState$.value;
+    const cardStyle = this.model.props.style$.value ?? AttachmentBlockStyles[1];
 
     const classInfo = {
       'affine-attachment-card': true,
       [cardStyle]: true,
-      error,
-      loading,
+      loading: resolvedState.loading,
+      error: resolvedState.error,
     };
-
-    const icon = loading
-      ? loadingIcon
-      : error
-        ? WarningIcon()
-        : AttachmentIcon();
-    const title = uploading ? 'Uploading...' : loading ? 'Loading...' : name;
-    const description = errorMessage || humanFileSize(size);
-    const kind = getAttachmentFileIcon(name.split('.').pop() ?? '');
 
     return when(
       cardStyle === 'cubeThick',
-      () =>
-        this.renderWithVertical(
-          classInfo,
-          icon,
-          title,
-          description,
-          kind,
-          state
-        ),
-      () =>
-        this.renderWithHorizontal(
-          classInfo,
-          icon,
-          title,
-          description,
-          kind,
-          state
-        )
+      () => this.renderWithVertical(classInfo, resolvedState),
+      () => this.renderWithHorizontal(classInfo, resolvedState)
     );
+  };
+
+  protected renderEmbedView = () => {
+    const { model, blobUrl } = this;
+    if (!model.props.embed || !blobUrl) return null;
+
+    const { std, _maxFileSize } = this;
+    const provider = std.get(AttachmentEmbedProvider);
+
+    const render = provider.getRender(model, _maxFileSize);
+    if (!render) return null;
+
+    const enabled = provider.shouldShowStatus(model);
+
+    return html`
+      <div class="affine-attachment-embed-container">
+        ${guard([this._refreshKey$.value], () => render(model, blobUrl))}
+      </div>
+      ${when(enabled, () => {
+        const resolvedState = this.resolvedState$.value;
+        if (resolvedState.state !== 'error') return null;
+        // It should be an error messge.
+        const message = resolvedState.description;
+        if (!message) return null;
+
+        return html`
+          <affine-resource-status
+            class="affine-attachment-embed-status"
+            .message=${message}
+            .reload=${() => this.reload()}
+          ></affine-resource-status>
+        `;
+      })}
+    `;
   };
 
   private readonly _renderCitation = () => {
@@ -376,22 +360,11 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
         ${when(
           this.isCitation,
           () => this._renderCitation(),
-          () =>
-            when(
-              this.embedView,
-              () =>
-                html`<div class="affine-attachment-embed-container">
-                  ${this.embedView}
-                </div>`,
-              this.renderCard
-            )
+          () => this.renderEmbedView() ?? this.renderCardView()
         )}
       </div>
     `;
   }
-
-  @property({ attribute: false })
-  accessor blobUrl: string | null = null;
 
   override accessor selectedStyle = SelectedStyle.Border;
 

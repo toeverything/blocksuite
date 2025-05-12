@@ -174,7 +174,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       presentationIndex: frameMgr.generatePresentationIndex(),
     });
     const id = this.crud.addBlock('affine:frame', props, surfaceBlockModel);
-    edgeless.doc.captureSync();
+    edgeless.store.captureSync();
     const frame = this.crud.getElementById(id);
     if (!frame) return;
 
@@ -190,7 +190,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
   }
 
   private _addNote() {
-    const { doc } = this.edgeless;
+    const { store } = this.edgeless;
     const target = this._getTargetXYWH(
       DEFAULT_NOTE_WIDTH,
       DEFAULT_NOTE_OVERLAY_HEIGHT
@@ -203,13 +203,13 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       {
         xywh: serializeXYWH(...xywh),
       },
-      doc.root?.id
+      store.root?.id
     );
-    const note = doc.getBlock(id)?.model;
+    const note = store.getBlock(id)?.model;
     if (!matchModels(note, [NoteBlockModel])) {
       return;
     }
-    doc.addBlock('affine:paragraph', { type: 'text' }, id);
+    store.addBlock('affine:paragraph', { type: 'text' }, id);
     const group = this.currentSource.group;
 
     if (group instanceof GroupElementModel) {
@@ -251,7 +251,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
       elements: [id],
       editing: true,
     });
-    edgeless.doc.captureSync();
+    edgeless.store.captureSync();
   }
 
   private _addText() {
@@ -260,7 +260,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
     const { xywh, position } = target;
     const bound = Bound.fromXYWH(xywh);
 
-    const textFlag = this.edgeless.doc
+    const textFlag = this.edgeless.store
       .get(FeatureFlagService)
       .getFlag('enable_edgeless_text');
     if (textFlag) {
@@ -287,7 +287,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         elements: [textId],
         editing: false,
       });
-      this.edgeless.doc.captureSync();
+      this.edgeless.store.captureSync();
     } else {
       const textId = this.crud.addElement(CanvasElementType.TEXT, {
         xywh: bound.serialize(),
@@ -316,7 +316,7 @@ export class EdgelessAutoCompletePanel extends WithDisposable(LitElement) {
         elements: [textId],
         editing: false,
       });
-      this.edgeless.doc.captureSync();
+      this.edgeless.store.captureSync();
 
       mountTextElementEditor(textElement, this.edgeless);
     }

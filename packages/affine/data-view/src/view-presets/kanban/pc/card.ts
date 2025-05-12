@@ -230,7 +230,7 @@ export class KanbanCard extends SignalWatcher(
       return;
     }
     return html` <div class="card-header-icon">
-      ${icon.cellGet(this.cardId).value$.value}
+      ${icon.cellGetOrCreate(this.cardId).value$.value}
     </div>`;
   }
 

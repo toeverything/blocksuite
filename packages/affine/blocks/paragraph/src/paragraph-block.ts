@@ -125,7 +125,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<ParagraphBl
     this.disposables.add(
       effect(() => {
         const composing = this._composing.value;
-        if (composing || this.doc.readonly) {
+        if (composing || this.store.readonly) {
           this._displayPlaceholder.value = false;
           return;
         }
@@ -197,7 +197,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<ParagraphBl
             nearestHeading &&
             nearestHeading.props.type.startsWith('h') &&
             nearestHeading.props.collapsed &&
-            !this.doc.readonly
+            !this.store.readonly
           ) {
             nearestHeading.props.collapsed = false;
           }
@@ -215,7 +215,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<ParagraphBl
 
   override renderBlock(): TemplateResult<1> {
     const { type$ } = this.model.props;
-    const collapsed = this.doc.readonly
+    const collapsed = this.store.readonly
       ? this._readonlyCollapsed
       : this.model.props.collapsed;
     const collapsedSiblings = this.collapsedSiblings;
@@ -278,11 +278,11 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<ParagraphBl
                 <blocksuite-toggle-button
                   .collapsed=${collapsed}
                   .updateCollapsed=${(value: boolean) => {
-                    if (this.doc.readonly) {
+                    if (this.store.readonly) {
                       this._readonlyCollapsed = value;
                     } else {
-                      this.doc.captureSync();
-                      this.doc.updateBlock(this.model, {
+                      this.store.captureSync();
+                      this.store.updateBlock(this.model, {
                         collapsed: value,
                       });
                     }
@@ -293,12 +293,12 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<ParagraphBl
           <rich-text
             .yText=${this.model.props.text.yText}
             .inlineEventSource=${this.topContenteditableElement ?? nothing}
-            .undoManager=${this.doc.history}
+            .undoManager=${this.store.history}
             .attributesSchema=${this.attributesSchema}
             .attributeRenderer=${this.attributeRenderer}
             .markdownMatches=${this.inlineManager?.markdownMatches}
             .embedChecker=${this.embedChecker}
-            .readonly=${this.doc.readonly}
+            .readonly=${this.store.readonly}
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}
             .enableUndoRedo=${false}

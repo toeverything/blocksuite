@@ -15,7 +15,7 @@ export async function refreshBookmarkUrlData(
   try {
     bookmarkElement.loading = true;
 
-    const linkPreviewer = bookmarkElement.doc.get(LinkPreviewerService);
+    const linkPreviewer = bookmarkElement.store.get(LinkPreviewerService);
     const bookmarkUrlData = await linkPreviewer.query(
       bookmarkElement.model.props.url,
       signal
@@ -32,7 +32,7 @@ export async function refreshBookmarkUrlData(
 
     if (signal?.aborted) return;
 
-    bookmarkElement.doc.updateBlock(bookmarkElement.model, {
+    bookmarkElement.store.updateBlock(bookmarkElement.model, {
       title,
       description,
       icon,

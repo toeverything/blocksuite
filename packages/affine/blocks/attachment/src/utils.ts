@@ -22,15 +22,13 @@ import type { BlockModel } from '@blocksuite/store';
 import type { AttachmentBlockComponent } from './attachment-block';
 
 export async function getAttachmentBlob(model: AttachmentBlockModel) {
-  const {
-    sourceId$: { value: sourceId },
-    type$: { value: type },
-  } = model.props;
+  const { sourceId$, type$ } = model.props;
+  const sourceId = sourceId$.peek();
+  const type = type$.peek();
   if (!sourceId) return null;
 
-  const doc = model.doc;
-  let blob = await doc.blobSync.get(sourceId);
-
+  const doc = model.store;
+  const blob = await doc.blobSync.get(sourceId);
   if (!blob) return null;
 
   return new Blob([blob], { type });
@@ -41,9 +39,9 @@ export async function getAttachmentBlob(model: AttachmentBlockModel) {
  * the download process may take a long time!
  */
 export function downloadAttachmentBlob(block: AttachmentBlockComponent) {
-  const { host, model, blobUrl, blobState$ } = block;
+  const { host, model, blobUrl, resourceController } = block;
 
-  if (blobState$.peek().downloading) {
+  if (resourceController.state$.peek().downloading) {
     toast(host, 'Download in progress...');
     return;
   }
@@ -56,7 +54,7 @@ export function downloadAttachmentBlob(block: AttachmentBlockComponent) {
     return;
   }
 
-  block.updateBlobState({ downloading: true });
+  resourceController.updateState({ downloading: true });
 
   toast(host, `Downloading ${shortName}`);
 
@@ -67,34 +65,14 @@ export function downloadAttachmentBlob(block: AttachmentBlockComponent) {
   tmpLink.dispatchEvent(event);
   tmpLink.remove();
 
-  block.updateBlobState({ downloading: false });
+  resourceController.updateState({ downloading: false });
 }
 
-export async function refreshData(
-  std: BlockStdScope,
-  block: AttachmentBlockComponent
-) {
+export async function refreshData(block: AttachmentBlockComponent) {
   const model = block.model;
-  const sourceId = model.props.sourceId$.peek();
-  if (!sourceId) return;
-
-  const blobUrl = block.blobUrl;
-  if (blobUrl) {
-    URL.revokeObjectURL(blobUrl);
-    block.blobUrl = null;
-  }
-
-  let blob = await std.store.blobSync.get(sourceId);
-  if (!blob) {
-    block.updateBlobState({ errorMessage: 'File not found' });
-    return;
-  }
-
   const type = model.props.type$.peek();
 
-  blob = new Blob([blob], { type });
-
-  block.blobUrl = URL.createObjectURL(blob);
+  await block.resourceController.refreshUrlWith(type);
 }
 
 export async function getFileType(file: File) {
@@ -104,7 +82,7 @@ export async function getFileType(file: File) {
   const buffer = await file.arrayBuffer();
   const FileType = await import('file-type');
   const fileType = await FileType.fileTypeFromBuffer(buffer);
-  return fileType ? fileType.mime : '';
+  return fileType?.mime ?? '';
 }
 
 function hasExceeded(

@@ -14,6 +14,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import type { DataViewRenderer } from '../../../core/data-view.js';
 import { GroupTitle } from '../../../core/group-by/group-title.js';
 import type { GroupData } from '../../../core/group-by/trait.js';
+import type { Row } from '../../../core/index.js';
 import { LEFT_TOOL_BAR_WIDTH } from '../consts.js';
 import type { DataViewTable } from '../pc/table-view.js';
 import { TableViewAreaSelection } from '../selection';
@@ -100,15 +101,15 @@ export class MobileTableGroup extends SignalWatcher(
         name: 'Ungroup',
         hide: () => group.value == null,
         select: () => {
-          group.rows.forEach(id => {
-            group.manager.removeFromGroup(id, group.key);
+          group.rows.forEach(row => {
+            group.manager.removeFromGroup(row.rowId, group.key);
           });
         },
       }),
       menu.action({
         name: 'Delete Cards',
         select: () => {
-          this.view.rowDelete(group.rows);
+          this.view.rowsDelete(group.rows.map(row => row.rowId));
         },
       }),
     ]);
@@ -135,7 +136,7 @@ export class MobileTableGroup extends SignalWatcher(
     return this.group?.rows ?? this.view.rows$.value;
   }
 
-  private renderRows(ids: string[]) {
+  private renderRows(rows: Row[]) {
     return html`
       <mobile-table-header
         .renderGroupHeader="${this.renderGroupHeader}"
@@ -143,15 +144,15 @@ export class MobileTableGroup extends SignalWatcher(
       ></mobile-table-header>
       <div class="mobile-affine-table-body">
         ${repeat(
-          ids,
-          id => id,
-          (id, idx) => {
+          rows,
+          row => row.rowId,
+          (row, idx) => {
             return html` <mobile-table-row
               data-row-index="${idx}"
-              data-row-id="${id}"
+              data-row-id="${row.rowId}"
               .dataViewEle="${this.dataViewEle}"
               .view="${this.view}"
-              .rowId="${id}"
+              .rowId="${row.rowId}"
               .rowIndex="${idx}"
             ></mobile-table-row>`;
           }

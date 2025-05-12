@@ -407,7 +407,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
               elements[0].id
             ) as ShapeElementModel;
             if (target.text) {
-              this.doc.transact(() => {
+              this.store.transact(() => {
                 target.text!.delete(0, target.text!.length);
                 target.text!.insert(0, key);
               });
@@ -467,7 +467,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     this._initPanEvent();
     this._initPinchEvent();
 
-    if (this.doc.readonly) {
+    if (this.store.readonly) {
       this.gfx.tool.setTool(PanTool, { panning: true });
     } else {
       this.gfx.tool.setTool(DefaultTool);

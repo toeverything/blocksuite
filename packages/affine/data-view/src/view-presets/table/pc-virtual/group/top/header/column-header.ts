@@ -8,7 +8,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { TableSingleView } from '../../../../table-view-manager';
-import * as styles from './column-header.css';
+import * as styles from './column-header-css';
 
 export class VirtualTableHeader extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -30,8 +30,6 @@ export class VirtualTableHeader extends SignalWatcher(
     column.editTitle();
   };
 
-  preMove = 0;
-
   private get readonly() {
     return this.tableViewManager.readonly$.value;
   }
@@ -39,10 +37,6 @@ export class VirtualTableHeader extends SignalWatcher(
   override connectedCallback() {
     super.connectedCallback();
     this.classList.add(styles.columnHeaderContainer);
-  }
-
-  getScale() {
-    return this.scaleDiv?.getBoundingClientRect().width ?? 1;
   }
 
   override render() {

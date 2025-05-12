@@ -288,8 +288,8 @@ export function createEdgelessElement(
     if (!id) return null;
     element = crud.getElementById(id);
   } else {
-    const { doc } = edgeless;
-    id = doc.addBlock(
+    const { store } = edgeless;
+    id = store.addBlock(
       'affine:note',
       {
         background: current.props.background,
@@ -299,7 +299,7 @@ export function createEdgelessElement(
       },
       edgeless.model.id
     );
-    const note = doc.getBlock(id)?.model;
+    const note = store.getBlock(id)?.model;
     if (!note) {
       throw new BlockSuiteError(
         ErrorCode.GfxBlockElementError,
@@ -307,10 +307,10 @@ export function createEdgelessElement(
       );
     }
     assertType<NoteBlockModel>(note);
-    doc.updateBlock(note, () => {
+    store.updateBlock(note, () => {
       note.props.edgeless.collapse = true;
     });
-    doc.addBlock('affine:paragraph', {}, note.id);
+    store.addBlock('affine:paragraph', {}, note.id);
 
     element = note;
   }

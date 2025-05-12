@@ -2,8 +2,6 @@ import { embedNoteContentStyles } from '@blocksuite/affine-block-embed';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { css, html } from 'lit';
 
-unsafeCSSVarV2('layer/background/linkedDocOnEdgeless');
-
 export const styles = css`
   .affine-embed-linked-doc-block {
     box-sizing: border-box;
@@ -12,6 +10,7 @@ export const styles = css`
     height: 100%;
     border-radius: 8px;
     border: 1px solid var(--affine-background-tertiary-color);
+    background: ${unsafeCSSVarV2('layer/background/primary')};
     user-select: none;
     position: relative;
   }

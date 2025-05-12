@@ -201,7 +201,7 @@ export class OutlineViewer extends SignalWatcher(
     );
 
     this.disposables.add(
-      this.editor.doc.workspace.meta.docMetaUpdated.subscribe(() => {
+      this.editor.store.workspace.meta.docMetaUpdated.subscribe(() => {
         this.requestUpdate();
       })
     );
@@ -223,10 +223,10 @@ export class OutlineViewer extends SignalWatcher(
   override render() {
     const docModeService = this.editor.std.get(DocModeProvider);
     const mode = docModeService.getEditorMode();
-    if (this.editor.doc.root === null || mode === 'edgeless') return nothing;
+    if (this.editor.store.root === null || mode === 'edgeless') return nothing;
 
     const headingBlocks = getHeadingBlocksFromDoc(
-      this.editor.doc,
+      this.editor.store,
       [NoteDisplayMode.DocAndEdgeless, NoteDisplayMode.DocOnly],
       true
     );
@@ -234,7 +234,7 @@ export class OutlineViewer extends SignalWatcher(
     if (headingBlocks.length === 0) return nothing;
 
     const items = [
-      ...(this.editor.doc.meta?.title !== '' ? [this.editor.doc.root] : []),
+      ...(this.editor.store.meta?.title !== '' ? [this.editor.store.root] : []),
       ...headingBlocks,
     ];
 

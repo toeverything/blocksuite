@@ -61,7 +61,7 @@ export class BookmarkCard extends SignalWatcher(
 
     const theme = this.bookmark.std.get(ThemeProvider).theme;
     const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons(theme);
-    const imageProxyService = this.bookmark.doc.get(ImageProxyService);
+    const imageProxyService = this.bookmark.store.get(ImageProxyService);
 
     const titleIcon = this.loading
       ? LoadingIcon

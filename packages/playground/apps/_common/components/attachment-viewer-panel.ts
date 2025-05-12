@@ -182,7 +182,7 @@ export class AttachmentViewerPanel extends SignalWatcher(
           console.debug('connected');
           this.#state.value = State.Connected;
 
-          const blob = await model.doc.blobSync.get(model.props.sourceId!);
+          const blob = await model.store.blobSync.get(model.props.sourceId!);
 
           if (!blob) return;
           const buffer = await blob.arrayBuffer();

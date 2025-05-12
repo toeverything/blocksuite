@@ -20,7 +20,7 @@ import {
 } from '../../selection';
 import type { DatabaseCellContainer } from '../cell.js';
 import type { TableGroup } from '../group.js';
-import type { TableRow } from '../row/row.js';
+import type { TableRowView } from '../row/row.js';
 import type { DataViewTable } from '../table-view.js';
 import {
   DragToFillElement,
@@ -244,7 +244,7 @@ export class TableSelectionController implements ReactiveController {
       this.selection = TableViewAreaSelection.create({
         groupKey: groupKey,
         focus: {
-          rowIndex: rows?.findIndex(v => v === id) ?? 0,
+          rowIndex: rows?.findIndex(v => v.rowId === id) ?? 0,
           columnIndex: index,
         },
         isEditing: true,
@@ -346,7 +346,7 @@ export class TableSelectionController implements ReactiveController {
   }
 
   deleteRow(rowId: string) {
-    this.view.rowDelete([rowId]);
+    this.view.rowsDelete([rowId]);
     this.focusToCell('up');
   }
 
@@ -553,7 +553,7 @@ export class TableSelectionController implements ReactiveController {
       (
         this.getGroup(lastRow?.groupKey)?.querySelector(
           `data-view-table-row[data-row-id='${lastRow?.id}']`
-        ) as TableRow | null
+        ) as TableRowView | null
       )?.rowIndex ?? 0;
     const getRowByIndex = (index: number) => {
       const tableRow = this.rows(lastRow?.groupKey)?.item(index);

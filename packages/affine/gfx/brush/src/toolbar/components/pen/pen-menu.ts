@@ -163,7 +163,7 @@ export class EdgelessPenMenu extends EdgelessToolbarToolMixin(
             .theme=${theme}
             .palettes=${DefaultTheme.StrokeColorShortPalettes}
             .shouldKeepColor=${true}
-            .hasTransparent=${!this.edgeless.doc
+            .hasTransparent=${!this.edgeless.store
               .get(FeatureFlagService)
               .getFlag('enable_color_picker')}
           ></edgeless-color-panel>

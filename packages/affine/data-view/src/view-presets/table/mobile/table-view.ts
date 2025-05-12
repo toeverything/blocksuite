@@ -29,7 +29,12 @@ export class MobileDataViewTable extends DataViewBase<
       position: relative;
       width: 100%;
       padding-bottom: 4px;
-      overflow-x: scroll;
+      /** 
+       * Disable horizontal scrolling to prevent crashes on iOS Safari
+       * See https://github.com/toeverything/AFFiNE/pull/12203
+       * and https://github.com/toeverything/blocksuite/pull/8784
+       */
+      overflow-x: hidden;
       overflow-y: hidden;
     }
 

@@ -258,6 +258,7 @@
     "./components/toolbar": "./src/components/toolbar.ts",
     "./components/view-dropdown-menu": "./src/components/view-dropdown-menu.ts",
     "./components/tooltip-content-with-shortcut": "./src/components/tooltip-content-with-shortcut.ts",
+    "./components/resource": "./src/components/resource.ts",
     "./rich-text": "./src/rich-text/index.ts",
     "./rich-text/effects": "./src/rich-text/effects.ts",
     "./shared/adapters": "./src/shared/adapters.ts",
@@ -284,6 +285,6 @@
   "version": "0.21.0",
   "devDependencies": {
     "@vanilla-extract/vite-plugin": "^5.0.0",
-    "vitest": "3.1.2"
+    "vitest": "3.1.3"
   }
 }

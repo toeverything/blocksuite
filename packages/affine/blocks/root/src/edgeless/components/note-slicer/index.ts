@@ -152,7 +152,7 @@ export class NoteSlicer extends WidgetComponent<RootBlockModel> {
 
   private _sliceNote() {
     if (!this._anchorNote || !this._noteBlockIds.length) return;
-    const doc = this.doc;
+    const doc = this.store;
 
     const {
       index: originalIndex,
@@ -177,7 +177,7 @@ export class NoteSlicer extends WidgetComponent<RootBlockModel> {
     const sliceVerticalPos =
       this._divingLinePositions[this._activeSlicerIndex].y;
     const newY = this.gfx.viewport.toModelCoord(x, sliceVerticalPos)[1];
-    const newNoteId = this.doc.addBlock(
+    const newNoteId = this.store.addBlock(
       'affine:note',
       {
         background,
@@ -364,7 +364,7 @@ export class NoteSlicer extends WidgetComponent<RootBlockModel> {
 
   override render() {
     if (
-      this.doc.readonly ||
+      this.store.readonly ||
       this._hidden ||
       this._isResizing ||
       !this._anchorNote ||

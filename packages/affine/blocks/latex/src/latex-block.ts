@@ -77,7 +77,7 @@ export class LatexBlockComponent extends CaptionedBlockComponent<LatexBlockModel
 
     this.disposables.addFromEvent(this, 'click', () => {
       // should not open editor or select block in readonly mode
-      if (this.doc.readonly) {
+      if (this.store.readonly) {
         return;
       }
 

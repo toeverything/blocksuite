@@ -477,7 +477,7 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
   private readonly _onDragEnd = () => {
     this.slots.dragEnd.next();
 
-    this.doc.transact(() => {
+    this.store.transact(() => {
       this._dragEndCallback.forEach(cb => cb());
     });
 
@@ -1210,7 +1210,7 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
     this._isHeightLimit = bound.h === NOTE_MIN_HEIGHT * scale;
 
     if (bound.h > NOTE_MIN_HEIGHT * scale) {
-      this.doc.updateBlock(element, () => {
+      this.store.updateBlock(element, () => {
         element.props.edgeless.collapse = true;
         element.props.edgeless.collapsedHeight = bound.h / scale;
       });
@@ -1393,7 +1393,7 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
     }
 
     _disposables.add(
-      this.doc.slots.blockUpdated.subscribe(this._updateOnElementChange)
+      this.store.slots.blockUpdated.subscribe(this._updateOnElementChange)
     );
 
     _disposables.add(
@@ -1464,14 +1464,14 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
     const {
       block,
       gfx,
-      doc,
+      store,
       resizeMode,
       _resizeManager,
       _selectedRect,
       _updateCursor,
     } = this;
 
-    const hasResizeHandles = !selection.editing && !doc.readonly;
+    const hasResizeHandles = !selection.editing && !store.readonly;
     const inoperable = selection.inoperable;
     const hasElementLocked = elements.some(element => element.isLocked());
     const handlers = [];
@@ -1578,7 +1578,7 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<
         }
       </style>
 
-      ${!doc.readonly && !inoperable && this._canAutoComplete()
+      ${!store.readonly && !inoperable && this._canAutoComplete()
         ? html`<edgeless-auto-complete
             .current=${this.selection.selectedElements[0]}
             .edgeless=${block}

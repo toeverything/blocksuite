@@ -12,7 +12,7 @@ import { property } from 'lit/decorators.js';
 import { TableViewAreaSelection } from '../../../selection';
 import type { VirtualTableView } from '../../table-view';
 import type { TableGridGroup } from '../../types';
-import * as styles from './group-header.css';
+import * as styles from './group-header-css';
 import { GroupTitle } from './group-title';
 export class TableGroupHeader extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -86,15 +86,15 @@ export class TableGroupHeader extends SignalWatcher(
         name: 'Ungroup',
         hide: () => group.value == null,
         select: () => {
-          group.rows.forEach(id => {
-            group.manager.removeFromGroup(id, group.key);
+          group.rows.forEach(row => {
+            group.manager.removeFromGroup(row.rowId, group.key);
           });
         },
       }),
       menu.action({
         name: 'Delete Cards',
         select: () => {
-          this.tableViewManager.rowDelete(group.rows);
+          this.tableViewManager.rowsDelete(group.rows.map(row => row.rowId));
         },
       }),
     ]);

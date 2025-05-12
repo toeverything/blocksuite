@@ -155,7 +155,7 @@ export class MobileKanbanCard extends SignalWatcher(
       return;
     }
     return html` <div class="mobile-card-header-icon">
-      ${icon.cellGet(this.cardId).value$.value}
+      ${icon.cellGetOrCreate(this.cardId).value$.value}
     </div>`;
   }
 

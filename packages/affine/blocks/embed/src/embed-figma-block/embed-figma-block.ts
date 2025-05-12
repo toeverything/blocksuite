@@ -49,8 +49,8 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<EmbedFigmaMode
     this._cardStyle = this.model.props.style;
 
     if (!this.model.props.title) {
-      this.doc.withoutTransact(() => {
-        this.doc.updateBlock(this.model, {
+      this.store.withoutTransact(() => {
+        this.store.updateBlock(this.model, {
           title: 'Figma',
         });
       });
@@ -89,6 +89,7 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<EmbedFigmaMode
                 src=${`https://www.figma.com/embed?embed_host=blocksuite&url=${url}`}
                 allowfullscreen
                 loading="lazy"
+                credentialless
               ></iframe>
 
               <!-- overlay to prevent the iframe from capturing pointer events -->

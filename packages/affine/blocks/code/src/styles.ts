@@ -49,4 +49,8 @@ export const codeBlockStyles = css`
     box-sizing: border-box;
     user-select: none;
   }
+
+  affine-code .affine-code-block-preview {
+    padding: 12px;
+  }
 `;
