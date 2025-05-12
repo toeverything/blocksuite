@@ -75,7 +75,7 @@ export class AffineFrameTitle extends SignalWatcher(
   }
 
   get doc() {
-    return this.model.doc;
+    return this.model.store;
   }
 
   get gfx() {

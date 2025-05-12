@@ -18,7 +18,9 @@ import type { TableSingleView } from '../../table-view-manager.js';
 import type { TableGroup } from '../group.js';
 import { openDetail, popRowMenu } from '../menu.js';
 
-export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
+export class TableRowView extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   static override styles = css`
     .affine-database-block-row:has(.row-select-checkbox.selected) {
       background: var(--affine-primary-color-04);
@@ -294,6 +296,6 @@ export class TableRow extends SignalWatcher(WithDisposable(ShadowlessElement)) {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'data-view-table-row': TableRow;
+    'data-view-table-row': TableRowView;
   }
 }

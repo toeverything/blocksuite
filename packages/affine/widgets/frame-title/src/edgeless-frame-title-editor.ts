@@ -120,7 +120,7 @@ export class EdgelessFrameTitleEditor extends WithDisposable(
   }
 
   override render() {
-    const rootBlockId = this.editorHost.doc.root?.id;
+    const rootBlockId = this.editorHost.store.root?.id;
     if (!rootBlockId) return nothing;
 
     const viewport = this.gfx.viewport;

@@ -104,7 +104,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
             prefix: CopyIcon,
             name: 'Copy',
             select: () => {
-              const slice = Slice.fromModels(this.doc, [this.model]);
+              const slice = Slice.fromModels(this.store, [this.model]);
               this.std.clipboard.copySlice(slice).catch(console.error);
             },
           }),
@@ -119,9 +119,9 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
                 name: 'Delete Database',
                 select: () => {
                   this.model.children.slice().forEach(block => {
-                    this.doc.deleteBlock(block);
+                    this.store.deleteBlock(block);
                   });
-                  this.doc.deleteBlock(this.model);
+                  this.store.deleteBlock(this.model);
                 },
               }),
             ],
@@ -237,7 +237,7 @@ export class DataViewBlockComponent extends CaptionedBlockComponent<DataViewBloc
   }
 
   private renderDatabaseOps() {
-    if (this.doc.readonly) {
+    if (this.store.readonly) {
       return nothing;
     }
     return html` <div class="database-ops" @click="${this._clickDatabaseOps}">

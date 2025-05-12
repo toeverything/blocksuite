@@ -13,7 +13,7 @@ export class FrameBlockComponent extends GfxBlockComponent<FrameBlockModel> {
     super.connectedCallback();
 
     this._disposables.add(
-      this.doc.slots.blockUpdated.subscribe(({ type, id }) => {
+      this.store.slots.blockUpdated.subscribe(({ type, id }) => {
         if (id === this.model.id && type === 'update') {
           this.requestUpdate();
         }

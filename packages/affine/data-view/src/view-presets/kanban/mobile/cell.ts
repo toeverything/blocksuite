@@ -130,7 +130,7 @@ export class MobileKanbanCell extends SignalWatcher(
 
   override render() {
     const props: CellRenderProps = {
-      cell: this.column.cellGet(this.cardId),
+      cell: this.column.cellGetOrCreate(this.cardId),
       isEditing$: this.isEditing$,
       selectCurrentCell: this.selectCurrentCell,
     };

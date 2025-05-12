@@ -54,17 +54,6 @@ const styles = css`
     overflow-y: hidden;
   }
 
-  /* Disable horizontal scrolling to prevent crashes on iOS Safari */
-  affine-edgeless-root .affine-database-block-table {
-    @media (pointer: coarse) {
-      overflow: hidden;
-    }
-    @media (pointer: fine) {
-      overflow-x: scroll;
-      overflow-y: hidden;
-    }
-  }
-
   .affine-database-block-table:hover {
     padding-bottom: 0px;
   }
@@ -237,12 +226,8 @@ export class DataViewTable extends DataViewBase<
       moveTo: (id, evt) => {
         const result = this.dragController.getInsertPosition(evt);
         if (result) {
-          this.props.view.rowMove(
-            id,
-            result.position,
-            undefined,
-            result.groupKey
-          );
+          const row = this.props.view.rowGetOrCreate(id);
+          row.move(result.position, undefined, result.groupKey);
         }
       },
       getSelection: () => {

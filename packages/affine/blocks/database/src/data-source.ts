@@ -2,6 +2,7 @@ import type {
   ColumnDataType,
   ColumnUpdater,
   DatabaseBlockModel,
+  ParagraphBlockModel,
 } from '@blocksuite/affine-model';
 import { getSelectedModelsCommand } from '@blocksuite/affine-shared/commands';
 import { FeatureFlagService } from '@blocksuite/affine-shared/services';
@@ -51,7 +52,59 @@ import {
   databaseBlockViews,
 } from './views/index.js';
 
+type SpacialProperty = {
+  valueSet: (rowId: string, propertyId: string, value: unknown) => void;
+  valueGet: (rowId: string, propertyId: string) => unknown;
+};
 export class DatabaseBlockDataSource extends DataSourceBase {
+  spacialProperties: Record<string, SpacialProperty> = {
+    'created-time': {
+      valueSet: () => {},
+      valueGet: (rowId: string) => {
+        const model = this.getModelById(rowId) as ParagraphBlockModel;
+        if (!model) {
+          return null;
+        }
+        return model.props['meta:createdAt'];
+      },
+    },
+    'created-by': {
+      valueSet: () => {},
+      valueGet: (rowId: string) => {
+        const model = this.getModelById(rowId) as
+          | ParagraphBlockModel
+          | undefined;
+        return model ? model.props['meta:createdBy'] : null;
+      },
+    },
+    type: {
+      valueSet: () => {},
+      valueGet: (rowId: string) => {
+        const model = this.getModelById(rowId);
+        if (!model) {
+          return;
+        }
+        return getIcon(model);
+      },
+    },
+    title: {
+      valueSet: () => {},
+      valueGet: (rowId: string) => {
+        const model = this.getModelById(rowId);
+        if (!model) {
+          return;
+        }
+        return model.text;
+      },
+    },
+  };
+  isSpacialProperty(propertyId: string): boolean {
+    return this.spacialProperties[propertyId] !== undefined;
+  }
+  spacialValueGet(rowId: string, propertyId: string): unknown {
+    return this.spacialProperties[propertyId]?.valueGet(rowId, propertyId);
+  }
+
   static externalProperties = signal<PropertyMetaConfig[]>([]);
   static propertiesList = computed(() => {
     return [
@@ -99,7 +152,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
 
   readonly$: ReadonlySignal<boolean> = computed(() => {
     return (
-      this._model.doc.readonly ||
+      this._model.store.readonly ||
       // TODO(@L-Sun): use block level readonly
       IS_MOBILE
     );
@@ -120,7 +173,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
   viewMetas = databaseBlockViews;
 
   get doc() {
-    return this._model.doc;
+    return this._model.store;
   }
 
   allPropertyMetas$ = computed<PropertyMetaConfig<any, any, any, any>[]>(() => {
@@ -196,20 +249,15 @@ export class DatabaseBlockDataSource extends DataSourceBase {
   }
 
   cellValueGet(rowId: string, propertyId: string): unknown {
-    if (propertyId === 'type') {
-      const model = this.getModelById(rowId);
-      if (!model) {
-        return;
-      }
-      return getIcon(model);
+    if (this.isSpacialProperty(propertyId)) {
+      return this.spacialValueGet(rowId, propertyId);
     }
     const type = this.propertyTypeGet(propertyId);
     if (!type) {
       return;
     }
     if (type === 'title') {
-      const model = this.getModelById(rowId);
-      return model?.text;
+      return this.spacialValueGet(rowId, 'title');
     }
     const meta = this.propertyMetaGet(type);
     if (!meta) {
@@ -302,7 +350,7 @@ export class DatabaseBlockDataSource extends DataSourceBase {
       return;
     }
     const { column: prevColumn, index } = result;
-    this._model.doc.transact(() => {
+    this._model.store.transact(() => {
       if (index >= 0) {
         const result = updater(prevColumn);
         this._model.props.columns[index] = { ...prevColumn, ...result };
@@ -500,15 +548,15 @@ export class DatabaseBlockDataSource extends DataSourceBase {
   }
 
   viewDataAdd(viewData: DataViewDataType): string {
-    this._model.doc.captureSync();
-    this._model.doc.transact(() => {
+    this._model.store.captureSync();
+    this._model.store.transact(() => {
       this._model.props.views = [...this._model.props.views, viewData];
     });
     return viewData.id;
   }
 
   viewDataDelete(viewId: string): void {
-    this._model.doc.captureSync();
+    this._model.store.captureSync();
     deleteView(this._model, viewId);
   }
 
@@ -568,20 +616,20 @@ export const convertToDatabase = (host: EditorHost, viewType: string) => {
   const firstModel = selectedModels?.[0];
   if (!firstModel) return;
 
-  host.doc.captureSync();
+  host.store.captureSync();
 
-  const parentModel = host.doc.getParent(firstModel);
+  const parentModel = host.store.getParent(firstModel);
   if (!parentModel) {
     return;
   }
 
-  const id = host.doc.addBlock(
+  const id = host.store.addBlock(
     'affine:database',
     {},
     parentModel,
     parentModel.children.indexOf(firstModel)
   );
-  const databaseModel = host.doc.getBlock(id)?.model as
+  const databaseModel = host.store.getBlock(id)?.model as
     | DatabaseBlockModel
     | undefined;
   if (!databaseModel) {
@@ -589,7 +637,7 @@ export const convertToDatabase = (host: EditorHost, viewType: string) => {
   }
   const datasource = new DatabaseBlockDataSource(databaseModel);
   datasource.viewManager.viewAdd(viewType);
-  host.doc.moveBlocks(selectedModels, databaseModel);
+  host.store.moveBlocks(selectedModels, databaseModel);
 
   const selectionManager = host.selection;
   selectionManager.clear();

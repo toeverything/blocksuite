@@ -9,7 +9,7 @@ import { cssVarV2 } from '@toeverything/theme/v2';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import * as dv from '../../../core/common/dv.css.js';
+import * as dv from '../../../core/common/dv-css.js';
 import {
   type GroupTrait,
   groupTraitKey,
@@ -31,7 +31,7 @@ import { TableGroupHeader } from './group/top/group-header';
 import { DatabaseCellContainer } from './row/cell';
 import { TableRowHeader } from './row/row-header.js';
 import { TableRowLast } from './row/row-last.js';
-import * as styles from './table-view.css.js';
+import * as styles from './table-view-css.js';
 import type {
   TableCellData,
   TableGrid,
@@ -134,12 +134,8 @@ export class VirtualTableView extends DataViewBase<
       moveTo: (id, evt) => {
         const result = this.dragController.getInsertPosition(evt);
         if (result) {
-          this.props.view.rowMove(
-            id,
-            result.position,
-            undefined,
-            result.groupKey
-          );
+          const row = this.props.view.rowGetOrCreate(id);
+          row.move(result.position, undefined, result.groupKey);
         }
       },
       getSelection: () => {
@@ -181,13 +177,13 @@ export class VirtualTableView extends DataViewBase<
       return [
         {
           id: '',
-          rows: this.props.view.rows$.value,
+          rows: this.props.view.rowIds$.value,
         },
       ];
     }
     return groupTrait.groupsDataList$.value.map(group => ({
       id: group.key,
-      rows: group.rows,
+      rows: group.rows.map(v => v.rowId),
     }));
   });
   virtualScroll$ = signal<TableGrid>();
@@ -221,9 +217,10 @@ export class VirtualTableView extends DataViewBase<
           if (!selection || selection.selectionType !== 'row') {
             return false;
           }
+          const groupId = row.group.groupId;
           return TableViewRowSelection.includes(selection, {
             id: row.rowId,
-            groupKey: row.group.groupId,
+            groupKey: groupId ? groupId : undefined,
           });
         }),
       }),

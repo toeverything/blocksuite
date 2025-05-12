@@ -18,10 +18,6 @@ export class LanguageListButton extends WithDisposable(
   SignalWatcher(LitElement)
 ) {
   static override styles = css`
-    :host {
-      margin-right: auto;
-    }
-
     .lang-button {
       background-color: var(--affine-background-primary-color);
       box-shadow: var(--affine-shadow-1);
@@ -53,7 +49,7 @@ export class LanguageListButton extends WithDisposable(
   private _abortController?: AbortController;
 
   private readonly _clickLangBtn = () => {
-    if (this.blockComponent.doc.readonly) return;
+    if (this.blockComponent.store.readonly) return;
     if (this._abortController) {
       // Close the language list if it's already opened.
       this._abortController.abort();
@@ -75,7 +71,7 @@ export class LanguageListButton extends WithDisposable(
           sortedBundledLanguages.splice(index, 1);
           sortedBundledLanguages.unshift(item);
         }
-        this.blockComponent.doc.transact(() => {
+        this.blockComponent.store.transact(() => {
           this.blockComponent.model.props.language$.value = item.name;
         });
       },
@@ -138,10 +134,10 @@ export class LanguageListButton extends WithDisposable(
       </div>`}
       height="24px"
       @click=${this._clickLangBtn}
-      ?disabled=${this.blockComponent.doc.readonly}
+      ?disabled=${this.blockComponent.store.readonly}
     >
       <span class="lang-button-icon" slot="suffix">
-        ${!this.blockComponent.doc.readonly ? ArrowDownIcon : nothing}
+        ${!this.blockComponent.store.readonly ? ArrowDownIcon : nothing}
       </span>
     </icon-button> `;
   }

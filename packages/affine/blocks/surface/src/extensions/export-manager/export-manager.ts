@@ -438,7 +438,7 @@ export class ExportManager {
       if (matchModels(block, [ImageBlockModel])) {
         if (!block.props.sourceId) return;
 
-        const blob = await block.doc.blobSync.get(block.props.sourceId);
+        const blob = await block.store.blobSync.get(block.props.sourceId);
         if (!blob) return;
 
         const blobToImage = (blob: Blob) =>
@@ -542,7 +542,7 @@ type RootBlockComponent = BlockComponent & {
 function getRootByEditorHost(
   editorHost: EditorHost
 ): RootBlockComponent | null {
-  const model = editorHost.doc.root;
+  const model = editorHost.store.root;
   if (!model) return null;
   const root = editorHost.view.getBlock(model.id);
   return root as RootBlockComponent | null;

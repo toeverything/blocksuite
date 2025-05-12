@@ -112,7 +112,7 @@ export const database: InitFn = (collection: Workspace, id: string) => {
       store.addBlock('affine:paragraph', {}, noteId);
       datasource.viewManager.viewAdd(viewPresets.kanbanViewMeta.type);
 
-      doc.resetHistory();
+      store.resetHistory();
     };
     // Add database block inside note block
     addDatabase('Database 1', false);

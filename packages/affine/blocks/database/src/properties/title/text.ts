@@ -24,7 +24,7 @@ import {
   headerAreaIconStyle,
   titleCellStyle,
   titleRichTextStyle,
-} from './cell-renderer.css.js';
+} from './cell-renderer-css.js';
 
 export class HeaderAreaTextCell extends BaseCellRenderer<Text, string> {
   activity = true;
@@ -271,7 +271,8 @@ export class HeaderAreaTextCell extends BaseCellRenderer<Text, string> {
     const iconColumn = this.view.mainProperties$.value.iconColumn;
     if (!iconColumn) return;
 
-    const icon = this.view.cellValueGet(this.cell.rowId, iconColumn) as string;
+    const icon = this.view.cellGetOrCreate(this.cell.rowId, iconColumn).value$
+      .value;
     if (!icon) return;
     return icon;
   });

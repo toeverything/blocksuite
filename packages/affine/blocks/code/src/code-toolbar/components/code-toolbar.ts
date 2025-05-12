@@ -30,7 +30,6 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
       padding: 4px;
       margin: 0;
       display: flex;
-      justify-content: flex-end;
     }
 
     .code-toolbar-button {
@@ -38,6 +37,10 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
       background-color: var(--affine-background-primary-color);
       box-shadow: var(--affine-shadow-1);
       border-radius: 4px;
+    }
+
+    .copy-code {
+      margin-left: auto;
     }
   `;
 

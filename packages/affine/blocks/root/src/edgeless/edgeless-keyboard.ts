@@ -465,7 +465,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           !event.metaKey
         ) {
           const elements = selection.selectedElements;
-          const doc = this.rootComponent.doc;
+          const doc = this.rootComponent.store;
 
           if (isSingleMindMapNode(elements)) {
             const target = gfx.getElementById(

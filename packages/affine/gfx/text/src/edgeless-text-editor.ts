@@ -83,7 +83,7 @@ export function addText(edgeless: BlockComponent, event: PointerEventState) {
       });
     if (!id) return;
 
-    edgeless.doc.captureSync();
+    edgeless.store.captureSync();
     const textElement = crud.getElementById(id);
     if (!textElement) return;
     if (textElement instanceof TextElementModel) {

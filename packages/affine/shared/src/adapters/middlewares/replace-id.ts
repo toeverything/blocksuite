@@ -80,7 +80,7 @@ export const replaceIdMiddleware =
           model.props.reference = idMap.get(original)!;
         } else if (
           model.props.refFlavour === 'affine:frame' &&
-          !model.doc.hasBlock(original)
+          !model.store.hasBlock(original)
         ) {
           const newId = idGenerator();
           idMap.set(original, newId);

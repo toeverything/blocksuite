@@ -120,7 +120,7 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<DatabaseBloc
           prefix: CopyIcon(),
           name: 'Copy',
           select: () => {
-            const slice = Slice.fromModels(this.doc, [this.model]);
+            const slice = Slice.fromModels(this.store, [this.model]);
             this.std.clipboard
               .copySlice(slice)
               .then(() => {
@@ -139,9 +139,9 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<DatabaseBloc
               name: 'Delete Database',
               select: () => {
                 this.model.children.slice().forEach(block => {
-                  this.doc.deleteBlock(block);
+                  this.store.deleteBlock(block);
                 });
-                this.doc.deleteBlock(this.model);
+                this.store.deleteBlock(this.model);
               },
             }),
           ],
@@ -258,18 +258,18 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<DatabaseBloc
       );
       return () => {
         this.indicator.remove();
-        const model = this.doc.getBlock(id)?.model;
+        const model = this.store.getBlock(id)?.model;
         const target = result.modelState.model;
-        let parent = this.doc.getParent(target.id);
+        let parent = this.store.getParent(target.id);
         const shouldInsertIn = result.placement === 'in';
         if (shouldInsertIn) {
           parent = target;
         }
         if (model && target && parent) {
           if (shouldInsertIn) {
-            this.doc.moveBlocks([model], parent);
+            this.store.moveBlocks([model], parent);
           } else {
-            this.doc.moveBlocks(
+            this.store.moveBlocks(
               [model],
               parent,
               target,
@@ -434,13 +434,13 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<DatabaseBloc
                   return peekViewService.peek({
                     docId,
                     databaseId: this.blockId,
-                    databaseDocId: this.model.doc.id,
+                    databaseDocId: this.model.store.id,
                     databaseRowId: data.rowId,
                     target: this,
                   });
                 };
                 const doc = getSingleDocIdFromText(
-                  this.model.doc.getBlock(data.rowId)?.model?.text
+                  this.model.store.getBlock(data.rowId)?.model?.text
                 );
                 if (doc) {
                   return openDoc(doc);

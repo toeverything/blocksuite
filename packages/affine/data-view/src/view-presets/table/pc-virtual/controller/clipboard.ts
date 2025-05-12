@@ -30,7 +30,7 @@ export class TableClipboardController implements ReactiveController {
       .map(row => row.cells.map(cell => cell.stringValue$.value).join('\t'))
       .join('\n');
     const jsonResult: JsonAreaData = area.map(row =>
-      row.cells.map(cell => cell.stringValue$.value)
+      row.cells.map(cell => cell.stringValue$.value ?? '')
     );
     if (isCut) {
       const deleteRows: string[] = [];
@@ -44,7 +44,7 @@ export class TableClipboardController implements ReactiveController {
         }
       }
       if (deleteRows.length) {
-        this.props.view.rowDelete(deleteRows);
+        this.props.view.rowsDelete(deleteRows);
       }
     }
     this.clipboard
@@ -210,7 +210,7 @@ function getSelectedArea(
       .sort((a, b) => a.y - b.y)
       .map(v => v.row);
     return rows.map(r => {
-      const row = view.rowGet(r.id);
+      const row = view.rowGetOrCreate(r.id);
       return {
         row,
         cells: row.cells$.value,
@@ -227,11 +227,11 @@ function getSelectedArea(
     return;
   }
   for (let i = rowsSelection.start; i <= rowsSelection.end; i++) {
-    const row: SelectedArea[number] = {
+    const rowArea: SelectedArea[number] = {
       cells: [],
     };
-    const rowId = rows[i];
-    if (rowId == null) {
+    const row = rows[i];
+    if (row == null) {
       continue;
     }
     for (let j = columnsSelection.start; j <= columnsSelection.end; j++) {
@@ -239,10 +239,10 @@ function getSelectedArea(
       if (columnId == null) {
         continue;
       }
-      const cell = view.cellGet(rowId, columnId);
-      row.cells.push(cell);
+      const cell = view.cellGetOrCreate(row.rowId, columnId);
+      rowArea.cells.push(cell);
     }
-    data.push(row);
+    data.push(rowArea);
   }
 
   return data;

@@ -66,13 +66,13 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
     }
   `;
 
-  private readonly _hideOutsideNoEditingBlock = () => {
+  private readonly _hideOutsideAndNoSelectedBlock = () => {
     if (!this.host) return;
 
     const gfx = this.host.std.get(GfxControllerIdentifier);
     const nextVisibleModels = new Set([
       ...this.getModelsInViewport(),
-      ...this._getEditingModels(),
+      ...this._getSelectedModels(),
     ]);
 
     batch(() => {
@@ -106,7 +106,7 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
   }[] = [];
 
   private readonly _refreshViewport = requestThrottledConnectedFrame(() => {
-    this._hideOutsideNoEditingBlock();
+    this._hideOutsideAndNoSelectedBlock();
   }, this);
 
   private _updatingChildrenFlag = false;
@@ -122,7 +122,7 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
       delete this.scheduleUpdateChildren;
     }
 
-    this._hideOutsideNoEditingBlock();
+    this._hideOutsideAndNoSelectedBlock();
     this.disposables.add(
       this.viewport.viewportUpdated.subscribe(() => viewportUpdateCallback())
     );
@@ -169,12 +169,11 @@ export class GfxViewportElement extends WithDisposable(ShadowlessElement) {
     return promise;
   };
 
-  private _getEditingModels(): Set<GfxBlockElementModel> {
+  private _getSelectedModels(): Set<GfxBlockElementModel> {
     if (!this.host) return new Set();
     const gfx = this.host.std.get(GfxControllerIdentifier);
     return new Set(
       gfx.selection.surfaceSelections
-        .filter(s => s.editing)
         .flatMap(({ elements }) => elements)
         .map(id => gfx.getElementById(id))
         .filter(e => e instanceof GfxBlockElementModel)

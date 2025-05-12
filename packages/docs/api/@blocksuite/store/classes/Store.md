@@ -721,36 +721,6 @@ Check if the store can undo
 
 ***
 
-### captureSync
-
-#### Get Signature
-
-> **get** **captureSync**(): () => `void`
-
-Force the following history to be captured into a new stack.
-
-##### Example
-
-```ts
-op1();
-op2();
-store.captureSync();
-op3();
-
-store.undo(); // undo op3
-store.undo(); // undo op1, op2
-```
-
-##### Returns
-
-> (): `void`
-
-###### Returns
-
-`void`
-
-***
-
 ### history
 
 #### Get Signature
@@ -765,51 +735,75 @@ Get the Y.UndoManager instance for current store.
 
 ***
 
-### redo
+### captureSync()
 
-#### Get Signature
+> **captureSync**(): `void`
 
-> **get** **redo**(): () => `void`
+Force the following history to be captured into a new stack.
+
+#### Returns
+
+`void`
+
+#### Example
+
+```ts
+op1();
+op2();
+store.captureSync();
+op3();
+
+store.undo(); // undo op3
+store.undo(); // undo op1, op2
+```
+
+***
+
+### redo()
+
+> **redo**(): `void`
 
 Redo the last undone transaction.
 
-##### Returns
-
-> (): `void`
-
-###### Returns
+#### Returns
 
 `void`
 
 ***
 
-### resetHistory
+### resetHistory()
 
-#### Get Signature
-
-> **get** **resetHistory**(): () => `void`
+> **resetHistory**(): `void`
 
 Reset the history of the store.
 
-##### Returns
-
-> (): `void`
-
-###### Returns
+#### Returns
 
 `void`
 
 ***
 
-### transact
+### transact()
 
-#### Get Signature
-
-> **get** **transact**(): (`fn`, `shouldTransact?`) => `void`
+> **transact**(`fn`, `shouldTransact`): `void`
 
 Execute a transaction.
 
-##### Example
+#### Parameters
+
+##### fn
+
+() => `void`
+
+##### shouldTransact
+
+`boolean` = `...`
+
+#### Returns
+
+`void`
+
+#### Example
 
 ```ts
 store.transact(() => {
@@ -818,53 +812,37 @@ store.transact(() => {
 });
 ```
 
-##### Returns
-
-> (`fn`, `shouldTransact?`): `void`
-
-###### Parameters
-
-###### fn
-
-() => `void`
-
-###### shouldTransact?
-
-`boolean`
-
-###### Returns
-
-`void`
-
 ***
 
-### undo
+### undo()
 
-#### Get Signature
-
-> **get** **undo**(): () => `void`
+> **undo**(): `void`
 
 Undo the last transaction.
 
-##### Returns
-
-> (): `void`
-
-###### Returns
+#### Returns
 
 `void`
 
 ***
 
-### withoutTransact
+### withoutTransact()
 
-#### Get Signature
-
-> **get** **withoutTransact**(): (`fn`) => `void`
+> **withoutTransact**(`fn`): `void`
 
 Execute a transaction without capturing the history.
 
-##### Example
+#### Parameters
+
+##### fn
+
+() => `void`
+
+#### Returns
+
+`void`
+
+#### Example
 
 ```ts
 store.withoutTransact(() => {
@@ -872,20 +850,6 @@ store.withoutTransact(() => {
   op2();
 });
 ```
-
-##### Returns
-
-> (`fn`): `void`
-
-###### Parameters
-
-###### fn
-
-() => `void`
-
-###### Returns
-
-`void`
 
 ## Store Lifecycle
 

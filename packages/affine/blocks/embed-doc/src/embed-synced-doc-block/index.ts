@@ -1,4 +1,5 @@
 export * from './adapters';
+export * from './commands';
 export * from './configs';
 export * from './edgeless-clipboard-config';
 export * from './embed-synced-doc-block';

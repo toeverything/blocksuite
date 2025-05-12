@@ -56,7 +56,7 @@ function handleGfxConnection(instance: GfxBlockComponent) {
   );
 
   instance.disposables.add(
-    instance.doc.slots.blockUpdated.subscribe(({ type, id }) => {
+    instance.store.slots.blockUpdated.subscribe(({ type, id }) => {
       if (id === instance.model.id && type === 'update') {
         updateTransform(instance);
       }

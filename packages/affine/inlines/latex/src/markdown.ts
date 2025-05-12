@@ -34,7 +34,7 @@ export const LatexExtension = InlineMarkdownExtension<AffineTextAttributes>({
         inlineEditor.rootElement.closest<BlockComponent>('[data-block-id]');
       if (!blockComponent) return;
 
-      const doc = blockComponent.doc;
+      const doc = blockComponent.store;
       const parentComponent = blockComponent.parentComponent;
       if (!parentComponent) return;
 

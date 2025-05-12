@@ -4,6 +4,7 @@ import {
   WebIcon16,
 } from '@blocksuite/affine-components/icons';
 import type { FootNote } from '@blocksuite/affine-model';
+import { ImageProxyService } from '@blocksuite/affine-shared/adapters';
 import {
   DocDisplayMetaProvider,
   LinkPreviewerService,
@@ -80,7 +81,10 @@ export class FootNotePopup extends SignalWatcher(WithDisposable(LitElement)) {
       }
 
       const favicon = this._linkPreview$.value?.favicon;
-      return favicon ? html`<img src=${favicon} alt="favicon" />` : WebIcon16;
+      const imageSrc = favicon
+        ? this.imageProxyService.buildUrl(favicon)
+        : undefined;
+      return imageSrc ? html`<img src=${imageSrc} alt="favicon" />` : WebIcon16;
     }
     return undefined;
   });
@@ -188,6 +192,10 @@ export class FootNotePopup extends SignalWatcher(WithDisposable(LitElement)) {
           : nothing}
       </div>
     `;
+  }
+
+  get imageProxyService() {
+    return this.std.get(ImageProxyService);
   }
 
   @property({ attribute: false })

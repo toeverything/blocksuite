@@ -176,7 +176,7 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(
   private _exitPresentation() {
     // When exit presentation mode, we need to set the tool to default or pan
     // And exit fullscreen
-    if (this.edgeless.doc.readonly) {
+    if (this.edgeless.store.readonly) {
       this.setEdgelessTool(PanTool, { panning: false });
     } else {
       this.setEdgelessTool(DefaultTool);
@@ -316,7 +316,7 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(
           this.edgelessTool.toolType === PresentTool &&
           this._fullScreenMode
         ) {
-          if (this.edgeless.doc.readonly) {
+          if (this.edgeless.store.readonly) {
             this.setEdgelessTool(PanTool, { panning: false });
           } else {
             this.setEdgelessTool(DefaultTool);

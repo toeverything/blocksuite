@@ -299,7 +299,7 @@ export class UIEventDispatcher extends LifeCycleWatcher {
     return (
       element instanceof HTMLInputElement ||
       element instanceof HTMLTextAreaElement ||
-      (element instanceof EditorHost && !element.doc.readonly) ||
+      (element instanceof EditorHost && !element.store.readonly) ||
       (element as HTMLElement).isContentEditable
     );
   }

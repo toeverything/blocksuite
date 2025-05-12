@@ -29,7 +29,7 @@ import type { DatabaseBlockComponent } from '../../database-block.js';
 import {
   richTextCellStyle,
   richTextContainerStyle,
-} from './cell-renderer.css.js';
+} from './cell-renderer-css.js';
 import { richTextPropertyModelConfig } from './define.js';
 
 function toggleStyle(
@@ -310,7 +310,6 @@ export class RichTextCell extends BaseCellRenderer<Text, string> {
         });
       }
     } else {
-      console.log(text);
       inlineEditor.insertText(inlineRange, text);
       inlineEditor.setInlineRange({
         index: inlineRange.index + text.length,

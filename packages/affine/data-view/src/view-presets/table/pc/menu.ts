@@ -70,7 +70,7 @@ export const popRowMenu = (
             },
             prefix: DeleteIcon(),
             select: () => {
-              selectionController.view.rowDelete(rows);
+              selectionController.view.rowsDelete(rows);
             },
           }),
         ],

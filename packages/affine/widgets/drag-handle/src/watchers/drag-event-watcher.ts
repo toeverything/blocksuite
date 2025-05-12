@@ -501,7 +501,7 @@ export class DragEventWatcher {
       // can't drop edgeless content on the same doc
       if (
         dragPayload.bsEntity?.fromMode === 'gfx' &&
-        dragPayload.from?.docId === this.widget.doc.id
+        dragPayload.from?.docId === this.widget.store.id
       ) {
         return;
       }
@@ -550,7 +550,7 @@ export class DragEventWatcher {
 
     // drop on the same place, do nothing
     if (
-      (dragPayload.from?.docId === this.widget.doc.id &&
+      (dragPayload.from?.docId === this.widget.store.id &&
         result.placement === 'after' &&
         parent.children[index]?.id === snapshot.content[0].id) ||
       (result.placement === 'before' &&
@@ -566,7 +566,7 @@ export class DragEventWatcher {
     ) {
       snapshot.content = snapshot.content.filter(
         block =>
-          dragPayload.from?.docId !== this.widget.doc.id ||
+          dragPayload.from?.docId !== this.widget.store.id ||
           block.id !== parent.id
       );
       if (snapshot.content.length) {
@@ -590,7 +590,7 @@ export class DragEventWatcher {
       matchModels(parent, [NoteBlockModel])
     ) {
       // if the snapshot comes from the same doc, just create a surface-ref block
-      if (dragPayload.from?.docId === this.widget.doc.id) {
+      if (dragPayload.from?.docId === this.widget.store.id) {
         let largestElem!: {
           size: number;
           id: string;
@@ -1194,7 +1194,7 @@ export class DragEventWatcher {
         };
 
         this._rewriteSnapshotXYWH(pageSnapshot, point, true);
-        this._dropToModel(pageSnapshot, this.widget.doc.root!.id)
+        this._dropToModel(pageSnapshot, this.widget.store.root!.id)
           .then(slices => {
             slices?.content.forEach((block, idx) => {
               if (block.flavour === 'affine:embed-iframe') {
@@ -1259,7 +1259,7 @@ export class DragEventWatcher {
               DEFAULT_NOTE_HEIGHT
             ).serialize(),
           },
-          this.widget.doc.root!
+          this.widget.store.root!
         );
 
         this._dropToModel(
@@ -1508,7 +1508,7 @@ export class DragEventWatcher {
            */
           if (source.data.bsEntity?.type === 'blocks') {
             return (
-              source.data.from?.docId !== widget.doc.id ||
+              source.data.from?.docId !== widget.store.id ||
               source.data.bsEntity.modelIds.every(id => id !== view.model.id)
             );
           }

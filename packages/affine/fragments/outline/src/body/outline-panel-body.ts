@@ -92,7 +92,7 @@ export class OutlinePanelBody extends SignalWatcher(
   }
 
   private get doc() {
-    return this.editor.doc;
+    return this.editor.store;
   }
 
   get viewportPadding(): [number, number, number, number] {
@@ -262,14 +262,14 @@ export class OutlinePanelBody extends SignalWatcher(
 
   private _watchSelectedNotes() {
     return effect(() => {
-      const { std, doc } = this.editor;
+      const { std, store } = this.editor;
       const docModeService = this.editor.std.get(DocModeProvider);
       const mode = docModeService.getEditorMode();
       if (mode !== 'edgeless') return;
 
       const currSelectedNotes = std.selection
         .filter(SurfaceSelection)
-        .map(({ blockId }) => doc.getBlock(blockId)?.model)
+        .map(({ blockId }) => store.getBlock(blockId)?.model)
         .filter(model => {
           return !!model && matchModels(model, [NoteBlockModel]);
         });

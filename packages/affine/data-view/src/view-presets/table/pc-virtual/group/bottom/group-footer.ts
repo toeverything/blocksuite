@@ -8,7 +8,7 @@ import { property } from 'lit/decorators.js';
 import { TableViewAreaSelection } from '../../../selection';
 import type { VirtualTableView } from '../../table-view';
 import type { TableGridGroup } from '../../types';
-import * as styles from './group-footer.css';
+import * as styles from './group-footer-css';
 
 export class TableGroupFooter extends WithDisposable(ShadowlessElement) {
   @property({ attribute: false })

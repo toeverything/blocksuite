@@ -18,7 +18,7 @@ import { typeSystem } from '../../../../../../core';
 import type { GroupData } from '../../../../../../core/group-by/trait';
 import { statsFunctions } from '../../../../../../core/statistics';
 import type { StatisticsConfig } from '../../../../../../core/statistics/types';
-import type { TableColumn } from '../../../../table-view-manager';
+import type { TableProperty } from '../../../../table-view-manager';
 
 const styles = css`
   .stats-cell {
@@ -73,12 +73,12 @@ export class VirtualDatabaseColumnStatsCell extends SignalWatcher(
   static override styles = styles;
 
   @property({ attribute: false })
-  accessor column!: TableColumn;
+  accessor column!: TableProperty;
 
   cellValues$ = computed(() => {
     if (this.group) {
-      return this.group.rows.map(id => {
-        return this.column.valueGet(id);
+      return this.group.rows.map(row => {
+        return this.column.valueGet(row.rowId);
       });
     }
     return this.column.cells$.value.map(cell => cell.jsonValue$.value);
@@ -157,7 +157,7 @@ export class VirtualDatabaseColumnStatsCell extends SignalWatcher(
   values$ = signal<unknown[]>([]);
 
   statsResult$ = computed(() => {
-    const meta = this.column.view.propertyMetaGet(this.column.type$.value);
+    const meta = this.column.meta$.value;
     if (!meta) {
       return null;
     }

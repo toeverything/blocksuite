@@ -21,7 +21,7 @@ export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
 ) {
   override convertToEmbed = () => {
     const { caption, xywh } = this.model.props;
-    const { doc, id } = this.model;
+    const { store, id } = this.model;
 
     const style = 'syncedDoc';
     const bound = Bound.deserialize(xywh);
@@ -50,7 +50,7 @@ export class EmbedEdgelessLinkedDocBlockComponent extends toEdgelessEmbedBlock(
       elements: [newId],
     });
 
-    doc.deleteBlock(this.model);
+    store.deleteBlock(this.model);
   };
 
   protected override _handleClick = (evt: MouseEvent): void => {

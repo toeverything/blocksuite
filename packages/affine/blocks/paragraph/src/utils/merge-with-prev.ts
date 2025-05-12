@@ -41,7 +41,7 @@ import type { BlockModel, Text } from '@blocksuite/store';
  *   - line3
  */
 export function mergeWithPrev(editorHost: EditorHost, model: BlockModel) {
-  const doc = model.doc;
+  const doc = model.store;
   const parent = doc.getParent(model);
   if (!parent) return false;
 
@@ -118,7 +118,7 @@ export function mergeWithPrev(editorHost: EditorHost, model: BlockModel) {
 }
 
 function handleNoPreviousSibling(editorHost: EditorHost, model: ExtendedModel) {
-  const doc = model.doc;
+  const doc = model.store;
   const text = model.text;
   const parent = doc.getParent(model);
   if (!parent) return false;
@@ -137,7 +137,7 @@ function handleNoPreviousSibling(editorHost: EditorHost, model: ExtendedModel) {
     return false;
   }
 
-  const rootModel = model.doc.root as RootBlockModel;
+  const rootModel = model.store.root as RootBlockModel;
   const title = rootModel.props.title;
 
   doc.captureSync();

@@ -6,9 +6,9 @@ export const styles = css`
     border-radius: 8px;
     box-sizing: border-box;
     user-select: none;
+    overflow: hidden;
     border: 1px solid ${unsafeCSSVarV2('layer/background/tertiary')};
     background: ${unsafeCSSVarV2('layer/background/primary')};
-    overflow: hidden;
 
     &.focused {
       border-color: ${unsafeCSSVarV2('layer/insideBorder/primaryBorder')};
@@ -30,6 +30,13 @@ export const styles = css`
     min-width: 0;
   }
 
+  .truncate {
+    align-self: stretch;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
   .affine-attachment-content-title {
     display: flex;
     flex-direction: row;
@@ -45,13 +52,6 @@ export const styles = css`
     align-items: center;
     justify-content: center;
     color: var(--affine-text-primary-color);
-  }
-
-  .truncate {
-    align-self: stretch;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
   }
 
   .affine-attachment-content-title-text {
@@ -141,6 +141,12 @@ export const styles = css`
     position: relative;
     width: 100%;
     height: 100%;
+  }
+
+  .affine-attachment-embed-status {
+    position: absolute;
+    left: 14px;
+    bottom: 64px;
   }
 
   .affine-attachment-embed-event-mask {

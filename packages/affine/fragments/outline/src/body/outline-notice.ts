@@ -31,7 +31,7 @@ export class OutlineNotice extends SignalWatcher(
         }
 
         const shouldShowNotice =
-          getNotesFromDoc(this._context.editor$.value.doc, [
+          getNotesFromDoc(this._context.editor$.value.store, [
             NoteDisplayMode.DocOnly,
           ]).length > 0;
 

@@ -28,7 +28,7 @@ import {
   AutoHeightIcon,
   CornerIcon,
   CustomizedHeightIcon,
-  LinkedPageIcon,
+  InsertIntoPageIcon,
   ScissorsIcon,
 } from '@blocksuite/icons/lit';
 import { BlockFlavourIdentifier } from '@blocksuite/std';
@@ -125,7 +125,7 @@ const builtinSurfaceToolbarConfig = {
             data-testid="display-in-page"
             @click=${() => onSelect()}
           >
-            ${LinkedPageIcon()}
+            ${InsertIntoPageIcon()}
             <span class="label">${label$.value}</span>
           </editor-icon-button>`,
         };

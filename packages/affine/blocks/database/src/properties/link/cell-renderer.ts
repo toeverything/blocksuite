@@ -26,7 +26,7 @@ import {
   linkIconStyle,
   normalTextStyle,
   showLinkIconStyle,
-} from './cell-renderer.css.js';
+} from './cell-renderer-css.js';
 import { linkPropertyModelConfig } from './define.js';
 
 export class LinkCell extends BaseCellRenderer<string, string> {

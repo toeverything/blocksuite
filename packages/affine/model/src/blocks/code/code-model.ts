@@ -12,6 +12,7 @@ type CodeBlockProps = {
   language: string | null;
   wrap: boolean;
   caption: string;
+  preview?: boolean;
 } & BlockMeta;
 
 export const CodeBlockSchema = defineBlockSchema({
@@ -22,6 +23,7 @@ export const CodeBlockSchema = defineBlockSchema({
       language: null,
       wrap: false,
       caption: '',
+      preview: undefined,
       'meta:createdAt': undefined,
       'meta:createdBy': undefined,
       'meta:updatedAt': undefined,

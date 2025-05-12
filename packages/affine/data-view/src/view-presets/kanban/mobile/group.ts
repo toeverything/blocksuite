@@ -77,15 +77,15 @@ export class MobileKanbanGroup extends SignalWatcher(
             name: 'Ungroup',
             hide: () => this.group.value == null,
             select: () => {
-              this.group.rows.forEach(id => {
-                this.group.manager.removeFromGroup(id, this.group.key);
+              this.group.rows.forEach(row => {
+                this.group.manager.removeFromGroup(row.rowId, this.group.key);
               });
             },
           }),
           menu.action({
             name: 'Delete Cards',
             select: () => {
-              this.view.rowDelete(this.group.rows);
+              this.view.rowsDelete(this.group.rows.map(row => row.rowId));
             },
           }),
         ],
@@ -106,15 +106,15 @@ export class MobileKanbanGroup extends SignalWatcher(
       <div class="mobile-group-body">
         ${repeat(
           cards,
-          id => id,
-          id => {
+          row => row.rowId,
+          row => {
             return html`
               <mobile-kanban-card
-                data-card-id="${id}"
+                data-card-id="${row.rowId}"
                 .groupKey="${this.group.key}"
                 .dataViewEle="${this.dataViewEle}"
                 .view="${this.view}"
-                .cardId="${id}"
+                .cardId="${row.rowId}"
               ></mobile-kanban-card>
             `;
           }

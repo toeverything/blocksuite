@@ -8,7 +8,11 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import type { GroupData } from '../../../../core/group-by/trait.js';
-import type { TableColumn, TableSingleView } from '../../table-view-manager.js';
+import type { Row } from '../../../../core/index.js';
+import type {
+  TableProperty,
+  TableSingleView,
+} from '../../table-view-manager.js';
 
 export class DataViewColumnPreview extends SignalWatcher(
   WithDisposable(ShadowlessElement)
@@ -26,8 +30,8 @@ export class DataViewColumnPreview extends SignalWatcher(
     return this.column.view as TableSingleView;
   }
 
-  private renderGroup(rows: string[]) {
-    const columnIndex = this.tableViewManager.propertyIndexGet(this.column.id);
+  private renderGroup(rows: Row[]) {
+    const columnIndex = this.column.index$.value;
     return html`
       <div
         style="background-color: var(--affine-background-primary-color);border-top: 1px solid ${unsafeCSS(
@@ -74,7 +78,7 @@ export class DataViewColumnPreview extends SignalWatcher(
   }
 
   @property({ attribute: false })
-  accessor column!: TableColumn;
+  accessor column!: TableProperty;
 
   @property({ attribute: false })
   accessor container!: HTMLElement;

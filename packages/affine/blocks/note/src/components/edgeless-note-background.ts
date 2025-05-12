@@ -66,7 +66,7 @@ export class EdgelessNoteBackground extends SignalWatcher(
   }
 
   get doc() {
-    return this.std.host.doc;
+    return this.std.host.store;
   }
 
   private _tryAddParagraph(x: number, y: number) {
@@ -137,7 +137,7 @@ export class EdgelessNoteBackground extends SignalWatcher(
     const y = clamp(e.y, rect.top + offsetY, rect.bottom - offsetY);
     handleNativeRangeAtPoint(x, y);
 
-    if (this.std.host.doc.readonly) return;
+    if (this.std.host.store.readonly) return;
 
     this._tryAddParagraph(x, y);
   }

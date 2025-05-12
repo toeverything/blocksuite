@@ -164,7 +164,7 @@ export class GfxBlockElementModel<
   }
 
   get surface(): SurfaceBlockModel | null {
-    const result = this.doc.getBlocksByFlavour('affine:surface');
+    const result = this.store.getBlocksByFlavour('affine:surface');
     if (result.length === 0) return null;
     return result[0].model as SurfaceBlockModel;
   }
@@ -257,11 +257,11 @@ export class GfxBlockElementModel<
   }
 
   lock() {
-    lockElementImpl(this.doc, this);
+    lockElementImpl(this.store, this);
   }
 
   unlock() {
-    unlockElementImpl(this.doc, this);
+    unlockElementImpl(this.store, this);
   }
 }
 

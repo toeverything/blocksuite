@@ -145,7 +145,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
   };
 
   override convertToCard = (aliasInfo?: AliasInfo) => {
-    const { id, doc, xywh } = this.model;
+    const { id, store, xywh } = this.model;
     const { caption } = this.model.props;
 
     const style = 'vertical';
@@ -176,7 +176,7 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
       editing: false,
       elements: [newId],
     });
-    doc.deleteBlock(this.model);
+    store.deleteBlock(this.model);
   };
 
   override renderGfxBlock() {

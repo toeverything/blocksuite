@@ -141,7 +141,7 @@ export function cleanup() {
 
   delete (window as any).editor;
 
-  delete (window as any).doc;
+  delete (window as any).store;
 }
 
 declare global {

@@ -41,7 +41,7 @@ export const RenameModal = ({
       toast(editorHost, 'File name cannot be empty');
       return;
     }
-    model.doc.updateBlock(model, {
+    model.store.updateBlock(model, {
       name: newFileName,
     });
     abort();

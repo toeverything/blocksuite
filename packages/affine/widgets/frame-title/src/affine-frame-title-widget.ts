@@ -10,7 +10,7 @@ export const AFFINE_FRAME_TITLE_WIDGET = 'affine-frame-title-widget';
 
 export class AffineFrameTitleWidget extends WidgetComponent<RootBlockModel> {
   private get _frames() {
-    return Object.values(this.doc.blocks.value)
+    return Object.values(this.store.blocks.value)
       .map(({ model }) => model)
       .filter(model => model instanceof FrameBlockModel);
   }

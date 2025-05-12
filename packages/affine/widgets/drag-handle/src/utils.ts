@@ -79,7 +79,7 @@ export const containChildBlock = (
       if (currentBlock.id === block.model.id) {
         return true;
       }
-      currentBlock = block.doc.getParent(currentBlock.id);
+      currentBlock = block.store.getParent(currentBlock.id);
     }
     return false;
   });

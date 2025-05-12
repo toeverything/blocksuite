@@ -25,7 +25,7 @@ export class TableHotkeysController implements ReactiveController {
           if (TableViewRowSelection.is(selection)) {
             const rows = TableViewRowSelection.rowsIds(selection);
             this.selectionController.selection = undefined;
-            this.host.props.view.rowDelete(rows);
+            this.host.props.view.rowsDelete(rows);
             return;
           }
           const {
@@ -336,11 +336,14 @@ export class TableHotkeysController implements ReactiveController {
               rows:
                 this.host.props.view.groupTrait.groupsDataList$.value?.flatMap(
                   group =>
-                    group?.rows.map(id => ({ groupKey: group.key, id })) ?? []
+                    group?.rows.map(row => ({
+                      groupKey: group.key,
+                      id: row.rowId,
+                    })) ?? []
                 ) ??
-                this.host.props.view.rows$.value.map(id => ({
+                this.host.props.view.rows$.value.map(row => ({
                   groupKey: undefined,
-                  id,
+                  id: row.rowId,
                 })),
             });
             return true;

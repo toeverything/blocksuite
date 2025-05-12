@@ -97,7 +97,7 @@ export async function refreshEmbedYoutubeUrlData(
 
     if (signal?.aborted) return;
 
-    embedYoutubeElement.doc.updateBlock(embedYoutubeElement.model, {
+    embedYoutubeElement.store.updateBlock(embedYoutubeElement.model, {
       image,
       title,
       description,

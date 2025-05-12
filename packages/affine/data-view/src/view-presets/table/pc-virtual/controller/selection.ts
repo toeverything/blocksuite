@@ -242,7 +242,7 @@ export class TableSelectionController implements ReactiveController {
       this.selection = TableViewAreaSelection.create({
         groupKey: groupKey,
         focus: {
-          rowIndex: rows?.findIndex(v => v === id) ?? 0,
+          rowIndex: rows?.findIndex(v => v.rowId === id) ?? 0,
           columnIndex: index,
         },
         isEditing: true,
@@ -373,7 +373,7 @@ export class TableSelectionController implements ReactiveController {
   }
 
   deleteRow(rowId: string) {
-    this.view.rowDelete([rowId]);
+    this.view.rowsDelete([rowId]);
     this.focusToCell('up');
   }
 

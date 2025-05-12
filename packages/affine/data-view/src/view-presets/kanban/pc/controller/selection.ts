@@ -116,7 +116,7 @@ export class KanbanSelectionController implements ReactiveController {
       return;
     }
     if (selection.selectionType === 'card') {
-      this.host.props.view.rowDelete(selection.cards.map(v => v.cardId));
+      this.host.props.view.rowsDelete(selection.cards.map(v => v.cardId));
       this.selection = undefined;
     }
   }
@@ -155,12 +155,13 @@ export class KanbanSelectionController implements ReactiveController {
   focusFirstCell() {
     const group = this.host.groupManager?.groupsDataList$.value?.[0];
     const card = group?.rows[0];
-    const columnId = card && this.host.props.view.getHeaderTitle(card)?.id;
+    const columnId =
+      card && this.host.props.view.getHeaderTitle(card.rowId)?.id;
     if (group && card && columnId) {
       this.selection = {
         selectionType: 'cell',
         groupKey: group.key,
-        cardId: card,
+        cardId: card.rowId,
         columnId,
         isEditing: false,
       };

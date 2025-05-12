@@ -13,7 +13,7 @@ const flavour = ImageBlockSchema.model.flavour;
 export const ImageBlockSpec: ExtensionType[] = [
   FlavourExtension(flavour),
   BlockViewExtension(flavour, model => {
-    const parent = model.doc.getParent(model.id);
+    const parent = model.store.getParent(model.id);
 
     if (parent?.flavour === 'affine:surface') {
       return literal`affine-edgeless-image`;

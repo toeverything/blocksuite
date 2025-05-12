@@ -171,7 +171,7 @@ const conversionsActionGroup = {
         ) {
           const editorSetting = ctx.std.getOptional(EditorSettingProvider);
           editorSetting?.set?.(
-            'docDropCanvasPreferView',
+            'docCanvasPreferView',
             'affine:embed-linked-doc'
           );
         }
@@ -310,7 +310,7 @@ const builtinSurfaceToolbarConfig = {
               note.props.displayMode !== NoteDisplayMode.EdgelessOnly
           );
 
-        ctx.doc.captureSync();
+        ctx.store.captureSync();
         ctx.chain
           .pipe(duplicateSelectedModelsCommand, {
             selectedModels: [model],
@@ -350,7 +350,7 @@ const builtinSurfaceToolbarConfig = {
         }
         if (contentModels.length === 0) return;
 
-        ctx.doc.captureSync();
+        ctx.store.captureSync();
         ctx.chain
           .pipe(draftSelectedModelsCommand, {
             selectedModels: contentModels,

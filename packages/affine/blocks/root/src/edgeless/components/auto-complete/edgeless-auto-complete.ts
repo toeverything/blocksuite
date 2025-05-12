@@ -371,7 +371,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
   }
 
   private _generateElementOnClick(type: Direction) {
-    const { doc } = this.edgeless;
+    const { store } = this.edgeless;
     const bound = this._computeNextBound(type);
     const id = createEdgelessElement(this.edgeless, this.current, bound);
     if (!id) return;
@@ -393,7 +393,7 @@ export class EdgelessAutoComplete extends WithDisposable(LitElement) {
         this.edgeless
       );
     } else {
-      const model = doc.getModelById(id);
+      const model = store.getModelById(id);
       if (!model) {
         return;
       }
