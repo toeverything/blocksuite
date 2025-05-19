@@ -23,7 +23,7 @@ function getFoldersWithPackageJson(dir) {
   return folders;
 }
 
-const ignoreList = ['react/jsx-runtime'];
+const ignoreList = [];
 
 const folders = getFoldersWithPackageJson(entry)
   .map(p => {
