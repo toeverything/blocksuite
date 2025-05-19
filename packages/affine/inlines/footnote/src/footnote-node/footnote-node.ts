@@ -150,6 +150,20 @@ export class AffineFootnoteNode extends WithDisposable(ShadowlessElement) {
     window.open(url, '_blank');
   };
 
+  private readonly _updateFootnoteAttributes = (footnote: FootNote) => {
+    if (!this.footnote || this.readonly) {
+      return;
+    }
+
+    if (!this.inlineEditor || !this.selfInlineRange) {
+      return;
+    }
+
+    this.inlineEditor.formatText(this.selfInlineRange, {
+      footnote: footnote,
+    });
+  };
+
   private readonly _FootNoteDefaultContent = (footnote: FootNote) => {
     return html`<span
       class="footnote-content-default"
@@ -169,6 +183,7 @@ export class AffineFootnoteNode extends WithDisposable(ShadowlessElement) {
           .std=${this.std}
           .abortController=${abortController}
           .onPopupClick=${this.onPopupClick ?? this.onFootnoteClick}
+          .updateFootnoteAttributes=${this._updateFootnoteAttributes}
         ></footnote-popup>`;
   };
 

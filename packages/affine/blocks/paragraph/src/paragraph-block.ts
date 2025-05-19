@@ -293,7 +293,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<ParagraphBl
           <rich-text
             .yText=${this.model.props.text.yText}
             .inlineEventSource=${this.topContenteditableElement ?? nothing}
-            .undoManager=${this.store.history}
+            .undoManager=${this.store.history.undoManager}
             .attributesSchema=${this.attributesSchema}
             .attributeRenderer=${this.attributeRenderer}
             .markdownMatches=${this.inlineManager?.markdownMatches}

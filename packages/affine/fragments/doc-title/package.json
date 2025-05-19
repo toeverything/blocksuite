@@ -32,7 +32,6 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./effects": "./src/effects.ts",
     "./view": "./src/view.ts"
   },
   "files": [

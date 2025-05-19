@@ -40,7 +40,10 @@ import {
 } from '../../../../../../core/utils/wc-dnd/dnd-context';
 import type { Property } from '../../../../../../core/view-manager/property';
 import { numberFormats } from '../../../../../../property-presets/number/utils/formats';
-import { ShowQuickSettingBarContextKey } from '../../../../../../widget-presets/quick-setting-bar/context';
+import {
+  createDefaultShowQuickSettingBar,
+  ShowQuickSettingBarKey,
+} from '../../../../../../widget-presets/quick-setting-bar/context';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../../../consts';
 import type {
   TableProperty,
@@ -193,7 +196,10 @@ export class DatabaseHeaderColumn extends SignalWatcher(
   }
 
   private _toggleQuickSettingBar(show = true) {
-    const map = this.tableViewManager.contextGet(ShowQuickSettingBarContextKey);
+    const map = this.tableViewManager.serviceGetOrCreate(
+      ShowQuickSettingBarKey,
+      createDefaultShowQuickSettingBar
+    );
     map.value = {
       ...map.value,
       [this.tableViewManager.id]: show,

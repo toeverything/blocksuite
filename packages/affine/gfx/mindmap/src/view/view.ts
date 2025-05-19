@@ -12,6 +12,7 @@ import type { PointerEventState } from '@blocksuite/std';
 import {
   type BoxSelectionContext,
   GfxElementModelView,
+  GfxViewInteractionExtension,
   type SelectedContext,
 } from '@blocksuite/std/gfx';
 
@@ -381,3 +382,12 @@ export class MindMapView extends GfxElementModelView<MindmapElementModel> {
     });
   }
 }
+
+export const MindMapInteraction = GfxViewInteractionExtension(
+  MindMapView.type,
+  {
+    resizeConstraint: {
+      allowedHandlers: [],
+    },
+  }
+);

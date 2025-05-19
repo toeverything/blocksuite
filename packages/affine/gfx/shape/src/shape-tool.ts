@@ -41,6 +41,10 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
   // shape overlay
   private _shapeOverlay: ShapeOverlay | null = null;
 
+  private get _surfaceComponent() {
+    return this.gfx.surfaceComponent as SurfaceBlockComponent | null;
+  }
+
   private _spacePressedCtx: {
     draggingArea: IBound & {
       endX: number;
@@ -91,7 +95,7 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
   private _hideOverlay() {
     if (!this._shapeOverlay) return;
     this._shapeOverlay.globalAlpha = 0;
-    (this.gfx.surfaceComponent as SurfaceBlockComponent)?.refresh();
+    this._surfaceComponent?.refresh();
   }
 
   private _resize(shiftPressed = false, spacePressed = false) {
@@ -152,7 +156,7 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
     if (!this._shapeOverlay) return;
     this._shapeOverlay.x = x;
     this._shapeOverlay.y = y;
-    (this.gfx.surfaceComponent as SurfaceBlockComponent)?.refresh();
+    this._surfaceComponent?.refresh();
   }
 
   override activate() {
@@ -163,11 +167,11 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
     if (!this._shapeOverlay) return;
 
     this._shapeOverlay.dispose();
-    (
-      this.gfx.surfaceComponent as SurfaceBlockComponent
-    )?.renderer.removeOverlay(this._shapeOverlay);
+
+    this._surfaceComponent?.renderer.removeOverlay(this._shapeOverlay);
     this._shapeOverlay = null;
-    (this.gfx.surfaceComponent as SurfaceBlockComponent)?.renderer.refresh();
+
+    this._surfaceComponent?.renderer.refresh();
   }
 
   override click(e: PointerEventState): void {
@@ -223,9 +227,7 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
       fillColor: attributes.fillColor,
       strokeColor: attributes.strokeColor,
     });
-    (this.gfx.surfaceComponent as SurfaceBlockComponent)?.renderer.addOverlay(
-      this._shapeOverlay
-    );
+    this._surfaceComponent?.renderer.addOverlay(this._shapeOverlay);
   }
 
   override deactivate() {

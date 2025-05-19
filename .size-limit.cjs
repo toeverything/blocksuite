@@ -23,6 +23,8 @@ function getFoldersWithPackageJson(dir) {
   return folders;
 }
 
+const ignoreList = [];
+
 const folders = getFoldersWithPackageJson(entry)
   .map(p => {
     const packageJson = path.join(p, 'package.json');
@@ -46,7 +48,9 @@ const folders = getFoldersWithPackageJson(entry)
     const ignore = Object.keys({
       ...data.json.dependencies,
       ...data.json.devDependencies,
-    }).filter(name => !name.startsWith('@blocksuite/'));
+    })
+      .filter(name => !name.startsWith('@blocksuite/'))
+      .concat(ignoreList);
     return pathList.map(p => ({
       name: path.join(data.json.name, p.subpath),
       path: p.path,

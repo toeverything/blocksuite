@@ -930,7 +930,6 @@ __metadata:
     "@blocksuite/affine-block-database": "workspace:*"
     "@blocksuite/affine-block-edgeless-text": "workspace:*"
     "@blocksuite/affine-block-embed": "workspace:*"
-    "@blocksuite/affine-block-embed-doc": "workspace:*"
     "@blocksuite/affine-block-frame": "workspace:*"
     "@blocksuite/affine-block-image": "workspace:*"
     "@blocksuite/affine-block-note": "workspace:*"
@@ -950,6 +949,7 @@ __metadata:
     "@blocksuite/affine-model": "workspace:*"
     "@blocksuite/affine-rich-text": "workspace:*"
     "@blocksuite/affine-shared": "workspace:*"
+    "@blocksuite/affine-widget-edgeless-selected-rect": "workspace:*"
     "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
     "@blocksuite/data-view": "workspace:*"
     "@blocksuite/global": "workspace:*"
@@ -1785,6 +1785,7 @@ __metadata:
     micromark-extension-gfm-task-list-item: "npm:^2.1.0"
     micromark-util-combine-extensions: "npm:^2.0.0"
     minimatch: "npm:^10.0.1"
+    quick-lru: "npm:^7.0.1"
     rehype-parse: "npm:^9.0.0"
     rehype-stringify: "npm:^10.0.0"
     remark-math: "npm:^6.0.0"
@@ -1848,6 +1849,54 @@ __metadata:
     "@toeverything/theme": "npm:^1.1.14"
     lit: "npm:^3.2.0"
     rxjs: "npm:^7.8.1"
+  languageName: unknown
+  linkType: soft
+
+"@blocksuite/affine-widget-edgeless-dragging-area@workspace:*, @blocksuite/affine-widget-edgeless-dragging-area@workspace:packages/affine/widgets/edgeless-dragging-area":
+  version: 0.0.0-use.local
+  resolution: "@blocksuite/affine-widget-edgeless-dragging-area@workspace:packages/affine/widgets/edgeless-dragging-area"
+  dependencies:
+    "@blocksuite/affine-block-note": "workspace:*"
+    "@blocksuite/affine-block-surface": "workspace:*"
+    "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-ext-loader": "workspace:*"
+    "@blocksuite/affine-model": "workspace:*"
+    "@blocksuite/affine-shared": "workspace:*"
+    "@blocksuite/global": "workspace:*"
+    "@blocksuite/icons": "npm:^2.2.12"
+    "@blocksuite/std": "workspace:*"
+    "@lit/context": "npm:^1.1.2"
+    "@preact/signals-core": "npm:^1.8.0"
+    "@toeverything/theme": "npm:^1.1.14"
+    lit: "npm:^3.2.0"
+    rxjs: "npm:^7.8.1"
+    yjs: "npm:^13.6.21"
+  languageName: unknown
+  linkType: soft
+
+"@blocksuite/affine-widget-edgeless-selected-rect@workspace:*, @blocksuite/affine-widget-edgeless-selected-rect@workspace:packages/affine/widgets/edgeless-selected-rect":
+  version: 0.0.0-use.local
+  resolution: "@blocksuite/affine-widget-edgeless-selected-rect@workspace:packages/affine/widgets/edgeless-selected-rect"
+  dependencies:
+    "@blocksuite/affine-block-frame": "workspace:*"
+    "@blocksuite/affine-block-note": "workspace:*"
+    "@blocksuite/affine-block-surface": "workspace:*"
+    "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-ext-loader": "workspace:*"
+    "@blocksuite/affine-gfx-connector": "workspace:*"
+    "@blocksuite/affine-gfx-shape": "workspace:*"
+    "@blocksuite/affine-gfx-text": "workspace:*"
+    "@blocksuite/affine-model": "workspace:*"
+    "@blocksuite/affine-shared": "workspace:*"
+    "@blocksuite/global": "workspace:*"
+    "@blocksuite/icons": "npm:^2.2.12"
+    "@blocksuite/std": "workspace:*"
+    "@lit/context": "npm:^1.1.2"
+    "@preact/signals-core": "npm:^1.8.0"
+    "@toeverything/theme": "npm:^1.1.14"
+    lit: "npm:^3.2.0"
+    rxjs: "npm:^7.8.1"
+    yjs: "npm:^13.6.21"
   languageName: unknown
   linkType: soft
 
@@ -1981,6 +2030,29 @@ __metadata:
     lodash-es: "npm:^4.17.21"
     rxjs: "npm:^7.8.1"
     zod: "npm:^3.23.8"
+  languageName: unknown
+  linkType: soft
+
+"@blocksuite/affine-widget-note-slicer@workspace:*, @blocksuite/affine-widget-note-slicer@workspace:packages/affine/widgets/note-slicer":
+  version: 0.0.0-use.local
+  resolution: "@blocksuite/affine-widget-note-slicer@workspace:packages/affine/widgets/note-slicer"
+  dependencies:
+    "@blocksuite/affine-block-note": "workspace:*"
+    "@blocksuite/affine-block-surface": "workspace:*"
+    "@blocksuite/affine-components": "workspace:*"
+    "@blocksuite/affine-ext-loader": "workspace:*"
+    "@blocksuite/affine-model": "workspace:*"
+    "@blocksuite/affine-shared": "workspace:*"
+    "@blocksuite/affine-widget-edgeless-selected-rect": "workspace:*"
+    "@blocksuite/global": "workspace:*"
+    "@blocksuite/icons": "npm:^2.2.12"
+    "@blocksuite/std": "workspace:*"
+    "@lit/context": "npm:^1.1.2"
+    "@preact/signals-core": "npm:^1.8.0"
+    "@toeverything/theme": "npm:^1.1.14"
+    lit: "npm:^3.2.0"
+    rxjs: "npm:^7.8.1"
+    yjs: "npm:^13.6.21"
   languageName: unknown
   linkType: soft
 
@@ -2163,11 +2235,14 @@ __metadata:
     "@blocksuite/affine-shared": "workspace:*"
     "@blocksuite/affine-widget-drag-handle": "workspace:*"
     "@blocksuite/affine-widget-edgeless-auto-connect": "workspace:*"
+    "@blocksuite/affine-widget-edgeless-dragging-area": "workspace:*"
+    "@blocksuite/affine-widget-edgeless-selected-rect": "workspace:*"
     "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
     "@blocksuite/affine-widget-edgeless-zoom-toolbar": "workspace:*"
     "@blocksuite/affine-widget-frame-title": "workspace:*"
     "@blocksuite/affine-widget-keyboard-toolbar": "workspace:*"
     "@blocksuite/affine-widget-linked-doc": "workspace:*"
+    "@blocksuite/affine-widget-note-slicer": "workspace:*"
     "@blocksuite/affine-widget-page-dragging-area": "workspace:*"
     "@blocksuite/affine-widget-remote-selection": "workspace:*"
     "@blocksuite/affine-widget-scroll-anchoring": "workspace:*"
@@ -4617,6 +4692,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react@npm:^19":
+  version: 19.1.4
+  resolution: "@types/react@npm:19.1.4"
+  dependencies:
+    csstype: "npm:^3.0.2"
+  checksum: 10/b8744e03bc3f7d4d686681ab039e0b2454fbb2110436b8b7f6ee9e6c5f8f8552231c6c273b908f69b3eae1745aeb7b075949bb3983ba8b36c3b0c2888e22726c
+  languageName: node
+  linkType: hard
+
 "@types/send@npm:*":
   version: 0.17.4
   resolution: "@types/send@npm:0.17.4"
@@ -5382,12 +5466,14 @@ __metadata:
     "@size-limit/esbuild-why": "npm:^11.1.5"
     "@size-limit/preset-small-lib": "npm:^11.1.4"
     "@types/node": "npm:^22.13.10"
+    "@types/react": "npm:^19"
     es-module-lexer: "npm:^1.5.4"
     esbuild: "npm:^0.25.0"
     husky: "npm:^9.1.5"
     lint-staged: "npm:^15.2.9"
     micromatch: "npm:^4.0.7"
     prettier: "npm:^3.3.3"
+    react: "npm:^19.1.0"
     simple-git: "npm:^3.25.0"
     size-limit: "npm:^11.1.4"
     tsx: "npm:^4.19.0"
@@ -9450,10 +9536,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"quick-lru@npm:^7.0.1":
+  version: 7.0.1
+  resolution: "quick-lru@npm:7.0.1"
+  checksum: 10/00bed5bcc4683221bf3da5c767f9dd8197c18fb6b0b7f9b79ddada62b52ff2a7ce17bb49dd4fce783c89b29974cf47a93422d7094766c8593c127ffe6c70054a
+  languageName: node
+  linkType: hard
+
 "raf-schd@npm:^4.0.3":
   version: 4.0.3
   resolution: "raf-schd@npm:4.0.3"
   checksum: 10/45514041c5ad31fa96aef3bb3c572a843b92da2f2cd1cb4a47c9ad58e48761d3a4126e18daa32b2bfa0bc2551a42d8f324a0e40e536cb656969929602b4e8b58
+  languageName: node
+  linkType: hard
+
+"react@npm:^19.1.0":
+  version: 19.1.0
+  resolution: "react@npm:19.1.0"
+  checksum: 10/d0180689826fd9de87e839c365f6f361c561daea397d61d724687cae88f432a307d1c0f53a0ee95ddbe3352c10dac41d7ff1ad85530fb24951b27a39e5398db4
   languageName: node
   linkType: hard
 

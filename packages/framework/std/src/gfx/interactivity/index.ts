@@ -1,7 +1,13 @@
 export type { GfxInteractivityContext } from './event.js';
 export { InteractivityExtension } from './extension/base.js';
+export {
+  type GfxViewInteractionConfig,
+  GfxViewInteractionExtension,
+  GfxViewInteractionIdentifier,
+} from './extension/view.js';
 export { GfxViewEventManager } from './gfx-view-event-handler.js';
 export { InteractivityIdentifier, InteractivityManager } from './manager.js';
+export { type ResizeHandle } from './resize/manager.js';
 export type {
   DragExtensionInitializeContext,
   DragInitializationOption,
@@ -15,5 +21,13 @@ export type {
   DragMoveContext,
   DragStartContext,
   GfxViewTransformInterface,
+  ResizeConstraint,
+  ResizeEndContext,
+  ResizeMoveContext,
+  ResizeStartContext,
+  RotateConstraint,
+  RotateEndContext,
+  RotateMoveContext,
+  RotateStartContext,
   SelectedContext,
 } from './types/view.js';

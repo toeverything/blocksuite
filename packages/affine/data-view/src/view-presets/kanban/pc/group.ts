@@ -13,7 +13,7 @@ import { html } from 'lit/static-html.js';
 
 import type { DataViewRenderer } from '../../../core/data-view.js';
 import { GroupTitle } from '../../../core/group-by/group-title.js';
-import type { GroupData } from '../../../core/group-by/trait.js';
+import type { Group } from '../../../core/group-by/trait.js';
 import { dragHandler } from '../../../core/utils/wc-dnd/dnd-context.js';
 import type { KanbanSingleView } from '../kanban-view-manager.js';
 
@@ -201,7 +201,7 @@ export class KanbanGroup extends SignalWatcher(
   accessor dataViewEle!: DataViewRenderer;
 
   @property({ attribute: false })
-  accessor group!: GroupData;
+  accessor group!: Group;
 
   @property({ attribute: false })
   accessor view!: KanbanSingleView;

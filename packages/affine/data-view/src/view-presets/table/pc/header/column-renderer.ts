@@ -7,7 +7,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import type { GroupData } from '../../../../core/group-by/trait.js';
+import type { Group } from '../../../../core/group-by/trait.js';
 import type { Row } from '../../../../core/index.js';
 import type {
   TableProperty,
@@ -84,7 +84,7 @@ export class DataViewColumnPreview extends SignalWatcher(
   accessor container!: HTMLElement;
 
   @property({ attribute: false })
-  accessor group: GroupData | undefined = undefined;
+  accessor group: Group | undefined = undefined;
 }
 
 declare global {

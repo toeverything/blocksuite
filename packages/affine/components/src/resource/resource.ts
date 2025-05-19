@@ -35,6 +35,7 @@ export type ResolvedStateInfo = StateInfo & ResolvedStateInfoPart;
 export class ResourceController implements Disposable {
   readonly blobUrl$ = signal<string | null>(null);
 
+  // TODO(@fundon): default `loading` status.
   readonly state$ = signal<Partial<BlobState>>({});
 
   readonly resolvedState$ = computed<ResolvedStateInfoPart>(() => {

@@ -39,7 +39,6 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./effects": "./src/effects.ts",
     "./turbo-painter": "./src/turbo/note-painter.worker.ts",
     "./store": "./src/store.ts",
     "./view": "./src/view.ts"

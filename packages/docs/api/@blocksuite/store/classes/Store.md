@@ -725,13 +725,13 @@ Check if the store can undo
 
 #### Get Signature
 
-> **get** **history**(): `UndoManager`
+> **get** **history**(): `HistoryExtension`
 
 Get the Y.UndoManager instance for current store.
 
 ##### Returns
 
-`UndoManager`
+`HistoryExtension`
 
 ***
 

@@ -1,6 +1,6 @@
 import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
 import type { DocTitle } from '@blocksuite/affine-fragment-doc-title';
-import { NoteDisplayMode } from '@blocksuite/affine-model';
+import { NoteBlockSchema, NoteDisplayMode } from '@blocksuite/affine-model';
 import { focusTextModel } from '@blocksuite/affine-rich-text';
 import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/affine-shared/consts';
 import { TelemetryProvider } from '@blocksuite/affine-shared/services';
@@ -10,7 +10,11 @@ import {
 } from '@blocksuite/affine-shared/utils';
 import { Bound } from '@blocksuite/global/gfx';
 import { toGfxBlockComponent } from '@blocksuite/std';
-import type { BoxSelectionContext, SelectedContext } from '@blocksuite/std/gfx';
+import {
+  type BoxSelectionContext,
+  GfxViewInteractionExtension,
+  type SelectedContext,
+} from '@blocksuite/std/gfx';
 import { html, nothing, type PropertyValues } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';
@@ -432,3 +436,62 @@ declare global {
     [AFFINE_EDGELESS_NOTE]: EdgelessNoteBlockComponent;
   }
 }
+
+export const EdgelessNoteInteraction =
+  GfxViewInteractionExtension<EdgelessNoteBlockComponent>(
+    NoteBlockSchema.model.flavour,
+    {
+      resizeConstraint: {
+        minWidth: 170 + 24 * 2,
+        minHeight: 92,
+      },
+      handleRotate: () => {
+        return {
+          beforeRotate(context) {
+            context.set({
+              rotatable: false,
+            });
+          },
+        };
+      },
+      handleResize: ({ model }) => {
+        const initialScale: number = model.props.edgeless.scale ?? 1;
+        return {
+          onResizeStart(context): void {
+            context.default(context);
+            model.stash('edgeless');
+          },
+
+          onResizeMove(context): void {
+            const { originalBound, newBound, lockRatio, constraint } = context;
+            const { minWidth, minHeight } = constraint;
+
+            let scale = initialScale;
+            let edgelessProp = { ...model.props.edgeless };
+            const originalRealWidth = originalBound.w / scale;
+
+            if (lockRatio) {
+              scale = newBound.w / originalRealWidth;
+              edgelessProp.scale = scale;
+            }
+
+            newBound.w = clamp(newBound.w, minWidth, Number.MAX_SAFE_INTEGER);
+            newBound.h = clamp(newBound.h, minHeight, Number.MAX_SAFE_INTEGER);
+
+            if (newBound.h > minHeight * scale) {
+              edgelessProp.collapse = true;
+              edgelessProp.collapsedHeight = newBound.h / scale;
+            }
+
+            model.props.edgeless = edgelessProp;
+            model.props.xywh = newBound.serialize();
+          },
+
+          onResizeEnd(context): void {
+            context.default(context);
+            model.pop('edgeless');
+          },
+        };
+      },
+    }
+  );

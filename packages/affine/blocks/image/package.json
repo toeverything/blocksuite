@@ -34,7 +34,6 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./effects": "./src/effects.ts",
     "./turbo-painter": "./src/turbo/image-painter.worker.ts",
     "./store": "./src/store.ts",
     "./view": "./src/view.ts"

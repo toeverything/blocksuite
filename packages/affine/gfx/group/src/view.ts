@@ -5,7 +5,7 @@ import {
 
 import { effects } from './effects';
 import { GroupElementRendererExtension } from './element-renderer';
-import { GroupElementView } from './element-view';
+import { GroupElementView, GroupInteraction } from './element-view';
 import { groupToolbarExtension } from './toolbar/config';
 
 export class GroupViewExtension extends ViewExtensionProvider {
@@ -22,6 +22,7 @@ export class GroupViewExtension extends ViewExtensionProvider {
     context.register(GroupElementView);
     if (this.isEdgeless(context.scope)) {
       context.register(groupToolbarExtension);
+      context.register(GroupInteraction);
     }
   }
 }

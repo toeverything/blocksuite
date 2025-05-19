@@ -14,7 +14,7 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { DataViewRenderer } from '../../../core/data-view.js';
 import { GroupTitle } from '../../../core/group-by/group-title.js';
-import type { GroupData } from '../../../core/group-by/trait.js';
+import type { Group } from '../../../core/group-by/trait.js';
 import type { Row } from '../../../core/index.js';
 import { createDndContext } from '../../../core/utils/wc-dnd/dnd-context.js';
 import { defaultActivators } from '../../../core/utils/wc-dnd/sensors/index.js';
@@ -150,7 +150,7 @@ export class TableGroup extends SignalWatcher(
   };
 
   @property({ attribute: false })
-  accessor group: GroupData | undefined = undefined;
+  accessor group: Group | undefined = undefined;
 
   @property({ attribute: false })
   accessor view!: TableSingleView;

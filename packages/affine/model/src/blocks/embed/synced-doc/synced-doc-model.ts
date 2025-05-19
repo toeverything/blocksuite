@@ -11,6 +11,10 @@ export type EmbedSyncedDocBlockProps = {
   style: EmbedCardStyle;
   caption?: string | null;
   scale?: number;
+  /**
+   * Record the scaled height of the synced doc block when it is folded,
+   * a.k.a the fourth number of the `xywh`
+   */
   preFoldHeight?: number;
 } & ReferenceInfo &
   GfxCompatibleProps;

@@ -6,7 +6,7 @@ export const codeBlockStyles = css`
     font-size: var(--affine-font-xs);
     line-height: var(--affine-line-height);
     position: relative;
-    padding: 28px 24px;
+    padding: 32px 20px;
     background: var(--affine-background-code-block);
     border-radius: 10px;
     box-sizing: border-box;
@@ -36,8 +36,8 @@ export const codeBlockStyles = css`
   .affine-code-block-container .line-number {
     position: sticky;
     text-align: left;
-    padding-right: 4px;
-    width: 24px;
+    padding-right: 12px;
+    width: 32px;
     word-break: break-word;
     white-space: nowrap;
     left: -0.5px;
@@ -48,6 +48,10 @@ export const codeBlockStyles = css`
     color: var(--affine-text-secondary);
     box-sizing: border-box;
     user-select: none;
+  }
+
+  .affine-code-block-container.disable-line-numbers .line-number {
+    display: none;
   }
 
   affine-code .affine-code-block-preview {

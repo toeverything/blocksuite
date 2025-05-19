@@ -317,6 +317,15 @@ const builtinSurfaceToolbarConfig = {
             parentModel: lastVisibleNote,
           })
           .run();
+
+        ctx.track('BlockCreated', {
+          page: 'whiteboard editor',
+          module: 'toolbar',
+          segment: 'toolbar',
+          blockType: 'affine:embed-linked-doc',
+          control: 'toolbar:general',
+          other: 'insert to page',
+        });
       },
     },
     {
@@ -412,6 +421,15 @@ const builtinSurfaceToolbarConfig = {
             return next();
           })
           .run();
+
+        ctx.track('CanvasElementAdded', {
+          page: 'whiteboard editor',
+          type: 'note',
+          module: 'toolbar',
+          segment: 'toolbar',
+          control: 'conversation',
+          other: 'duplicate as note',
+        });
       },
     },
     captionAction,

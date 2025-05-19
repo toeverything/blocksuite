@@ -746,7 +746,7 @@ export class StarterDebugMenu extends ShadowlessElement {
   }
 
   override firstUpdated() {
-    this.doc.slots.historyUpdated.subscribe(() => {
+    this.doc.history.onUpdated.subscribe(() => {
       this._canUndo = this.doc.canUndo;
       this._canRedo = this.doc.canRedo;
     });

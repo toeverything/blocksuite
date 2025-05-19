@@ -17,7 +17,7 @@ import { property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';
 
-import { HostContextKey } from '../../context/host-context.js';
+import { EditorHostKey } from '../../context/host-context.js';
 import type { DatabaseBlockComponent } from '../../database-block.js';
 import { getSingleDocIdFromText } from '../../utils/title-doc.js';
 import {
@@ -32,7 +32,7 @@ export class HeaderAreaTextCell extends BaseCellRenderer<Text, string> {
   docId$ = signal<string>();
 
   get host() {
-    return this.view.contextGet(HostContextKey);
+    return this.view.serviceGet(EditorHostKey);
   }
 
   get inlineEditor() {
@@ -50,7 +50,7 @@ export class HeaderAreaTextCell extends BaseCellRenderer<Text, string> {
   }
 
   get std() {
-    return this.view.contextGet(HostContextKey)?.std;
+    return this.view.serviceGet(EditorHostKey)?.std;
   }
 
   private readonly _onCopy = (e: ClipboardEvent) => {

@@ -388,8 +388,10 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
 
   override renderBlock(): TemplateResult<1> {
     const showLineNumbers =
-      this.std.getOptional(CodeBlockConfigExtension.identifier)
-        ?.showLineNumbers ?? true;
+      (this.std.getOptional(CodeBlockConfigExtension.identifier)
+        ?.showLineNumbers ??
+        true) &&
+      (this.model.props.lineNumber ?? true);
 
     const preview = !!this.model.props.preview;
     const previewContext = this.std.getOptional(
@@ -403,6 +405,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
           'affine-code-block-container': true,
           mobile: IS_MOBILE,
           wrap: this.model.props.wrap,
+          'disable-line-numbers': !showLineNumbers,
         })}
       >
         <rich-text
@@ -411,7 +414,7 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
           })}
           .yText=${this.model.props.text.yText}
           .inlineEventSource=${this.topContenteditableElement ?? nothing}
-          .undoManager=${this.store.history}
+          .undoManager=${this.store.history.undoManager}
           .attributesSchema=${this.inlineManager.getSchema()}
           .attributeRenderer=${this.inlineManager.getRenderer()}
           .readonly=${this.store.readonly}
@@ -420,16 +423,14 @@ export class CodeBlockComponent extends CaptionedBlockComponent<CodeBlockModel> 
           .enableUndoRedo=${false}
           .wrapText=${this.model.props.wrap}
           .verticalScrollContainerGetter=${() => getViewportElement(this.host)}
-          .vLineRenderer=${showLineNumbers
-            ? (vLine: VLine) => {
-                return html`
-                  <span contenteditable="false" class="line-number"
-                    >${vLine.index + 1}</span
-                  >
-                  ${vLine.renderVElements()}
-                `;
-              }
-            : undefined}
+          .vLineRenderer=${(vLine: VLine) => {
+            return html`
+              <span contenteditable="false" class="line-number"
+                >${vLine.index + 1}</span
+              >
+              ${vLine.renderVElements()}
+            `;
+          }}
         >
         </rich-text>
         <div

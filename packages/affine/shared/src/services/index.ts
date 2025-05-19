@@ -11,7 +11,7 @@ export * from './feature-flag-service';
 export * from './file-size-limit-service';
 export * from './font-loader';
 export * from './generate-url-service';
-export * from './link-previewer-service';
+export * from './link-preview-service';
 export * from './native-clipboard-service';
 export * from './notification-service';
 export * from './open-doc-config';

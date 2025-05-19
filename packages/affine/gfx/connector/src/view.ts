@@ -10,7 +10,7 @@ import { ConnectorElementRendererExtension } from './element-renderer';
 import { ConnectorFilter } from './element-transform';
 import { connectorToolbarExtension } from './toolbar/config';
 import { connectorQuickTool } from './toolbar/quick-tool';
-import { ConnectorElementView } from './view/view';
+import { ConnectorElementView, ConnectorInteraction } from './view/view';
 
 export class ConnectorViewExtension extends ViewExtensionProvider {
   override name = 'affine-connector-gfx';
@@ -30,6 +30,7 @@ export class ConnectorViewExtension extends ViewExtensionProvider {
       context.register(connectorQuickTool);
       context.register(connectorToolbarExtension);
       context.register(ConnectionOverlay);
+      context.register(ConnectorInteraction);
     }
   }
 }

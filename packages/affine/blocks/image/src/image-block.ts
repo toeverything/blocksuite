@@ -4,6 +4,7 @@ import { getLoadingIconWith } from '@blocksuite/affine-components/icons';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import { ResourceController } from '@blocksuite/affine-components/resource';
 import type { ImageBlockModel } from '@blocksuite/affine-model';
+import { ImageSelection } from '@blocksuite/affine-shared/selection';
 import {
   ThemeProvider,
   ToolbarRegistryIdentifier,
@@ -30,6 +31,13 @@ import {
   enableOn: () => !IS_MOBILE,
 })
 export class ImageBlockComponent extends CaptionedBlockComponent<ImageBlockModel> {
+  resizeable$ = computed(() =>
+    this.std.selection.value.some(
+      selection =>
+        selection.is(ImageSelection) && selection.blockId === this.blockId
+    )
+  );
+
   resourceController = new ResourceController(
     computed(() => this.model.props.sourceId$.value),
     'Image'
@@ -104,7 +112,11 @@ export class ImageBlockComponent extends CaptionedBlockComponent<ImageBlockModel
     this.disposables.add(this.resourceController.subscribe());
     this.disposables.add(this.resourceController);
 
-    this.refreshData();
+    this.disposables.add(
+      this.model.props.sourceId$.subscribe(() => {
+        this.refreshData();
+      })
+    );
   }
 
   override firstUpdated() {

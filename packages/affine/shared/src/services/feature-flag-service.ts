@@ -22,6 +22,8 @@ export interface BlockSuiteFlags {
   enable_embed_doc_with_alias: boolean;
   enable_turbo_renderer: boolean;
   enable_citation: boolean;
+  enable_link_preview_cache: boolean;
+  enable_dom_renderer: boolean;
 }
 
 export class FeatureFlagService extends StoreExtension {
@@ -48,6 +50,8 @@ export class FeatureFlagService extends StoreExtension {
     enable_embed_doc_with_alias: false,
     enable_turbo_renderer: false,
     enable_citation: false,
+    enable_link_preview_cache: false,
+    enable_dom_renderer: false,
   });
 
   setFlag(key: keyof BlockSuiteFlags, value: boolean) {

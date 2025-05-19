@@ -210,7 +210,7 @@ export class DocTitle extends WithDisposable(ShadowlessElement) {
       >
         <rich-text
           .yText=${this._rootModel?.props.title.yText}
-          .undoManager=${this.doc.history}
+          .undoManager=${this.doc.history.undoManager}
           .verticalScrollContainerGetter=${() => this._viewport}
           .readonly=${this.doc.readonly}
           .enableFormat=${false}

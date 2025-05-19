@@ -2,12 +2,16 @@ import type { BlockCaptionEditor } from '@blocksuite/affine-components/caption';
 import { getLoadingIconWith } from '@blocksuite/affine-components/icons';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import { ResourceController } from '@blocksuite/affine-components/resource';
-import type { ImageBlockModel } from '@blocksuite/affine-model';
+import {
+  type ImageBlockModel,
+  ImageBlockSchema,
+} from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
 import { BrokenImageIcon, ImageIcon } from '@blocksuite/icons/lit';
 import { GfxBlockComponent } from '@blocksuite/std';
+import { GfxViewInteractionExtension } from '@blocksuite/std/gfx';
 import { computed } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';
@@ -96,7 +100,11 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockMod
     this.disposables.add(this.resourceController.subscribe());
     this.disposables.add(this.resourceController);
 
-    this.refreshData();
+    this.disposables.add(
+      this.model.props.sourceId$.subscribe(() => {
+        this.refreshData();
+      })
+    );
   }
 
   override renderGfxBlock() {
@@ -171,6 +179,15 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockMod
   @query('.resizable-img')
   accessor resizableImg!: HTMLDivElement;
 }
+
+export const ImageEdgelessBlockInteraction = GfxViewInteractionExtension(
+  ImageBlockSchema.model.flavour,
+  {
+    resizeConstraint: {
+      lockRatio: true,
+    },
+  }
+);
 
 declare global {
   interface HTMLElementTagNameMap {
