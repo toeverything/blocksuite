@@ -13,7 +13,7 @@ import { repeat } from 'lit/directives/repeat.js';
 
 import type { DataViewRenderer } from '../../../core/data-view.js';
 import { GroupTitle } from '../../../core/group-by/group-title.js';
-import type { GroupData } from '../../../core/group-by/trait.js';
+import type { Group } from '../../../core/group-by/trait.js';
 import type { Row } from '../../../core/index.js';
 import { LEFT_TOOL_BAR_WIDTH } from '../consts.js';
 import type { DataViewTable } from '../pc/table-view.js';
@@ -185,7 +185,7 @@ export class MobileTableGroup extends SignalWatcher(
   accessor dataViewEle!: DataViewRenderer;
 
   @property({ attribute: false })
-  accessor group: GroupData | undefined = undefined;
+  accessor group: Group | undefined = undefined;
 
   @query('.affine-database-block-rows')
   accessor rowsContainer: HTMLElement | null = null;

@@ -1089,7 +1089,7 @@ export class DragEventWatcher {
           block.flavour === 'affine:bookmark' ||
           block.flavour.startsWith('affine:embed-')
         ) {
-          const style = 'vertical' as EmbedCardStyle;
+          const style = (block.props.style ?? 'vertical') as EmbedCardStyle;
           block.props.style = style;
 
           blockBound.w = EMBED_CARD_WIDTH[style];
@@ -1268,7 +1268,19 @@ export class DragEventWatcher {
             content,
           },
           noteId
-        ).catch(console.error);
+        )
+          .then(() => {
+            const telemetry = this.std.getOptional(TelemetryProvider);
+            telemetry?.track('CanvasElementAdded', {
+              page: 'whiteboard editor',
+              module: 'canvas',
+              segment: 'whiteboard',
+              control: 'canvas:drop',
+              type: 'note',
+              other: 'split-from-note',
+            });
+          })
+          .catch(console.error);
       }
     }
   };

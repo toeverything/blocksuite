@@ -38,6 +38,7 @@
     "micromark-extension-gfm-task-list-item": "^2.1.0",
     "micromark-util-combine-extensions": "^2.0.0",
     "minimatch": "^10.0.1",
+    "quick-lru": "^7.0.1",
     "rehype-parse": "^9.0.0",
     "rehype-stringify": "^10.0.0",
     "remark-math": "^6.0.0",

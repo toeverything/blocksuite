@@ -14,7 +14,7 @@ import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import type { GroupData } from '../../../core/group-by/trait.js';
+import type { Group } from '../../../core/group-by/trait.js';
 import { typeSystem } from '../../../core/index.js';
 import { statsFunctions } from '../../../core/statistics/index.js';
 import type { StatisticsConfig } from '../../../core/statistics/types.js';
@@ -236,7 +236,7 @@ export class DatabaseColumnStatsCell extends SignalWatcher(
   }
 
   @property({ attribute: false })
-  accessor group: GroupData | undefined = undefined;
+  accessor group: Group | undefined = undefined;
 }
 
 declare global {

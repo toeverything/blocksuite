@@ -11,7 +11,7 @@ import type {
   GfxViewTransformInterface,
   SelectedContext,
 } from '../../gfx/interactivity/index.js';
-import { type GfxBlockElementModel } from '../../gfx/model/gfx-block-model.js';
+import type { GfxBlockElementModel } from '../../gfx/model/gfx-block-model.js';
 import { SurfaceSelection } from '../../selection/index.js';
 import { BlockComponent } from './block-component.js';
 
@@ -115,10 +115,6 @@ export abstract class GfxBlockComponent<
   }
 
   onBoxSelected(_: BoxSelectionContext) {}
-
-  onRotate() {}
-
-  onResize() {}
 
   getCSSTransform() {
     const viewport = this.gfx.viewport;
@@ -235,10 +231,6 @@ export function toGfxBlockComponent<
     }
 
     onBoxSelected(_: BoxSelectionContext) {}
-
-    onRotate() {}
-
-    onResize() {}
 
     get gfx() {
       return this.std.get(GfxControllerIdentifier);

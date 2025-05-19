@@ -60,7 +60,7 @@ export const popCardMenu = (
             })
             .map(group => {
               return menu.action({
-                name: group.value != null ? group.name : 'Ungroup',
+                name: group.value != null ? group.name$.value : 'Ungroup',
                 select: () => {
                   selection.moveCard(rowId, group.key);
                 },

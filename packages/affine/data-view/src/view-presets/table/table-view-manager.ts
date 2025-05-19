@@ -241,7 +241,7 @@ export class TableSingleView extends SingleViewBase<TableViewData> {
       });
     }
 
-    if (groupKey) {
+    if (groupKey && id) {
       this.groupTrait.addToGroup(id, groupKey);
     }
     return id;

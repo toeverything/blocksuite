@@ -3,7 +3,7 @@ import {
   EdgelessCRUDIdentifier,
   reassociateConnectorsCommand,
 } from '@blocksuite/affine-block-surface';
-import type { AliasInfo } from '@blocksuite/affine-model';
+import { type AliasInfo } from '@blocksuite/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
@@ -15,7 +15,7 @@ import {
 import { Bound } from '@blocksuite/global/gfx';
 import { type BlockComponent, BlockStdScope } from '@blocksuite/std';
 import { html, nothing } from 'lit';
-import { query, queryAsync } from 'lit/decorators.js';
+import { query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';
 import { classMap } from 'lit/directives/class-map.js';
 import { guard } from 'lit/directives/guard.js';
@@ -31,8 +31,8 @@ export class EmbedEdgelessSyncedDocBlockComponent extends toEdgelessEmbedBlock(
   @query('.affine-embed-synced-doc-edgeless-header-wrapper')
   accessor headerWrapper: HTMLDivElement | null = null;
 
-  @queryAsync('affine-preview-root')
-  accessor contentElement!: Promise<BlockComponent | null>;
+  @query('affine-preview-root')
+  accessor contentElement: BlockComponent | null = null;
 
   protected override _renderSyncedView = () => {
     const { syncedDoc, editorMode } = this;

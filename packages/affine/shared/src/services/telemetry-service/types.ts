@@ -61,9 +61,36 @@ export interface MindMapCollapseEvent extends TelemetryEvent {
   type: 'expand' | 'collapse';
 }
 
+export interface AttachmentReloadedEvent extends TelemetryEvent {
+  page: 'doc editor' | 'whiteboard editor';
+  segment: 'doc' | 'whiteboard';
+  module: 'attachment';
+  control: 'reload';
+  category: 'card' | 'embed';
+  type: string; // file type
+}
+
+export interface AttachmentReloadedEventInToolbar extends TelemetryEvent {
+  page: 'doc editor' | 'whiteboard editor';
+  segment: 'doc' | 'whiteboard';
+  module: 'toolbar';
+  control: 'reload';
+  category: 'attachment';
+  type: string; // file type
+}
+
+export interface AttachmentUpgradedEvent extends TelemetryEvent {
+  page: 'doc editor' | 'whiteboard editor';
+  segment: 'doc' | 'whiteboard';
+  module: 'attachment';
+  control: 'upgrade';
+  category: 'card' | 'embed';
+  type: string; // file type
+}
+
 export interface AttachmentUploadedEvent extends TelemetryEvent {
   page: 'doc editor' | 'whiteboard editor';
-  segment: 'attachment';
+  segment: 'doc' | 'whiteboard';
   module: 'attachment';
   control: 'uploader';
   type: string; // file type

@@ -224,10 +224,6 @@ export class GfxElementModelView<
 
   onBoxSelected(_: BoxSelectionContext): boolean | void {}
 
-  onResize = () => {};
-
-  onRotate = () => {};
-
   /**
    * Called when the view is destroyed.
    * Override this method requires calling `super.onDestroyed()`.

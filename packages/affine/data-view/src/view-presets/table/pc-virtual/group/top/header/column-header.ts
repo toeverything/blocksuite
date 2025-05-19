@@ -1,3 +1,8 @@
+import {
+  menu,
+  popMenu,
+  popupTargetFromElement,
+} from '@blocksuite/affine-components/context-menu';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { PlusIcon } from '@blocksuite/icons/lit';
 import { ShadowlessElement } from '@blocksuite/std';
@@ -7,6 +12,7 @@ import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
+import { renderUniLit } from '../../../../../../core';
 import type { TableSingleView } from '../../../../table-view-manager';
 import * as styles from './column-header-css';
 
@@ -15,19 +21,50 @@ export class VirtualTableHeader extends SignalWatcher(
 ) {
   private readonly _onAddColumn = (e: MouseEvent) => {
     if (this.readonly) return;
-    this.tableViewManager.propertyAdd('end');
     const ele = e.currentTarget as HTMLElement;
-    requestAnimationFrame(() => {
-      this.editLastColumnTitle();
-      ele.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    popMenu(popupTargetFromElement(ele), {
+      options: {
+        title: {
+          text: 'Property type',
+        },
+        items: [
+          menu.group({
+            items: this.tableViewManager.propertyMetas$.value.map(config => {
+              return menu.action({
+                name: config.config.name,
+                prefix: renderUniLit(config.renderer.icon),
+                select: () => {
+                  const id = this.tableViewManager.propertyAdd('end', {
+                    type: config.type,
+                    name: config.config.name,
+                  });
+                  if (id) {
+                    requestAnimationFrame(() => {
+                      ele.scrollIntoView({
+                        block: 'nearest',
+                        inline: 'nearest',
+                      });
+                      this.openPropertyMenuById(id);
+                    });
+                  }
+                },
+              });
+            }),
+          }),
+        ],
+      },
     });
   };
 
-  editLastColumnTitle = () => {
-    const columns = this.querySelectorAll('affine-database-header-column');
-    const column = columns.item(columns.length - 1);
-    column.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-    column.editTitle();
+  openPropertyMenuById = (id: string) => {
+    const column = this.querySelectorAll('virtual-database-header-column');
+    for (const item of column) {
+      if (item.dataset.columnId === id) {
+        item.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        item.editTitle();
+        return;
+      }
+    }
   };
 
   private get readonly() {
@@ -44,7 +81,7 @@ export class VirtualTableHeader extends SignalWatcher(
       <div class="${styles.columnHeader} database-row">
         ${this.readonly
           ? nothing
-          : html`<div class="data-view-table-left-bar"></div>`}
+          : html` <div class="data-view-table-left-bar"></div>`}
         ${repeat(
           this.tableViewManager.properties$.value,
           column => column.id,
@@ -54,14 +91,14 @@ export class VirtualTableHeader extends SignalWatcher(
               border: index === 0 ? 'none' : undefined,
             });
             return html`
-              <affine-database-header-column
+              <virtual-database-header-column
                 style="${style}"
                 data-column-id="${column.id}"
                 data-column-index="${index}"
                 class="${styles.column} ${styles.cell}"
                 .column="${column}"
                 .tableViewManager="${this.tableViewManager}"
-              ></affine-database-header-column>
+              ></virtual-database-header-column>
               <div class="cell-divider" style="height: auto;"></div>
             `;
           }

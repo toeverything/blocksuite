@@ -65,6 +65,14 @@ const typeFilters = {
     model instanceof GfxLocalElementModel,
 };
 
+export type BuiltInFilterModelMap = {
+  block: GfxBlockElementModel;
+  canvas: GfxPrimitiveElementModel;
+  local: GfxLocalElementModel;
+};
+
+export type BuiltInFilterType = keyof typeof typeFilters;
+
 type FilterFunc = (model: GfxModel | GfxLocalElementModel) => boolean;
 
 export class GridManager extends GfxExtension {
@@ -280,7 +288,7 @@ export class GridManager extends GfxExtension {
    * @param bound
    * @param options
    */
-  search<T extends keyof typeof typeFilters>(
+  search<T extends BuiltInFilterType = 'canvas' | 'block'>(
     bound: IBound,
     options?: {
       /**
@@ -297,16 +305,16 @@ export class GridManager extends GfxExtension {
        */
       filter?: (T | FilterFunc)[] | FilterFunc;
     }
-  ): T extends 'local'[] ? (GfxModel | GfxLocalElementModel)[] : GfxModel[];
-  search<T extends keyof typeof typeFilters>(
+  ): BuiltInFilterModelMap[T][];
+  search<T extends BuiltInFilterType = 'canvas' | 'block'>(
     bound: IBound,
     options: {
       strict?: boolean | undefined;
       useSet: true;
       filter?: (T | FilterFunc)[] | FilterFunc;
     }
-  ): T extends 'local'[] ? Set<GfxModel | GfxLocalElementModel> : Set<GfxModel>;
-  search<T extends keyof typeof typeFilters>(
+  ): Set<BuiltInFilterModelMap[T]>;
+  search<T extends BuiltInFilterType = 'canvas' | 'block'>(
     bound: IBound,
     options: {
       strict?: boolean;

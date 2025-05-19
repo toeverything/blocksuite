@@ -7,7 +7,7 @@ import {
 } from '@blocksuite/affine-shared/commands';
 import { ImageSelection } from '@blocksuite/affine-shared/selection';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { WithDisposable } from '@blocksuite/global/lit';
+import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import type { BlockComponent, UIEventStateContext } from '@blocksuite/std';
 import {
   BlockSelection,
@@ -15,8 +15,9 @@ import {
   TextSelection,
 } from '@blocksuite/std';
 import type { BaseSelection } from '@blocksuite/store';
+import { computed } from '@preact/signals-core';
 import { css, html, type PropertyValues } from 'lit';
-import { property, query, state } from 'lit/decorators.js';
+import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { when } from 'lit/directives/when.js';
 
@@ -25,7 +26,9 @@ import { ImageResizeManager } from '../image-resize-manager';
 import { shouldResizeImage } from '../utils';
 import { ImageSelectedRect } from './image-selected-rect';
 
-export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
+export class ImageBlockPageComponent extends SignalWatcher(
+  WithDisposable(ShadowlessElement)
+) {
   static override styles = css`
     affine-page-image {
       position: relative;
@@ -67,6 +70,8 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
       height: 100%;
     }
   `;
+
+  resizeable$ = computed(() => this.block.resizeable$.value);
 
   private _isDragging = false;
 
@@ -134,21 +139,21 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
         return true;
       },
       Delete: ctx => {
-        if (this._host.store.readonly || !this._isSelected) return;
+        if (this._host.store.readonly || !this.resizeable$.peek()) return;
 
         addParagraph(ctx);
         this._doc.deleteBlock(this._model);
         return true;
       },
       Backspace: ctx => {
-        if (this._host.store.readonly || !this._isSelected) return;
+        if (this._host.store.readonly || !this.resizeable$.peek()) return;
 
         addParagraph(ctx);
         this._doc.deleteBlock(this._model);
         return true;
       },
       Enter: ctx => {
-        if (this._host.store.readonly || !this._isSelected) return;
+        if (this._host.store.readonly || !this.resizeable$.peek()) return;
 
         addParagraph(ctx);
         return true;
@@ -213,19 +218,6 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
 
   private _handleSelection() {
     const selection = this._host.selection;
-    this._disposables.add(
-      selection.slots.changed.subscribe(selList => {
-        this._isSelected = selList.some(
-          sel => sel.blockId === this.block.blockId && sel.is(ImageSelection)
-        );
-      })
-    );
-
-    this._disposables.add(
-      this._model.propsUpdated.subscribe(() => {
-        this.requestUpdate();
-      })
-    );
 
     this._disposables.addFromEvent(
       this.resizeImg,
@@ -249,7 +241,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
     this.block.handleEvent(
       'click',
       () => {
-        if (!this._isSelected) return;
+        if (!this.resizeable$.peek()) return;
 
         selection.update(selList =>
           selList.filter(
@@ -356,7 +348,7 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
   override render() {
     const imageSize = this._normalizeImageSize();
 
-    const imageSelectedRect = this._isSelected
+    const imageSelectedRect = this.resizeable$.value
       ? ImageSelectedRect(this._doc.readonly)
       : null;
 
@@ -388,9 +380,6 @@ export class ImageBlockPageComponent extends WithDisposable(ShadowlessElement) {
       )}
     `;
   }
-
-  @state()
-  accessor _isSelected = false;
 
   @property({ attribute: false })
   accessor block!: ImageBlockComponent;

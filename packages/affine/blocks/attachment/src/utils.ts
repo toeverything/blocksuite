@@ -130,7 +130,7 @@ async function buildPropsWith(
     std.getOptional(TelemetryProvider)?.track('AttachmentUploadedEvent', {
       page: `${mode} editor`,
       module: 'attachment',
-      segment: 'attachment',
+      segment: mode,
       control: 'uploader',
       type,
       category,

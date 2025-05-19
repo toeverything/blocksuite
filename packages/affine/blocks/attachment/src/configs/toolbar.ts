@@ -264,6 +264,12 @@ const builtinToolbarConfig = {
       run(ctx) {
         const block = ctx.getCurrentBlockByType(AttachmentBlockComponent);
         block?.reload();
+
+        ctx.track('AttachmentReloadedEvent', {
+          ...trackBaseProps,
+          control: 'reload',
+          type: block?.model.props.name.split('.').pop() ?? '',
+        });
       },
     },
     {

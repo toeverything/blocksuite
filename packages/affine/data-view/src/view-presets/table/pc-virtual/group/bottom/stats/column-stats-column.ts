@@ -15,7 +15,7 @@ import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { typeSystem } from '../../../../../../core';
-import type { GroupData } from '../../../../../../core/group-by/trait';
+import type { Group } from '../../../../../../core/group-by/trait';
 import { statsFunctions } from '../../../../../../core/statistics';
 import type { StatisticsConfig } from '../../../../../../core/statistics/types';
 import type { TableProperty } from '../../../../table-view-manager';
@@ -236,7 +236,7 @@ export class VirtualDatabaseColumnStatsCell extends SignalWatcher(
   }
 
   @property({ attribute: false })
-  accessor group: GroupData | undefined = undefined;
+  accessor group: Group | undefined = undefined;
 }
 
 declare global {

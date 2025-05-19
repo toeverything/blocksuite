@@ -5,6 +5,7 @@ import {
   EDGELESS_TEXT_BLOCK_MIN_HEIGHT,
   EDGELESS_TEXT_BLOCK_MIN_WIDTH,
   type EdgelessTextBlockModel,
+  EdgelessTextBlockSchema,
   ListBlockModel,
   ParagraphBlockModel,
 } from '@blocksuite/affine-model';
@@ -21,7 +22,10 @@ import {
   GfxBlockComponent,
   TextSelection,
 } from '@blocksuite/std';
-import type { SelectedContext } from '@blocksuite/std/gfx';
+import {
+  GfxViewInteractionExtension,
+  type SelectedContext,
+} from '@blocksuite/std/gfx';
 import { css, html } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
@@ -420,3 +424,69 @@ declare global {
     'affine-edgeless-text': EdgelessTextBlockComponent;
   }
 }
+
+export const EdgelessTextInteraction =
+  GfxViewInteractionExtension<EdgelessTextBlockComponent>(
+    EdgelessTextBlockSchema.model.flavour,
+    {
+      resizeConstraint: {
+        lockRatio: ['top-left', 'top-right', 'bottom-left', 'bottom-right'],
+        allowedHandlers: [
+          'top-left',
+          'top-right',
+          'left',
+          'right',
+          'bottom-left',
+          'bottom-right',
+        ],
+        minWidth: EDGELESS_TEXT_BLOCK_MIN_WIDTH,
+      },
+      handleResize: context => {
+        const { model, view } = context;
+        const initialScale = model.props.scale;
+
+        return {
+          onResizeStart(context) {
+            context.default(context);
+            model.stash('scale');
+            model.stash('hasMaxWidth');
+          },
+          onResizeMove(context) {
+            const { originalBound, newBound, constraint, lockRatio } = context;
+
+            if (lockRatio) {
+              const originalRealWidth = originalBound.w / initialScale;
+              const newScale = newBound.w / originalRealWidth;
+
+              model.props.scale = newScale;
+              model.props.xywh = newBound.serialize();
+            } else {
+              if (!view.checkWidthOverflow(newBound.w)) {
+                return;
+              }
+
+              const newRealWidth = clamp(
+                newBound.w / initialScale,
+                constraint.minWidth,
+                constraint.maxWidth
+              );
+
+              const curBound = Bound.deserialize(model.xywh);
+
+              model.props.xywh = Bound.serialize({
+                ...newBound,
+                w: newRealWidth * initialScale,
+                h: curBound.h,
+              });
+              model.props.hasMaxWidth = true;
+            }
+          },
+          onResizeEnd(context) {
+            context.default(context);
+            model.pop('scale');
+            model.pop('hasMaxWidth');
+          },
+        };
+      },
+    }
+  );

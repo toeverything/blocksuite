@@ -11,7 +11,11 @@ import {
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
 import { findAncestorModel } from '@blocksuite/affine-shared/utils';
 import type { BlockService } from '@blocksuite/std';
-import type { GfxCompatibleProps } from '@blocksuite/std/gfx';
+import {
+  type GfxCompatibleProps,
+  GfxViewInteractionExtension,
+  type ResizeConstraint,
+} from '@blocksuite/std/gfx';
 import type { BlockModel } from '@blocksuite/store';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 import type { TemplateResult } from 'lit';
@@ -163,3 +167,31 @@ export class EmbedBlockComponent<
 
   override accessor useZeroWidth = true;
 }
+
+export const createEmbedEdgelessBlockInteraction = (
+  flavour: string,
+  config?: {
+    resizeConstraint?: ResizeConstraint;
+  }
+) => {
+  const resizeConstraint = Object.assign(
+    {
+      lockRatio: true,
+    },
+    config?.resizeConstraint ?? {}
+  );
+  const rotateConstraint = {
+    rotatable: false,
+  };
+
+  return GfxViewInteractionExtension(flavour, {
+    resizeConstraint,
+    handleRotate() {
+      return {
+        beforeRotate(context) {
+          context.set(rotateConstraint);
+        },
+      };
+    },
+  });
+};

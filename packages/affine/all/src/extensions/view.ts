@@ -40,11 +40,14 @@ import { InlinePresetViewExtension } from '@blocksuite/affine-inline-preset/view
 import { ReferenceViewExtension } from '@blocksuite/affine-inline-reference/view';
 import { DragHandleViewExtension } from '@blocksuite/affine-widget-drag-handle/view';
 import { EdgelessAutoConnectViewExtension } from '@blocksuite/affine-widget-edgeless-auto-connect/view';
+import { EdgelessDraggingAreaViewExtension } from '@blocksuite/affine-widget-edgeless-dragging-area/view';
+import { EdgelessSelectedRectViewExtension } from '@blocksuite/affine-widget-edgeless-selected-rect/view';
 import { EdgelessToolbarViewExtension } from '@blocksuite/affine-widget-edgeless-toolbar/view';
 import { EdgelessZoomToolbarViewExtension } from '@blocksuite/affine-widget-edgeless-zoom-toolbar/view';
 import { FrameTitleViewExtension } from '@blocksuite/affine-widget-frame-title/view';
 import { KeyboardToolbarViewExtension } from '@blocksuite/affine-widget-keyboard-toolbar/view';
 import { LinkedDocViewExtension } from '@blocksuite/affine-widget-linked-doc/view';
+import { NoteSlicerViewExtension } from '@blocksuite/affine-widget-note-slicer/view';
 import { PageDraggingAreaViewExtension } from '@blocksuite/affine-widget-page-dragging-area/view';
 import { RemoteSelectionViewExtension } from '@blocksuite/affine-widget-remote-selection/view';
 import { ScrollAnchoringViewExtension } from '@blocksuite/affine-widget-scroll-anchoring/view';
@@ -112,6 +115,9 @@ export function getInternalViewExtensions() {
     ViewportOverlayViewExtension,
     EdgelessZoomToolbarViewExtension,
     PageDraggingAreaViewExtension,
+    EdgelessSelectedRectViewExtension,
+    EdgelessDraggingAreaViewExtension,
+    NoteSlicerViewExtension,
 
     // Fragment
     DocTitleViewExtension,

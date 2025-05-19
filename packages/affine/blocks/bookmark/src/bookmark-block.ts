@@ -9,7 +9,7 @@ import type {
 import { ImageProxyService } from '@blocksuite/affine-shared/adapters';
 import {
   DocModeProvider,
-  LinkPreviewerService,
+  LinkPreviewServiceIdentifier,
 } from '@blocksuite/affine-shared/services';
 import { BlockSelection } from '@blocksuite/std';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
@@ -72,8 +72,8 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<BookmarkBloc
     this.loading = true;
     this.error = false;
 
-    this.std.store
-      .get(LinkPreviewerService)
+    this.std
+      .get(LinkPreviewServiceIdentifier)
       .query(this.model.props.url, this._fetchAbortController.signal)
       .then(data => {
         this._localLinkPreview$.value = {

@@ -27,6 +27,7 @@ import {
   type DataViewWidget,
   type DataViewWidgetProps,
   defineUniComponent,
+  ExternalGroupByConfigProvider,
   renderUniLit,
   type SingleView,
   uniMap,
@@ -47,7 +48,7 @@ import { css, html, nothing, unsafeCSS } from 'lit';
 
 import { popSideDetail } from './components/layout.js';
 import { DatabaseConfigExtension } from './config.js';
-import { HostContextKey } from './context/host-context.js';
+import { EditorHostKey } from './context/host-context.js';
 import { DatabaseBlockDataSource } from './data-source.js';
 import { BlockRenderer } from './detail-panel/block-renderer.js';
 import { NoteRenderer } from './detail-panel/note-renderer.js';
@@ -333,8 +334,17 @@ export class DatabaseBlockComponent extends CaptionedBlockComponent<DatabaseBloc
 
   get dataSource(): DatabaseBlockDataSource {
     if (!this._dataSource) {
-      this._dataSource = new DatabaseBlockDataSource(this.model);
-      this._dataSource.contextSet(HostContextKey, this.host);
+      this._dataSource = new DatabaseBlockDataSource(this.model, dataSource => {
+        dataSource.serviceSet(EditorHostKey, this.host);
+        this.std.provider
+          .getAll(ExternalGroupByConfigProvider)
+          .forEach(config => {
+            dataSource.serviceSet(
+              ExternalGroupByConfigProvider(config.name),
+              config
+            );
+          });
+      });
       const id = currentViewStorage.getCurrentView(this.model.id);
       if (id && this.dataSource.viewManager.viewGet(id)) {
         this.dataSource.viewManager.setCurrentView(id);

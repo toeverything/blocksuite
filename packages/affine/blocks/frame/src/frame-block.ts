@@ -1,12 +1,27 @@
-import { DefaultTheme, type FrameBlockModel } from '@blocksuite/affine-model';
+import { OverlayIdentifier } from '@blocksuite/affine-block-surface';
+import {
+  DefaultTheme,
+  type FrameBlockModel,
+  FrameBlockSchema,
+} from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { Bound } from '@blocksuite/global/gfx';
 import { GfxBlockComponent } from '@blocksuite/std';
-import type { BoxSelectionContext, SelectedContext } from '@blocksuite/std/gfx';
+import {
+  type BoxSelectionContext,
+  getTopElements,
+  GfxViewInteractionExtension,
+  type SelectedContext,
+} from '@blocksuite/std/gfx';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { html } from 'lit';
 import { state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
+
+import {
+  EdgelessFrameManagerIdentifier,
+  type FrameOverlay,
+} from './frame-manager';
 
 export class FrameBlockComponent extends GfxBlockComponent<FrameBlockModel> {
   override connectedCallback() {
@@ -115,3 +130,64 @@ declare global {
     'affine-frame': FrameBlockComponent;
   }
 }
+
+export const FrameBlockInteraction =
+  GfxViewInteractionExtension<FrameBlockComponent>(
+    FrameBlockSchema.model.flavour,
+    {
+      handleResize: context => {
+        const { model, std } = context;
+
+        return {
+          onResizeStart(context): void {
+            context.default(context);
+            model.stash('childElementIds');
+          },
+
+          onResizeMove(context): void {
+            const { newBound } = context;
+            const frameManager = std.getOptional(
+              EdgelessFrameManagerIdentifier
+            );
+            const overlay = std.getOptional(
+              OverlayIdentifier('frame')
+            ) as FrameOverlay;
+
+            model.xywh = newBound.serialize();
+
+            if (!frameManager) {
+              return;
+            }
+
+            const oldChildren = frameManager.getChildElementsInFrame(model);
+
+            const newChildren = getTopElements(
+              frameManager.getElementsInFrameBound(model)
+            ).concat(
+              oldChildren.filter(oldChild => {
+                return model.intersectsBound(oldChild.elementBound);
+              })
+            );
+
+            frameManager.removeAllChildrenFromFrame(model);
+            frameManager.addElementsToFrame(model, newChildren);
+
+            overlay?.highlight(model, true, false);
+          },
+          onResizeEnd(context): void {
+            context.default(context);
+            model.pop('childElementIds');
+          },
+        };
+      },
+      handleRotate: () => {
+        return {
+          beforeRotate(context): void {
+            context.set({
+              rotatable: false,
+            });
+          },
+        };
+      },
+    }
+  );

@@ -42,7 +42,6 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./effects": "./src/effects.ts",
     "./view": "./src/view.ts",
     "./store": "./src/store.ts"
   },

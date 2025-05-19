@@ -4,6 +4,9 @@ import {
   TableModelFlavour,
 } from '@blocksuite/affine-model';
 import {
+  CalloutAdmonitionType,
+  CalloutExportStyle,
+  calloutMarkdownExportMiddleware,
   embedSyncedDocMiddleware,
   MarkdownAdapter,
 } from '@blocksuite/affine-shared/adapters';
@@ -2449,119 +2452,288 @@ World!
     expect(target.file).toBe(markdown);
   });
 
-  test('callout', async () => {
-    const blockSnapshot: BlockSnapshot = {
-      type: 'block',
-      id: 'block:vu6SK6WJpW',
-      flavour: 'affine:page',
-      props: {
-        title: {
-          '$blocksuite:internal:text$': true,
-          delta: [],
-        },
-      },
-      children: [
-        {
-          type: 'block',
-          id: 'block:Tk4gSPocAt',
-          flavour: 'affine:surface',
-          props: {
-            elements: {},
+  describe('callout', () => {
+    test('without export middleware', async () => {
+      const blockSnapshot: BlockSnapshot = {
+        type: 'block',
+        id: 'block:vu6SK6WJpW',
+        flavour: 'affine:page',
+        props: {
+          title: {
+            '$blocksuite:internal:text$': true,
+            delta: [],
           },
-          children: [],
         },
-        {
-          type: 'block',
-          id: 'block:WfnS5ZDCJT',
-          flavour: 'affine:note',
-          props: {
-            xywh: '[0,0,800,95]',
-            background: DefaultTheme.noteBackgrounColor,
-            index: 'a0',
-            hidden: false,
-            displayMode: NoteDisplayMode.DocAndEdgeless,
+        children: [
+          {
+            type: 'block',
+            id: 'block:Tk4gSPocAt',
+            flavour: 'affine:surface',
+            props: {
+              elements: {},
+            },
+            children: [],
           },
-          children: [
-            {
-              type: 'block',
-              id: 'block:8hOLxad5Fv',
-              flavour: 'affine:callout',
-              props: {
-                emoji: '💡',
-              },
-              children: [
-                {
-                  type: 'block',
-                  id: 'block:8hOLxad5Fv',
-                  flavour: 'affine:paragraph',
-                  props: {
-                    type: 'text',
-                    text: {
-                      '$blocksuite:internal:text$': true,
-                      delta: [{ insert: 'First callout' }],
+          {
+            type: 'block',
+            id: 'block:WfnS5ZDCJT',
+            flavour: 'affine:note',
+            props: {
+              xywh: '[0,0,800,95]',
+              background: DefaultTheme.noteBackgrounColor,
+              index: 'a0',
+              hidden: false,
+              displayMode: NoteDisplayMode.DocAndEdgeless,
+            },
+            children: [
+              {
+                type: 'block',
+                id: 'block:8hOLxad5Fv',
+                flavour: 'affine:callout',
+                props: {
+                  emoji: '💡',
+                },
+                children: [
+                  {
+                    type: 'block',
+                    id: 'block:8hOLxad5Fv',
+                    flavour: 'affine:paragraph',
+                    props: {
+                      type: 'text',
+                      text: {
+                        '$blocksuite:internal:text$': true,
+                        delta: [{ insert: 'First callout' }],
+                      },
                     },
+                    children: [],
                   },
-                  children: [],
-                },
-              ],
-            },
-            {
-              type: 'block',
-              id: 'block:8hOLxadvdv',
-              flavour: 'affine:callout',
-              props: {
-                emoji: '',
+                ],
               },
-              children: [
-                {
-                  type: 'block',
-                  id: 'block:8hOLxad5Fv',
-                  flavour: 'affine:paragraph',
-                  props: {
-                    type: 'text',
-                    text: {
-                      '$blocksuite:internal:text$': true,
-                      delta: [{ insert: 'Second callout without emoji' }],
+              {
+                type: 'block',
+                id: 'block:8hOLxadvdv',
+                flavour: 'affine:callout',
+                props: {
+                  emoji: '',
+                },
+                children: [
+                  {
+                    type: 'block',
+                    id: 'block:8hOLxad5Fv',
+                    flavour: 'affine:paragraph',
+                    props: {
+                      type: 'text',
+                      text: {
+                        '$blocksuite:internal:text$': true,
+                        delta: [
+                          { insert: 'Warning second callout without emoji' },
+                        ],
+                      },
                     },
+                    children: [],
                   },
-                  children: [],
-                },
-              ],
-            },
-            {
-              type: 'block',
-              id: 'block:8hOLxbfdb',
-              flavour: 'affine:paragraph',
-              props: {
-                type: 'quote',
-                text: {
-                  '$blocksuite:internal:text$': true,
-                  delta: [{ insert: 'This is a regular blockquote' }],
-                },
+                  {
+                    type: 'block',
+                    id: 'block:8hOLxad5Fv',
+                    flavour: 'affine:paragraph',
+                    props: {
+                      type: 'text',
+                      text: {
+                        '$blocksuite:internal:text$': true,
+                        delta: [{ insert: 'Text in second callout' }],
+                      },
+                    },
+                    children: [],
+                  },
+                ],
               },
-              children: [],
-            },
-          ],
-        },
-      ],
-    };
+            ],
+          },
+        ],
+      };
 
-    const markdown = `> \\[!💡]
+      const markdown = `> \\[!💡]
 >
 > First callout
 
 > \\[!]
 >
-> Second callout without emoji
-
-> This is a regular blockquote
+> Warning second callout without emoji
+>
+> Text in second callout
 `;
 
-    const mdAdapter = new MarkdownAdapter(createJob(), provider);
-    const target = await mdAdapter.fromBlockSnapshot({
-      snapshot: blockSnapshot,
+      const mdAdapter = new MarkdownAdapter(createJob(), provider);
+      const target = await mdAdapter.fromBlockSnapshot({
+        snapshot: blockSnapshot,
+      });
+      expect(target.file).toBe(markdown);
     });
-    expect(target.file).toBe(markdown);
+
+    test('with export middleware', async () => {
+      const blockSnapshot: BlockSnapshot = {
+        type: 'block',
+        id: 'block:vu6SK6WJpW',
+        flavour: 'affine:page',
+        props: {
+          title: {
+            '$blocksuite:internal:text$': true,
+            delta: [],
+          },
+        },
+        children: [
+          {
+            type: 'block',
+            id: 'block:Tk4gSPocAt',
+            flavour: 'affine:surface',
+            props: {
+              elements: {},
+            },
+            children: [],
+          },
+          {
+            type: 'block',
+            id: 'block:WfnS5ZDCJT',
+            flavour: 'affine:note',
+            props: {
+              xywh: '[0,0,800,95]',
+              background: DefaultTheme.noteBackgrounColor,
+              index: 'a0',
+              hidden: false,
+              displayMode: NoteDisplayMode.DocAndEdgeless,
+            },
+            children: [
+              {
+                type: 'block',
+                id: 'block:8hOLxad5Fv',
+                flavour: 'affine:callout',
+                props: {
+                  emoji: '💡',
+                },
+                children: [
+                  {
+                    type: 'block',
+                    id: 'block:8hOLxad5Fv',
+                    flavour: 'affine:paragraph',
+                    props: {
+                      type: 'text',
+                      text: {
+                        '$blocksuite:internal:text$': true,
+                        delta: [
+                          { insert: 'Callout that does not have a title' },
+                        ],
+                      },
+                    },
+                    children: [],
+                  },
+                ],
+              },
+              {
+                type: 'block',
+                id: 'block:8hOLxadvdv',
+                flavour: 'affine:callout',
+                props: {
+                  emoji: '',
+                },
+                children: [
+                  {
+                    type: 'block',
+                    id: 'block:8hOLxad5Fv',
+                    flavour: 'affine:paragraph',
+                    props: {
+                      type: 'text',
+                      text: {
+                        '$blocksuite:internal:text$': true,
+                        delta: [
+                          {
+                            insert:
+                              'Warning callout with custom title and multiple paragraphs',
+                          },
+                        ],
+                      },
+                    },
+                    children: [],
+                  },
+                  {
+                    type: 'block',
+                    id: 'block:8hOLxad5Fv',
+                    flavour: 'affine:paragraph',
+                    props: {
+                      type: 'text',
+                      text: {
+                        '$blocksuite:internal:text$': true,
+                        delta: [{ insert: 'Text in second callout' }],
+                      },
+                    },
+                    children: [],
+                  },
+                ],
+              },
+              {
+                type: 'block',
+                id: 'block:8hOLxad5Fv',
+                flavour: 'affine:callout',
+                props: {
+                  emoji: '💡',
+                },
+                children: [
+                  {
+                    type: 'block',
+                    id: 'block:8hOLxad5Fv',
+                    flavour: 'affine:paragraph',
+                    props: {
+                      type: 'text',
+                      text: {
+                        '$blocksuite:internal:text$': true,
+                        delta: [
+                          { insert: 'details' },
+                          { insert: ' ' },
+                          { insert: '\nText in details callout with new line' },
+                        ],
+                      },
+                    },
+                    children: [],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const markdown = `::: info
+
+Callout that does not have a title
+
+:::
+
+::: warning callout with custom title and multiple paragraphs
+
+Text in second callout
+
+:::
+
+::: details
+
+Text in details callout with new line
+
+:::
+`;
+
+      const mdAdapter = new MarkdownAdapter(
+        createJob([
+          calloutMarkdownExportMiddleware({
+            style: CalloutExportStyle.Admonitions,
+            admonitionType: CalloutAdmonitionType.Info,
+          }),
+        ]),
+        provider
+      );
+      const target = await mdAdapter.fromBlockSnapshot({
+        snapshot: blockSnapshot,
+      });
+      expect(target.file).toBe(markdown);
+    });
   });
 });
 

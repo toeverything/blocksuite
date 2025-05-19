@@ -185,7 +185,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<ListBlockModel> 
           <rich-text
             .yText=${this.model.props.text.yText}
             .inlineEventSource=${this.topContenteditableElement ?? nothing}
-            .undoManager=${this.store.history}
+            .undoManager=${this.store.history.undoManager}
             .attributeRenderer=${this.attributeRenderer}
             .attributesSchema=${this.attributesSchema}
             .markdownMatches=${this.inlineManager?.markdownMatches}

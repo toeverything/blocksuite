@@ -1,7 +1,6 @@
 import { NoteConfigExtension } from '@blocksuite/affine-block-note';
 import {
   DefaultTool,
-  EdgelessLegacySlotIdentifier,
   getBgGridGap,
   normalizeWheelDeltaY,
   type SurfaceBlockComponent,
@@ -45,7 +44,6 @@ import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 
-import type { EdgelessSelectedRectWidget } from './components/rects/edgeless-selected-rect.js';
 import { EdgelessPageKeyboardManager } from './edgeless-keyboard.js';
 import type { EdgelessRootService } from './edgeless-root-service.js';
 import { isCanvasElement } from './utils/query.js';
@@ -121,27 +119,8 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
   keyboardManager: EdgelessPageKeyboardManager | null = null;
 
-  get dispatcher() {
-    return this.std.event;
-  }
-
-  get fontLoader() {
-    return this.std.get(FontLoaderService);
-  }
-
   get gfx() {
     return this.std.get(GfxControllerIdentifier);
-  }
-
-  get selectedRectWidget() {
-    return this.host.view.getWidget(
-      'edgeless-selected-rect',
-      this.host.id
-    ) as EdgelessSelectedRectWidget;
-  }
-
-  get slots() {
-    return this.std.get(EdgelessLegacySlotIdentifier);
   }
 
   get surfaceBlockModel() {
@@ -150,14 +129,17 @@ export class EdgelessRootBlockComponent extends BlockComponent<
     ) as SurfaceBlockModel;
   }
 
-  get viewportElement(): HTMLElement {
+  private get _viewportElement(): HTMLElement {
     return this.std.get(ViewportElementProvider).viewportElement;
   }
 
+  get fontLoader() {
+    return this.std.get(FontLoaderService);
+  }
+
   private _initFontLoader() {
-    this.std
-      .get(FontLoaderService)
-      .ready.then(() => {
+    this.fontLoader.ready
+      .then(() => {
         this.surface.refresh();
       })
       .catch(console.error);
@@ -181,7 +163,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
   private _initPanEvent() {
     this.disposables.add(
-      this.dispatcher.add('pan', ctx => {
+      this.std.event.add('pan', ctx => {
         const { viewport } = this.gfx;
         if (viewport.locked) return;
 
@@ -205,7 +187,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
   private _initPinchEvent() {
     this.disposables.add(
-      this.dispatcher.add('pinch', ctx => {
+      this.std.event.add('pinch', ctx => {
         const { viewport } = this.gfx;
         if (viewport.locked) return;
 
@@ -285,7 +267,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
       this.gfx.viewport.onResize();
     });
 
-    resizeObserver.observe(this.viewportElement);
+    resizeObserver.observe(this._viewportElement);
     this._resizeObserver = resizeObserver;
   }
 
@@ -348,7 +330,7 @@ export class EdgelessRootBlockComponent extends BlockComponent<
 
   private _initWheelEvent() {
     this._disposables.add(
-      this.dispatcher.add('wheel', ctx => {
+      this.std.event.add('wheel', ctx => {
         const config = this.std.getOptional(EditorSettingProvider)?.setting$;
         const state = ctx.get('defaultState');
         const e = state.event as WheelEvent;

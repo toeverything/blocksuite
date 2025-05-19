@@ -5,6 +5,24 @@ import {
 import { collapseWhiteSpace } from 'collapse-white-space';
 import type { Element } from 'hast';
 
+/**
+ * Handle empty text nodes created by HTML parser for styling purposes.
+ * These nodes typically contain only whitespace/newlines, for example:
+ * ```json
+ * {
+ *   "type": "text",
+ *   "value": "\n\n  \n  \n  "
+ * }
+ * ```
+ * We collapse and trim the whitespace to check if the node is truly empty,
+ * and return an empty array in that case.
+ */
+const isEmptyText = (ast: HtmlAST): boolean => {
+  return (
+    ast.type === 'text' && collapseWhiteSpace(ast.value, { trim: true }) === ''
+  );
+};
+
 const isElement = (ast: HtmlAST): ast is Element => {
   return ast.type === 'element';
 };
@@ -22,10 +40,14 @@ export const htmlTextToDeltaMatcher = HtmlASTToDeltaExtension({
       return [];
     }
     const { options } = context;
-    options.trim ??= true;
+    options.trim ??= false;
 
     if (options.pre) {
       return [{ insert: ast.value }];
+    }
+
+    if (isEmptyText(ast)) {
+      return [];
     }
 
     const value = options.trim

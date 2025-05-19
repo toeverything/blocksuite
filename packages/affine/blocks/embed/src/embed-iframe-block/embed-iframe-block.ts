@@ -9,7 +9,7 @@ import {
   type EmbedIframeData,
   EmbedIframeService,
   type IframeOptions,
-  LinkPreviewerService,
+  LinkPreviewServiceIdentifier,
   NotificationProvider,
 } from '@blocksuite/affine-shared/services';
 import { matchModels } from '@blocksuite/affine-shared/utils';
@@ -94,7 +94,7 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
   }
 
   get linkPreviewService() {
-    return this.std.get(LinkPreviewerService);
+    return this.std.get(LinkPreviewServiceIdentifier);
   }
 
   get notificationService() {
@@ -156,7 +156,7 @@ export class EmbedIframeBlockComponent extends CaptionedBlockComponent<EmbedIfra
       if (!embedIframeService || !linkPreviewService) {
         throw new BlockSuiteError(
           ErrorCode.ValueNotExists,
-          'EmbedIframeService or LinkPreviewerService not found'
+          'EmbedIframeService or LinkPreviewService not found'
         );
       }
 

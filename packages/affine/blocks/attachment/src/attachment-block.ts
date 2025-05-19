@@ -17,7 +17,9 @@ import {
   AttachmentBlockStyles,
 } from '@blocksuite/affine-model';
 import {
+  DocModeProvider,
   FileSizeLimitProvider,
+  TelemetryProvider,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { humanFileSize } from '@blocksuite/affine-shared/utils';
@@ -143,7 +145,11 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
     this.disposables.add(this.resourceController.subscribe());
     this.disposables.add(this.resourceController);
 
-    this.refreshData();
+    this.disposables.add(
+      this.model.props.sourceId$.subscribe(() => {
+        this.refreshData();
+      })
+    );
 
     if (!this.model.props.style && !this.store.readonly) {
       this.store.withoutTransact(() => {
@@ -183,6 +189,22 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
           @click=${(event: MouseEvent) => {
             event.stopPropagation();
             onOverFileSize?.();
+
+            {
+              const mode =
+                this.std.get(DocModeProvider).getEditorMode() ?? 'page';
+              const segment = mode === 'page' ? 'doc' : 'whiteboard';
+              this.std
+                .getOptional(TelemetryProvider)
+                ?.track('AttachmentUpgradedEvent', {
+                  segment,
+                  page: `${segment} editor`,
+                  module: 'attachment',
+                  control: 'upgrade',
+                  category: 'card',
+                  type: this.model.props.name.split('.').pop() ?? '',
+                });
+            }
           }}
         >
           ${UpgradeIcon()} Upgrade
@@ -198,6 +220,22 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
         @click=${(event: MouseEvent) => {
           event.stopPropagation();
           this.refreshData();
+
+          {
+            const mode =
+              this.std.get(DocModeProvider).getEditorMode() ?? 'page';
+            const segment = mode === 'page' ? 'doc' : 'whiteboard';
+            this.std
+              .getOptional(TelemetryProvider)
+              ?.track('AttachmentReloadedEvent', {
+                segment,
+                page: `${segment} editor`,
+                module: 'attachment',
+                control: 'reload',
+                category: 'card',
+                type: this.model.props.name.split('.').pop() ?? '',
+              });
+          }
         }}
       >
         ${ResetIcon()} Reload

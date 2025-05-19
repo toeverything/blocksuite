@@ -1,8 +1,10 @@
+import { BookmarkBlockSchema } from '@blocksuite/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
 } from '@blocksuite/affine-shared/consts';
 import { toGfxBlockComponent } from '@blocksuite/std';
+import { GfxViewInteractionExtension } from '@blocksuite/std/gfx';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import { BookmarkBlockComponent } from './bookmark-block.js';
@@ -49,6 +51,24 @@ export class BookmarkEdgelessBlockComponent extends toGfxBlockComponent(
     height: '100%',
   };
 }
+
+export const BookmarkBlockInteraction = GfxViewInteractionExtension(
+  BookmarkBlockSchema.model.flavour,
+  {
+    resizeConstraint: {
+      lockRatio: true,
+    },
+    handleRotate: () => {
+      return {
+        beforeRotate(context) {
+          context.set({
+            rotatable: false,
+          });
+        },
+      };
+    },
+  }
+);
 
 declare global {
   interface HTMLElementTagNameMap {

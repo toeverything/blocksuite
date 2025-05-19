@@ -24,6 +24,7 @@ export class LanguageListButton extends WithDisposable(
       display: flex;
       gap: 4px;
       padding: 2px 4px;
+      height: 28px;
     }
 
     .lang-button:hover {

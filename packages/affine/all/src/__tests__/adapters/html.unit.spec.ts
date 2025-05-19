@@ -2360,6 +2360,65 @@ describe('html to snapshot', () => {
     expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
   });
 
+  test('should preserve space in p', async () => {
+    const html = template(
+      `<p>A <b>bold text</b> followed by a <i>italic text</i></p>`
+    );
+
+    const blockSnapshot: BlockSnapshot = {
+      type: 'block',
+      id: 'matchesReplaceMap[0]',
+      flavour: 'affine:note',
+      props: {
+        xywh: '[0,0,800,95]',
+        background: DefaultTheme.noteBackgrounColor,
+        index: 'a0',
+        hidden: false,
+        displayMode: NoteDisplayMode.DocAndEdgeless,
+      },
+      children: [
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[1]',
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'text',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'A ',
+                },
+                {
+                  insert: 'bold text',
+                  attributes: {
+                    bold: true,
+                  },
+                },
+                {
+                  insert: ' followed by a ',
+                },
+                {
+                  insert: 'italic text',
+                  attributes: {
+                    italic: true,
+                  },
+                },
+              ],
+            },
+          },
+          children: [],
+        },
+      ],
+    };
+
+    const htmlAdapter = new HtmlAdapter(createJob(), provider);
+    const rawBlockSnapshot = await htmlAdapter.toBlockSnapshot({
+      file: html,
+    });
+    expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+  });
+
   test('span nested in p', async () => {
     const html = template(
       `<p><span>aaa</span><span>bbb</span><span>ccc</span></p>`
