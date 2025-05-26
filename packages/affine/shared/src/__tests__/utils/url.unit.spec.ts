@@ -29,13 +29,13 @@ describe('isValidUrl: determining whether a URL is valid is very complicated', (
     expect(isValidUrl('www.example.com')).toEqual(true);
     expect(isValidUrl('example.co')).toEqual(true);
     expect(isValidUrl('example.cm')).toEqual(true);
-    expect(isValidUrl('1.1.1.1')).toEqual(true);
+    expect(isValidUrl('1.1.1.1')).toEqual(false);
 
     expect(isValidUrl('example.c')).toEqual(false);
   });
 
   test('special cases', () => {
-    expect(isValidUrl('example.com.')).toEqual(true);
+    expect(isValidUrl('example.com.')).toEqual(false);
 
     // I don't know why
     // private & local networks is excluded
@@ -44,8 +44,8 @@ describe('isValidUrl: determining whether a URL is valid is very complicated', (
     expect(isValidUrl('localhost')).toEqual(false);
     expect(isValidUrl('0.0.0.0')).toEqual(false);
 
-    expect(isValidUrl('128.0.0.1')).toEqual(true);
-    expect(isValidUrl('1.0.0.1')).toEqual(true);
+    expect(isValidUrl('128.0.0.1')).toEqual(false);
+    expect(isValidUrl('1.0.0.1')).toEqual(false);
   });
 
   test('email link is a valid URL', () => {

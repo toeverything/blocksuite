@@ -19,8 +19,6 @@ export class LanguageListButton extends WithDisposable(
 ) {
   static override styles = css`
     .lang-button {
-      background-color: var(--affine-background-primary-color);
-      box-shadow: var(--affine-shadow-1);
       display: flex;
       gap: 4px;
       padding: 2px 4px;
@@ -28,11 +26,11 @@ export class LanguageListButton extends WithDisposable(
     }
 
     .lang-button:hover {
-      background: var(--affine-hover-color-filled);
+      background: ${unsafeCSSVarV2('layer/background/hoverOverlay')};
     }
 
     .lang-button[hover] {
-      background: var(--affine-hover-color-filled);
+      background: ${unsafeCSSVarV2('layer/background/hoverOverlay')};
     }
 
     .lang-button-icon {

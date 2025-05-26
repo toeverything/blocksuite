@@ -11,8 +11,8 @@ import {
   NativeClipboardProvider,
 } from '@blocksuite/affine-shared/services';
 import {
+  formatSize,
   getBlockProps,
-  humanFileSize,
   isInsidePageEditor,
   readImageSize,
   transformModel,
@@ -241,7 +241,7 @@ function hasExceeded(
   const exceeded = files.some(file => file.size > maxFileSize);
 
   if (exceeded) {
-    const size = humanFileSize(maxFileSize, true, 0);
+    const size = formatSize(maxFileSize);
     toast(std.host, `You can only upload files less than ${size}`);
   }
 

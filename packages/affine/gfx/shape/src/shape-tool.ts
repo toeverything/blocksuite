@@ -5,7 +5,11 @@ import {
   type SurfaceBlockComponent,
 } from '@blocksuite/affine-block-surface';
 import type { ShapeElementModel, ShapeName } from '@blocksuite/affine-model';
-import { DefaultTheme, getShapeType } from '@blocksuite/affine-model';
+import {
+  DefaultTheme,
+  getShapeType,
+  ShapeType,
+} from '@blocksuite/affine-model';
 import {
   EditPropsStore,
   TelemetryProvider,
@@ -15,7 +19,7 @@ import { hasClassNameInList } from '@blocksuite/affine-shared/utils';
 import type { IBound } from '@blocksuite/global/gfx';
 import { Bound } from '@blocksuite/global/gfx';
 import type { PointerEventState } from '@blocksuite/std';
-import { BaseTool } from '@blocksuite/std/gfx';
+import { BaseTool, type GfxController } from '@blocksuite/std/gfx';
 import { effect } from '@preact/signals-core';
 
 import {
@@ -117,24 +121,24 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
 
     if (spacePressed && this._spacePressedCtx) {
       const {
-        startX,
-        startY,
         w,
         h,
+        startX,
+        startY,
         endX: pressedX,
         endY: pressedY,
       } = this._spacePressedCtx.draggingArea;
-      const curDraggingArea = controller.draggingViewArea$.peek();
-      const { endX: lastX, endY: lastY } = curDraggingArea;
+      const { endX: lastX, endY: lastY } = controller.draggingArea$.peek();
       const dx = lastX - pressedX;
       const dy = lastY - pressedY;
 
-      this.controller.draggingViewArea$.value = {
-        ...curDraggingArea,
+      this.controller.draggingArea$.value = {
         x: Math.min(startX + dx, lastX),
         y: Math.min(startY + dy, lastY),
         w,
         h,
+        endX: endX + dx,
+        endY: endY + dy,
         startX: startX + dx,
         startY: startY + dy,
       };
@@ -157,6 +161,13 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
     this._shapeOverlay.x = x;
     this._shapeOverlay.y = y;
     this._surfaceComponent?.refresh();
+  }
+
+  constructor(gfx: GfxController) {
+    super(gfx);
+    this.activatedOption = {
+      shapeName: ShapeType.Rect,
+    };
   }
 
   override activate() {
@@ -306,7 +317,7 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
 
         if (spacePressed && this._draggingElementId) {
           this._spacePressedCtx = {
-            draggingArea: this.controller.draggingViewArea$.peek(),
+            draggingArea: this.controller.draggingArea$.peek(),
           };
         }
       })
@@ -336,5 +347,21 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
 
   setDisableOverlay(disable: boolean) {
     this._disableOverlay = disable;
+  }
+
+  cycleShapeName(dir: 'prev' | 'next' = 'next'): ShapeName {
+    const shapeNames: ShapeName[] = [
+      ShapeType.Rect,
+      ShapeType.Ellipse,
+      ShapeType.Diamond,
+      ShapeType.Triangle,
+      'roundedRect',
+    ];
+
+    const currentIndex = shapeNames.indexOf(this.activatedOption.shapeName);
+    const nextIndex =
+      (currentIndex + (dir === 'prev' ? -1 : 1) + shapeNames.length) %
+      shapeNames.length;
+    return shapeNames[nextIndex];
   }
 }

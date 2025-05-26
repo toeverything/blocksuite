@@ -26,6 +26,7 @@ import {
   GfxViewInteractionExtension,
   type SelectedContext,
 } from '@blocksuite/std/gfx';
+import { computed } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
@@ -81,6 +82,23 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
       xywh: bound.serialize(),
     });
   }
+
+  private readonly _style$ = computed(() => {
+    const {
+      color$: { value: color },
+      fontFamily$: { value: fontFamily },
+      fontStyle$: { value: fontStyle },
+      fontWeight$: { value: fontWeight },
+      textAlign$: { value: textAlign },
+    } = this.model.props;
+    return {
+      color,
+      fontFamily,
+      fontStyle,
+      fontWeight,
+      textAlign,
+    };
+  });
 
   checkWidthOverflow(width: number) {
     let wValid = true;
@@ -365,7 +383,7 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
 
   override renderPageContent() {
     const { color, fontFamily, fontStyle, fontWeight, textAlign } =
-      this.model.props;
+      this._style$.value;
     const themeProvider = this.std.get(ThemeProvider);
     const textColor = themeProvider.generateColorProperty(
       color,

@@ -278,9 +278,7 @@ export abstract class GfxPrimitiveElementModel<
 
     if (getFieldPropsSet(this).has(prop as string)) {
       if (!isEqual(value, this.yMap.get(prop as string))) {
-        this.surface.store.transact(() => {
-          this.yMap.set(prop as string, value);
-        });
+        this.yMap.set(prop as string, value);
       }
     } else {
       console.warn('pop a prop that is not field or local:', prop);

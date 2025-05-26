@@ -20,7 +20,7 @@ export type StateKind =
 export type StateInfo = {
   icon: TemplateResult;
   title?: string;
-  description?: string;
+  description?: string | null;
 };
 
 export type ResolvedStateInfoPart = {

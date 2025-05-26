@@ -30,6 +30,7 @@
     { "path": "../components" },
     { "path": "../ext-loader" },
     { "path": "../foundation" },
+    { "path": "../fragments/adapter-panel" },
     { "path": "../fragments/doc-title" },
     { "path": "../fragments/frame-panel" },
     { "path": "../fragments/outline" },

@@ -200,7 +200,6 @@ export class GfxController extends LifeCycleWatcher {
       ...options,
       all: true,
     });
-
     let picked = last(results) ?? null;
     const { activeGroup } = selectionManager;
     const first = picked;

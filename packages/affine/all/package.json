@@ -33,6 +33,7 @@
     "@blocksuite/affine-components": "workspace:*",
     "@blocksuite/affine-ext-loader": "workspace:*",
     "@blocksuite/affine-foundation": "workspace:*",
+    "@blocksuite/affine-fragment-adapter-panel": "workspace:*",
     "@blocksuite/affine-fragment-doc-title": "workspace:*",
     "@blocksuite/affine-fragment-frame-panel": "workspace:*",
     "@blocksuite/affine-fragment-outline": "workspace:*",
@@ -209,6 +210,8 @@
     "./fragments/frame-panel/view": "./src/fragments/frame-panel/view.ts",
     "./fragments/outline": "./src/fragments/outline/index.ts",
     "./fragments/outline/view": "./src/fragments/outline/view.ts",
+    "./fragments/adapter-panel": "./src/fragments/adapter-panel/index.ts",
+    "./fragments/adapter-panel/view": "./src/fragments/adapter-panel/view.ts",
     "./gfx/text": "./src/gfx/text/index.ts",
     "./gfx/text/store": "./src/gfx/text/store.ts",
     "./gfx/text/view": "./src/gfx/text/view.ts",
@@ -292,6 +295,7 @@
   "version": "0.21.0",
   "devDependencies": {
     "@vanilla-extract/vite-plugin": "^5.0.0",
+    "msw": "^2.8.4",
     "vitest": "3.1.3"
   }
 }

@@ -4417,6 +4417,69 @@ hhh
       });
       expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
     });
+
+    test('should handle footnote reference with url prefix', async () => {
+      const blockSnapshot = {
+        type: 'block',
+        id: 'matchesReplaceMap[0]',
+        flavour: 'affine:note',
+        props: {
+          xywh: '[0,0,800,95]',
+          background: DefaultTheme.noteBackgrounColor,
+          index: 'a0',
+          hidden: false,
+          displayMode: NoteDisplayMode.DocAndEdgeless,
+        },
+        children: [
+          {
+            type: 'block',
+            id: 'matchesReplaceMap[1]',
+            flavour: 'affine:paragraph',
+            props: {
+              type: 'text',
+              text: {
+                '$blocksuite:internal:text$': true,
+                delta: [
+                  {
+                    insert: 'https://example.com',
+                    attributes: {
+                      link: 'https://example.com',
+                    },
+                  },
+                  {
+                    insert: ' ',
+                  },
+                  {
+                    insert: ' ',
+                    attributes: {
+                      footnote: {
+                        label: '1',
+                        reference: {
+                          type: 'url',
+                          url,
+                          favicon,
+                          title,
+                          description,
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            children: [],
+          },
+        ],
+      };
+
+      const markdown = `https://example.com[^1]\n\n[^1]: {"type":"url","url":"${url}","favicon":"${favicon}","title":"${title}","description":"${description}"}\n`;
+
+      const mdAdapter = new MarkdownAdapter(createJob(), provider);
+      const rawBlockSnapshot = await mdAdapter.toBlockSnapshot({
+        file: markdown,
+      });
+      expect(nanoidReplacement(rawBlockSnapshot)).toEqual(blockSnapshot);
+    });
   });
 
   test('should not wrap url with angle brackets if it is not a url', async () => {

@@ -6,7 +6,7 @@ import {
   type IModelCoord,
   TextUtils,
 } from '@blocksuite/affine-block-surface';
-import { TextElementModel } from '@blocksuite/affine-model';
+import { DefaultTheme, TextElementModel } from '@blocksuite/affine-model';
 import type { RichText } from '@blocksuite/affine-rich-text';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { getSelectedRect } from '@blocksuite/affine-shared/utils';
@@ -432,7 +432,7 @@ export class EdgelessTextEditor extends WithDisposable(ShadowlessElement) {
     const isEmpty = !text.length && !this._isComposition;
     const color = this.std
       .get(ThemeProvider)
-      .generateColorProperty(this.element.color, '#000000');
+      .generateColorProperty(this.element.color, DefaultTheme.textColor);
 
     return html`<div
       style=${styleMap({

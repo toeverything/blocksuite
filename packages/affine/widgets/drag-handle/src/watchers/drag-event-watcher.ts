@@ -30,6 +30,7 @@ import {
 import {
   captureEventTarget,
   type DropTarget as DropResult,
+  findNoteBlockModel,
   getBlockComponentsExcludeSubtrees,
   getRectByBlockComponent,
   getScrollContainer,
@@ -709,6 +710,7 @@ export class DragEventWatcher {
     dropPayload: DropPayload,
     point: Point
   ) => {
+    this.std.store.captureSync();
     if (this.mode === 'edgeless') {
       this._onEdgelessDrop(dropBlock, dragPayload, dropPayload, point);
     } else {
@@ -1247,20 +1249,50 @@ export class DragEventWatcher {
             console.error
           );
         }
-      } else {
-        // create note to wrap the snapshot
-        const noteId = store.addBlock(
-          'affine:note',
-          {
-            xywh: new Bound(
-              point.x,
-              point.y,
-              DEFAULT_NOTE_WIDTH,
-              DEFAULT_NOTE_HEIGHT
-            ).serialize(),
-          },
-          this.widget.store.root!
-        );
+      }
+      // create note to wrap the snapshot
+      else {
+        const originalModel = store.getModelById(snapshot.content[0].id);
+        const originalNote = originalModel
+          ? findNoteBlockModel(originalModel)
+          : null;
+
+        let noteId: string;
+        if (originalNote) {
+          const placement =
+            originalNote.children[0].id === snapshot.content[0].id
+              ? 'before'
+              : 'after';
+
+          noteId = store.addSiblingBlocks(
+            originalNote,
+            [
+              {
+                flavour: 'affine:note',
+                xywh: new Bound(
+                  point.x,
+                  point.y,
+                  DEFAULT_NOTE_WIDTH,
+                  DEFAULT_NOTE_HEIGHT
+                ).serialize(),
+              },
+            ],
+            placement
+          )[0];
+        } else {
+          noteId = store.addBlock(
+            'affine:note',
+            {
+              xywh: new Bound(
+                point.x,
+                point.y,
+                DEFAULT_NOTE_WIDTH,
+                DEFAULT_NOTE_HEIGHT
+              ).serialize(),
+            },
+            this.widget.store.root!
+          );
+        }
 
         this._dropToModel(
           {

@@ -40,11 +40,11 @@ export class EdgelessNoteStylePanel extends SignalWatcher(
   @property({ attribute: false })
   accessor std!: BlockStdScope;
 
-  @query('.edgeless-note-style-panel')
-  private accessor _panel!: HTMLDivElement;
-
   @state()
   accessor tabType: 'style' | 'customColor' = 'style';
+
+  @query('div.edgeless-note-style-panel-container')
+  accessor container!: HTMLDivElement;
 
   static override styles = css`
     .edgeless-note-style-panel {
@@ -187,7 +187,32 @@ export class EdgelessNoteStylePanel extends SignalWatcher(
   };
 
   private readonly _pickColor = (e: PickColorEvent) => {
-    console.log(e);
+    switch (e.type) {
+      case 'pick':
+        {
+          const color = e.detail.value;
+          const crud = this.std.get(EdgelessCRUDIdentifier);
+          this.notes.forEach(note => {
+            crud.updateElement(note.id, {
+              background: color,
+            } satisfies Partial<NoteProps>);
+          });
+        }
+        break;
+      case 'start':
+        this._beforeChange();
+        this.notes.forEach(note => {
+          note.stash('background');
+        });
+        break;
+      case 'end':
+        this.std.store.transact(() => {
+          this.notes.forEach(note => {
+            note.pop('background');
+          });
+        });
+        break;
+    }
   };
 
   private readonly _selectShadow = (e: CustomEvent<NoteShadow>) => {
@@ -265,7 +290,7 @@ export class EdgelessNoteStylePanel extends SignalWatcher(
   };
 
   private _renderStylePanel() {
-    return html` <div class="edgeless-note-style-panel">
+    return html`<div class="edgeless-note-style-panel">
       <div class="edgeless-note-style-section">
         <div class="edgeless-note-style-section-title">Fill color</div>
         <edgeless-color-panel
@@ -369,9 +394,11 @@ export class EdgelessNoteStylePanel extends SignalWatcher(
   }
 
   override firstUpdated() {
-    this.disposables.addFromEvent(this._panel, 'click', e => {
-      e.stopPropagation();
-    });
+    if (this.container) {
+      this.disposables.addFromEvent(this.container, 'click', e => {
+        e.stopPropagation();
+      });
+    }
   }
 
   override render() {
@@ -383,11 +410,18 @@ export class EdgelessNoteStylePanel extends SignalWatcher(
             ${PaletteIcon()}
           </editor-icon-button>
         `}
+        @toggle=${(e: CustomEvent<boolean>) => {
+          if (!e.detail) {
+            this.tabType = 'style';
+          }
+        }}
       >
-        ${choose(this.tabType, [
-          ['style', () => this._renderStylePanel()],
-          ['customColor', () => this._renderCustomColorPanel()],
-        ])}
+        <div class="edgeless-note-style-panel-container">
+          ${choose(this.tabType, [
+            ['style', () => this._renderStylePanel()],
+            ['customColor', () => this._renderCustomColorPanel()],
+          ])}
+        </div>
       </editor-menu-button>
     `;
   }

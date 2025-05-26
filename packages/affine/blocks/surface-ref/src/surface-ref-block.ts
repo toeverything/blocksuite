@@ -374,6 +374,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
     const { w, h } = Bound.deserialize(this._referenceXYWH$.value);
     const aspectRatio = h !== 0 ? w / h : 1;
     const _previewSpec = this._previewSpec.concat(this._runtimePreviewExt);
+    const edgelessTheme = this.std.get(ThemeProvider).edgeless$.value;
 
     return html`<div class="ref-content">
       <div
@@ -381,6 +382,7 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
         style=${styleMap({
           aspectRatio: `${aspectRatio}`,
         })}
+        data-theme=${edgelessTheme}
       >
         ${guard(this._previewDoc, () => {
           return this._previewDoc
@@ -440,13 +442,14 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
 
     const { _referencedModel, model } = this;
     const isEmpty = !_referencedModel || !_referencedModel.xywh;
+    const theme = this.std.get(ThemeProvider).theme$.value;
     const content = isEmpty
       ? html`<surface-ref-placeholder
           .referenceModel=${_referencedModel}
           .refFlavour=${model.props.refFlavour$.value}
+          .theme=${theme}
         ></surface-ref-placeholder>`
       : this._renderRefContent();
-    const edgelessTheme = this.std.get(ThemeProvider).edgeless$.value;
 
     return html`
       <div
@@ -454,7 +457,6 @@ export class SurfaceRefBlockComponent extends BlockComponent<SurfaceRefBlockMode
           'affine-surface-ref': true,
           focused: this.selected$.value,
         })}
-        data-theme=${edgelessTheme}
         @click=${this._handleClick}
       >
         ${content}

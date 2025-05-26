@@ -209,9 +209,10 @@ export class EdgelessClipboardController extends PageClipboard {
         await addImages(this.std, imageFiles, {
           point,
           maxWidth: MAX_IMAGE_WIDTH,
+          shouldTransformPoint: false,
         });
       } else {
-        await addAttachments(this.std, [...files], point);
+        await addAttachments(this.std, [...files], point, false);
       }
 
       this.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
@@ -227,11 +228,7 @@ export class EdgelessClipboardController extends PageClipboard {
 
     if (isUrlInClipboard(data)) {
       const url = data.getData('text/plain');
-      const lastMousePos = this.toolManager.lastMousePos$.peek();
-      const [x, y] = this.gfx.viewport.toModelCoord(
-        lastMousePos.x,
-        lastMousePos.y
-      );
+      const { x, y } = this.toolManager.lastMousePos$.peek();
 
       // try to interpret url as affine doc url
       const parseDocUrlService = this.std.getOptional(ParseDocUrlProvider);
@@ -562,11 +559,7 @@ export class EdgelessClipboardController extends PageClipboard {
   }
 
   private async _pasteTextContentAsNote(content: BlockSnapshot[] | string) {
-    const lastMousePos = this.toolManager.lastMousePos$.peek();
-    const [x, y] = this.gfx.viewport.toModelCoord(
-      lastMousePos.x,
-      lastMousePos.y
-    );
+    const { x, y } = this.toolManager.lastMousePos$.peek();
 
     const noteProps = {
       xywh: new Bound(
