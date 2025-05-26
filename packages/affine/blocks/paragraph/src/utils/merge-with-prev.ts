@@ -8,6 +8,7 @@ import {
   EdgelessTextBlockModel,
   ImageBlockModel,
   ListBlockModel,
+  NoteBlockModel,
   ParagraphBlockModel,
   type RootBlockModel,
 } from '@blocksuite/affine-model';
@@ -19,7 +20,6 @@ import { EMBED_BLOCK_MODEL_LIST } from '@blocksuite/affine-shared/consts';
 import type { ExtendedModel } from '@blocksuite/affine-shared/types';
 import {
   focusTitle,
-  getDocTitleInlineEditor,
   getPrevContentBlock,
   matchModels,
 } from '@blocksuite/affine-shared/utils';
@@ -122,41 +122,39 @@ function handleNoPreviousSibling(editorHost: EditorHost, model: ExtendedModel) {
   const text = model.text;
   const parent = doc.getParent(model);
   if (!parent) return false;
-  const titleEditor = getDocTitleInlineEditor(editorHost);
-  // Probably no title, e.g. in edgeless mode
-  if (!titleEditor) {
-    if (
-      matchModels(parent, [EdgelessTextBlockModel]) ||
-      model.children.length > 0
-    ) {
+
+  if (matchModels(parent, [NoteBlockModel]) && parent.isPageBlock()) {
+    const rootModel = model.store.root as RootBlockModel;
+    const title = rootModel.props.title;
+
+    doc.captureSync();
+    let textLength = 0;
+    if (text) {
+      textLength = text.length;
+      title.join(text);
+    }
+
+    // Preserve at least one block to be able to focus on container click
+    if (doc.getNext(model) || model.children.length > 0) {
       doc.deleteBlock(model, {
         bringChildrenTo: parent,
       });
-      return true;
+    } else {
+      text?.clear();
     }
-    return false;
+    focusTitle(editorHost, title.length - textLength);
+    return true;
   }
 
-  const rootModel = model.store.root as RootBlockModel;
-  const title = rootModel.props.title;
-
-  doc.captureSync();
-  let textLength = 0;
-  if (text) {
-    textLength = text.length;
-    title.join(text);
-  }
-
-  // Preserve at least one block to be able to focus on container click
-  if (doc.getNext(model) || model.children.length > 0) {
-    const parent = doc.getParent(model);
-    if (!parent) return false;
+  if (
+    matchModels(parent, [EdgelessTextBlockModel]) ||
+    model.children.length > 0
+  ) {
     doc.deleteBlock(model, {
       bringChildrenTo: parent,
     });
-  } else {
-    text?.clear();
+    return true;
   }
-  focusTitle(editorHost, title.length - textLength);
-  return true;
+
+  return false;
 }

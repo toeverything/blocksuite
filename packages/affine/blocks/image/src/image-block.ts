@@ -9,7 +9,7 @@ import {
   ThemeProvider,
   ToolbarRegistryIdentifier,
 } from '@blocksuite/affine-shared/services';
-import { humanFileSize } from '@blocksuite/affine-shared/utils';
+import { formatSize } from '@blocksuite/affine-shared/utils';
 import { IS_MOBILE } from '@blocksuite/global/env';
 import { BrokenImageIcon, ImageIcon } from '@blocksuite/icons/lit';
 import { BlockSelection } from '@blocksuite/std';
@@ -142,7 +142,7 @@ export class ImageBlockComponent extends CaptionedBlockComponent<ImageBlockModel
       errorIcon: BrokenImageIcon(),
       icon: ImageIcon(),
       title: 'Image',
-      description: humanFileSize(size),
+      description: formatSize(size),
     });
 
     return html`

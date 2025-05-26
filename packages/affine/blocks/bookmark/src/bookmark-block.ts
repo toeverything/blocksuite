@@ -11,6 +11,7 @@ import {
   DocModeProvider,
   LinkPreviewServiceIdentifier,
 } from '@blocksuite/affine-shared/services';
+import { normalizeUrl } from '@blocksuite/affine-shared/utils';
 import { BlockSelection } from '@blocksuite/std';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 import { html } from 'lit';
@@ -99,12 +100,12 @@ export class BookmarkBlockComponent extends CaptionedBlockComponent<BookmarkBloc
     selectionManager.setGroup('note', [blockSelection]);
   };
 
+  get link() {
+    return normalizeUrl(this.model.props.url);
+  }
+
   open = () => {
-    let link = this.model.props.url;
-    if (!link.match(/^[a-zA-Z]+:\/\//)) {
-      link = 'https://' + link;
-    }
-    window.open(link, '_blank');
+    window.open(this.link, '_blank');
   };
 
   refreshData = () => {

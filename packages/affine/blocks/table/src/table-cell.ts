@@ -745,7 +745,7 @@ export class TableCell extends SignalWatcher(
             padding: '8px 12px',
           })}
           .yText="${this.text}"
-          .inlineEventSource="${this.topContenteditableElement}"
+          .inlineEventSource="${this.topContenteditableElement ?? nothing}"
           .attributesSchema="${this.inlineManager?.getSchema()}"
           .attributeRenderer="${this.inlineManager?.getRenderer()}"
           .embedChecker="${this.inlineManager?.embedChecker}"

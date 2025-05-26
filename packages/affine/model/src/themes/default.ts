@@ -115,7 +115,7 @@ export const DefaultTheme: Theme = {
   black: Black,
   white: White,
   transparent: Transparent,
-  textColor: Medium.Blue,
+  textColor: Black,
   shapeTextColor: pureBlack,
   shapeStrokeColor: Medium.Yellow,
   shapeFillColor: Medium.Yellow,

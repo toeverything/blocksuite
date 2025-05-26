@@ -22,7 +22,7 @@ import {
   TelemetryProvider,
   ThemeProvider,
 } from '@blocksuite/affine-shared/services';
-import { humanFileSize } from '@blocksuite/affine-shared/utils';
+import { formatSize } from '@blocksuite/affine-shared/utils';
 import {
   AttachmentIcon,
   ResetIcon,
@@ -316,7 +316,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
       errorIcon: WarningIcon(),
       icon: AttachmentIcon(),
       title: name,
-      description: humanFileSize(size),
+      description: formatSize(size),
     });
 
     return { ...resolvedState, kind };

@@ -39,6 +39,9 @@ export const dragHandlerIndicator = css({
   backgroundColor: 'var(--affine-placeholder-color)',
 });
 
+export const show = css({
+  opacity: '1 !important',
+});
 export const rowSelectCheckbox = css({
   display: 'flex',
   alignItems: 'center',
@@ -46,8 +49,4 @@ export const rowSelectCheckbox = css({
   cursor: 'pointer',
   fontSize: '20px',
   color: cssVarV2.icon.primary,
-});
-
-export const show = css({
-  opacity: 1,
 });

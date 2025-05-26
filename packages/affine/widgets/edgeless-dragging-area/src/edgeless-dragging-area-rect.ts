@@ -36,7 +36,7 @@ export class EdgelessDraggingAreaRectWidget extends WidgetComponent<RootBlockMod
   }
 
   override render() {
-    const rect = this.gfx.tool.draggingViewArea$.value;
+    const rect = this.gfx.tool.draggingViewportArea$.value;
     const tool = this.gfx.tool.currentTool$.value;
 
     if (

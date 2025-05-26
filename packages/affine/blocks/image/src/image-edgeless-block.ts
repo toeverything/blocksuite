@@ -8,7 +8,7 @@ import {
 } from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { humanFileSize } from '@blocksuite/affine-shared/utils';
+import { formatSize } from '@blocksuite/affine-shared/utils';
 import { BrokenImageIcon, ImageIcon } from '@blocksuite/icons/lit';
 import { GfxBlockComponent } from '@blocksuite/std';
 import { GfxViewInteractionExtension } from '@blocksuite/std/gfx';
@@ -128,7 +128,7 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockMod
       errorIcon: BrokenImageIcon(),
       icon: ImageIcon(),
       title: 'Image',
-      description: humanFileSize(size),
+      description: formatSize(size),
     });
 
     return html`

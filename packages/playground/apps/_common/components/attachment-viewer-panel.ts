@@ -1,7 +1,7 @@
 import { getAttachmentFileIcon } from '@blocksuite/affine/components/icons';
 import { SignalWatcher, WithDisposable } from '@blocksuite/affine/global/lit';
 import type { AttachmentBlockModel } from '@blocksuite/affine-model';
-import { humanFileSize } from '@blocksuite/affine-shared/utils';
+import { formatSize } from '@blocksuite/affine-shared/utils';
 import {
   ArrowDownBigIcon,
   ArrowUpBigIcon,
@@ -18,7 +18,7 @@ const DPI = window.devicePixelRatio;
 
 type FileInfo = {
   name: string;
-  size: string;
+  size: string | null;
   isPDF: boolean;
   icon: TemplateResult;
 };
@@ -161,7 +161,7 @@ export class AttachmentViewerPanel extends SignalWatcher(
       name,
       icon,
       isPDF,
-      size: humanFileSize(size),
+      size: formatSize(size),
     };
 
     if (!isPDF) return;

@@ -2,6 +2,10 @@ import { scrollbarStyle } from '@blocksuite/affine-shared/styles';
 import { css } from 'lit';
 
 export const codeBlockStyles = css`
+  affine-code {
+    display: block;
+  }
+
   .affine-code-block-container {
     font-size: var(--affine-font-xs);
     line-height: var(--affine-line-height);

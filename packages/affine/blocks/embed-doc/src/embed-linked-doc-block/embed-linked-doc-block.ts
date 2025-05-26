@@ -259,7 +259,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
     );
   }
 
-  private _handleDoubleClick(event: MouseEvent) {
+  private readonly _handleDoubleClick = (event: MouseEvent) => {
     event.stopPropagation();
     const openDocService = this.std.get(OpenDocExtensionIdentifier);
     const shouldOpenInPeek =
@@ -270,7 +270,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
         : 'open-in-active-view',
       event,
     });
-  }
+  };
 
   private _isDocEmpty() {
     const linkedDoc = this.linkedDoc;
@@ -311,6 +311,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
         .citationIdentifier=${footnoteIdentifier}
         .active=${this.selected$.value}
         .onClickCallback=${this._handleClick}
+        .onDoubleClickCallback=${this._handleDoubleClick}
       ></affine-citation-card>
     </div> `;
   };

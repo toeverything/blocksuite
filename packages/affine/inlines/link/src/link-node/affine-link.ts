@@ -7,6 +7,7 @@ import {
 } from '@blocksuite/affine-shared/services';
 import { affineTextStyles } from '@blocksuite/affine-shared/styles';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
+import { normalizeUrl } from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/global/lit';
 import type { BlockComponent, BlockStdScope } from '@blocksuite/std';
 import { BLOCK_ID_ATTR, ShadowlessElement } from '@blocksuite/std';
@@ -120,7 +121,7 @@ export class AffineLink extends WithDisposable(ShadowlessElement) {
   }
 
   get link() {
-    return this.delta.attributes?.link ?? '';
+    return normalizeUrl(this.delta.attributes?.link ?? '');
   }
 
   get selfInlineRange() {

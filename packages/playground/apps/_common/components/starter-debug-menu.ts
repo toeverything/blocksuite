@@ -70,7 +70,7 @@ import type { Pane } from 'tweakpane';
 import type { CommentPanel } from '../../comment/index.js';
 import { createTestEditor } from '../../starter/utils/extensions.js';
 import { mockEdgelessTheme } from '../mock-services.js';
-import { AdaptersPanel } from './adapters-panel.js';
+import type { CustomAdapterPanel } from './custom-adapter-panel.js';
 import type { CustomFramePanel } from './custom-frame-panel.js';
 import type { CustomOutlinePanel } from './custom-outline-panel.js';
 import type { CustomOutlineViewer } from './custom-outline-viewer.js';
@@ -612,26 +612,6 @@ export class StarterDebugMenu extends ShadowlessElement {
     this._hasOffset = !this._hasOffset;
   }
 
-  private _toggleAdaptersPanel() {
-    const app = document.querySelector('#app');
-    if (!app) return;
-
-    const currentAdaptersPanel = app.querySelector('adapters-panel');
-    if (currentAdaptersPanel) {
-      currentAdaptersPanel.remove();
-      (app as HTMLElement).style.display = 'block';
-      this.editor.style.width = '100%';
-      this.editor.style.flex = '';
-      return;
-    }
-
-    const adaptersPanel = new AdaptersPanel();
-    adaptersPanel.editor = this.editor;
-    app.append(adaptersPanel);
-    this.editor.style.flex = '1';
-    (app as HTMLElement).style.display = 'flex';
-  }
-
   private _toggleCommentPanel() {
     document.body.append(this.commentPanel);
   }
@@ -647,6 +627,10 @@ export class StarterDebugMenu extends ShadowlessElement {
 
   private _toggleFramePanel() {
     this.framePanel.toggleDisplay();
+  }
+
+  private _toggleAdapterPanel() {
+    this.adapterPanel.toggleDisplay();
   }
 
   private _toggleMultipleEditors() {
@@ -926,8 +910,8 @@ export class StarterDebugMenu extends ShadowlessElement {
               <sl-menu-item @click="${this._toggleMultipleEditors}">
                 Toggle Multiple Editors
               </sl-menu-item>
-              <sl-menu-item @click="${this._toggleAdaptersPanel}">
-                Toggle Adapters Panel
+              <sl-menu-item @click="${this._toggleAdapterPanel}">
+                Toggle Adapter Panel
               </sl-menu-item>
             </sl-menu>
           </sl-dropdown>
@@ -1031,6 +1015,9 @@ export class StarterDebugMenu extends ShadowlessElement {
 
   @property({ attribute: false })
   accessor framePanel!: CustomFramePanel;
+
+  @property({ attribute: false })
+  accessor adapterPanel!: CustomAdapterPanel;
 
   @property({ attribute: false })
   accessor leftSidePanel!: LeftSidePanel;
