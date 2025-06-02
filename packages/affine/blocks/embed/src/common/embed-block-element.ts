@@ -50,12 +50,6 @@ export class EmbedBlockComponent<
 
   _cardStyle: EmbedCardStyle = 'horizontal';
 
-  /**
-   * The actual rendered scale of the embed card.
-   * By default, it is set to 1.
-   */
-  protected _scale = 1;
-
   blockDraggable = true;
 
   /**

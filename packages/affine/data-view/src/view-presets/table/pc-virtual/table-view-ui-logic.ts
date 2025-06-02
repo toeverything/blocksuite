@@ -3,19 +3,27 @@ import {
   popMenu,
   popupTargetFromElement,
 } from '@blocksuite/affine-components/context-menu';
+import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { computed, signal } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
+import type { TemplateResult } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
-import * as dv from '../../../core/common/dv-css.js';
+import { dv } from '../../../core/common/dv-css.js';
 import {
   type GroupTrait,
   groupTraitKey,
 } from '../../../core/group-by/trait.js';
-import { type DataViewInstance, renderUniLit } from '../../../core/index.js';
-import { DataViewBase } from '../../../core/view/data-view-base.js';
+import {
+  createUniComponentFromWebComponent,
+  renderUniLit,
+} from '../../../core/index.js';
+import {
+  DataViewUIBase,
+  DataViewUILogicBase,
+} from '../../../core/view/data-view-base.js';
 import {
   type TableSingleView,
   TableViewRowSelection,
@@ -26,9 +34,9 @@ import { TableClipboardController } from './controller/clipboard.js';
 import { TableDragController } from './controller/drag.js';
 import { TableHotkeysController } from './controller/hotkeys.js';
 import { TableSelectionController } from './controller/selection.js';
-import { TableGroupFooter } from './group/bottom/group-footer';
-import { TableGroupHeader } from './group/top/group-header';
-import { DatabaseCellContainer } from './row/cell';
+import { TableGroupFooter } from './group/bottom/group-footer.js';
+import { TableGroupHeader } from './group/top/group-header.js';
+import { DatabaseCellContainer } from './row/cell.js';
 import { TableRowHeader } from './row/row-header.js';
 import { TableRowLast } from './row/row-last.js';
 import * as styles from './table-view-css.js';
@@ -43,15 +51,83 @@ import {
   GridVirtualScroll,
 } from './virtual/virtual-scroll.js';
 
-export class VirtualTableView extends DataViewBase<
+export class VirtualTableViewUILogic extends DataViewUILogicBase<
   TableSingleView,
   TableViewSelectionWithType
 > {
+  ui$ = signal<TableViewUI | undefined>();
   clipboardController = new TableClipboardController(this);
-
   dragController = new TableDragController(this);
-
   hotkeysController = new TableHotkeysController(this);
+  selectionController = new TableSelectionController(this);
+
+  virtualScroll$ = signal<TableGrid>();
+  yScrollContainer: HTMLElement | undefined;
+
+  columns$ = computed(() => {
+    return [
+      {
+        id: 'row-header',
+        width: LEFT_TOOL_BAR_WIDTH,
+      },
+      ...this.view.properties$.value.map(property => ({
+        id: property.id,
+        width: property.width$.value + 1,
+      })),
+      {
+        id: 'row-last',
+        width: 40,
+      },
+    ];
+  });
+
+  groupTrait$ = computed(() => {
+    return this.view.traitGet(groupTraitKey);
+  });
+
+  groups$ = computed(() => {
+    const groupTrait = this.groupTrait$.value;
+    if (!groupTrait?.groupsDataList$.value) {
+      return [
+        {
+          id: '',
+          rows: this.view.rowIds$.value,
+        },
+      ];
+    }
+    return groupTrait.groupsDataList$.value.map(group => ({
+      id: group.key,
+      rows: group.rows.map(v => v.rowId),
+    }));
+  });
+
+  clearSelection = () => {
+    this.selectionController.clear();
+  };
+
+  addRow = (position: InsertToPosition) => {
+    return this.view.rowAdd(position);
+  };
+
+  focusFirstCell = () => {
+    this.selectionController.focusFirstCell();
+  };
+
+  showIndicator = (evt: MouseEvent) => {
+    return this.dragController.showIndicator(evt) != null;
+  };
+
+  hideIndicator = () => {
+    this.dragController.dropPreview.remove();
+  };
+
+  moveTo = (id: string, evt: MouseEvent) => {
+    const result = this.dragController.getInsertPosition(evt);
+    if (result) {
+      const row = this.view.rowGetOrCreate(id);
+      row.move(result.position, undefined, result.groupKey);
+    }
+  };
 
   onWheel = (event: WheelEvent) => {
     if (event.metaKey || event.ctrlKey) {
@@ -80,13 +156,12 @@ export class VirtualTableView extends DataViewBase<
               onComplete: text => {
                 const column = groupHelper.property$.value;
                 if (column) {
-                  column.dataUpdate(
-                    () =>
-                      addGroup({
-                        text,
-                        oldData: column.data$.value,
-                        dataSource: this.props.view.manager.dataSource,
-                      }) as never
+                  column.dataUpdate(() =>
+                    addGroup({
+                      text,
+                      oldData: column.data$.value,
+                      dataSource: this.view.manager.dataSource,
+                    })
                   );
                 }
               },
@@ -103,92 +178,8 @@ export class VirtualTableView extends DataViewBase<
     </div>`;
   };
 
-  selectionController = new TableSelectionController(this);
-  yScrollContainer: HTMLElement | undefined;
-
-  get expose(): DataViewInstance {
-    return {
-      clearSelection: () => {
-        this.selectionController.clear();
-      },
-      addRow: position => {
-        if (this.readonly) return;
-        const rowId = this.props.view.rowAdd(position);
-        if (rowId) {
-          this.props.dataViewEle.openDetailPanel({
-            view: this.props.view,
-            rowId,
-          });
-        }
-        return rowId;
-      },
-      focusFirstCell: () => {
-        this.selectionController.focusFirstCell();
-      },
-      showIndicator: evt => {
-        return this.dragController.showIndicator(evt) != null;
-      },
-      hideIndicator: () => {
-        this.dragController.dropPreview.remove();
-      },
-      moveTo: (id, evt) => {
-        const result = this.dragController.getInsertPosition(evt);
-        if (result) {
-          const row = this.props.view.rowGetOrCreate(id);
-          row.move(result.position, undefined, result.groupKey);
-        }
-      },
-      getSelection: () => {
-        return this.selectionController.selection;
-      },
-      view: this.props.view,
-      eventTrace: this.props.eventTrace,
-    };
-  }
-
-  private get readonly() {
-    return this.props.view.readonly$.value;
-  }
-
-  columns$ = computed(() => {
-    return [
-      {
-        id: 'row-header',
-        width: LEFT_TOOL_BAR_WIDTH,
-      },
-      ...this.props.view.properties$.value.map(property => ({
-        id: property.id,
-        width: property.width$.value + 1,
-      })),
-      {
-        id: 'row-last',
-        width: 40,
-      },
-    ];
-  });
-
-  groupTrait$ = computed(() => {
-    return this.props.view.traitGet(groupTraitKey);
-  });
-
-  groups$ = computed(() => {
-    const groupTrait = this.groupTrait$.value;
-    if (!groupTrait?.groupsDataList$.value) {
-      return [
-        {
-          id: '',
-          rows: this.props.view.rowIds$.value,
-        },
-      ];
-    }
-    return groupTrait.groupsDataList$.value.map(group => ({
-      id: group.key,
-      rows: group.rows.map(v => v.rowId),
-    }));
-  });
-  virtualScroll$ = signal<TableGrid>();
-  private initVirtualScroll(yScrollContainer: HTMLElement) {
-    this.virtualScroll$.value = new GridVirtualScroll<
+  initVirtualScroll(yScrollContainer: HTMLElement, ui: TableViewUI) {
+    const virtualScroll = new GridVirtualScroll<
       TableGroupData,
       TableRowData,
       TableCellData
@@ -213,7 +204,7 @@ export class VirtualTableView extends DataViewBase<
           return row.cells$.value.some(cell => cell.data.hover$.value);
         }),
         selected$: computed(() => {
-          const selection = this.props.selection$.value;
+          const selection = this.selection$.value;
           if (!selection || selection.selectionType !== 'row') {
             return false;
           }
@@ -234,34 +225,31 @@ export class VirtualTableView extends DataViewBase<
         if (cell.columnId === 'row-header') {
           wrapper.style.borderBottom = `1px solid ${cssVarV2.database.border}`;
           const rowHeader = new TableRowHeader();
-          rowHeader.view = this.props.view;
           rowHeader.gridCell = cell;
-          rowHeader.tableView = this;
+          rowHeader.tableViewLogic = this;
           return rowHeader;
         }
         if (cell.columnId === 'row-last') {
           const rowLast = new TableRowLast();
-          rowLast.view = this.props.view;
           rowLast.gridCell = cell;
-          rowLast.tableView = this;
+          rowLast.tableViewLogic = this;
           return rowLast;
         }
         const cellContainer = new DatabaseCellContainer();
-        cellContainer.view = this.props.view;
         cellContainer.gridCell = cell;
-        cellContainer.tableView = this;
+        cellContainer.tableViewLogic = this;
         return cellContainer;
       },
       createGroup: {
         top: gridGroup => {
           const groupHeader = new TableGroupHeader();
-          groupHeader.tableView = this;
+          groupHeader.tableViewLogic = this;
           groupHeader.gridGroup = gridGroup;
           return groupHeader;
         },
         bottom: gridGroup => {
           const groupFooter = new TableGroupFooter();
-          groupFooter.tableView = this;
+          groupFooter.tableViewLogic = this;
           groupFooter.gridGroup = gridGroup;
           return groupFooter;
         },
@@ -269,26 +257,40 @@ export class VirtualTableView extends DataViewBase<
       fixedRowHeight$: signal(undefined),
       yScrollContainer,
     });
+
+    this.yScrollContainer = yScrollContainer;
+
+    this.virtualScroll$.value = virtualScroll;
     requestAnimationFrame(() => {
-      const virtualScroll = this.virtualScroll$.value;
       if (virtualScroll) {
         virtualScroll.init();
-        this.disposables.add(() => virtualScroll.dispose());
+        ui.disposables.add(() => virtualScroll.dispose());
       }
     });
   }
+
+  renderer = createUniComponentFromWebComponent(TableViewUI);
+}
+
+export class TableViewUI extends DataViewUIBase<VirtualTableViewUILogic> {
   private renderTable() {
-    return this.virtualScroll$.value?.content;
+    return this.logic.virtualScroll$.value?.content;
   }
 
   override connectedCallback(): void {
     super.connectedCallback();
-    this.initVirtualScroll(getScrollContainer(this, 'y') ?? document.body);
+    this.logic.ui$.value = this;
+    this.logic.clipboardController.hostConnected();
+    this.logic.dragController.hostConnected();
+    this.logic.hotkeysController.hostConnected();
+    this.logic.selectionController.hostConnected();
+    const scrollContainer = getScrollContainer(this, 'y') ?? document.body;
+    this.logic.initVirtualScroll(scrollContainer, this);
     this.classList.add(styles.tableView);
   }
 
-  override render() {
-    const vPadding = this.props.virtualPadding$.value;
+  override render(): TemplateResult {
+    const vPadding = this.logic.root.config.virtualPadding$.value;
     const wrapperStyle = styleMap({
       marginLeft: `-${vPadding}px`,
       marginRight: `-${vPadding}px`,
@@ -298,11 +300,11 @@ export class VirtualTableView extends DataViewBase<
       paddingRight: `${vPadding}px`,
     });
     return html`
-      ${renderUniLit(this.props.headerWidget, {
-        dataViewInstance: this.expose,
+      ${renderUniLit(this.logic.root.config.headerWidget, {
+        dataViewLogic: this.logic,
       })}
       <div class="${styles.tableContainer}" style="${wrapperStyle}">
-        <div class="${styles.tableBlockTable}" @wheel="${this.onWheel}">
+        <div class="${styles.tableBlockTable}" @wheel="${this.logic.onWheel}">
           <div class="${styles.tableContainer2}" style="${containerStyle}">
             ${this.renderTable()}
           </div>
@@ -314,6 +316,6 @@ export class VirtualTableView extends DataViewBase<
 
 declare global {
   interface HTMLElementTagNameMap {
-    'affine-virtual-table': VirtualTableView;
+    'dv-table-view-ui-virtual': TableViewUI;
   }
 }

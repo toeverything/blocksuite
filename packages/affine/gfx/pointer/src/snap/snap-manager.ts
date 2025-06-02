@@ -1,6 +1,6 @@
 import { OverlayIdentifier } from '@blocksuite/affine-block-surface';
 import { MindmapElementModel } from '@blocksuite/affine-model';
-import type { Bound } from '@blocksuite/global/gfx';
+import { Bound } from '@blocksuite/global/gfx';
 import {
   type DragExtensionInitializeContext,
   type ExtensionDragMoveContext,
@@ -28,7 +28,7 @@ export class SnapExtension extends InteractivityExtension {
           return {};
         }
 
-        let alignBound: Bound;
+        let alignBound: Bound | null = null;
 
         return {
           onDragStart() {
@@ -46,6 +46,7 @@ export class SnapExtension extends InteractivityExtension {
           onDragMove(context: ExtensionDragMoveContext) {
             if (
               context.elements.length === 0 ||
+              !alignBound ||
               alignBound.w === 0 ||
               alignBound.h === 0
             ) {
@@ -58,11 +59,65 @@ export class SnapExtension extends InteractivityExtension {
             context.dx = alignRst.dx + context.dx;
             context.dy = alignRst.dy + context.dy;
           },
-          onDragEnd() {
+          clear() {
+            alignBound = null;
             snapOverlay.clear();
           },
         };
       }
     );
+
+    this.action.onElementResize(() => {
+      const snapOverlay = this.snapOverlay;
+
+      if (!snapOverlay) {
+        return {};
+      }
+
+      let alignBound: Bound | null = null;
+
+      return {
+        onResizeStart(context) {
+          alignBound = snapOverlay.setMovingElements(context.elements);
+        },
+        onResizeMove(context) {
+          if (!alignBound || alignBound.w === 0 || alignBound.h === 0) {
+            return;
+          }
+
+          const { handle, handleSign, lockRatio } = context;
+          let { dx, dy } = context;
+
+          if (lockRatio) {
+            const min = Math.min(
+              Math.abs(dx / alignBound.w),
+              Math.abs(dy / alignBound.h)
+            );
+
+            dx = min * Math.sign(dx) * alignBound.w;
+            dy = min * Math.sign(dy) * alignBound.h;
+          }
+
+          const currentBound = new Bound(
+            alignBound.x +
+              (handle.includes('left') ? -dx * handleSign.xSign : 0),
+            alignBound.y +
+              (handle.includes('top') ? -dy * handleSign.ySign : 0),
+            Math.abs(alignBound.w + dx * handleSign.xSign),
+            Math.abs(alignBound.h + dy * handleSign.ySign)
+          );
+          const alignRst = snapOverlay.align(currentBound);
+
+          context.suggest({
+            dx: alignRst.dx + context.dx,
+            dy: alignRst.dy + context.dy,
+          });
+        },
+        onResizeEnd() {
+          alignBound = null;
+          snapOverlay.clear();
+        },
+      };
+    });
   }
 }

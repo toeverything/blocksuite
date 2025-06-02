@@ -126,12 +126,7 @@ export type RotateMoveContext = RotateStartContext & {
 
 export type RotateEndContext = RotateStartContext;
 
-export type SelectedContext = {
-  /**
-   * The selected state of the element
-   */
-  selected: boolean;
-
+export type SelectableContext = {
   /**
    * Whether is multi-select, usually triggered by shift key
    */
@@ -146,14 +141,13 @@ export type SelectedContext = {
    * The model position of the event pointer
    */
   position: IPoint;
+};
 
+export type SelectContext = SelectableContext & {
   /**
-   * If the current selection is a fallback selection.
-   *
-   * E.g., if selecting a child element inside a group, the `onSelected` method will be executed on group, and
-   * the fallback is true because the it's not the original target(the child element).
+   * The selected state of the element
    */
-  fallback: boolean;
+  selected: boolean;
 };
 
 export type BoxSelectionContext = {
@@ -171,11 +165,6 @@ export type GfxViewTransformInterface = {
   onDragStart: (context: DragStartContext) => void;
   onDragMove: (context: DragMoveContext) => void;
   onDragEnd: (context: DragEndContext) => void;
-
-  /**
-   * When the element is selected by the pointer
-   */
-  onSelected: (context: SelectedContext) => void;
 
   /**
    * When the element is selected by box selection, return false to prevent the default selection behavior.

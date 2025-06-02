@@ -2,6 +2,7 @@ import { type ServiceIdentifier } from '@blocksuite/global/di';
 import { DisposableGroup } from '@blocksuite/global/disposable';
 import { Bound, clamp, Point } from '@blocksuite/global/gfx';
 import { signal } from '@preact/signals-core';
+import last from 'lodash-es/last.js';
 
 import type { PointerEventState } from '../../event/state/pointer.js';
 import { getTopElements } from '../../utils/tree.js';
@@ -9,9 +10,11 @@ import type { GfxBlockComponent } from '../../view/index.js';
 import { GfxExtension, GfxExtensionIdentifier } from '../extension.js';
 import { GfxBlockElementModel } from '../model/gfx-block-model.js';
 import type { GfxModel } from '../model/model.js';
+import { GfxPrimitiveElementModel } from '../model/surface/element-model.js';
 import type { GfxElementModelView } from '../view/view.js';
 import { createInteractionContext, type SupportedEvents } from './event.js';
 import {
+  type ActionContextMap,
   type InteractivityActionAPI,
   type InteractivityEventAPI,
   InteractivityExtensionIdentifier,
@@ -40,6 +43,7 @@ import type {
   BoxSelectionContext,
   ResizeConstraint,
   RotateConstraint,
+  SelectContext,
 } from './types/view.js';
 
 type ExtensionPointerHandler = Exclude<
@@ -120,6 +124,112 @@ export class InteractivityManager extends GfxExtension {
     };
   }
 
+  private _getSelectionConfig(models: GfxModel[]) {
+    type SelectionHandlers = Required<
+      ReturnType<Required<GfxViewInteractionConfig>['handleSelection']>
+    >;
+
+    const selectionConfigMap = new Map<
+      string,
+      {
+        view: GfxBlockComponent | GfxElementModelView;
+        handlers: SelectionHandlers;
+        defaultHandlers: SelectionHandlers;
+      }
+    >();
+
+    models.forEach(model => {
+      const typeOrFlavour = 'flavour' in model ? model.flavour : model.type;
+      const view = this.gfx.view.get(model);
+      const config = this.std.getOptional(
+        GfxViewInteractionIdentifier(typeOrFlavour)
+      );
+
+      if (!view) {
+        return;
+      }
+
+      const selectionConfig =
+        config?.handleSelection?.({
+          gfx: this.gfx,
+          std: this.std,
+          view,
+          model,
+        }) ?? {};
+      const defaultHandlers = {
+        selectable: () => {
+          return !model.isLockedByAncestor();
+        },
+        onSelect: (context: SelectContext) => {
+          if (context.multiSelect) {
+            this.gfx.selection.toggle(model);
+          } else {
+            this.gfx.selection.set({ elements: [model.id] });
+          }
+
+          return true;
+        },
+      };
+
+      selectionConfigMap.set(model.id, {
+        view,
+        defaultHandlers,
+        handlers: {
+          ...defaultHandlers,
+          ...selectionConfig,
+        },
+      });
+    });
+
+    return selectionConfigMap;
+  }
+
+  private _getSuggestedTarget(context: {
+    candidates: GfxModel[];
+    target: GfxModel;
+  }) {
+    const { candidates, target } = context;
+
+    const suggestedElements: {
+      id: string;
+      priority?: number;
+    }[] = [];
+    const suggest = (element: { id: string; priority?: number }) => {
+      suggestedElements.push(element);
+    };
+
+    const extensions = this.interactExtensions;
+    extensions
+      .values()
+      .toArray()
+      .forEach(ext => {
+        return (ext.action as InteractivityActionAPI).emit('elementSelect', {
+          candidates,
+          target,
+          suggest,
+        });
+      });
+
+    if (suggestedElements.length) {
+      suggestedElements.sort((a, b) => {
+        return (a.priority ?? 0) - (b.priority ?? 0);
+      });
+
+      const suggested = last(suggestedElements) as {
+        id: string;
+        priority?: number;
+      };
+      const elm = this.gfx.getElementById(suggested.id);
+
+      return elm instanceof GfxPrimitiveElementModel ||
+        elm instanceof GfxBlockElementModel
+        ? elm
+        : target;
+    }
+
+    return target;
+  }
+
   /**
    * Handle element selection.
    * @param evt The pointer event that triggered the selection.
@@ -129,32 +239,72 @@ export class InteractivityManager extends GfxExtension {
     const { raw } = evt;
     const { gfx } = this;
     const [x, y] = gfx.viewport.toModelCoordFromClientCoord([raw.x, raw.y]);
-    const picked = this.gfx.getElementInGroup(x, y);
+    let candidates = this.gfx.getElementByPoint(x, y, {
+      all: true,
+    });
 
-    const tryGetLockedAncestor = (e: GfxModel) => {
-      if (e?.isLockedByAncestor()) {
-        return e.groups.findLast(group => group.isLocked()) ?? e;
-      }
-      return e;
+    const selectionConfigs = this._getSelectionConfig(candidates);
+    const context = {
+      multiSelect: raw.shiftKey,
+      event: raw,
+      position: Point.from([x, y]),
     };
 
-    if (picked) {
-      const lockedElement = tryGetLockedAncestor(picked);
+    candidates = candidates.filter(model => {
+      if (!selectionConfigs.has(model.id)) {
+        return false;
+      }
+      const config = selectionConfigs.get(model.id)!;
+
+      return (
+        selectionConfigs.has(model.id) &&
+        selectionConfigs.get(model.id)?.handlers.selectable({
+          ...context,
+          view: config.view,
+          model,
+          default: config.defaultHandlers.selectable as () => boolean,
+        })
+      );
+    });
+
+    {
+      let target = last(candidates);
+
+      if (!target) {
+        return false;
+      }
+
+      target = this._getSuggestedTarget({
+        candidates,
+        target,
+      });
+
+      const config = selectionConfigs.has(target.id)
+        ? selectionConfigs.get(target.id)
+        : this._getSelectionConfig([target]).get(target.id);
+
+      if (!config) {
+        return false;
+      }
+
       const multiSelect = raw.shiftKey;
-      const view = gfx.view.get(lockedElement);
       const context = {
-        selected: multiSelect ? !gfx.selection.has(picked.id) : true,
+        selected: multiSelect ? !gfx.selection.has(target.id) : true,
         multiSelect,
         event: raw,
         position: Point.from([x, y]),
-        fallback: lockedElement !== picked,
       };
 
-      const selected = view?.onSelected(context);
-      return selected ?? true;
-    }
+      const result = config.handlers.onSelect({
+        ...context,
+        selected: multiSelect ? !gfx.selection.has(target.id) : true,
+        view: config.view,
+        model: target,
+        default: config.defaultHandlers.onSelect as () => void,
+      });
 
-    return false;
+      return result ?? true;
+    }
   }
 
   handleBoxSelection(context: { box: BoxSelectionContext['box'] }) {
@@ -733,7 +883,11 @@ export class InteractivityManager extends GfxExtension {
   handleElementResize(
     options: Omit<
       OptionResize,
-      'lockRatio' | 'onResizeStart' | 'onResizeEnd' | 'onResizeUpdate'
+      | 'lockRatio'
+      | 'onResizeStart'
+      | 'onResizeEnd'
+      | 'onResizeUpdate'
+      | 'onResizeMove'
     > & {
       onResizeStart?: () => void;
       onResizeEnd?: () => void;
@@ -761,6 +915,23 @@ export class InteractivityManager extends GfxExtension {
     const elements = Array.from(viewConfigMap.values()).map(
       config => config.view.model
     ) as GfxModel[];
+    const extensionHandlers = this.interactExtensions.values().reduce(
+      (handlers, ext) => {
+        const extHandlers = (ext.action as InteractivityActionAPI).emit(
+          'elementResize',
+          {
+            elements,
+          }
+        );
+
+        if (extHandlers) {
+          handlers.push(extHandlers);
+        }
+
+        return handlers;
+      },
+      [] as ActionContextMap['elementResize']['returnType'][]
+    );
     let lockRatio = false;
 
     viewConfigMap.forEach(config => {
@@ -776,11 +947,46 @@ export class InteractivityManager extends GfxExtension {
       ...options,
       lockRatio,
       elements,
+      onResizeMove: ({ dx, dy, handleSign, lockRatio }) => {
+        const suggested: {
+          dx: number;
+          dy: number;
+          priority?: number;
+        }[] = [];
+        const suggest = (distance: { dx: number; dy: number }) => {
+          suggested.push(distance);
+        };
+
+        extensionHandlers.forEach(ext => {
+          ext.onResizeMove?.({
+            dx,
+            dy,
+            elements,
+            handleSign,
+            handle,
+            lockRatio,
+            suggest,
+          });
+        });
+
+        suggested.sort((a, b) => {
+          return (a.priority ?? 0) - (b.priority ?? 0);
+        });
+
+        return last(suggested) ?? { dx, dy };
+      },
       onResizeStart: ({ data }) => {
         this.activeInteraction$.value = {
           type: 'resize',
           elements,
         };
+        extensionHandlers.forEach(ext => {
+          ext.onResizeStart?.({
+            elements,
+            handle,
+          });
+        });
+
         options.onResizeStart?.();
         data.forEach(({ model }) => {
           if (!viewConfigMap.has(model.id)) {
@@ -841,6 +1047,13 @@ export class InteractivityManager extends GfxExtension {
       },
       onResizeEnd: ({ data }) => {
         this.activeInteraction$.value = null;
+
+        extensionHandlers.forEach(ext => {
+          ext.onResizeEnd?.({
+            elements,
+            handle,
+          });
+        });
         options.onResizeEnd?.();
         this.std.store.transact(() => {
           data.forEach(({ model }) => {

@@ -154,32 +154,6 @@ export class DefaultTool extends BaseTool {
   private _determineDragType(evt: PointerEventState): DefaultModeDragType {
     const { x, y } = this.controller.lastMousePos$.peek();
     if (this.selection.isInSelectedRect(x, y)) {
-      if (this.selection.selectedElements.length === 1) {
-        const currentHoveredElem = this._getElementInGroup(x, y);
-        let curSelected = this.selection.selectedElements[0];
-
-        // If one of the following condition is true, keep the selection:
-        // 1. if group is currently selected
-        // 2. if the selected element is descendant of the hovered element
-        // 3. not hovering any element or hovering the same element
-        //
-        // Otherwise, we update the selection to the current hovered element
-        const shouldKeepSelection =
-          isGfxGroupCompatibleModel(curSelected) ||
-          (isGfxGroupCompatibleModel(currentHoveredElem) &&
-            currentHoveredElem.hasDescendant(curSelected)) ||
-          !currentHoveredElem ||
-          currentHoveredElem === curSelected;
-
-        if (!shouldKeepSelection) {
-          curSelected = currentHoveredElem;
-          this.selection.set({
-            elements: [curSelected.id],
-            editing: false,
-          });
-        }
-      }
-
       return this.selection.editing
         ? DefaultModeDragType.NativeEditing
         : DefaultModeDragType.ContentMoving;
@@ -192,17 +166,6 @@ export class DefaultTool extends BaseTool {
         return DefaultModeDragType.Selecting;
       }
     }
-  }
-
-  private _getElementInGroup(modelX: number, modelY: number) {
-    const tryGetLockedAncestor = (e: GfxModel | null) => {
-      if (e?.isLockedByAncestor()) {
-        return e.groups.findLast(group => group.isLocked());
-      }
-      return e;
-    };
-
-    return tryGetLockedAncestor(this.gfx.getElementInGroup(modelX, modelY));
   }
 
   private initializeDragState(

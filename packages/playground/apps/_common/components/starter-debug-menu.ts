@@ -41,7 +41,11 @@ import {
   SizeVariables,
   StyleVariables,
 } from '@blocksuite/affine/shared/theme';
-import { openFileOrFiles, printToPdf } from '@blocksuite/affine/shared/utils';
+import {
+  openFilesWith,
+  openSingleFileWith,
+  printToPdf,
+} from '@blocksuite/affine/shared/utils';
 import { ShadowlessElement } from '@blocksuite/affine/std';
 import { GfxControllerIdentifier } from '@blocksuite/affine/std/gfx';
 import {
@@ -339,10 +343,7 @@ export class StarterDebugMenu extends ShadowlessElement {
 
   private async _importHTML() {
     try {
-      const files = await openFileOrFiles({
-        acceptType: 'Html',
-        multiple: true,
-      });
+      const files = await openFilesWith('Html');
 
       if (!files) return;
 
@@ -373,7 +374,7 @@ export class StarterDebugMenu extends ShadowlessElement {
 
   private async _importHTMLZip() {
     try {
-      const file = await openFileOrFiles({ acceptType: 'Zip' });
+      const file = await openSingleFileWith('Zip');
       if (!file) return;
       const result = await HtmlTransformer.importHTMLZip({
         collection: this.collection,
@@ -393,10 +394,7 @@ export class StarterDebugMenu extends ShadowlessElement {
 
   private async _importMarkdown() {
     try {
-      const files = await openFileOrFiles({
-        acceptType: 'Markdown',
-        multiple: true,
-      });
+      const files = await openFilesWith('Markdown');
 
       if (!files) return;
 
@@ -427,7 +425,7 @@ export class StarterDebugMenu extends ShadowlessElement {
 
   private async _importMarkdownZip() {
     try {
-      const file = await openFileOrFiles({ acceptType: 'Zip' });
+      const file = await openSingleFileWith('Zip');
       if (!file) return;
       const result = await MarkdownTransformer.importMarkdownZip({
         collection: this.collection,
@@ -447,10 +445,7 @@ export class StarterDebugMenu extends ShadowlessElement {
 
   private async _importNotionHTML() {
     try {
-      const file = await openFileOrFiles({
-        acceptType: 'Html',
-        multiple: false,
-      });
+      const file = await openSingleFileWith('Html');
       if (!file) return;
       const doc = this.editor.doc;
       const job = doc.getTransformer([defaultImageProxyMiddleware]);
@@ -467,7 +462,7 @@ export class StarterDebugMenu extends ShadowlessElement {
 
   private async _importNotionHTMLZip() {
     try {
-      const file = await openFileOrFiles({ acceptType: 'Zip' });
+      const file = await openSingleFileWith('Zip');
       if (!file) return;
       const result = await NotionHtmlTransformer.importNotionZip({
         collection: this.collection,

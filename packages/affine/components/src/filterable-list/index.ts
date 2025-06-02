@@ -92,6 +92,7 @@ export class FilterableListComponent<Props = unknown> extends WithDisposable(
     const isFlip = !!this.placement?.startsWith('top');
 
     const _handleInputKeydown = (ev: KeyboardEvent) => {
+      ev.stopPropagation();
       switch (ev.key) {
         case 'ArrowUp': {
           ev.preventDefault();

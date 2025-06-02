@@ -3,6 +3,7 @@ import {
   RENDER_CARD_THROTTLE_MS,
 } from '@blocksuite/affine-block-embed';
 import { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
+import { LoadingIcon } from '@blocksuite/affine-components/icons';
 import { isPeekable, Peekable } from '@blocksuite/affine-components/peek';
 import { RefNodeSlotsProvider } from '@blocksuite/affine-inline-reference';
 import type {
@@ -31,6 +32,7 @@ import {
   referenceToNode,
 } from '@blocksuite/affine-shared/utils';
 import { Bound } from '@blocksuite/global/gfx';
+import { ResetIcon } from '@blocksuite/icons/lit';
 import { BlockSelection } from '@blocksuite/std';
 import { Text } from '@blocksuite/store';
 import { computed } from '@preact/signals-core';
@@ -337,8 +339,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
 
     const theme = this.std.get(ThemeProvider).theme;
     const {
-      LoadingIcon,
-      ReloadIcon,
       LinkedDocDeletedBanner,
       LinkedDocEmptyBanner,
       SyncedDocErrorBanner,
@@ -347,7 +347,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
     const icon = isError
       ? SyncedDocErrorIcon
       : isLoading
-        ? LoadingIcon
+        ? LoadingIcon()
         : this.icon$.value;
     const title = isLoading ? 'Loading...' : this.title$;
     const description = this.model.props.description$;
@@ -384,10 +384,6 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
       () => html`
         <div
           class="affine-embed-linked-doc-block ${cardClassMap}"
-          style=${styleMap({
-            transform: `scale(${this._scale})`,
-            transformOrigin: '0 0',
-          })}
           @click=${this._handleClick}
           @dblclick=${this._handleDoubleClick}
         >
@@ -433,7 +429,7 @@ export class EmbedLinkedDocBlockComponent extends EmbedBlockComponent<EmbedLinke
                       class="affine-embed-linked-doc-card-content-reload-button"
                       @click=${this.refreshData}
                     >
-                      ${ReloadIcon} <span>Reload</span>
+                      ${ResetIcon()} <span>Reload</span>
                     </div>
                   </div>
                 `

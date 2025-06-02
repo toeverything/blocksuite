@@ -1,13 +1,12 @@
 import type { BlockCaptionEditor } from '@blocksuite/affine-components/caption';
-import { getLoadingIconWith } from '@blocksuite/affine-components/icons';
+import { LoadingIcon } from '@blocksuite/affine-components/icons';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import { ResourceController } from '@blocksuite/affine-components/resource';
 import {
   type ImageBlockModel,
   ImageBlockSchema,
 } from '@blocksuite/affine-model';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { cssVarV2, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { formatSize } from '@blocksuite/affine-shared/utils';
 import { BrokenImageIcon, ImageIcon } from '@blocksuite/icons/lit';
 import { GfxBlockComponent } from '@blocksuite/std';
@@ -39,11 +38,18 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockMod
       position: absolute;
       top: 4px;
       right: 4px;
-      width: 20px;
-      height: 20px;
-      padding: 4px;
-      border-radius: 4px;
-      background: ${unsafeCSSVarV2('loading/backgroundLayer')};
+      width: 36px;
+      height: 36px;
+      padding: 5px;
+      border-radius: 8px;
+      background: ${unsafeCSSVarV2(
+        'loading/imageLoadingBackground',
+        '#92929238'
+      )};
+
+      & > svg {
+        font-size: 25.71px;
+      }
     }
 
     affine-edgeless-image .affine-image-status {
@@ -108,9 +114,6 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockMod
   }
 
   override renderGfxBlock() {
-    const theme = this.std.get(ThemeProvider).theme$.value;
-    const loadingIcon = getLoadingIconWith(theme);
-
     const blobUrl = this.blobUrl;
     const { rotate = 0, size = 0, caption = 'Image' } = this.model.props;
 
@@ -124,12 +127,17 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockMod
     });
 
     const resovledState = this.resourceController.resolveStateWith({
-      loadingIcon,
+      loadingIcon: LoadingIcon({
+        strokeColor: cssVarV2('button/pureWhiteText'),
+        ringColor: cssVarV2('loading/imageLoadingLayer', '#ffffff8f'),
+      }),
       errorIcon: BrokenImageIcon(),
       icon: ImageIcon(),
       title: 'Image',
       description: formatSize(size),
     });
+
+    const { loading, icon, description, error, needUpload } = resovledState;
 
     return html`
       <div class="affine-image-container" style=${containerStyleMap}>
@@ -146,17 +154,18 @@ export class ImageEdgelessBlockComponent extends GfxBlockComponent<ImageBlockMod
                 @error=${this._handleError}
               />
             </div>
+            ${when(loading, () => html`<div class="loading">${icon}</div>`)}
             ${when(
-              resovledState.loading,
-              () => html`<div class="loading">${loadingIcon}</div>`
-            )}
-            ${when(
-              resovledState.error && resovledState.description,
+              Boolean(error && description),
               () =>
                 html`<affine-resource-status
                   class="affine-image-status"
-                  .message=${resovledState.description}
-                  .reload=${() => this.refreshData()}
+                  .message=${description}
+                  .needUpload=${needUpload}
+                  .action=${() =>
+                    needUpload
+                      ? this.resourceController.upload()
+                      : this.refreshData()}
                 ></affine-resource-status>`
             )}
           `,

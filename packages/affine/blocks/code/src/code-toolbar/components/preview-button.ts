@@ -1,3 +1,7 @@
+import {
+  DocModeProvider,
+  TelemetryProvider,
+} from '@blocksuite/affine-shared/services';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { css, html, LitElement, nothing } from 'lit';
@@ -9,6 +13,10 @@ import { CodeBlockPreviewIdentifier } from '../../code-preview-extension';
 
 export class PreviewButton extends WithDisposable(SignalWatcher(LitElement)) {
   static override styles = css`
+    :host {
+      margin-right: auto;
+    }
+
     .preview-toggle-container {
       display: flex;
       padding: 2px;
@@ -54,6 +62,17 @@ export class PreviewButton extends WithDisposable(SignalWatcher(LitElement)) {
 
     this.blockComponent.store.updateBlock(this.blockComponent.model, {
       preview: value,
+    });
+
+    const std = this.blockComponent.std;
+    const mode = std.getOptional(DocModeProvider)?.getEditorMode() ?? 'page';
+    const telemetryService = std.getOptional(TelemetryProvider);
+    if (!telemetryService) return;
+    telemetryService.track('htmlBlockTogglePreview', {
+      page: mode,
+      segment: 'code block',
+      module: 'code toolbar container',
+      control: 'preview toggle button',
     });
   };
 

@@ -29,5 +29,5 @@ export type {
   RotateEndContext,
   RotateMoveContext,
   RotateStartContext,
-  SelectedContext,
+  SelectContext,
 } from './types/view.js';

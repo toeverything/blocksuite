@@ -45,10 +45,8 @@ import {
   ShowQuickSettingBarKey,
 } from '../../../../widget-presets/quick-setting-bar/context.js';
 import { DEFAULT_COLUMN_TITLE_HEIGHT } from '../../consts.js';
-import type {
-  TableProperty,
-  TableSingleView,
-} from '../../table-view-manager.js';
+import type { TableProperty } from '../../table-view-manager.js';
+import type { TableViewUILogic } from '../table-view-ui-logic.js';
 import {
   getTableGroupRect,
   getVerticalIndicator,
@@ -173,7 +171,7 @@ export class DatabaseHeaderColumn extends SignalWatcher(
 
     const sortUtils = createSortUtils(
       sortTrait,
-      this.closest('affine-data-view-renderer')?.view?.eventTrace ?? (() => {})
+      this.tableViewLogic.eventTrace
     );
     const sortList = sortUtils.sortList$.value;
     const existingIndex = sortList.findIndex(
@@ -398,10 +396,10 @@ export class DatabaseHeaderColumn extends SignalWatcher(
 
   override connectedCallback() {
     super.connectedCallback();
-    const table = this.closest('affine-database-table');
+    const table = this.closest('dv-table-view-ui');
     if (table) {
       this.disposables.add(
-        table.props.handleEvent('dragStart', context => {
+        table.logic.handleEvent('dragStart', context => {
           if (this.tableViewManager.readonly$.value) {
             return;
           }
@@ -481,7 +479,11 @@ export class DatabaseHeaderColumn extends SignalWatcher(
   accessor grabStatus: 'grabStart' | 'grabEnd' | 'grabbing' = 'grabEnd';
 
   @property({ attribute: false })
-  accessor tableViewManager!: TableSingleView;
+  accessor tableViewLogic!: TableViewUILogic;
+
+  get tableViewManager() {
+    return this.tableViewLogic.view;
+  }
 }
 
 function numberFormatConfig(column: Property): MenuConfig {

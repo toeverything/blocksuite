@@ -1,4 +1,4 @@
-import { OpenIcon } from '@blocksuite/affine-components/icons';
+import { LoadingIcon, OpenIcon } from '@blocksuite/affine-components/icons';
 import type { EmbedLoomModel, EmbedLoomStyles } from '@blocksuite/affine-model';
 import { ImageProxyService } from '@blocksuite/affine-shared/adapters';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
@@ -94,8 +94,8 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
     const loading = this.loading;
     const theme = this.std.get(ThemeProvider).theme;
     const imageProxyService = this.store.get(ImageProxyService);
-    const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons(theme);
-    const titleIcon = loading ? LoadingIcon : LoomIcon;
+    const { EmbedCardBannerIcon } = getEmbedCardIcons(theme);
+    const titleIcon = loading ? LoadingIcon() : LoomIcon;
     const titleText = loading ? 'Loading...' : title;
     const descriptionText = loading ? '' : description;
     const bannerImage =
@@ -112,7 +112,6 @@ export class EmbedLoomBlockComponent extends EmbedBlockComponent<
             selected: this.selected$.value,
           })}
           style=${styleMap({
-            transform: `scale(${this._scale})`,
             transformOrigin: '0 0',
           })}
           @click=${this._handleClick}

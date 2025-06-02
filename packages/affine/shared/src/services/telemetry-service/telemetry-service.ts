@@ -1,6 +1,7 @@
 import { createIdentifier } from '@blocksuite/global/di';
 import type { ExtensionType } from '@blocksuite/store';
 
+import type { CodeBlockEvents } from './code-block.js';
 import type { OutDatabaseAllEvents } from './database.js';
 import type { LinkToolbarEvents } from './link.js';
 import type { NoteEvents } from './note.js';
@@ -16,6 +17,7 @@ import type {
   ElementCreationEvent,
   ElementLockEvent,
   ElementUpdatedEvent,
+  LatexEvent,
   LinkedDocCreatedEvent,
   LinkEvent,
   MindMapCollapseEvent,
@@ -25,6 +27,7 @@ import type {
 export type TelemetryEventMap = OutDatabaseAllEvents &
   LinkToolbarEvents &
   SlashMenuEvents &
+  CodeBlockEvents &
   NoteEvents & {
     DocCreated: DocCreatedEvent;
     Link: TelemetryEvent;
@@ -42,6 +45,7 @@ export type TelemetryEventMap = OutDatabaseAllEvents &
     BlockCreated: BlockCreationEvent;
     EdgelessToolPicked: EdgelessToolPickedEvent;
     CreateEmbedBlock: LinkEvent;
+    Latex: LatexEvent;
   };
 
 export interface TelemetryService {

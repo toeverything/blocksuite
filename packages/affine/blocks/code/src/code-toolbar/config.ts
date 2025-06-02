@@ -117,13 +117,12 @@ export const PRIMARY_GROUPS: MenuItemGroup<CodeBlockToolbarContext>[] = [
   },
 ];
 
-// Clipboard Group
-export const clipboardGroup: MenuItemGroup<CodeBlockToolbarContext> = {
-  type: 'clipboard',
+export const toggleGroup: MenuItemGroup<CodeBlockToolbarContext> = {
+  type: 'toggle',
   items: [
     {
       type: 'wrap',
-      generate: ({ blockComponent, close }) => {
+      generate: ({ blockComponent }) => {
         return {
           action: () => {},
           render: () => {
@@ -134,7 +133,6 @@ export const clipboardGroup: MenuItemGroup<CodeBlockToolbarContext> = {
               <editor-menu-action
                 @click=${() => {
                   blockComponent.setWrap(!wrapped);
-                  close();
                 }}
                 aria-label=${label}
               >
@@ -155,7 +153,7 @@ export const clipboardGroup: MenuItemGroup<CodeBlockToolbarContext> = {
       when: ({ std }) =>
         std.getOptional(CodeBlockConfigExtension.identifier)?.showLineNumbers ??
         true,
-      generate: ({ blockComponent, close }) => {
+      generate: ({ blockComponent }) => {
         return {
           action: () => {},
           render: () => {
@@ -167,8 +165,6 @@ export const clipboardGroup: MenuItemGroup<CodeBlockToolbarContext> = {
                   blockComponent.store.updateBlock(blockComponent.model, {
                     lineNumber: !lineNumber,
                   });
-
-                  close();
                 }}
                 aria-label=${label}
               >
@@ -184,6 +180,13 @@ export const clipboardGroup: MenuItemGroup<CodeBlockToolbarContext> = {
         };
       },
     },
+  ],
+};
+
+// Clipboard Group
+export const clipboardGroup: MenuItemGroup<CodeBlockToolbarContext> = {
+  type: 'clipboard',
+  items: [
     {
       type: 'duplicate',
       label: 'Duplicate',
@@ -233,6 +236,7 @@ export const deleteGroup: MenuItemGroup<CodeBlockToolbarContext> = {
 };
 
 export const MORE_GROUPS: MenuItemGroup<CodeBlockToolbarContext>[] = [
+  toggleGroup,
   clipboardGroup,
   deleteGroup,
 ];

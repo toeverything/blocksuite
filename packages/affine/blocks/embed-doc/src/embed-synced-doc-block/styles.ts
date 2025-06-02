@@ -303,11 +303,11 @@ export const cardStyles = css`
     align-items: center;
     gap: 4px;
     cursor: pointer;
+    color: ${unsafeCSSVarV2('button/primary')};
   }
   .affine-embed-synced-doc-card-content-reload-button svg {
     width: 12px;
     height: 12px;
-    fill: var(--affine-background-primary-color);
   }
   .affine-embed-synced-doc-card-content-reload-button > span {
     display: -webkit-box;
@@ -317,7 +317,6 @@ export const cardStyles = css`
     white-space: normal;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--affine-brand-color);
     font-family: var(--affine-font-family);
     font-size: var(--affine-font-xs);
     font-style: normal;

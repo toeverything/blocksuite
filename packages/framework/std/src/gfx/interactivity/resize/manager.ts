@@ -1,6 +1,7 @@
 import {
   Bound,
   getCommonBoundWithRotation,
+  type IBound,
   type IVec,
 } from '@blocksuite/global/gfx';
 
@@ -28,19 +29,24 @@ export const DEFAULT_HANDLES: ResizeHandle[] = [
   'bottom',
 ];
 
-interface ElementInitialSnapshot {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  rotate: number;
-}
+type ElementInitialSnapshot = Readonly<Required<IBound>>;
 
 export interface OptionResize {
   elements: GfxModel[];
   handle: ResizeHandle;
   lockRatio: boolean;
   event: PointerEvent;
+  onResizeMove: (payload: {
+    dx: number;
+    dy: number;
+
+    handleSign: {
+      xSign: number;
+      ySign: number;
+    };
+
+    lockRatio: boolean;
+  }) => { dx: number; dy: number };
   onResizeUpdate: (payload: {
     lockRatio: boolean;
     scaleX: number;
@@ -95,6 +101,7 @@ export class ResizeController {
       handle,
       lockRatio,
       onResizeStart,
+      onResizeMove,
       onResizeUpdate,
       onResizeEnd,
       event,
@@ -107,17 +114,30 @@ export class ResizeController {
       h: el.h,
       rotate: el.rotate,
     }));
+    const originalBound = getCommonBoundWithRotation(originals);
     const startPt = this.gfx.viewport.toModelCoordFromClientCoord([
       event.clientX,
       event.clientY,
     ]);
+    const handleSign = this.getHandleSign(handle);
 
     const onPointerMove = (e: PointerEvent) => {
       const currPt = this.gfx.viewport.toModelCoordFromClientCoord([
         e.clientX,
         e.clientY,
       ]);
+      let delta = {
+        dx: currPt[0] - startPt[0],
+        dy: currPt[1] - startPt[1],
+      };
       const shouldLockRatio = lockRatio || e.shiftKey;
+
+      delta = onResizeMove({
+        dx: delta.dx,
+        dy: delta.dy,
+        handleSign,
+        lockRatio: shouldLockRatio,
+      });
 
       if (elements.length === 1) {
         this.resizeSingle(
@@ -125,17 +145,18 @@ export class ResizeController {
           elements[0],
           shouldLockRatio,
           startPt,
-          currPt,
-          handle,
+          delta,
+          handleSign,
           onResizeUpdate
         );
       } else {
         this.resizeMulti(
+          originalBound,
           originals,
           elements,
-          handle,
-          currPt,
           startPt,
+          delta,
+          handleSign,
           onResizeUpdate
         );
       }
@@ -159,11 +180,14 @@ export class ResizeController {
     model: GfxModel,
     lockRatio: boolean,
     startPt: IVec,
-    currPt: IVec,
-    handle: ResizeHandle,
+    delta: {
+      dx: number;
+      dy: number;
+    },
+    handleSign: { xSign: number; ySign: number },
     updateCallback: OptionResize['onResizeUpdate']
   ) {
-    const { xSign, ySign } = this.getHandleSign(handle);
+    const { xSign, ySign } = handleSign;
 
     const pivot = new DOMPoint(
       orig.x + (-xSign === 1 ? orig.w : 0),
@@ -181,8 +205,11 @@ export class ResizeController {
     const toModel = (p: DOMPoint) =>
       p.matrixTransform(toLocalRotatedM.inverse());
 
-    const currPtLocal = toLocal(new DOMPoint(currPt[0], currPt[1]), true);
     const handleLocal = toLocal(new DOMPoint(startPt[0], startPt[1]), true);
+    const currPtLocal = toLocal(
+      new DOMPoint(startPt[0] + delta.dx, startPt[1] + delta.dy),
+      true
+    );
 
     let scaleX = xSign
       ? (xSign * (currPtLocal.x - handleLocal.x) + orig.w) / orig.w
@@ -255,34 +282,38 @@ export class ResizeController {
   }
 
   private resizeMulti(
+    originalBound: Bound,
     originals: ElementInitialSnapshot[],
     elements: GfxModel[],
-    handle: ResizeHandle,
-    currPt: IVec,
     startPt: IVec,
+    delta: {
+      dx: number;
+      dy: number;
+    },
+    handleSign: { xSign: number; ySign: number },
     updateCallback: OptionResize['onResizeUpdate']
   ) {
-    const commonBound = getCommonBoundWithRotation(originals);
-    const { xSign, ySign } = this.getHandleSign(handle);
-
+    const { xSign, ySign } = handleSign;
     const pivot = new DOMPoint(
-      commonBound.x + ((-xSign + 1) / 2) * commonBound.w,
-      commonBound.y + ((-ySign + 1) / 2) * commonBound.h
+      originalBound.x + ((-xSign + 1) / 2) * originalBound.w,
+      originalBound.y + ((-ySign + 1) / 2) * originalBound.h
     );
     const toLocalM = new DOMMatrix().translate(-pivot.x, -pivot.y);
 
     const toLocal = (p: DOMPoint) => p.matrixTransform(toLocalM);
 
-    const currPtLocal = toLocal(new DOMPoint(currPt[0], currPt[1]));
     const handleLocal = toLocal(new DOMPoint(startPt[0], startPt[1]));
+    const currPtLocal = toLocal(
+      new DOMPoint(startPt[0] + delta.dx, startPt[1] + delta.dy)
+    );
 
     let scaleX = xSign
-      ? (xSign * (currPtLocal.x - handleLocal.x) + commonBound.w) /
-        commonBound.w
+      ? (xSign * (currPtLocal.x - handleLocal.x) + originalBound.w) /
+        originalBound.w
       : 1;
     let scaleY = ySign
-      ? (ySign * (currPtLocal.y - handleLocal.y) + commonBound.h) /
-        commonBound.h
+      ? (ySign * (currPtLocal.y - handleLocal.y) + originalBound.h) /
+        originalBound.h
       : 1;
 
     const min = Math.max(Math.abs(scaleX), Math.abs(scaleY));

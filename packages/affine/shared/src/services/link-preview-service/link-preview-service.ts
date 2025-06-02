@@ -1,12 +1,10 @@
 import { type LinkPreviewData } from '@blocksuite/affine-model';
 import { type Container, createIdentifier } from '@blocksuite/global/di';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { type BlockStdScope, StdIdentifier } from '@blocksuite/std';
 import { Extension } from '@blocksuite/store';
 
 import { DEFAULT_LINK_PREVIEW_ENDPOINT } from '../../consts';
 import { isAbortError } from '../../utils/is-abort-error';
-import { FeatureFlagService } from '../feature-flag-service';
 import {
   LinkPreviewCacheIdentifier,
   type LinkPreviewCacheProvider,
@@ -53,17 +51,13 @@ export class LinkPreviewService
 {
   static override setup(di: Container) {
     di.addImpl(LinkPreviewServiceIdentifier, LinkPreviewService, [
-      StdIdentifier,
       LinkPreviewCacheIdentifier,
     ]);
   }
 
   private _endpoint: string = DEFAULT_LINK_PREVIEW_ENDPOINT;
 
-  constructor(
-    private readonly _std: BlockStdScope,
-    private readonly _cache: LinkPreviewCacheProvider
-  ) {
+  constructor(private readonly _cache: LinkPreviewCacheProvider) {
     super();
   }
 
@@ -181,15 +175,6 @@ export class LinkPreviewService
     url: string,
     signal?: AbortSignal
   ): Promise<Partial<LinkPreviewData>> => {
-    const featureFlagService = this._std.store.get(FeatureFlagService);
-    const cacheEnabled = featureFlagService.getFlag(
-      'enable_link_preview_cache'
-    );
-    // If the cache is not enabled, fetch the preview directly
-    if (!cacheEnabled) {
-      return this._fetchPreview(url, signal);
-    }
-
     // Check memory cache, if hit, return the cached data
     const cached = this._cache.get(url);
     if (cached) {

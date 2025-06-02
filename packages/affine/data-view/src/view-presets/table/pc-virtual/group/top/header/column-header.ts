@@ -6,6 +6,7 @@ import {
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { PlusIcon } from '@blocksuite/icons/lit';
 import { ShadowlessElement } from '@blocksuite/std';
+import { css } from '@emotion/css';
 import { nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
@@ -13,9 +14,13 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 
 import { renderUniLit } from '../../../../../../core';
-import type { TableSingleView } from '../../../../table-view-manager';
+import { LEFT_TOOL_BAR_WIDTH } from '../../../../consts';
+import { cellDivider } from '../../../../styles';
+import type { VirtualTableViewUILogic } from '../../../table-view-ui-logic';
 import * as styles from './column-header-css';
-
+const leftBarStyle = css({
+  width: LEFT_TOOL_BAR_WIDTH,
+});
 export class VirtualTableHeader extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
@@ -79,9 +84,7 @@ export class VirtualTableHeader extends SignalWatcher(
   override render() {
     return html`
       <div class="${styles.columnHeader} database-row">
-        ${this.readonly
-          ? nothing
-          : html` <div class="data-view-table-left-bar"></div>`}
+        ${this.readonly ? nothing : html` <div class="${leftBarStyle}"></div>`}
         ${repeat(
           this.tableViewManager.properties$.value,
           column => column.id,
@@ -97,9 +100,9 @@ export class VirtualTableHeader extends SignalWatcher(
                 data-column-index="${index}"
                 class="${styles.column} ${styles.cell}"
                 .column="${column}"
-                .tableViewManager="${this.tableViewManager}"
+                .tableViewLogic="${this.tableViewLogic}"
               ></virtual-database-header-column>
-              <div class="cell-divider" style="height: auto;"></div>
+              <div class="${cellDivider}" style="height: auto;"></div>
             `;
           }
         )}
@@ -118,7 +121,11 @@ export class VirtualTableHeader extends SignalWatcher(
   accessor scaleDiv!: HTMLDivElement;
 
   @property({ attribute: false })
-  accessor tableViewManager!: TableSingleView;
+  accessor tableViewLogic!: VirtualTableViewUILogic;
+
+  get tableViewManager() {
+    return this.tableViewLogic.view;
+  }
 }
 
 declare global {

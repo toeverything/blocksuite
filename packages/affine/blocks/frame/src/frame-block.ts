@@ -3,6 +3,7 @@ import {
   DefaultTheme,
   type FrameBlockModel,
   FrameBlockSchema,
+  isTransparent,
 } from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { Bound } from '@blocksuite/global/gfx';
@@ -11,7 +12,6 @@ import {
   type BoxSelectionContext,
   getTopElements,
   GfxViewInteractionExtension,
-  type SelectedContext,
 } from '@blocksuite/std/gfx';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { html } from 'lit';
@@ -66,22 +66,6 @@ export class FrameBlockComponent extends GfxBlockComponent<FrameBlockModel> {
       rotate,
       zIndex: this.toZIndex(),
     };
-  }
-
-  override onSelected(context: SelectedContext): boolean | void {
-    const { x, y } = context.position;
-
-    if (
-      !context.fallback &&
-      // if the frame is selected by title, then ignore it because the title selection is handled by the title widget
-      (this.model.externalBound?.containsPoint([x, y]) ||
-        // otherwise if the frame has title, then ignore it because in this case the frame cannot be selected by frame body
-        this.model.props.title.length)
-    ) {
-      return false;
-    }
-
-    return super.onSelected(context);
   }
 
   override onBoxSelected(context: BoxSelectionContext) {
@@ -186,6 +170,18 @@ export const FrameBlockInteraction =
             context.set({
               rotatable: false,
             });
+          },
+        };
+      },
+      handleSelection: () => {
+        return {
+          selectable(context) {
+            const { model } = context;
+
+            return (
+              context.default(context) &&
+              (model.isLocked() || !isTransparent(model.props.background))
+            );
           },
         };
       },

@@ -1,6 +1,7 @@
 import type { ResizeHandle } from '@blocksuite/std/gfx';
 import { html, nothing } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
+import { styleMap } from 'lit/directives/style-map.js';
 
 export enum HandleDirection {
   Bottom = 'bottom',
@@ -17,36 +18,28 @@ function ResizeHandleRenderer(
   handle: ResizeHandle,
   rotatable: boolean,
   onPointerDown?: (e: PointerEvent, direction: ResizeHandle) => void,
-  updateCursor?: (options?: {
+  getCursor?: (options: {
     type: 'resize' | 'rotate';
     handle: ResizeHandle;
-  }) => void
+  }) => string
 ) {
   const handlerPointerDown = (e: PointerEvent) => {
     e.stopPropagation();
     onPointerDown && onPointerDown(e, handle);
   };
 
-  const pointerEnter = (type: 'resize' | 'rotate') => (e: PointerEvent) => {
-    e.stopPropagation();
-    if (e.buttons === 1 || !updateCursor) return;
-
-    updateCursor({ type, handle });
-  };
-
-  const pointerLeave = (e: PointerEvent) => {
-    e.stopPropagation();
-    if (e.buttons === 1 || !updateCursor) return;
-
-    updateCursor();
-  };
-
   const rotationTpl =
     handle.length > 6 && rotatable
       ? html`<div
           class="rotate"
-          @pointerover=${pointerEnter('rotate')}
-          @pointerout=${pointerLeave}
+          style=${styleMap({
+            cursor: getCursor
+              ? getCursor({
+                  type: 'rotate',
+                  handle,
+                })
+              : 'default',
+          })}
         ></div>`
       : nothing;
 
@@ -58,8 +51,14 @@ function ResizeHandleRenderer(
     ${rotationTpl}
     <div
       class="resize transparent-handle"
-      @pointerover=${pointerEnter('resize')}
-      @pointerout=${pointerLeave}
+      style=${styleMap({
+        cursor: getCursor
+          ? getCursor({
+              type: 'resize',
+              handle,
+            })
+          : 'default',
+      })}
     ></div>
   </div>`;
 }
@@ -79,17 +78,17 @@ export function RenderResizeHandles(
   resizeHandles: ResizeHandle[],
   rotatable: boolean,
   onPointerDown: (e: PointerEvent, direction: ResizeHandle) => void,
-  updateCursor?: (options?: {
+  getCursor?: (options: {
     type: 'resize' | 'rotate';
     handle: ResizeHandle;
-  }) => void
+  }) => string
 ) {
   return html`
     ${repeat(
       resizeHandles,
       handle => handle,
       handle =>
-        ResizeHandleRenderer(handle, rotatable, onPointerDown, updateCursor)
+        ResizeHandleRenderer(handle, rotatable, onPointerDown, getCursor)
     )}
   `;
 }

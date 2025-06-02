@@ -4393,6 +4393,61 @@ hhh
           },
           children: [],
         },
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[2]',
+          flavour: 'affine:paragraph',
+          props: {
+            type: 'h6',
+            text: {
+              '$blocksuite:internal:text$': true,
+              delta: [
+                {
+                  insert: 'Sources',
+                },
+              ],
+            },
+            collapsed: true,
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[3]',
+          flavour: 'affine:bookmark',
+          props: {
+            style: 'citation',
+            url,
+            title,
+            description,
+            icon: favicon,
+            footnoteIdentifier: '1',
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[4]',
+          flavour: 'affine:embed-linked-doc',
+          props: {
+            style: 'citation',
+            pageId: 'deadbeef',
+            footnoteIdentifier: '2',
+          },
+          children: [],
+        },
+        {
+          type: 'block',
+          id: 'matchesReplaceMap[5]',
+          flavour: 'affine:attachment',
+          props: {
+            name: 'test.txt',
+            sourceId: 'abcdefg',
+            footnoteIdentifier: '3',
+            style: 'citation',
+          },
+          children: [],
+        },
       ],
     };
 
@@ -4466,6 +4521,38 @@ hhh
                   },
                 ],
               },
+            },
+            children: [],
+          },
+          {
+            type: 'block',
+            id: 'matchesReplaceMap[2]',
+            flavour: 'affine:paragraph',
+            props: {
+              type: 'h6',
+              text: {
+                '$blocksuite:internal:text$': true,
+                delta: [
+                  {
+                    insert: 'Sources',
+                  },
+                ],
+              },
+              collapsed: true,
+            },
+            children: [],
+          },
+          {
+            type: 'block',
+            id: 'matchesReplaceMap[3]',
+            flavour: 'affine:bookmark',
+            props: {
+              style: 'citation',
+              url,
+              title,
+              description,
+              icon: favicon,
+              footnoteIdentifier: '1',
             },
             children: [],
           },

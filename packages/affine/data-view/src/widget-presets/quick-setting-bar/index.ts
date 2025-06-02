@@ -15,7 +15,7 @@ import { renderSortBar } from './sort/index.js';
 
 export const widgetQuickSettingBar = defineUniComponent(
   (props: DataViewWidgetProps) => {
-    const view = props.dataViewInstance.view;
+    const view = props.dataViewLogic.view;
     const barList = [renderSortBar(props), renderFilterBar(props)].filter(
       Boolean
     );

@@ -1,4 +1,4 @@
-import { OpenIcon } from '@blocksuite/affine-components/icons';
+import { LoadingIcon, OpenIcon } from '@blocksuite/affine-components/icons';
 import type {
   EmbedYoutubeModel,
   EmbedYoutubeStyles,
@@ -108,8 +108,8 @@ export class EmbedYoutubeBlockComponent extends EmbedBlockComponent<
     const loading = this.loading;
     const theme = this.std.get(ThemeProvider).theme;
     const imageProxyService = this.store.get(ImageProxyService);
-    const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons(theme);
-    const titleIcon = loading ? LoadingIcon : YoutubeIcon;
+    const { EmbedCardBannerIcon } = getEmbedCardIcons(theme);
+    const titleIcon = loading ? LoadingIcon() : YoutubeIcon;
     const titleText = loading ? 'Loading...' : title;
     const descriptionText = loading ? null : description;
     const bannerImage =

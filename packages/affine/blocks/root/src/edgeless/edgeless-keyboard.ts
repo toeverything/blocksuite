@@ -1,6 +1,9 @@
 import { insertLinkByQuickSearchCommand } from '@blocksuite/affine-block-bookmark';
 import { EdgelessTextBlockComponent } from '@blocksuite/affine-block-edgeless-text';
-import { FrameTool } from '@blocksuite/affine-block-frame';
+import {
+  FrameTool,
+  type PresentToolOption,
+} from '@blocksuite/affine-block-frame';
 import {
   DefaultTool,
   EdgelessLegacySlotIdentifier,
@@ -472,9 +475,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         const selection = gfx.selection;
 
         if (event.code === 'Space' && !event.repeat) {
-          const currentToolName =
-            this.rootComponent.gfx.tool.currentToolName$.peek();
-          if (currentToolName === 'frameNavigator') return false;
           this._space(event);
         } else if (
           !selection.editing &&
@@ -512,9 +512,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       ctx => {
         const event = ctx.get('keyboardState').raw;
         if (event.code === 'Space' && !event.repeat) {
-          const currentToolName =
-            this.rootComponent.gfx.tool.currentToolName$.peek();
-          if (currentToolName === 'frameNavigator') return false;
           this._space(event);
         }
         return false;
@@ -712,10 +709,18 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
     const revertToPrevTool = (ev: KeyboardEvent) => {
       if (ev.code === 'Space') {
-        this._setEdgelessTool(
-          (currentTool as DefaultTool).constructor as typeof DefaultTool,
-          currentTool?.activatedOption
-        );
+        const toolConstructor = currentTool.constructor as typeof DefaultTool;
+        let finalOptions = currentTool?.activatedOption;
+
+        // Handle frameNavigator (PresentTool) restoration after space pan
+        if (currentTool.toolName === 'frameNavigator') {
+          finalOptions = {
+            ...currentTool?.activatedOption,
+            restoredAfterPan: true,
+          } as PresentToolOption;
+        }
+
+        this._setEdgelessTool(toolConstructor, finalOptions);
         selection.set(currentSel);
         document.removeEventListener('keyup', revertToPrevTool, false);
       }
@@ -728,6 +733,14 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       ) {
         return;
       }
+
+      // If in presentation mode, disable black background during space drag
+      if (currentTool.toolName === 'frameNavigator') {
+        this.slots.navigatorSettingUpdated.next({
+          blackBackground: false,
+        });
+      }
+
       this._setEdgelessTool(PanTool, { panning: false });
 
       this.std.event.disposables.addFromEvent(

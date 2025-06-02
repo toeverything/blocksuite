@@ -1,4 +1,4 @@
-import { OpenIcon } from '@blocksuite/affine-components/icons';
+import { LoadingIcon, OpenIcon } from '@blocksuite/affine-components/icons';
 import type {
   EmbedGithubModel,
   EmbedGithubStyles,
@@ -133,8 +133,8 @@ export class EmbedGithubBlockComponent extends EmbedBlockComponent<
     const loading = this.loading;
     const theme = this.std.get(ThemeProvider).theme;
     const imageProxyService = this.store.get(ImageProxyService);
-    const { LoadingIcon, EmbedCardBannerIcon } = getEmbedCardIcons(theme);
-    const titleIcon = loading ? LoadingIcon : GithubIcon;
+    const { EmbedCardBannerIcon } = getEmbedCardIcons(theme);
+    const titleIcon = loading ? LoadingIcon() : GithubIcon;
     const statusIcon = status
       ? getGithubStatusIcon(githubType, status, statusReason)
       : nothing;
