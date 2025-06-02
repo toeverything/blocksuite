@@ -626,6 +626,11 @@ export class SurfaceBlockModel extends BlockModel<SurfaceBlockProps> {
     return null;
   }
 
+  /**
+   * Get all groups in the group chain. The last group is the top level group.
+   * @param id
+   * @returns
+   */
   getGroups(id: string): GfxGroupModel[] {
     const groups: GfxGroupModel[] = [];
     const visited = new Set<GfxGroupModel>();

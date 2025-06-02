@@ -29,6 +29,15 @@ export class BookmarkEdgelessBlockComponent extends toGfxBlockComponent(
     };
   }
 
+  override connectedCallback(): void {
+    super.connectedCallback();
+    this.disposables.add(
+      this.gfx.selection.slots.updated.subscribe(() => {
+        this.requestUpdate();
+      })
+    );
+  }
+
   override renderGfxBlock() {
     const style = this.model.props.style$.value;
     const width = EMBED_CARD_WIDTH[style];
@@ -36,12 +45,14 @@ export class BookmarkEdgelessBlockComponent extends toGfxBlockComponent(
     const bound = this.model.elementBound;
     const scaleX = bound.w / width;
     const scaleY = bound.h / height;
+    const isSelected = this.gfx.selection.has(this.model.id);
 
     this.containerStyleMap = styleMap({
       width: `100%`,
       height: `100%`,
       transform: `scale(${scaleX}, ${scaleY})`,
       transformOrigin: '0 0',
+      pointerEvents: isSelected ? 'auto' : 'none',
     });
 
     return this.renderPageContent();

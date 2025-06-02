@@ -15,18 +15,21 @@ import type {
   RotateEndContext,
   RotateMoveContext,
   RotateStartContext,
+  SelectableContext,
+  SelectContext,
 } from '../types/view';
 
 type ExtendedViewContext<
   T extends GfxBlockComponent | GfxElementModelView,
   Context,
+  DefaultReturnType = void,
 > = {
   /**
    * The default function of the interaction.
    * If the interaction is handled by the extension, the default function will not be executed.
    * But extension can choose to call the default function by `context.default(context)` if needed.
    */
-  default: (context: Context) => void;
+  default: (context: Context) => DefaultReturnType;
 
   model: T['model'];
 
@@ -98,6 +101,19 @@ export type GfxViewInteractionConfig<
     onRotateEnd?(
       context: RotateEndContext & ExtendedViewContext<T, RotateEndContext>
     ): void;
+  };
+
+  handleSelection?: (
+    context: Omit<ViewInteractionHandleContext<T>, 'add' | 'delete'>
+  ) => {
+    selectable?: (
+      context: SelectableContext &
+        ExtendedViewContext<T, SelectableContext, boolean>
+    ) => boolean;
+    onSelect?: (
+      context: SelectContext &
+        ExtendedViewContext<T, SelectContext, boolean | void>
+    ) => boolean | void;
   };
 };
 

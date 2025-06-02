@@ -6,7 +6,6 @@ import type {
 import { BlockSelection } from '@blocksuite/std';
 import { html, nothing } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
-import { styleMap } from 'lit/directives/style-map.js';
 
 import { EmbedBlockComponent } from '../common/embed-block-element.js';
 import { FigmaIcon, styles } from './styles.js';
@@ -75,10 +74,6 @@ export class EmbedFigmaBlockComponent extends EmbedBlockComponent<EmbedFigmaMode
           class=${classMap({
             'affine-embed-figma-block': true,
             selected: this.selected$.value,
-          })}
-          style=${styleMap({
-            transform: `scale(${this._scale})`,
-            transformOrigin: '0 0',
           })}
           @click=${this._handleClick}
           @dblclick=${this._handleDoubleClick}

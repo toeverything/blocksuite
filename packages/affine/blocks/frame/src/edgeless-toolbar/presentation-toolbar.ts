@@ -205,10 +205,11 @@ export class PresentationToolbar extends EdgelessToolbarToolMixin(
       !forceMove
     ) {
       // Clear the flag so future navigations behave normally
-      this.gfx.tool.setTool(PresentTool, {
-        ...toolOptions,
-        restoredAfterPan: false,
-      });
+      // Here we modify the tool's activated option to avoid triggering setTool update
+      const currentTool = this.gfx.tool.currentTool$.peek();
+      if (currentTool?.activatedOption) {
+        currentTool.activatedOption.restoredAfterPan = false;
+      }
       return;
     }
 
