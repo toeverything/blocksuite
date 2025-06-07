@@ -40,21 +40,27 @@ export class EdgelessLassoDraggingAreaWidget extends WidgetComponent<RootBlockMo
   }
 
   private _getPathString(points: [number, number][]): string {
-    if (points.length < 2) return '';
+    if (points.length < 1) return '';
     
     const viewportPoints = points.map(([x, y]) => {
       const [vx, vy] = this.gfx.viewport.toViewCoord(x, y);
       return [vx, vy];
     });
 
+    if (viewportPoints.length === 1) {
+      // Single point - draw a small circle
+      const [x, y] = viewportPoints[0];
+      return `M ${x-2} ${y} A 2 2 0 1 1 ${x+2} ${y} A 2 2 0 1 1 ${x-2} ${y}`;
+    }
+
     let pathString = `M ${viewportPoints[0][0]} ${viewportPoints[0][1]}`;
     for (let i = 1; i < viewportPoints.length; i++) {
       pathString += ` L ${viewportPoints[i][0]} ${viewportPoints[i][1]}`;
     }
     
-    // Close the path by connecting to the start point
+    // Always close the path by connecting back to the start point
     if (viewportPoints.length > 2) {
-      pathString += ` L ${viewportPoints[0][0]} ${viewportPoints[0][1]}`;
+      pathString += ' Z';
     }
     
     return pathString;
@@ -74,7 +80,7 @@ export class EdgelessLassoDraggingAreaWidget extends WidgetComponent<RootBlockMo
     // Access the lasso path from the tool
     const lassoPath = tool.lassoPath as [number, number][];
     
-    if (!lassoPath || lassoPath.length < 2) {
+    if (!lassoPath || lassoPath.length < 1) {
       return nothing;
     }
 
@@ -90,6 +96,32 @@ export class EdgelessLassoDraggingAreaWidget extends WidgetComponent<RootBlockMo
         </svg>
       </div>
     `;
+  }
+
+  override firstUpdated() {
+    // Subscribe to tool changes to trigger re-render when lasso path updates
+    this.disposables.add(
+      this.gfx.tool.currentToolName$.subscribe(() => {
+        this.requestUpdate();
+      })
+    );
+    
+    // Also subscribe to dragging state changes to ensure updates during drag
+    this.disposables.add(
+      this.gfx.tool.dragging$.subscribe(() => {
+        this.requestUpdate();
+      })
+    );
+    
+    // Subscribe to dragging area changes to update lasso path in real-time
+    this.disposables.add(
+      this.gfx.tool.draggingArea$.subscribe(() => {
+        const tool = this.gfx.tool.currentTool$.value;
+        if (tool instanceof DefaultTool && tool.dragType === DefaultModeDragType.LassoSelecting) {
+          this.requestUpdate();
+        }
+      })
+    );
   }
 }
 
