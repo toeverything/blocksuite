@@ -1232,7 +1232,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     this._previewDirections.add(direction);
   }
 
-  /**
    * Clear all shape previews
    */
   private _clearAllShapePreviews() {
