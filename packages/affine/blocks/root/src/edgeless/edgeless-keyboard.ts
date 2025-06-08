@@ -1232,17 +1232,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     this._previewDirections.add(direction);
   }
 
-  /**
-   * Hide preview shape in the specified direction
-   */
-  private _hideShapePreview(direction: Direction) {
-    if (!this._shapePreviewOverlay) return;
-    
-    this._shapePreviewOverlay.removePreviewShape(direction);
-    this._previewDirections.delete(direction);
-  }
-
-  /**
    * Clear all shape previews
    */
   private _clearAllShapePreviews() {
@@ -1278,22 +1267,6 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
       if (id) {
         createdIds.push(id);
-        
-        // Create connector between original and new shape
-        const { startPosition, endPosition } = getPosition(direction);
-        const connectorId = crud.addElement('connector', {
-          mode: 1, // ConnectorMode.Orthogonal (Elbowed)
-          strokeWidth: 2,
-          stroke: shape.strokeColor,
-          source: {
-            id: shape.id,
-            position: startPosition,
-          },
-          target: {
-            id,
-            position: endPosition,
-          },
-        });
       }
     });
 
