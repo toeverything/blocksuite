@@ -41,7 +41,7 @@ import {
   MindmapElementModel,
   NoteBlockModel,
   NoteDisplayMode,
-  type ShapeElementModel,
+  ShapeElementModel,
 } from '@blocksuite/affine-model';
 import {
   EditPropsStore,
@@ -361,7 +361,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           this._move('ArrowRight', true);
         },
 
-        Enter: () => {
+        Enter: ctx => {
           const { service } = rootComponent;
           const selection = service.selection;
           const elements = selection.selectedElements;
@@ -394,6 +394,12 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
                 textBlock.tryFocusEnd();
               }
 
+              return;
+            }
+
+            if (element instanceof ShapeElementModel && !selection.editing) {
+              ctx.get('keyboardState').event.preventDefault();
+              mountShapeTextEditor(element, rootComponent);
               return;
             }
           }
@@ -456,7 +462,7 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
               );
             }
           });
-        },
+        }
       },
       {
         global: true,
