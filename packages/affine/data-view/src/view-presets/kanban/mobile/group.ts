@@ -11,11 +11,10 @@ import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { html } from 'lit/static-html.js';
 
-import type { DataViewRenderer } from '../../../core/data-view.js';
 import { GroupTitle } from '../../../core/group-by/group-title.js';
 import type { Group } from '../../../core/group-by/trait.js';
 import { dragHandler } from '../../../core/utils/wc-dnd/dnd-context.js';
-import type { KanbanSingleView } from '../kanban-view-manager.js';
+import type { MobileKanbanViewUILogic } from './kanban-view-ui-logic.js';
 
 const styles = css`
   mobile-kanban-group {
@@ -112,9 +111,8 @@ export class MobileKanbanGroup extends SignalWatcher(
               <mobile-kanban-card
                 data-card-id="${row.rowId}"
                 .groupKey="${this.group.key}"
-                .dataViewEle="${this.dataViewEle}"
-                .view="${this.view}"
                 .cardId="${row.rowId}"
+                .kanbanViewLogic="${this.kanbanViewLogic}"
               ></mobile-kanban-card>
             `;
           }
@@ -134,13 +132,14 @@ export class MobileKanbanGroup extends SignalWatcher(
   }
 
   @property({ attribute: false })
-  accessor dataViewEle!: DataViewRenderer;
-
-  @property({ attribute: false })
   accessor group!: Group;
 
   @property({ attribute: false })
-  accessor view!: KanbanSingleView;
+  accessor kanbanViewLogic!: MobileKanbanViewUILogic;
+
+  get view() {
+    return this.kanbanViewLogic.view;
+  }
 }
 
 declare global {

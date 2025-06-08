@@ -35,13 +35,9 @@ export class AffineCodeToolbar extends WithDisposable(LitElement) {
 
     .code-toolbar-button {
       color: ${unsafeCSSVarV2('icon/primary')};
-      background-color: ${unsafeCSSVarV2('segment/background')};
+      background-color: ${unsafeCSSVarV2('button/secondary')};
       box-shadow: var(--affine-shadow-1);
       border-radius: 4px;
-    }
-
-    .copy-code {
-      margin-left: auto;
     }
   `;
 

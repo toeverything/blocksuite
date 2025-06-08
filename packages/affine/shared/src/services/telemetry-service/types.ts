@@ -65,7 +65,7 @@ export interface AttachmentReloadedEvent extends TelemetryEvent {
   page: 'doc editor' | 'whiteboard editor';
   segment: 'doc' | 'whiteboard';
   module: 'attachment';
-  control: 'reload';
+  control: 'reload' | 'retry';
   category: 'card' | 'embed';
   type: string; // file type
 }
@@ -116,4 +116,12 @@ export interface ElementUpdatedEvent extends TelemetryEvent {
 
 export interface LinkEvent extends TelemetryEvent {
   result?: 'success' | 'failure';
+}
+
+export interface LatexEvent extends TelemetryEvent {
+  from: 'doc' | 'edgeless text' | 'edgeless note';
+  page: 'doc' | 'edgeless';
+  segment: 'doc' | 'whiteboard';
+  module: 'equation' | 'inline equation';
+  control: 'create equation' | 'create inline equation';
 }

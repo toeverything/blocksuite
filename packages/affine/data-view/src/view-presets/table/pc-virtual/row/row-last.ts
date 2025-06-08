@@ -5,8 +5,7 @@ import { effect } from '@preact/signals-core';
 import { property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';
 
-import type { TableSingleView } from '../../table-view-manager.js';
-import type { VirtualTableView } from '../table-view.js';
+import type { VirtualTableViewUILogic } from '../table-view-ui-logic.js';
 import type { TableGridCell } from '../types.js';
 import * as styles from './row-header-css.js';
 
@@ -56,10 +55,7 @@ export class TableRowLast extends SignalWatcher(
   accessor gridCell!: TableGridCell;
 
   @property({ attribute: false })
-  accessor view!: TableSingleView;
-
-  @property({ attribute: false })
-  accessor tableView!: VirtualTableView;
+  accessor tableViewLogic!: VirtualTableViewUILogic;
 }
 
 declare global {

@@ -1,3 +1,4 @@
+import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
 import { on } from '@blocksuite/affine-shared/utils';
 import type { PointerEventState } from '@blocksuite/std';
 import { BaseTool, MouseButton, type ToolOptions } from '@blocksuite/std/gfx';
@@ -83,6 +84,14 @@ export class PanTool extends BaseTool<PanToolOption> {
         this.controller.setTool(toolType, finalOptions);
         this.gfx.selection.set(selectionToRestore);
       };
+
+      // If in presentation mode, disable black background after middle mouse drag
+      if (currentTool.toolType?.toolName === 'frameNavigator') {
+        const slots = this.std.get(EdgelessLegacySlotIdentifier);
+        slots.navigatorSettingUpdated.next({
+          blackBackground: false,
+        });
+      }
 
       this.controller.setTool(PanTool, {
         panning: true,

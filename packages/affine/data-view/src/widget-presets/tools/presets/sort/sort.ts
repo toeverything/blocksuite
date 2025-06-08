@@ -43,7 +43,7 @@ export class DataViewHeaderToolsSort extends WidgetBase {
   sortUtils$ = computed(() => {
     const sortTrait = this.view.traitGet(sortTraitKey);
     if (sortTrait) {
-      return createSortUtils(sortTrait, this.dataViewInstance.eventTrace);
+      return createSortUtils(sortTrait, this.dataViewLogic.eventTrace);
     }
     return;
   });

@@ -2,6 +2,11 @@ import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { css } from 'lit';
 
 export const styles = css`
+  :host {
+    display: block;
+    touch-action: none;
+  }
+
   :host([disabled]) {
     opacity: 0.5;
     pointer-events: none;

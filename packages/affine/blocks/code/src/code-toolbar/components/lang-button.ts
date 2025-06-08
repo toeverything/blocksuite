@@ -4,6 +4,10 @@ import {
   showPopFilterableList,
 } from '@blocksuite/affine-components/filterable-list';
 import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
+import {
+  DocModeProvider,
+  TelemetryProvider,
+} from '@blocksuite/affine-shared/services';
 import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
 import { noop } from '@blocksuite/global/utils';
@@ -72,6 +76,18 @@ export class LanguageListButton extends WithDisposable(
         }
         this.blockComponent.store.transact(() => {
           this.blockComponent.model.props.language$.value = item.name;
+        });
+
+        const std = this.blockComponent.std;
+        const mode =
+          std.getOptional(DocModeProvider)?.getEditorMode() ?? 'page';
+        const telemetryService = std.getOptional(TelemetryProvider);
+        if (!telemetryService) return;
+        telemetryService.track('codeBlockLanguageSelect', {
+          page: mode,
+          segment: 'code block',
+          module: 'language selector',
+          control: item.name,
         });
       },
       active: item => item.name === this.blockComponent.model.props.language,
