@@ -73,8 +73,22 @@ import {
 } from './utils/consts.js';
 import { deleteElements } from './utils/crud.js';
 import { isCanvasElement } from './utils/query.js';
+import { ShapePreviewOverlay } from './shape-preview-overlay.js';
+import { 
+  Direction, 
+  nextBound as computeNextBound,
+  getPosition,
+} from '../../../../widgets/edgeless-selected-rect/src/utils.js';
+import { ConnectorPathGenerator } from '@blocksuite/affine-gfx-connector';
+import { getSurfaceComponent, getSurfaceBlock } from '@blocksuite/affine-block-surface';
+import { DefaultTheme } from '@blocksuite/affine-model';
+import * as Y from 'yjs';
 
 export class EdgelessPageKeyboardManager extends PageKeyboardManager {
+  private _shapePreviewOverlay: ShapePreviewOverlay | null = null;
+  private _previewDirections: Set<Direction> = new Set();
+  private _pathGenerator: ConnectorPathGenerator | null = null;
+
   get gfx() {
     return this.std.get(GfxControllerIdentifier);
   }
@@ -89,6 +103,8 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
 
   constructor(override rootComponent: EdgelessRootBlockComponent) {
     super(rootComponent);
+    this._initShapePreviewOverlay();
+    this._bindSelectionChange();
     this.rootComponent.bindHotKey(
       {
         v: () => {
@@ -528,7 +544,40 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         const gfx = this.rootComponent.gfx;
         const selection = gfx.selection;
 
-        if (event.code === 'Space' && !event.repeat) {
+        // Handle Cmd/Ctrl + Arrow keys for shape preview
+        if (
+          (event.metaKey || event.ctrlKey) &&
+          (event.code === 'ArrowUp' || event.code === 'ArrowDown' || 
+           event.code === 'ArrowLeft' || event.code === 'ArrowRight') &&
+          !event.repeat
+        ) {
+          if (this._canShowShapePreview()) {
+            event.preventDefault();
+            
+            let direction: Direction;
+            switch (event.code) {
+              case 'ArrowUp':
+                direction = Direction.Top;
+                break;
+              case 'ArrowDown':
+                direction = Direction.Bottom;
+                break;
+              case 'ArrowLeft':
+                direction = Direction.Left;
+                break;
+              case 'ArrowRight':
+                direction = Direction.Right;
+                break;
+              default:
+                return false;
+            }
+            this._showShapePreview(direction);
+            return true;
+          }
+        } else if (event.code === 'Space' && !event.repeat) {
+          const currentToolName =
+            this.rootComponent.gfx.tool.currentToolName$.peek();
+          if (currentToolName === 'frameNavigator') return false;
           this._space(event);
         } else if (
           !selection.editing &&
@@ -565,7 +614,19 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
       'keyUp',
       ctx => {
         const event = ctx.get('keyboardState').raw;
-        if (event.code === 'Space' && !event.repeat) {
+        
+        // Handle Cmd/Ctrl key release to create shapes from previews
+        if (
+          (event.code === 'MetaLeft' || event.code === 'MetaRight' || 
+           event.code === 'ControlLeft' || event.code === 'ControlRight') &&
+          this._previewDirections.size > 0
+        ) {
+          this._createShapesFromPreviews();
+          return true;
+        } else if (event.code === 'Space' && !event.repeat) {
+          const currentToolName =
+            this.rootComponent.gfx.tool.currentToolName$.peek();
+          if (currentToolName === 'frameNavigator') return false;
           this._space(event);
         }
         return false;
@@ -802,6 +863,240 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         'keyup',
         revertToPrevTool
       );
+    }
+  }
+
+  /**
+   * Initialize the shape preview overlay
+   */
+  private _initShapePreviewOverlay() {
+    this._shapePreviewOverlay = new ShapePreviewOverlay(this.gfx);
+    this._pathGenerator = new ConnectorPathGenerator({
+      getElementById: id => this.gfx.getElementById(id),
+    });
+    
+    const surface = getSurfaceComponent(this.std);
+    if (surface) {
+      surface.renderer.addOverlay(this._shapePreviewOverlay);
+    } else {
+      // Try again after a short delay
+      setTimeout(() => {
+        const surface = getSurfaceComponent(this.std);
+        if (surface && this._shapePreviewOverlay) {
+          surface.renderer.addOverlay(this._shapePreviewOverlay);
+        }
+      }, 100);
+    }
+  }
+
+  /**
+   * Bind selection change events to clear previews when selection changes
+   */
+  private _bindSelectionChange() {
+    this.gfx.selection.slots.updated.subscribe(() => {
+      // Clear previews when selection changes
+      this._clearAllShapePreviews();
+    });
+  }
+
+  /**
+   * Check if the current selection is a single shape that can show preview
+   */
+  private _canShowShapePreview(): boolean {
+    const { selectedElements } = this.rootComponent.service.selection;
+    return (
+      selectedElements.length === 1 &&
+      selectedElements[0] instanceof ShapeElementModel &&
+      !selectedElements[0].isLocked() &&
+      !this.rootComponent.service.selection.editing
+    );
+  }
+
+  /**
+   * Get the stroke color for preview shapes
+   */
+  private _getPreviewStrokeColor(shape: ShapeElementModel): string {
+    const surface = getSurfaceComponent(this.std);
+    if (!surface) return '#000000';
+    
+    const colorValue = surface.renderer.getColorValue(
+      shape.strokeColor,
+      DefaultTheme.shapeStrokeColor,
+      true
+    );
+    
+    // Ensure we return a string color value
+    if (typeof colorValue === 'string') {
+      return colorValue;
+    } else if (typeof colorValue === 'object' && colorValue !== null) {
+      const colorObj = colorValue as any;
+      if ('normal' in colorObj) {
+        return colorObj.normal;
+      } else if ('light' in colorObj) {
+        return colorObj.light;
+      }
+    }
+    
+    return '#000000';
+  }
+
+  /**
+   * Compute the next bound for a shape in the given direction
+   */
+  private _computeNextBound(shape: ShapeElementModel, direction: Direction) {
+    const surfaceBlock = getSurfaceBlock(this.std.store);
+    if (!surfaceBlock) {
+      return null;
+    }
+
+    const connectedShapes = surfaceBlock
+      .getConnectors(shape.id)
+      .reduce((prev, current) => {
+        if (current.target.id === shape.id && current.source.id) {
+          const sourceElement = this.gfx.getElementById(current.source.id);
+          if (sourceElement instanceof ShapeElementModel) {
+            prev.push(sourceElement);
+          }
+        }
+        if (current.source.id === shape.id && current.target.id) {
+          const targetElement = this.gfx.getElementById(current.target.id);
+          if (targetElement instanceof ShapeElementModel) {
+            prev.push(targetElement);
+          }
+        }
+        return prev;
+      }, [] as ShapeElementModel[]);
+
+    return computeNextBound(direction, shape, connectedShapes);
+  }
+
+  /**
+   * Show preview shape in the specified direction
+   */
+  private _showShapePreview(direction: Direction) {
+    if (!this._canShowShapePreview() || !this._shapePreviewOverlay || !this._pathGenerator) {
+      return;
+    }
+
+    // Clear all existing previews before showing new one
+    // This ensures only one direction preview is shown at a time
+    this._clearAllShapePreviews();
+
+    const shape = this.rootComponent.service.selection.selectedElements[0] as ShapeElementModel;
+    const nextBound = this._computeNextBound(shape, direction);
+    
+    if (!nextBound) {
+      return;
+    }
+
+    const strokeColor = this._getPreviewStrokeColor(shape);
+    
+    // Calculate connector path
+    const { startPosition, endPosition } = getPosition(direction);
+    const startBound = shape.elementBound;
+    const startPoint = shape.getRelativePointLocation(startPosition);
+    
+    // Create a temporary shape object for calculating end point
+    const tempShape = {
+      xywh: nextBound.serialize(),
+      rotate: shape.rotate,
+      shapeType: shape.shapeType,
+    };
+    const endPoint = shape.getRelativePointLocation.call(tempShape, endPosition);
+    
+    const connectorPath = this._pathGenerator.generateOrthogonalConnectorPath({
+      startBound,
+      endBound: nextBound,
+      startPoint,
+      endPoint,
+    });
+    
+    this._shapePreviewOverlay.addPreviewShape(
+      direction,
+      nextBound,
+      shape.shapeType,
+      strokeColor,
+      connectorPath,
+      startBound
+    );
+    
+    this._previewDirections.add(direction);
+  }
+
+  /**
+   * Hide preview shape in the specified direction
+   */
+  private _hideShapePreview(direction: Direction) {
+    if (!this._shapePreviewOverlay) return;
+    
+    this._shapePreviewOverlay.removePreviewShape(direction);
+    this._previewDirections.delete(direction);
+  }
+
+  /**
+   * Clear all shape previews
+   */
+  private _clearAllShapePreviews() {
+    if (!this._shapePreviewOverlay) return;
+    
+    this._shapePreviewOverlay.clearAllPreviews();
+    this._previewDirections.clear();
+  }
+
+  /**
+   * Create actual shapes based on current previews and clear previews
+   */
+  private _createShapesFromPreviews() {
+    if (!this._canShowShapePreview() || !this._shapePreviewOverlay || this._previewDirections.size === 0) {
+      return;
+    }
+
+    const shape = this.rootComponent.service.selection.selectedElements[0] as ShapeElementModel;
+    const crud = this.std.get(EdgelessCRUDIdentifier);
+    const createdIds: string[] = [];
+
+    // Create shapes for each preview direction (should be only one now)
+    this._previewDirections.forEach(direction => {
+      const nextBound = this._computeNextBound(shape, direction);
+      if (!nextBound) return;
+
+      // Create new shape
+      const id = crud.addElement(shape.type, {
+        ...shape.serialize(),
+        text: new Y.Text(),
+        xywh: nextBound.serialize(),
+      });
+
+      if (id) {
+        createdIds.push(id);
+        
+        // Create connector between original and new shape
+        const { startPosition, endPosition } = getPosition(direction);
+        const connectorId = crud.addElement('connector', {
+          mode: 1, // ConnectorMode.Orthogonal (Elbowed)
+          strokeWidth: 2,
+          stroke: shape.strokeColor,
+          source: {
+            id: shape.id,
+            position: startPosition,
+          },
+          target: {
+            id,
+            position: endPosition,
+          },
+        });
+      }
+    });
+
+    // Clear previews
+    this._clearAllShapePreviews();
+
+    // Select the newly created shape (should be only one)
+    if (createdIds.length > 0) {
+      this.rootComponent.service.selection.set({
+        elements: createdIds,
+        editing: false,
+      });
     }
   }
 }
