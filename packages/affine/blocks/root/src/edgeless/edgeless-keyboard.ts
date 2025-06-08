@@ -58,6 +58,7 @@ import {
   type BaseTool,
   GfxBlockElementModel,
   GfxControllerIdentifier,
+  type GfxModel,
   type GfxPrimitiveElementModel,
   isGfxGroupCompatibleModel,
   type ToolOptions,
@@ -88,6 +89,180 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
   private _shapePreviewOverlay: ShapePreviewOverlay | null = null;
   private _previewDirections: Set<Direction> = new Set();
   private _pathGenerator: ConnectorPathGenerator | null = null;
+  private _isTraversing = false;
+
+  /**
+   * Excalidraw Element Navigation Algorithm Formal Discussion
+   *
+   * 1. Abstract
+   * This document details an algorithm for navigating between elements connected by lines (arrows) in an Excalidraw canvas using `Alt/Option + Arrow keys`. The algorithm is essentially a stateful graph traversal algorithm where canvas elements are nodes (Node) and connecting lines are edges (Edge). The goal of the algorithm is to intuitively select the next element visually and logically based on the user's directional input.
+   *
+   * 2. Core Concepts and Data Structure Definitions
+   * To implement this algorithm, we need to define the following core data structures:
+   *
+   * 2.1. Element
+   * The basic object on the canvas.
+   * - `Element`:
+   *   - `id`: `String` (unique identifier)
+   *   - `x`: `Number` (top-left x-coordinate)
+   *   - `y`: `Number` (top-left y-coordinate)
+   *   - `width`: `Number` (width)
+   *   - `height`: `Number` (height)
+   *
+   * 2.2. Node
+   * Elements that can be connected, which are vertices in the graph. In Excalidraw, this corresponds to `ExcalidrawBindableElement`.
+   * - `Node` ⊂ `Element`
+   *
+   * 2.3. Edge
+   * A directed line segment used to connect two `Node`s (e.g., an arrow). In Excalidraw, this corresponds to `ExcalidrawLinearElement`.
+   * - `Edge` ⊂ `Element`:
+   *   - `startBinding`: `Object | null`
+   *     - `elementId`: `Node.id` (ID of the starting node)
+   *   - `endBinding`: `Object | null`
+   *     - `elementId`: `Node.id` (ID of the ending node)
+   *   - `points`: `Array<[Number, Number]>` (sequence of point coordinates defining the edge shape)
+   *
+   * 2.4. Canvas
+   * A collection of all elements.
+   * - `C`: An instance of `Map<Element.id, Element>` for efficient lookup.
+   *
+   * 2.5. Navigator State
+   * The navigator must maintain an internal state to handle multiple consecutive navigation operations.
+   * - `NavigatorState`:
+   *   - `isExploring`: `Boolean` (whether the navigation session is active)
+   *   - `visitedNodes`: `Set<Node.id>` (set of IDs of visited nodes in the current session, used to prevent cycles)
+   *   - `lastDirection`: `Direction | null` (the direction of the last navigation)
+   *   - `siblingNodes`: `Array<Node>` (stores "sibling" nodes when there are multiple successors in the same direction)
+   *   - `siblingIndex`: `Integer` (current index in the `siblingNodes` list)
+   *
+   * 2.6. Direction
+   * An enum type representing the user's navigation intent.
+   * - `D` = `{ UP, DOWN, LEFT, RIGHT }`
+   *
+   * 3. Core Geometric Calculation: Connection Heading
+   * To determine which direction an edge "comes out of" a node, we need to calculate its "connection heading".
+   *
+   * **Definition:** `getHeading(N, P_conn)`
+   * This function takes a node `N` and a connection point `P_conn` (the position of the edge's endpoint in world coordinates), and returns a `Direction`.
+   *
+   * 1.  **Get the Node's Axis-Aligned Bounding Box (AABB)**:
+   *     - `B(N) = { x_min, y_min, x_max, y_max }`
+   *     - `x_min = N.x`
+   *     - `y_min = N.y`
+   *     - `x_max = N.x + N.width`
+   *     - `y_max = N.y + N.height`
+   *
+   * 2.  **Calculate the Midpoints of the Four Sides**:
+   *     - `P_up = ((x_min + x_max)/2, y_min)`
+   *     - `P_down = ((x_min + x_max)/2, y_max)`
+   *     - `P_left = (x_min, (y_min + y_max)/2)`
+   *     - `P_right = (x_max, (y_min + y_max)/2)`
+   *
+   * 3.  **Calculate Distances**:
+   *     - Calculate the Euclidean distance from `P_conn` to `P_up`, `P_down`, `P_left`, `P_right`.
+   *     - `dist_side = distance(P_conn, P_side)`
+   *
+   * 4.  **Determine Heading**:
+   *     - `getHeading` returns the `Direction` corresponding to `min(dist_up, dist_down, dist_left, dist_right)`.
+   *
+   * 4. Key Functions
+   *
+   * 4.1. `getSuccessors(N, D, C)`
+   * This function finds all direct successor nodes of node `N` in direction `D`.
+   *
+   * **Algorithm**:
+   * 1.  Initialize an empty list `Result = []`.
+   * 2.  Iterate through all `Edge` elements `e` in Canvas `C`.
+   * 3.  **Filter Starting Node**:
+   *     - If `e.startBinding.elementId` equals `N.id` and `e.endBinding` exists, then `e` is an edge starting from `N`.
+   *     - Let `SuccessorNode = C.get(e.endBinding.elementId)`.
+   * 4.  **Calculate Connection Point**:
+   *     - Get the endpoint of `e` that connects to `N`. For `getSuccessors`, this is the first point of `e`.
+   *     - `P_start_local = e.points[0]`
+   *     - `P_conn = (e.x + P_start_local[0], e.y + P_start_local[1])`
+   * 5.  **Filter by Direction**:
+   *     - `heading = getHeading(N, P_conn)`
+   *     - If `heading` equals `D`, add `SuccessorNode` to the `Result` list.
+   * 6.  Return `Result`.
+   *
+   * 4.2. `getPredecessors(N, D, C)`
+   * This function finds all direct predecessor nodes of node `N` in direction `D` (i.e., nodes with arrows pointing to `N`). Its logic is similar to `getSuccessors`, but roles are swapped.
+   *
+   * **Algorithm**:
+   * 1.  Initialize an empty list `Result = []`.
+   * 2.  Iterate through all `Edge` elements `e` in `C`.
+   * 3.  **Filter Ending Node**:
+   *     - If `e.endBinding.elementId` equals `N.id` and `e.startBinding` exists, then `e` is an edge pointing to `N`.
+   *     - Let `PredecessorNode = C.get(e.startBinding.elementId)`.
+   * 4.  **Calculate Connection Point**:
+   *     - Get the endpoint of `e` that connects to `N`. For `getPredecessors`, this is the last point of `e`.
+   *     - `P_end_local = e.points[e.points.length - 1]`
+   *     - `P_conn = (e.x + P_end_local[0], e.y + P_end_local[1])`
+   * 5.  **Filter by Direction**:
+   *     - `heading = getHeading(N, P_conn)`
+   *     - If `heading` equals `D`, add `PredecessorNode` to the `Result` list.
+   * 6.  Return `Result`.
+   *
+   * 5. Main Navigation Algorithm `navigate(CurrentNode, D, C)`
+   * This is the core entry point of the navigator, which relies on and maintains `NavigatorState`.
+   *
+   * **Input**:
+   * - `CurrentNode`: `Node | null` - The currently selected node.
+   * - `D`: `Direction` - The user-requested navigation direction.
+   * - `C`: `Canvas` - All canvas elements.
+   *
+   * **Output**:
+   * - `Node.id | null` - The ID of the next node to be selected, or `null` if nowhere to go.
+   *
+   * **Algorithm Steps**:
+   *
+   * 1.  **[Initialization]** If `CurrentNode` is `null`:
+   *     a. Find a default node in `C` (e.g., the first `Node` type element).
+   *     b. If found, set `isExploring = true`, add its ID to `visitedNodes`, and return its ID.
+   *     c. If not found, return `null`.
+   *
+   * 2.  **[Session Start]** If `isExploring` is `false`:
+   *     a. Set `isExploring = true`.
+   *     b. Add `CurrentNode.id` to `visitedNodes`.
+   *
+   * 3.  **[Direction Check]** If `D` is not equal to `lastDirection`:
+   *     a. Update `lastDirection = D`.
+   *     b. Reset sibling node list: `siblingNodes = []`, `siblingIndex = 0`.
+   *     c. **Otherwise (direction unchanged)**:
+   *         i. If `siblingNodes` is not empty:
+   *            - `siblingIndex++`.
+   *            - If `siblingNodes[siblingIndex]` exists, let `NextNode = siblingNodes[siblingIndex]`.
+   *            - Add `NextNode.id` to `visitedNodes` and return `NextNode.id`.
+   *
+   * 4.  **[Find Successors]** Call `Successors = getSuccessors(CurrentNode, D, C)`.
+   *
+   * 5.  **[Handle Successors]** If `Successors` list is not empty:
+   *     a. **Single Successor**: If `Successors.length === 1`:
+   *         - `NextNode = Successors[0]`.
+   *         - If `NextNode.id` is not in `visitedNodes`, add it and return its ID. Otherwise, to prevent cycles, return `null`.
+   *         - Reset `siblingNodes = []` and `siblingIndex = 0`.
+   *     b. **Multiple Successors**: If `Successors.length > 1`:
+   *         - Sort the `Successors` list by direction:
+   *           - If `D` is `LEFT` or `RIGHT`, sort by `y` coordinate in ascending order.
+   *           - If `D` is `UP` or `DOWN`, sort by `x` coordinate in ascending order.
+   *         - Store the sorted list in `siblingNodes`.
+   *         - `siblingIndex = 0`.
+   *         - `NextNode = siblingNodes[0]`.
+   *         - If `NextNode.id` is not in `visitedNodes`, add it and return its ID. Otherwise return `null`.
+   *
+   * 6.  **[Fallback to Predecessors]** If `Successors` list is empty:
+   *     a. Call `Predecessors = getPredecessors(CurrentNode, D, C)`.
+   *     b. If `Predecessors` list is not empty, return `Predecessors[0].id`. (Here, `visitedNodes` is usually not checked, as it's a fallback).
+   *
+   * 7.  **[Nowhere to Go]** If none of the above steps find the next node, return `null`.
+   */
+  private _navigatorState = {
+    isExploring: false,
+    visitedNodes: new Set<string>(),
+    lastDirection: null as Direction | null,
+    siblingNodes: [] as GfxModel[],
+    siblingIndex: 0,
+  };
 
   get gfx() {
     return this.std.get(GfxControllerIdentifier);
@@ -544,8 +719,39 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         const gfx = this.rootComponent.gfx;
         const selection = gfx.selection;
 
-        // Handle Cmd/Ctrl + Arrow keys for shape preview
+        // Handle Alt/Option + Arrow keys for graph traversal
         if (
+          event.altKey &&
+          (event.code === 'ArrowUp' || event.code === 'ArrowDown' || 
+           event.code === 'ArrowLeft' || event.code === 'ArrowRight') &&
+          !event.repeat
+        ) {
+          if (this._canTraverseGraph()) {
+            event.preventDefault();
+            
+            let direction: Direction;
+            switch (event.code) {
+              case 'ArrowUp':
+                direction = Direction.Top;
+                break;
+              case 'ArrowDown':
+                direction = Direction.Bottom;
+                break;
+              case 'ArrowLeft':
+                direction = Direction.Left;
+                break;
+              case 'ArrowRight':
+                direction = Direction.Right;
+                break;
+              default:
+                return false;
+            }
+            this._traverseGraph(direction);
+            return true;
+          }
+        }
+        // Handle Cmd/Ctrl + Arrow keys for shape preview
+        else if (
           (event.metaKey || event.ctrlKey) &&
           (event.code === 'ArrowUp' || event.code === 'ArrowDown' || 
            event.code === 'ArrowLeft' || event.code === 'ArrowRight') &&
@@ -896,6 +1102,9 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
     this.gfx.selection.slots.updated.subscribe(() => {
       // Clear previews when selection changes
       this._clearAllShapePreviews();
+      if (!this._isTraversing) {
+        this._resetNavigatorState();
+      }
     });
   }
 
@@ -1097,6 +1306,256 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
         elements: createdIds,
         editing: false,
       });
+    }
+  }
+
+  /**
+   * Check if graph traversal is possible
+   */
+  private _canTraverseGraph(): boolean {
+    const { selectedElements } = this.rootComponent.service.selection;
+    return (
+      selectedElements.length === 1 &&
+      !selectedElements[0].isLocked() &&
+      !this.rootComponent.service.selection.editing
+    );
+  }
+
+  /**
+   * Traverse the graph in the specified direction
+   */
+  private _traverseGraph(direction: Direction) {
+    if (!this._canTraverseGraph()) {
+      return;
+    }
+
+    const state = this._navigatorState;
+    const selection = this.rootComponent.service.selection;
+    const currentElement = selection.selectedElements[0];
+
+    // Session Start
+    if (!state.isExploring) {
+      state.isExploring = true;
+      state.visitedNodes.clear();
+      state.visitedNodes.add(currentElement.id);
+    }
+
+    // Direction Check & Sibling Cycling
+    if (state.lastDirection === direction && state.siblingNodes.length > 1) {
+      state.siblingIndex = (state.siblingIndex + 1) % state.siblingNodes.length;
+      const nextNode = state.siblingNodes[state.siblingIndex];
+      state.visitedNodes.add(nextNode.id);
+      this._selectElement(nextNode);
+      return;
+    }
+
+    // Direction changed, reset sibling state but keep visited nodes
+    if (state.lastDirection !== direction) {
+      state.lastDirection = direction;
+      state.siblingNodes = [];
+      state.siblingIndex = 0;
+    }
+
+    // Find Successors
+    const successors = this._getSuccessors(currentElement, direction);
+    const unvisitedSuccessors = successors.filter(
+      s => !state.visitedNodes.has(s.id)
+    );
+
+    let nextNode: GfxModel | null = null;
+
+    // Handle Successors
+    if (unvisitedSuccessors.length > 0) {
+      // Single successor
+      if (unvisitedSuccessors.length === 1) {
+        nextNode = unvisitedSuccessors[0];
+        state.siblingNodes = [];
+        state.siblingIndex = 0;
+      } else {
+        // Multiple successors - set up sibling cycling
+        state.siblingNodes = unvisitedSuccessors;
+        state.siblingIndex = 0;
+        nextNode = state.siblingNodes[0];
+      }
+    } else if (successors.length > 0) {
+      // All successors visited, but we have successors - cycle through them
+      state.siblingNodes = successors;
+      state.siblingIndex = 0;
+      nextNode = state.siblingNodes[0];
+    } else {
+      // No successors, fallback to predecessors
+      const predecessors = this._getPredecessors(currentElement, direction);
+      if (predecessors.length > 0) {
+        nextNode = predecessors[0];
+        state.siblingNodes = [];
+        state.siblingIndex = 0;
+      }
+    }
+
+    if (nextNode) {
+      state.visitedNodes.add(nextNode.id);
+      this._selectElement(nextNode);
+    }
+  }
+
+  private _getSuccessors(
+    element: GfxModel,
+    direction: Direction
+  ): GfxModel[] {
+    const surfaceBlock = getSurfaceBlock(this.std.store);
+    if (!surfaceBlock) return [];
+
+    const connectors = surfaceBlock.getConnectors(element.id);
+    const successors: GfxModel[] = [];
+
+    connectors.forEach(connector => {
+      if (connector.source.id === element.id && connector.target.id) {
+        const heading = this._getHeadingForConnection(
+          element,
+          connector,
+          'source'
+        );
+        if (heading === direction) {
+          const successorElement = this.gfx.getElementById(
+            connector.target.id
+          );
+          if (successorElement) {
+            successors.push(successorElement as GfxModel);
+          }
+        }
+      }
+    });
+
+    if (direction === Direction.Left || direction === Direction.Right) {
+      successors.sort((a, b) => a.elementBound.y - b.elementBound.y);
+    } else {
+      successors.sort((a, b) => a.elementBound.x - b.elementBound.x);
+    }
+
+    return successors;
+  }
+
+  private _getPredecessors(
+    element: GfxModel,
+    direction: Direction
+  ): GfxModel[] {
+    const surfaceBlock = getSurfaceBlock(this.std.store);
+    if (!surfaceBlock) return [];
+
+    const connectors = surfaceBlock.getConnectors(element.id);
+    const predecessors: GfxModel[] = [];
+
+    connectors.forEach(connector => {
+      if (connector.target.id === element.id && connector.source.id) {
+        const heading = this._getHeadingForConnection(
+          element,
+          connector,
+          'target'
+        );
+        if (heading === direction) {
+          const predecessorElement = this.gfx.getElementById(
+            connector.source.id
+          );
+          if (predecessorElement) {
+            predecessors.push(predecessorElement as GfxModel);
+          }
+        }
+      }
+    });
+
+    if (direction === Direction.Left || direction === Direction.Right) {
+      predecessors.sort((a, b) => a.elementBound.y - b.elementBound.y);
+    } else {
+      predecessors.sort((a, b) => a.elementBound.x - b.elementBound.x);
+    }
+
+    return predecessors;
+  }
+
+  private _getHeadingForConnection(
+    element: GfxModel,
+    connector: ConnectorElementModel,
+    end: 'source' | 'target'
+  ): Direction | null {
+    if (!connector.path || connector.path.length === 0) {
+      return null;
+    }
+
+    const P_local =
+      end === 'source'
+        ? connector.path[0]
+        : connector.path[connector.path.length - 1];
+    const P_conn = {
+      x: connector.elementBound.x + P_local[0],
+      y: connector.elementBound.y + P_local[1],
+    };
+
+    const N = element.elementBound;
+    const P_up = { x: N.x + N.w / 2, y: N.y };
+    const P_down = { x: N.x + N.w / 2, y: N.y + N.h };
+    const P_left = { x: N.x, y: N.y + N.h / 2 };
+    const P_right = { x: N.x + N.w, y: N.y + N.h / 2 };
+
+    const dist = (p1: { x: number; y: number }, p2: { x: number; y: number }) =>
+      Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+
+    const distances = [
+      { dir: Direction.Top, dist: dist(P_conn, P_up) },
+      { dir: Direction.Bottom, dist: dist(P_conn, P_down) },
+      { dir: Direction.Left, dist: dist(P_conn, P_left) },
+      { dir: Direction.Right, dist: dist(P_conn, P_right) },
+    ];
+
+    distances.sort((a, b) => a.dist - b.dist);
+    return distances[0].dir;
+  }
+
+  private _selectElement(element: GfxModel) {
+    this._isTraversing = true;
+    this.rootComponent.service.selection.set({
+      elements: [element.id],
+      editing: false,
+    });
+    this._ensureElementVisible(element);
+    this._isTraversing = false;
+  }
+
+  private _resetNavigatorState() {
+    this._navigatorState.isExploring = false;
+    this._navigatorState.visitedNodes.clear();
+    this._navigatorState.lastDirection = null;
+    this._navigatorState.siblingNodes = [];
+    this._navigatorState.siblingIndex = 0;
+  }
+
+  /**
+   * Ensure the element is visible in the viewport
+   */
+  private _ensureElementVisible(element: GfxModel) {
+    const viewport = this.rootComponent.service.viewport;
+    
+    // Ensure the element has elementBound property
+    if (!('elementBound' in element)) return;
+    
+    const elementBound = element.elementBound;
+    
+    // Check if element is outside viewport
+    const viewportBound = viewport.viewportBounds;
+    const margin = 50; // Margin around the element
+    
+    const elementWithMargin = new Bound(
+      elementBound.x - margin,
+      elementBound.y - margin,
+      elementBound.w + margin * 2,
+      elementBound.h + margin * 2
+    );
+
+    // If element is not fully visible, smoothly move viewport to center it
+    if (!viewportBound.contains(elementWithMargin)) {
+      viewport.smoothTranslate(
+        elementBound.center[0],
+        elementBound.center[1]
+      );
     }
   }
 }
