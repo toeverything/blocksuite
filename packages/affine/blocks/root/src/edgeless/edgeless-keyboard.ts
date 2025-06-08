@@ -6,6 +6,7 @@ import {
 } from '@blocksuite/affine-block-frame';
 import {
   DefaultTool,
+  EdgelessCRUDIdentifier,
   EdgelessLegacySlotIdentifier,
   isNoteBlock,
 } from '@blocksuite/affine-block-surface';
@@ -36,6 +37,8 @@ import {
   ConnectorElementModel,
   type ConnectorMode,
   EdgelessTextBlockModel,
+  getShapeRadius,
+  getShapeType,
   GroupElementModel,
   LayoutType,
   MindmapElementModel,
@@ -434,6 +437,51 @@ export class EdgelessPageKeyboardManager extends PageKeyboardManager {
           const { service } = rootComponent;
           const selection = service.selection;
           const elements = selection.selectedElements;
+
+          if (elements.length === 1 && elements[0] instanceof ShapeElementModel && !selection.editing) {
+            const shapeElement = elements[0];
+            
+            if (shapeElement.isLocked()) return;
+            
+            const shapeTool = this.gfx.tool.get(ShapeTool);
+            const nextShapeName = shapeTool.cycleShapeName('next');
+            
+            const shapeType = getShapeType(nextShapeName);
+            const radius = getShapeRadius(nextShapeName);
+            
+            rootComponent.std.store.captureSync();
+            rootComponent.std.get(EdgelessCRUDIdentifier).updateElement(shapeElement.id, { 
+              shapeType, 
+              radius 
+            });
+            
+            // Update the activated option of ShapeTool so that the next Tab key press cycles from the current shape
+            shapeTool.activatedOption.shapeName = nextShapeName;
+            
+            // Keep the element selected, which will automatically trigger the floating toolbar to show
+            requestAnimationFrame(() => {
+              // Ensure the element remains selected
+              selection.set({
+                elements: [shapeElement.id],
+                editing: false,
+              });
+              
+              // Trigger the shape switch menu in the floating toolbar to show
+              requestAnimationFrame(() => {
+                // Find the floating toolbar
+                const toolbarWidget = rootComponent.querySelector('affine-toolbar-widget');
+                if (toolbarWidget) {
+                  // Find the shape switch menu button
+                  const shapeMenuButton = toolbarWidget.shadowRoot?.querySelector('editor-menu-button[aria-label="switch shape type-menu"]');
+                  if (shapeMenuButton && typeof (shapeMenuButton as any).show === 'function') {
+                    (shapeMenuButton as any).show();
+                  }
+                }
+              });
+            });
+            
+            return;
+          }
 
           if (!isSingleMindMapNode(elements)) {
             return;
