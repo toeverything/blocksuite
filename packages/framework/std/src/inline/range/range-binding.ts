@@ -279,6 +279,21 @@ export class RangeBinding {
         selection.is(TextSelection)
       ) ?? null;
 
+    if (!text && selections.length > 0) {
+      const hasRecoverable = selections.find(selection => {
+        const selectionConstructor =
+          selection.constructor as typeof BaseSelection;
+        return selectionConstructor.recoverable;
+      });
+      if (!hasRecoverable) {
+        // prevent focus to top-level content-editable element
+        // if the browser focus to the top-level content-editable element,
+        // when switching between tabs,
+        // the browser will focus to the top-level content-editable element
+        this.host.focus({ preventScroll: true });
+      }
+    }
+
     if (text === this._prevTextSelection) {
       return;
     }

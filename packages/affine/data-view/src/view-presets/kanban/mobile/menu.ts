@@ -12,18 +12,16 @@ import {
 } from '@blocksuite/icons/lit';
 import { html } from 'lit';
 
-import type { DataViewRenderer } from '../../../core/data-view.js';
 import { groupTraitKey } from '../../../core/group-by/trait.js';
-import type { KanbanSingleView } from '../kanban-view-manager.js';
+import type { MobileKanbanViewUILogic } from './kanban-view-ui-logic.js';
 
 export const popCardMenu = (
   ele: PopupTarget,
-  view: KanbanSingleView,
   groupKey: string,
   cardId: string,
-  dataViewEle: DataViewRenderer
+  kanbanViewLogic: MobileKanbanViewUILogic
 ) => {
-  const groupTrait = view.traitGet(groupTraitKey);
+  const groupTrait = kanbanViewLogic.view.traitGet(groupTraitKey);
   if (!groupTrait) {
     return;
   }
@@ -34,8 +32,8 @@ export const popCardMenu = (
           name: 'Expand Card',
           prefix: ExpandFullIcon(),
           select: () => {
-            dataViewEle.openDetailPanel({
-              view: view,
+            kanbanViewLogic.root.openDetailPanel({
+              view: kanbanViewLogic.view,
               rowId: cardId,
             });
           },
@@ -81,7 +79,10 @@ export const popCardMenu = (
             ${MoveLeftIcon()}
           </div>`,
           select: () => {
-            view.addCard({ before: true, id: cardId }, groupKey);
+            kanbanViewLogic.view.addCard(
+              { before: true, id: cardId },
+              groupKey
+            );
           },
         }),
         menu.action({
@@ -92,7 +93,10 @@ export const popCardMenu = (
             ${MoveRightIcon()}
           </div>`,
           select: () => {
-            view.addCard({ before: false, id: cardId }, groupKey);
+            kanbanViewLogic.view.addCard(
+              { before: false, id: cardId },
+              groupKey
+            );
           },
         }),
       ],
@@ -106,7 +110,7 @@ export const popCardMenu = (
           },
           prefix: DeleteIcon(),
           select: () => {
-            view.rowsDelete([cardId]);
+            kanbanViewLogic.view.rowsDelete([cardId]);
           },
         }),
       ],

@@ -28,7 +28,6 @@ import { state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { repeat } from 'lit/directives/repeat.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { type Subscription } from 'rxjs';
 
 import { RenderResizeHandles } from './resize-handles.js';
 import { generateCursorUrl, getRotatedResizeCursor } from './utils.js';
@@ -359,21 +358,6 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<RootBlockModel> 
     }
   `;
 
-  private readonly _initSelectedSlot = () => {
-    this._propDisposables.forEach(disposable => disposable.unsubscribe());
-    this._propDisposables = [];
-
-    this.selection.selectedElements.forEach(element => {
-      if ('flavour' in element) {
-        this._propDisposables.push(
-          element.propsUpdated.subscribe(() => {
-            this._updateOnElementChange(element.id);
-          })
-        );
-      }
-    });
-  };
-
   private readonly _dragEndCleanup = () => {
     this._isWidthLimit = false;
     this._isHeightLimit = false;
@@ -386,16 +370,15 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<RootBlockModel> 
     this.frameOverlay.clear();
   };
 
-  private _propDisposables: Subscription[] = [];
-
   private readonly _updateCursor = (options?: {
     type: 'resize' | 'rotate';
     angle: number;
     handle: ResizeHandle;
+    pure?: boolean;
   }) => {
     if (!options) {
       !this._isResizing && (this.gfx.cursor$.value = 'default');
-      return;
+      return 'default';
     }
 
     const { type, angle, handle } = options;
@@ -410,7 +393,11 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<RootBlockModel> 
       });
     }
 
-    this.gfx.cursor$.value = cursor;
+    if (options.pure !== true) {
+      this.gfx.cursor$.value = cursor;
+    }
+
+    return cursor;
   };
 
   private readonly _updateOnElementChange = (
@@ -423,8 +410,30 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<RootBlockModel> 
     }
   };
 
+  private readonly _updateHandles = () => {
+    const interaction = this._interaction;
+    const { store, selection } = this;
+    const elements = selection.selectedElements;
+
+    if (interaction && !selection.editing && !store.readonly) {
+      const resizeHandles = interaction.getResizeHandlers({
+        elements,
+      });
+      const { rotatable } = interaction.getRotateConfig({
+        elements,
+      });
+
+      this._allowedHandles = {
+        rotatable,
+        resizeHandles,
+      };
+    } else {
+      this._allowedHandles = null;
+    }
+  };
+
   private readonly _updateOnSelectionChange = () => {
-    this._initSelectedSlot();
+    this._updateHandles();
     this._updateSelectedRect();
     // Reset the cursor
     this._updateCursor();
@@ -554,10 +563,6 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<RootBlockModel> 
         })
       );
     }
-
-    _disposables.add(() => {
-      this._propDisposables.forEach(disposable => disposable.unsubscribe());
-    });
   }
 
   private get _interaction() {
@@ -569,7 +574,7 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<RootBlockModel> 
   }
 
   private _renderHandles() {
-    const { selection, gfx, block, store } = this;
+    const { selection, gfx, block } = this;
     const elements = selection.selectedElements;
 
     if (selection.inoperable) {
@@ -579,23 +584,16 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<RootBlockModel> 
     const handles = [];
 
     if (
+      this._allowedHandles &&
       this._interaction &&
-      !selection.editing &&
-      !store.readonly &&
       !elements.some(element => element.isLocked())
     ) {
       const interaction = this._interaction;
-      const resizeHandlers = interaction.getResizeHandlers({
-        elements,
-      });
-      const { rotatable } = interaction.getRotateConfig({
-        elements,
-      });
 
       handles.push(
         RenderResizeHandles(
-          resizeHandlers,
-          rotatable,
+          this._allowedHandles.resizeHandles,
+          this._allowedHandles.rotatable,
           (e: PointerEvent, handle: ResizeHandle) => {
             const isRotate = (e.target as HTMLElement).classList.contains(
               'rotate'
@@ -603,7 +601,7 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<RootBlockModel> 
 
             if (isRotate) {
               interaction.handleElementRotate({
-                elements: this.selection.selectedElements,
+                elements,
                 event: e,
                 onRotateStart: () => {
                   this._mode = 'rotate';
@@ -622,7 +620,7 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<RootBlockModel> 
               });
             } else {
               interaction.handleElementResize({
-                elements: this.selection.selectedElements,
+                elements,
                 handle,
                 event: e,
                 onResizeStart: () => {
@@ -632,12 +630,19 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<RootBlockModel> 
                   if (lockRatio) {
                     this._scaleDirection = handle;
                     this._scalePercent = `${Math.round(scaleX * 100)}%`;
+                    this._mode = 'scale';
                   }
 
                   if (exceed) {
                     this._isWidthLimit = exceed.w;
                     this._isHeightLimit = exceed.h;
                   }
+
+                  this._updateCursor({
+                    type: 'resize',
+                    angle: elements.length > 1 ? 0 : (elements[0]?.rotate ?? 0),
+                    handle,
+                  });
                 },
                 onResizeEnd: () => {
                   this._mode = 'resize';
@@ -647,14 +652,11 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<RootBlockModel> 
             }
           },
           option => {
-            if (option) {
-              this._updateCursor({
-                ...option,
-                angle: elements.length > 1 ? 0 : (elements[0]?.rotate ?? 0),
-              });
-            } else {
-              this._updateCursor();
-            }
+            return this._updateCursor({
+              ...option,
+              angle: elements.length > 1 ? 0 : (elements[0]?.rotate ?? 0),
+              pure: true,
+            });
           }
         )
       );
@@ -783,6 +785,12 @@ export class EdgelessSelectedRectWidget extends WidgetComponent<RootBlockModel> 
       </div>
     `;
   }
+
+  @state()
+  private accessor _allowedHandles: {
+    rotatable: boolean;
+    resizeHandles: ResizeHandle[];
+  } | null = null;
 
   @state()
   private accessor _isHeightLimit = false;

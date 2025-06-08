@@ -48,7 +48,7 @@ import { REFERENCE_NODE } from '@blocksuite/affine-shared/consts';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import {
   createDefaultDoc,
-  openFileOrFiles,
+  openSingleFileWith,
   type Signal,
 } from '@blocksuite/affine-shared/utils';
 import type { AffineLinkedDocWidget } from '@blocksuite/affine-widget-linked-doc';
@@ -418,7 +418,7 @@ const contentMediaToolGroup: KeyboardToolPanelGroup = {
         const model = selectedModels?.[0];
         if (!model) return;
 
-        const file = await openFileOrFiles();
+        const file = await openSingleFileWith();
         if (!file) return;
 
         await addSiblingAttachmentBlocks(std, [file], model);
@@ -1040,7 +1040,7 @@ export const defaultKeyboardToolbarConfig: KeyboardToolbarConfig = {
         const model = selectedModels?.[0];
         if (!model) return;
 
-        const file = await openFileOrFiles();
+        const file = await openSingleFileWith();
         if (!file) return;
 
         await addSiblingAttachmentBlocks(std, [file], model);

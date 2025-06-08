@@ -92,7 +92,7 @@ export class Slider extends WithDisposable(LitElement) {
 
     const dispose = on(this, 'pointermove', this._onPointerMove);
     this._disposables.add(once(this, 'pointerup', dispose));
-    this._disposables.add(once(this, 'pointerout', dispose));
+    this._disposables.add(once(this, 'pointerleave', dispose));
   };
 
   private readonly _onPointerMove = (e: PointerEvent) => {

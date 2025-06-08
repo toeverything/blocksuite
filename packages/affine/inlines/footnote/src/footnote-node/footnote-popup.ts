@@ -1,6 +1,6 @@
 import {
   getAttachmentFileIcon,
-  getLoadingIconWith,
+  LoadingIcon,
   WebIcon16,
 } from '@blocksuite/affine-components/icons';
 import type { FootNote } from '@blocksuite/affine-model';
@@ -8,7 +8,6 @@ import { ImageProxyService } from '@blocksuite/affine-shared/adapters';
 import {
   DocDisplayMetaProvider,
   LinkPreviewServiceIdentifier,
-  ThemeProvider,
 } from '@blocksuite/affine-shared/services';
 import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
 import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
@@ -77,7 +76,7 @@ export class FootNotePopup extends SignalWatcher(WithDisposable(LitElement)) {
       return getAttachmentFileIcon(fileType);
     } else if (referenceType === 'url') {
       if (this._isLoading$.value) {
-        return this._LoadingIcon();
+        return LoadingIcon();
       }
 
       const favicon = this._linkPreview$.value?.favicon;
@@ -125,11 +124,6 @@ export class FootNotePopup extends SignalWatcher(WithDisposable(LitElement)) {
     }
     return this._popupLabel$.value;
   });
-
-  private readonly _LoadingIcon = () => {
-    const theme = this.std.get(ThemeProvider).theme;
-    return getLoadingIconWith(theme);
-  };
 
   private readonly _onClick = () => {
     this.onPopupClick(this.footnote, this.abortController);

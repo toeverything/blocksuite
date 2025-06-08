@@ -1,19 +1,17 @@
 import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
 import { whenHover } from '@blocksuite/affine-components/hover';
-import { getLoadingIconWith } from '@blocksuite/affine-components/icons';
+import { LoadingIcon } from '@blocksuite/affine-components/icons';
 import { Peekable } from '@blocksuite/affine-components/peek';
 import { ResourceController } from '@blocksuite/affine-components/resource';
 import type { ImageBlockModel } from '@blocksuite/affine-model';
 import { ImageSelection } from '@blocksuite/affine-shared/selection';
-import {
-  ThemeProvider,
-  ToolbarRegistryIdentifier,
-} from '@blocksuite/affine-shared/services';
+import { ToolbarRegistryIdentifier } from '@blocksuite/affine-shared/services';
 import { formatSize } from '@blocksuite/affine-shared/utils';
 import { IS_MOBILE } from '@blocksuite/global/env';
 import { BrokenImageIcon, ImageIcon } from '@blocksuite/icons/lit';
 import { BlockSelection } from '@blocksuite/std';
 import { computed } from '@preact/signals-core';
+import { cssVarV2 } from '@toeverything/theme/v2';
 import { html } from 'lit';
 import { query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
@@ -126,9 +124,6 @@ export class ImageBlockComponent extends CaptionedBlockComponent<ImageBlockModel
   }
 
   override renderBlock() {
-    const theme = this.std.get(ThemeProvider).theme$.value;
-    const loadingIcon = getLoadingIconWith(theme);
-
     const blobUrl = this.blobUrl;
     const { size = 0 } = this.model.props;
 
@@ -138,7 +133,10 @@ export class ImageBlockComponent extends CaptionedBlockComponent<ImageBlockModel
     });
 
     const resovledState = this.resourceController.resolveStateWith({
-      loadingIcon,
+      loadingIcon: LoadingIcon({
+        strokeColor: cssVarV2('button/pureWhiteText'),
+        ringColor: cssVarV2('loading/imageLoadingLayer', '#ffffff8f'),
+      }),
       errorIcon: BrokenImageIcon(),
       icon: ImageIcon(),
       title: 'Image',

@@ -36,7 +36,7 @@ export type {
   RotateEndContext,
   RotateMoveContext,
   RotateStartContext,
-  SelectedContext,
+  SelectContext,
 } from './interactivity/index.js';
 export {
   GfxViewEventManager,

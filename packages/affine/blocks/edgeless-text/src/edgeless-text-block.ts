@@ -22,10 +22,7 @@ import {
   GfxBlockComponent,
   TextSelection,
 } from '@blocksuite/std';
-import {
-  GfxViewInteractionExtension,
-  type SelectedContext,
-} from '@blocksuite/std/gfx';
+import { GfxViewInteractionExtension } from '@blocksuite/std/gfx';
 import { computed } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { query, state } from 'lit/decorators.js';
@@ -282,69 +279,6 @@ export class EdgelessTextBlockComponent extends GfxBlockComponent<EdgelessTextBl
     };
   }
 
-  override onSelected(context: SelectedContext): void | boolean {
-    const { selected, multiSelect, event: e } = context;
-    const { editing } = this.gfx.selection;
-    const alreadySelected = this.gfx.selection.has(this.model.id);
-
-    if (!multiSelect && selected && (alreadySelected || editing)) {
-      if (this.model.isLocked()) return;
-
-      if (alreadySelected && editing) {
-        return;
-      }
-
-      this.gfx.selection.set({
-        elements: [this.model.id],
-        editing: true,
-      });
-
-      this.updateComplete
-        .then(() => {
-          if (!this.isConnected) {
-            return;
-          }
-
-          if (this.model.children.length === 0) {
-            const blockId = this.store.addBlock(
-              'affine:paragraph',
-              { type: 'text' },
-              this.model.id
-            );
-
-            if (blockId) {
-              focusTextModel(this.std, blockId);
-            }
-          } else {
-            const rect = this.querySelector(
-              '.affine-block-children-container'
-            )?.getBoundingClientRect();
-
-            if (rect) {
-              const offsetY = 8 * this.gfx.viewport.zoom;
-              const offsetX = 2 * this.gfx.viewport.zoom;
-              const x = clamp(
-                e.clientX,
-                rect.left + offsetX,
-                rect.right - offsetX
-              );
-              const y = clamp(
-                e.clientY,
-                rect.top + offsetY,
-                rect.bottom - offsetY
-              );
-              handleNativeRangeAtPoint(x, y);
-            } else {
-              handleNativeRangeAtPoint(e.clientX, e.clientY);
-            }
-          }
-        })
-        .catch(console.error);
-    } else {
-      return super.onSelected(context);
-    }
-  }
-
   override renderGfxBlock() {
     const { model } = this;
     const { rotate, hasMaxWidth } = model.props;
@@ -503,6 +437,74 @@ export const EdgelessTextInteraction =
             context.default(context);
             model.pop('scale');
             model.pop('hasMaxWidth');
+          },
+        };
+      },
+
+      handleSelection: context => {
+        const { gfx, std, view, model } = context;
+        return {
+          onSelect(context) {
+            const { selected, multiSelect, event: e } = context;
+            const { editing } = gfx.selection;
+            const alreadySelected = gfx.selection.has(model.id);
+
+            if (!multiSelect && selected && (alreadySelected || editing)) {
+              if (model.isLocked()) return;
+
+              if (alreadySelected && editing) {
+                return;
+              }
+
+              gfx.selection.set({
+                elements: [model.id],
+                editing: true,
+              });
+
+              view.updateComplete
+                .then(() => {
+                  if (!view.isConnected) {
+                    return;
+                  }
+
+                  if (model.children.length === 0) {
+                    const blockId = std.store.addBlock(
+                      'affine:paragraph',
+                      { type: 'text' },
+                      model.id
+                    );
+
+                    if (blockId) {
+                      focusTextModel(std, blockId);
+                    }
+                  } else {
+                    const rect = view
+                      .querySelector('.affine-block-children-container')
+                      ?.getBoundingClientRect();
+
+                    if (rect) {
+                      const offsetY = 8 * gfx.viewport.zoom;
+                      const offsetX = 2 * gfx.viewport.zoom;
+                      const x = clamp(
+                        e.clientX,
+                        rect.left + offsetX,
+                        rect.right - offsetX
+                      );
+                      const y = clamp(
+                        e.clientY,
+                        rect.top + offsetY,
+                        rect.bottom - offsetY
+                      );
+                      handleNativeRangeAtPoint(x, y);
+                    } else {
+                      handleNativeRangeAtPoint(e.clientX, e.clientY);
+                    }
+                  }
+                })
+                .catch(console.error);
+            } else {
+              return context.default(context);
+            }
           },
         };
       },

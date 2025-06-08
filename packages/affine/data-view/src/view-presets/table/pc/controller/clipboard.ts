@@ -9,7 +9,7 @@ import {
   type TableViewSelection,
   type TableViewSelectionWithType,
 } from '../../selection';
-import type { DataViewTable } from '../table-view.js';
+import type { TableViewUILogic } from '../table-view-ui-logic.js';
 
 const BLOCKSUITE_DATABASE_TABLE = 'blocksuite/database/table';
 type JsonAreaData = string[][];
@@ -20,9 +20,7 @@ export class TableClipboardController implements ReactiveController {
     tableSelection: TableViewSelectionWithType,
     isCut = false
   ) => {
-    const table = this.host;
-
-    const area = getSelectedArea(tableSelection, table);
+    const area = getSelectedArea(tableSelection, this.logic);
     if (!area) {
       return;
     }
@@ -44,7 +42,7 @@ export class TableClipboardController implements ReactiveController {
         }
       }
       if (deleteRows.length) {
-        this.props.view.rowsDelete(deleteRows);
+        this.logic.view.rowsDelete(deleteRows);
       }
     }
     this.clipboard
@@ -79,12 +77,11 @@ export class TableClipboardController implements ReactiveController {
   private readonly _onPaste = async (_context: UIEventStateContext) => {
     const event = _context.get('clipboardState').raw;
     event.stopPropagation();
-    const view = this.host;
 
     const clipboardData = event.clipboardData;
     if (!clipboardData) return;
 
-    const tableSelection = this.host.selectionController.selection;
+    const tableSelection = this.selectionController.selection;
     if (TableViewRowSelection.is(tableSelection)) {
       return;
     }
@@ -97,7 +94,7 @@ export class TableClipboardController implements ReactiveController {
         if (dataString) {
           // If internal format data exists, use it
           const jsonAreaData = JSON.parse(dataString) as JsonAreaData;
-          pasteToCells(view, jsonAreaData, tableSelection);
+          pasteToCells(this.logic, jsonAreaData, tableSelection);
           return true;
         }
       } catch {
@@ -115,7 +112,7 @@ export class TableClipboardController implements ReactiveController {
           .filter(row => row.some(cell => cell !== '')); // Filter out empty rows
 
         if (rows.length > 0) {
-          pasteToCells(view, rows, tableSelection);
+          pasteToCells(this.logic, rows, tableSelection);
         }
       }
     }
@@ -124,27 +121,29 @@ export class TableClipboardController implements ReactiveController {
   };
 
   private get clipboard() {
-    return this.props.clipboard;
+    return this.logic.root.config.clipboard;
   }
 
   private get notification() {
-    return this.props.notification;
-  }
-
-  get props() {
-    return this.host.props;
+    return this.logic.root.config.notification;
   }
 
   private get readonly() {
-    return this.props.view.readonly$.value;
+    return this.logic.view.readonly$.value;
   }
 
-  constructor(public host: DataViewTable) {
-    host.addController(this);
+  constructor(public logic: TableViewUILogic) {}
+
+  get host() {
+    return this.logic.ui$.value;
+  }
+
+  get selectionController() {
+    return this.logic.selectionController;
   }
 
   copy() {
-    const tableSelection = this.host.selectionController.selection;
+    const tableSelection = this.selectionController.selection;
     if (!tableSelection) {
       return;
     }
@@ -152,7 +151,7 @@ export class TableClipboardController implements ReactiveController {
   }
 
   cut() {
-    const tableSelection = this.host.selectionController.selection;
+    const tableSelection = this.selectionController.selection;
     if (!tableSelection) {
       return;
     }
@@ -160,9 +159,9 @@ export class TableClipboardController implements ReactiveController {
   }
 
   hostConnected() {
-    this.host.disposables.add(
-      this.props.handleEvent('copy', _ctx => {
-        const tableSelection = this.host.selectionController.selection;
+    this.host?.disposables.add(
+      this.logic.handleEvent('copy', _ctx => {
+        const tableSelection = this.selectionController.selection;
         if (!tableSelection) return false;
 
         this._onCopy(tableSelection);
@@ -170,9 +169,9 @@ export class TableClipboardController implements ReactiveController {
       })
     );
 
-    this.host.disposables.add(
-      this.props.handleEvent('cut', _ctx => {
-        const tableSelection = this.host.selectionController.selection;
+    this.host?.disposables.add(
+      this.logic.handleEvent('cut', _ctx => {
+        const tableSelection = this.selectionController.selection;
         if (!tableSelection) return false;
 
         this._onCut(tableSelection);
@@ -180,8 +179,8 @@ export class TableClipboardController implements ReactiveController {
       })
     );
 
-    this.host.disposables.add(
-      this.props.handleEvent('paste', ctx => {
+    this.host?.disposables.add(
+      this.logic.handleEvent('paste', ctx => {
         if (this.readonly) return false;
 
         this._onPaste(ctx).catch(console.error);
@@ -193,9 +192,9 @@ export class TableClipboardController implements ReactiveController {
 
 function getSelectedArea(
   selection: TableViewSelection,
-  table: DataViewTable
+  table: TableViewUILogic
 ): SelectedArea | undefined {
-  const view = table.props.view;
+  const view = table.view;
   if (TableViewRowSelection.is(selection)) {
     const rows = TableViewRowSelection.rows(selection)
       .map(row => {
@@ -283,7 +282,7 @@ function getTargetRangeFromSelection(
 }
 
 function pasteToCells(
-  table: DataViewTable,
+  table: TableViewUILogic,
   rows: JsonAreaData,
   selection: TableViewAreaSelection
 ) {

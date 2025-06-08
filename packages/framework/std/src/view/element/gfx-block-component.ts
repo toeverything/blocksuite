@@ -9,7 +9,6 @@ import type {
   BoxSelectionContext,
   DragMoveContext,
   GfxViewTransformInterface,
-  SelectedContext,
 } from '../../gfx/interactivity/index.js';
 import type { GfxBlockElementModel } from '../../gfx/model/gfx-block-model.js';
 import { SurfaceSelection } from '../../selection/index.js';
@@ -102,16 +101,6 @@ export abstract class GfxBlockComponent<
 
   onDragEnd() {
     this.model.pop('xywh');
-  }
-
-  onSelected(context: SelectedContext): void | boolean {
-    if (context.multiSelect) {
-      this.gfx.selection.toggle(this.model);
-    } else {
-      this.gfx.selection.set({ elements: [this.model.id] });
-    }
-
-    return true;
   }
 
   onBoxSelected(_: BoxSelectionContext) {}
@@ -217,17 +206,6 @@ export function toGfxBlockComponent<
 
     onDragEnd() {
       this.model.pop('xywh');
-    }
-
-    // eslint-disable-next-line sonarjs/no-identical-functions
-    onSelected(context: SelectedContext): void | boolean {
-      if (context.multiSelect) {
-        this.gfx.selection.toggle(this.model);
-      } else {
-        this.gfx.selection.set({ elements: [this.model.id] });
-      }
-
-      return true;
     }
 
     onBoxSelected(_: BoxSelectionContext) {}

@@ -10,7 +10,7 @@ import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 
 import { TableViewAreaSelection } from '../../../selection';
-import type { VirtualTableView } from '../../table-view';
+import type { VirtualTableViewUILogic } from '../../table-view-ui-logic';
 import type { TableGridGroup } from '../../types';
 import * as styles from './group-header-css';
 import { GroupTitle } from './group-title';
@@ -18,7 +18,7 @@ export class TableGroupHeader extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
   @property({ attribute: false })
-  accessor tableView!: VirtualTableView;
+  accessor tableViewLogic!: VirtualTableViewUILogic;
 
   @property({ attribute: false })
   accessor gridGroup!: TableGridGroup;
@@ -35,7 +35,7 @@ export class TableGroupHeader extends SignalWatcher(
   }
 
   group$ = computed(() => {
-    return this.tableView.groupTrait$.value?.groupsDataList$.value?.find(
+    return this.tableViewLogic.groupTrait$.value?.groupsDataList$.value?.find(
       g => g.key === this.gridGroup.groupId
     );
   });
@@ -45,11 +45,11 @@ export class TableGroupHeader extends SignalWatcher(
   });
 
   get tableViewManager() {
-    return this.tableView.props.view;
+    return this.tableViewLogic.view;
   }
 
   get selectionController() {
-    return this.tableView.selectionController;
+    return this.tableViewLogic.selectionController;
   }
 
   private readonly clickAddRowInStart = () => {
@@ -123,7 +123,7 @@ export class TableGroupHeader extends SignalWatcher(
     return html`
       ${this.renderGroupHeader()}
       <virtual-table-header
-        .tableViewManager="${this.tableViewManager}"
+        .tableViewLogic="${this.tableViewLogic}"
       ></virtual-table-header>
     `;
   }

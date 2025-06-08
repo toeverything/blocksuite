@@ -70,3 +70,19 @@ export const dividerV = css({
   backgroundColor: 'var(--affine-divider-color)',
   margin: '0 8px',
 });
+
+export const dv = {
+  p2,
+  p4,
+  p8,
+  hover,
+  icon16,
+  icon20,
+  border,
+  round4,
+  round8,
+  color2,
+  shadow2,
+  dividerH,
+  dividerV,
+};
