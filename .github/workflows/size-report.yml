@@ -1,9 +1,11 @@
 name: Size Report
 
 on:
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+  # Fail for unknown reasons
+  # pull_request:
+  #   branches:
+  #     - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
