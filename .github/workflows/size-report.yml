@@ -1,11 +1,9 @@
 name: Size Report
 
 on:
-  workflow_dispatch:
-  # Fail for unknown reasons
-  # pull_request:
-  #   branches:
-  #     - main
+  pull_request:
+    branches:
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,6 +23,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: ./.github/actions/setup
+
+      - name: Set environment variables
+        run: |
+          echo 'NODE_OPTIONS=--max_old_space_size=8192' >> "$GITHUB_ENV"
 
       - uses: andresz1/size-limit-action@v1
         with:
