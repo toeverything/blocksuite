@@ -25,7 +25,8 @@
     "ci:version:canary": "changeset version --snapshot canary && yarn install --no-frozen-lockfile",
     "ci:publish:canary": "yarn build:packages && yarn workspaces foreach -Ap --no-private npm publish --access public --tag canary",
     "postinstall": "husky",
-    "changeset": "changeset && node scripts/changelog.mjs"
+    "changeset": "changeset && node scripts/changelog.mjs",
+    "deploy": "aws s3 sync packages/playground/dist s3://block.docnosys.com --delete --profile Chen"
   },
   "lint-staged": {
     "!packages/**/*": [
