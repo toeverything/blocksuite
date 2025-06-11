@@ -559,6 +559,26 @@ export class StarterDebugMenu extends ShadowlessElement {
     printToPdf().catch(console.error);
   }
 
+  private async _saveData() {
+    try {
+      const doc = this.editor.doc;
+      // Serialize the document to JSON
+      const data = doc.toJSON();
+      const docTitle = doc.meta?.title || 'Untitled';
+      const jsonString = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      download(blob, `${docTitle}.json`);
+      if (this.editor.host) {
+        toast(this.editor.host, 'Document data saved successfully.');
+      }
+    } catch (error) {
+      console.error('Failed to save document data:', error);
+      if (this.editor.host) {
+        toast(this.editor.host, 'Failed to save document data.');
+      }
+    }
+  }
+
   private _setThemeMode(dark: boolean) {
     const html = document.querySelector('html');
 
@@ -914,6 +934,13 @@ export class StarterDebugMenu extends ShadowlessElement {
           <sl-tooltip content="Switch Editor" placement="bottom" hoist>
             <sl-button size="small" @click="${this._switchEditorMode}">
               <sl-icon name="repeat"></sl-icon>
+            </sl-button>
+          </sl-tooltip>
+
+          <!-- Save Data Button with Floppy Disk Icon -->
+          <sl-tooltip content="Save Data" placement="bottom" hoist>
+            <sl-button size="small" @click="${this._saveData}">
+              <sl-icon name="floppy"></sl-icon>
             </sl-button>
           </sl-tooltip>
 
