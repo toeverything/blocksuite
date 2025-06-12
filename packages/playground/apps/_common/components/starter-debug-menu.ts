@@ -50,7 +50,10 @@ import { ShadowlessElement } from '@blocksuite/affine/std';
 import { GfxControllerIdentifier } from '@blocksuite/affine/std/gfx';
 import {
   type DeltaInsert,
+  type DocSnapshot,
+  getAssetName,
   Text,
+  Transformer,
   type Workspace,
 } from '@blocksuite/affine/store';
 import {
@@ -61,7 +64,7 @@ import {
   NotionHtmlTransformer,
   ZipTransformer,
 } from '@blocksuite/affine/widgets/linked-doc';
-import { NotionHtmlAdapter } from '@blocksuite/affine-shared/adapters';
+import { NotionHtmlAdapter, replaceIdMiddleware } from '@blocksuite/affine-shared/adapters';
 import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
 import { TestAffineEditorContainer } from '@blocksuite/integration-test';
 import type { SlDropdown } from '@shoelace-style/shoelace';
@@ -80,6 +83,9 @@ import type { CustomOutlinePanel } from './custom-outline-panel.js';
 import type { CustomOutlineViewer } from './custom-outline-viewer.js';
 import type { DocsPanel } from './docs-panel.js';
 import type { LeftSidePanel } from './left-side-panel.js';
+
+import { StorageManager } from "../storage/storage-manager";
+import { Zip } from '../../../../affine/widgets/linked-doc/src/transformers/utils.js';
 
 const basePath =
   'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.11.2/dist';
@@ -295,9 +301,6 @@ export class StarterDebugMenu extends ShadowlessElement {
     });
   }
 
-  /**
-   * Export markdown file using markdown adapter factory extension
-   */
   private async _exportMarkDown() {
     await this._exportFile({
       identifier: MarkdownAdapterFactoryIdentifier,
@@ -311,9 +314,6 @@ export class StarterDebugMenu extends ShadowlessElement {
     this.editor.std.get(ExportManager).exportPdf().catch(console.error);
   }
 
-  /**
-   * Export plain text file using plain text adapter factory extension
-   */
   private async _exportPlainText() {
     await this._exportFile({
       identifier: PlainTextAdapterFactoryIdentifier,
@@ -561,20 +561,100 @@ export class StarterDebugMenu extends ShadowlessElement {
 
   private async _saveData() {
     try {
-      const doc = this.editor.doc;
-      // Serialize the document to JSON
-      const data = doc.toJSON();
-      const docTitle = doc.meta?.title || 'Untitled';
-      const jsonString = JSON.stringify(data, null, 2);
-      const blob = new Blob([jsonString], { type: 'application/json' });
-      download(blob, `${docTitle}.json`);
+      // Send request-save message to parent window
+      window.parent.postMessage(
+        {
+          type: 'request-save',
+          documentType: 'doc',
+        },
+        '*'
+      );
       if (this.editor.host) {
-        toast(this.editor.host, 'Document data saved successfully.');
+        toast(this.editor.host, 'Requested save operation.');
       }
     } catch (error) {
-      console.error('Failed to save document data:', error);
+      console.error('Failed to request save:', error);
       if (this.editor.host) {
-        toast(this.editor.host, 'Failed to save document data.');
+        toast(this.editor.host, 'Failed to request save.');
+      }
+    }
+  }
+
+  private async _handleSaveWithToken(saveCredentials: unknown) {
+    try {
+      // Export the document as a snapshot
+      const credential = saveCredentials as any;
+      const storage = StorageManager.CreateStorage((credential as any).storageType);
+      storage.initialize(credential);
+
+      /////////////////////
+      // Create snapshot using original logic
+      const workspaceImpl = this.collection;
+      const docs = [this.doc];
+      const zip = new Zip();
+      const job = new Transformer({
+        schema: this.editor.doc.schema,
+        blobCRUD: workspaceImpl.blobSync,
+        docCRUD: {
+          create: (id: string) => workspaceImpl.createDoc(id).getStore({id}),
+          get: (id: string) => workspaceImpl.getDoc(id)?.getStore({ id }) ?? null,
+          delete: (id: string) => workspaceImpl.removeDoc(id),
+        },
+        middlewares: [
+          replaceIdMiddleware(workspaceImpl.idGenerator),
+          titleMiddleware(workspaceImpl.meta.docMetas),
+        ],
+      });
+      const snapshots = await Promise.all(docs.map(job.docToSnapshot));
+
+      await Promise.all(
+        snapshots
+          .filter((snapshot): snapshot is DocSnapshot => !!snapshot)
+          .map(async snapshot => {
+            const snapshotName = `${snapshot.meta.title || 'untitled'}.snapshot.json`;
+            await zip.file(snapshotName, JSON.stringify(snapshot, null, 2));
+          })
+      );
+      const assets = zip.folder('assets');
+      const pathBlobIdMap = job.assetsManager.getPathBlobIdMap();
+      const assetsMap = job.assets;
+
+      // Add blobs to assets folder, if failed, log the error and continue
+      const results = await Promise.all(
+        Array.from(pathBlobIdMap.values()).map(async blobId => {
+          try {
+            await job.assetsManager.readFromBlob(blobId);
+            const ext = getAssetName(assetsMap, blobId).split('.').at(-1);
+            const blob = assetsMap.get(blobId);
+            if (blob) {
+              await assets.file(`${blobId}.${ext}`, blob);
+              return { success: true, blobId };
+            }
+            return { success: false, blobId, error: 'Blob not found' };
+          } catch (error) {
+            console.error(`Failed to process blob: ${blobId}`, error);
+            return { success: false, blobId, error };
+          }
+        })
+      );
+
+      const failures = results.filter(r => !r.success);
+      if (failures.length > 0) {
+        console.warn(`Failed to process ${failures.length} blobs:`, failures);
+      }
+
+      const downloadBlob = await zip.generate();
+      const snapshotName = `affine.zip`;
+      await storage.uploadFile(downloadBlob, snapshotName, null);
+      /////////////////////
+
+      if (this.editor.host) {
+        toast(this.editor.host, 'Document snapshot saved successfully.');
+      }
+    } catch (error) {
+      console.error('Failed to save snapshot:', error);
+      if (this.editor.host) {
+        toast(this.editor.host, 'Failed to save snapshot.');
       }
     }
   }
@@ -726,6 +806,9 @@ export class StarterDebugMenu extends ShadowlessElement {
       }
     };
     readSelectionFromURL().catch(console.error);
+
+    // Add message listener for save credentials from parent window
+    window.addEventListener('message', this._handleMessage.bind(this));
   }
 
   override createRenderRoot() {
@@ -742,6 +825,15 @@ export class StarterDebugMenu extends ShadowlessElement {
 
     const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
     matchMedia.removeEventListener('change', this._darkModeChange);
+
+    // Clean up message listener
+    window.removeEventListener('message', this._handleMessage.bind(this));
+  }
+
+  private _handleMessage(event: MessageEvent) {
+    if (event.data.type === 'save' && event.data.saveCredentials) {
+      this._handleSaveWithToken.bind(this)(event.data.saveCredentials);
+    }
   }
 
   override firstUpdated() {
@@ -937,10 +1029,12 @@ export class StarterDebugMenu extends ShadowlessElement {
             </sl-button>
           </sl-tooltip>
 
-          <!-- Save Data Button with Floppy Disk Icon -->
+          <!-- Save Data Button with Floppy Icon -->
           <sl-tooltip content="Save Data" placement="bottom" hoist>
             <sl-button size="small" @click="${this._saveData}">
               <sl-icon name="floppy"></sl-icon>
+              <!-- Fallback: Uncomment below to use 'save' icon if 'floppy' doesn't work -->
+              <!-- <sl-icon name="save"></sl-icon> -->
             </sl-button>
           </sl-tooltip>
 

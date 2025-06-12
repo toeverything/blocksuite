@@ -2420,6 +2420,7 @@ __metadata:
     lit: "npm:^3.2.0"
     lz-string: "npm:^1.5.0"
     magic-string: "npm:^0.30.11"
+    quantant-storage: "npm:^0.0.41"
     rxjs: "npm:^7.8.1"
     tweakpane: "npm:^4.0.4"
     vite: "npm:^6.0.3"
@@ -9812,6 +9813,13 @@ __metadata:
   version: 0.2.10
   resolution: "quansync@npm:0.2.10"
   checksum: 10/b54d955de867e104025f2666d52b2b67befe4e0f184a96acc9adcbdc572e46dce49c69d1e79f99413beae8a974a576383806a05f85f9a826865dc589ee1bcaf2
+  languageName: node
+  linkType: hard
+
+"quantant-storage@npm:^0.0.41":
+  version: 0.0.41
+  resolution: "quantant-storage@npm:0.0.41"
+  checksum: 10/0af42809088e040a9bdc2d3b47295809e08ea0a11c3e8d61bdfcb018cc097f209fec11da0cc290ac2c5dd1fd2b8b8b3dac287ca4bb39848695de2889c30a252f
   languageName: node
   linkType: hard
 
