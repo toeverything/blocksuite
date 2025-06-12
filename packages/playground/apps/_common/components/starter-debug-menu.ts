@@ -190,9 +190,17 @@ type AdapterFactoryIdentifier =
 
 interface AdapterConfig {
   identifier: AdapterFactoryIdentifier;
-  fileExtension: string; // file extension need to be lower case with dot prefix, e.g. '.md', '.txt', '.html'
+  fileExtension: string;
   contentType: string;
   indexFileName: string;
+}
+
+interface ReadCredentials {
+  storageType: "aws" | "oss";
+  accessKeyId?: string;
+  secretAccessKey?: string;
+  bucket?: string;
+  key?: string;
 }
 
 @customElement('starter-debug-menu')
@@ -368,7 +376,7 @@ export class StarterDebugMenu extends ShadowlessElement {
         `Successfully imported ${pageIds.length} HTML files.`
       );
     } catch (error) {
-      console.error(' Import HTML files failed:', error);
+      console.error('Import HTML files failed:', error);
     }
   }
 
@@ -419,7 +427,7 @@ export class StarterDebugMenu extends ShadowlessElement {
         `Successfully imported ${pageIds.length} markdown files.`
       );
     } catch (error) {
-      console.error(' Import markdown files failed:', error);
+      console.error('Import markdown files failed:', error);
     }
   }
 
@@ -515,7 +523,7 @@ export class StarterDebugMenu extends ShadowlessElement {
                   } as DeltaInsert<AffineTextAttributes>,
                 ]),
               },
-              noteBlock[0].id
+              noteBlock[0]?.id
             );
           }
         }
@@ -561,13 +569,12 @@ export class StarterDebugMenu extends ShadowlessElement {
 
   private async _saveData() {
     try {
-      // Send request-save message to parent window
       window.parent.postMessage(
         {
           type: 'request-save',
           documentType: 'doc',
         },
-        '*'
+                '*'
       );
       if (this.editor.host) {
         toast(this.editor.host, 'Requested save operation.');
@@ -580,14 +587,20 @@ export class StarterDebugMenu extends ShadowlessElement {
     }
   }
 
-  private async _handleSaveWithToken(saveCredentials: unknown) {
+  private _handleSaveWithToken = async (saveCredentials: unknown) => {
     try {
-      // Export the document as a snapshot
+      if (!this.collection) {
+        throw new Error('Workspace collection is undefined');
+      }
+
       const credential = saveCredentials as any;
-      const storage = StorageManager.CreateStorage((credential as any).storageType);
+      if (!credential.storageType) {
+        throw new Error('Invalid credentials: storageType is missing');
+      }
+
+      const storage = StorageManager.CreateStorage(credential.storageType);
       storage.initialize(credential);
 
-      /////////////////////
       // Create snapshot using original logic
       const workspaceImpl = this.collection;
       const docs = [this.doc];
@@ -596,7 +609,7 @@ export class StarterDebugMenu extends ShadowlessElement {
         schema: this.editor.doc.schema,
         blobCRUD: workspaceImpl.blobSync,
         docCRUD: {
-          create: (id: string) => workspaceImpl.createDoc(id).getStore({id}),
+          create: (id: string) => workspaceImpl.createDoc(id).getStore({ id }),
           get: (id: string) => workspaceImpl.getDoc(id)?.getStore({ id }) ?? null,
           delete: (id: string) => workspaceImpl.removeDoc(id),
         },
@@ -619,7 +632,6 @@ export class StarterDebugMenu extends ShadowlessElement {
       const pathBlobIdMap = job.assetsManager.getPathBlobIdMap();
       const assetsMap = job.assets;
 
-      // Add blobs to assets folder, if failed, log the error and continue
       const results = await Promise.all(
         Array.from(pathBlobIdMap.values()).map(async blobId => {
           try {
@@ -646,7 +658,15 @@ export class StarterDebugMenu extends ShadowlessElement {
       const downloadBlob = await zip.generate();
       const snapshotName = `affine.zip`;
       await storage.uploadFile(downloadBlob, snapshotName, null);
-      /////////////////////
+
+      window.parent.postMessage(
+        {
+          type: 'save-complete',
+          snapshotName,
+          saveCredentials,
+        },
+        'https://parent-domain.com'
+      );
 
       if (this.editor.host) {
         toast(this.editor.host, 'Document snapshot saved successfully.');
@@ -654,10 +674,73 @@ export class StarterDebugMenu extends ShadowlessElement {
     } catch (error) {
       console.error('Failed to save snapshot:', error);
       if (this.editor.host) {
-        toast(this.editor.host, 'Failed to save snapshot.');
+        toast(this.editor.host, `Failed to save snapshot: ${error.message}`);
       }
     }
-  }
+  };
+
+  private _loadSnapshotWithToken = async (readCredentials: unknown) => {
+    try {
+      if (!this.collection) {
+        throw new Error('Workspace collection is undefined');
+      }
+
+      const credential = readCredentials as ReadCredentials;
+      if (!credential.storageType) {
+        throw new Error('Invalid credentials: storageType is missing');
+      }
+
+      const storage = StorageManager.CreateStorage(credential.storageType);
+      storage.initialize(credential);
+
+      // Download affine.zip using getFileUrl
+      const fileFullPath = `affine.zip`;
+      const fileUrl = storage.getFileUrl(fileFullPath);
+      if (!fileUrl) {
+        throw new Error('Failed to get file URL for affine.zip');
+      }
+
+      const response = await fetch(fileUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch affine.zip: ${response.statusText}`);
+      }
+      const snapshotBlob = await response.blob();
+
+      console.log('Downloaded snapshot size:', snapshotBlob.size);
+
+      // Import document into workspace
+      const docs = await ZipTransformer.importDocs(
+        this.collection,
+        this.editor.doc.schema,
+        snapshotBlob
+      );
+
+      if (docs.length === 0) {
+        throw new Error('No documents found in snapshot');
+      }
+
+      const newDoc = docs[0];
+      this.editor.doc = newDoc;
+      this.requestUpdate();
+
+      window.parent.postMessage(
+        {
+          type: 'load-complete',
+          documentId: newDoc.id,
+        },
+        'https://parent-domain.com'
+      );
+
+      if (this.editor.host) {
+        toast(this.editor.host, 'Snapshot loaded successfully.');
+      }
+    } catch (error) {
+      console.error('Failed to load snapshot:', error);
+      if (this.editor.host) {
+        toast(this.editor.host, `Failed to load snapshot: ${error.message}`);
+      }
+    }
+  };
 
   private _setThemeMode(dark: boolean) {
     const html = document.querySelector('html');
@@ -735,7 +818,6 @@ export class StarterDebugMenu extends ShadowlessElement {
         'affine-editor-container'
       ).length;
       if (currentEditorCount === 1) {
-        // Add a second editor
         const newEditor = createTestEditor(this.doc, this.collection);
         app.append(newEditor);
         app.childNodes.forEach(child => {
@@ -745,7 +827,6 @@ export class StarterDebugMenu extends ShadowlessElement {
         });
         (app as HTMLElement).style.display = 'flex';
       } else {
-        // Remove the second editor
         const secondEditor = app.querySelectorAll('affine-editor-container')[1];
         if (secondEditor) {
           secondEditor.remove();
@@ -778,9 +859,7 @@ export class StarterDebugMenu extends ShadowlessElement {
     }
 
     this._showStyleDebugMenu = !this._showStyleDebugMenu;
-    this._showStyleDebugMenu
-      ? (this._styleMenu.hidden = false)
-      : (this._styleMenu.hidden = true);
+    this._styleMenu.hidden = !this._showStyleDebugMenu;
   }
 
   override connectedCallback() {
@@ -807,7 +886,6 @@ export class StarterDebugMenu extends ShadowlessElement {
     };
     readSelectionFromURL().catch(console.error);
 
-    // Add message listener for save credentials from parent window
     window.addEventListener('message', this._handleMessage.bind(this));
   }
 
@@ -826,13 +904,14 @@ export class StarterDebugMenu extends ShadowlessElement {
     const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
     matchMedia.removeEventListener('change', this._darkModeChange);
 
-    // Clean up message listener
     window.removeEventListener('message', this._handleMessage.bind(this));
   }
 
   private _handleMessage(event: MessageEvent) {
     if (event.data.type === 'save' && event.data.saveCredentials) {
-      this._handleSaveWithToken.bind(this)(event.data.saveCredentials);
+      this._handleSaveWithToken(event.data.saveCredentials);
+    } else if (event.data.type === 'load' && event.data.credential) {
+      this._loadSnapshotWithToken(event.data.credential);
     }
   }
 
@@ -845,6 +924,24 @@ export class StarterDebugMenu extends ShadowlessElement {
     this.editor.std.get(DocModeProvider).onPrimaryModeChange(() => {
       this.requestUpdate();
     }, this.editor.doc.id);
+
+    try {
+      window.parent.postMessage(
+        {
+          type: 'created',
+          documentId: this.doc.id,
+        },
+        '*'
+      );
+      if (this.editor.host) {
+        toast(this.editor.host, 'Document loaded, notified parent.');
+      }
+    } catch (error) {
+      console.error('Failed to send created message:', error);
+      if (this.editor.host) {
+        toast(this.editor.host, 'Failed to notify parent.');
+      }
+    }
   }
 
   override render() {
@@ -858,7 +955,7 @@ export class StarterDebugMenu extends ShadowlessElement {
           left: 0;
           width: 100%;
           overflow: auto;
-          z-index: 1000; /* for debug visibility */
+          z-index: 1000;
           pointer-events: none;
         }
 
@@ -894,9 +991,7 @@ export class StarterDebugMenu extends ShadowlessElement {
       </style>
       <div class="debug-menu default">
         <div class="default-toolbar">
-          <!-- undo/redo group -->
           <sl-button-group label="History">
-            <!-- undo -->
             <sl-tooltip content="Undo" placement="bottom" hoist>
               <sl-button
                 size="small"
@@ -906,7 +1001,6 @@ export class StarterDebugMenu extends ShadowlessElement {
                 <sl-icon name="arrow-counterclockwise" label="Undo"></sl-icon>
               </sl-button>
             </sl-tooltip>
-            <!-- redo -->
             <sl-tooltip content="Redo" placement="bottom" hoist>
               <sl-button
                 size="small"
@@ -918,7 +1012,6 @@ export class StarterDebugMenu extends ShadowlessElement {
             </sl-tooltip>
           </sl-button-group>
 
-          <!-- test operations -->
           <sl-dropdown id="test-operations-dropdown" placement="bottom" hoist>
             <sl-button size="small" slot="trigger" caret>
               Test Operations
@@ -1013,7 +1106,7 @@ export class StarterDebugMenu extends ShadowlessElement {
               <sl-menu-item @click="${this._toggleCommentPanel}">
                 Toggle Comment Panel
               </sl-menu-item>
-              <sl-menu-item @click="${this._addNote}"> Add Note </sl-menu-item>
+              <sl-menu-item @click="${this._addNote}">Add Note</sl-menu-item>
               <sl-menu-item @click="${this._toggleMultipleEditors}">
                 Toggle Multiple Editors
               </sl-menu-item>
@@ -1029,7 +1122,6 @@ export class StarterDebugMenu extends ShadowlessElement {
             </sl-button>
           </sl-tooltip>
 
-          <!-- Save Data Button with Floppy Icon -->
           <sl-tooltip content="Save Data" placement="bottom" hoist>
             <sl-button size="small" @click="${this._saveData}">
               <sl-icon name="floppy"></sl-icon>
@@ -1093,7 +1185,6 @@ export class StarterDebugMenu extends ShadowlessElement {
         : {
             margin: '0',
             overflow: 'initial',
-            // edgeless needs the container height
             height: '100%',
             boxShadow: 'initial',
           };
