@@ -9,4 +9,4 @@ yarn install
 yarn dev
 
 ## How to build locally?
-yarn workspace @blocksuite/playground build
+NODE_OPTIONS="--max-old-space-size=4096" yarn workspace @blocksuite/playground build
