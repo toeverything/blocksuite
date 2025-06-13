@@ -113,6 +113,117 @@ type AcceptTypes =
   | 'Zip'
   | 'MindMap';
 
+export function openFileOrFiles(options?: {
+  acceptType?: AcceptTypes;
+}): Promise<File | null>;
+export function openFileOrFiles(options: {
+  acceptType?: AcceptTypes;
+  multiple: false;
+}): Promise<File | null>;
+export function openFileOrFiles(options: {
+  acceptType?: AcceptTypes;
+  multiple: true;
+}): Promise<File[] | null>;
+export async function openFileOrFiles({
+  acceptType = 'Any',
+  multiple = false,
+} = {}) {
+  // Feature detection. The API needs to be supported
+  // and the app not run in an iframe.
+  const supportsFileSystemAccess =
+    'showOpenFilePicker' in window &&
+    (() => {
+      try {
+        return window.self === window.top;
+      } catch {
+        return false;
+      }
+    })();
+  // If the File System Access API is supported…
+  if (supportsFileSystemAccess && window.showOpenFilePicker) {
+    try {
+      const fileType = FileTypes.find(i => i.description === acceptType);
+      if (acceptType !== 'Any' && !fileType)
+        throw new BlockSuiteError(
+          ErrorCode.DefaultRuntimeError,
+          `Unexpected acceptType "${acceptType}"`
+        );
+      const pickerOpts = {
+        types: fileType ? [fileType] : undefined,
+        multiple,
+      } satisfies OpenFilePickerOptions;
+      // Show the file picker, optionally allowing multiple files.
+      const handles = await window.showOpenFilePicker(pickerOpts);
+      // Only one file is requested.
+      if (!multiple) {
+        // Add the `FileSystemFileHandle` as `.handle`.
+        const file = await handles[0].getFile();
+        // Add the `FileSystemFileHandle` as `.handle`.
+        // file.handle = handles[0];
+        return file;
+      } else {
+        const files = await Promise.all(
+          handles.map(async handle => {
+            const file = await handle.getFile();
+            // Add the `FileSystemFileHandle` as `.handle`.
+            // file.handle = handles[0];
+            return file;
+          })
+        );
+        return files;
+      }
+    } catch (err) {
+      console.error('Error opening file');
+      console.error(err);
+      return null;
+    }
+  }
+  // Fallback if the File System Access API is not supported.
+  return new Promise(resolve => {
+    // Append a new `<input type="file" multiple? />` and hide it.
+    const input = document.createElement('input');
+    input.classList.add('affine-upload-input');
+    input.style.display = 'none';
+    input.type = 'file';
+    if (multiple) {
+      input.multiple = true;
+    }
+    if (acceptType !== 'Any') {
+      // For example, `accept="image/*"` or `accept="video/*,audio/*"`.
+      input.accept = Object.keys(
+        FileTypes.find(i => i.description === acceptType)?.accept ?? ''
+      ).join(',');
+    }
+    document.body.append(input);
+    // The `change` event fires when the user interacts with the dialog.
+    input.addEventListener('change', () => {
+      // Remove the `<input type="file" multiple? />` again from the DOM.
+      input.remove();
+      // If no files were selected, return.
+      if (!input.files) {
+        resolve(null);
+        return;
+      }
+      // Return all files or just one file.
+      if (multiple) {
+        resolve(Array.from(input.files));
+        return;
+      }
+      resolve(input.files[0]);
+    });
+    // The `cancel` event fires when the user cancels the dialog.
+    input.addEventListener('cancel', () => {
+      resolve(null);
+    });
+    // Show the picker.
+    if ('showPicker' in HTMLInputElement.prototype) {
+      input.showPicker();
+    } else {
+      input.click();
+    }
+  });
+}
+
 export async function openFilesWith(
   acceptType: AcceptTypes = 'Any',
   multiple: boolean = true

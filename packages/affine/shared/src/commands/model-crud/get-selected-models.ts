@@ -38,14 +38,14 @@ import {
  */
 export const getSelectedModelsCommand: Command<
   {
-    types?: Array<'image' | 'text' | 'block' | 'surface'>;
+    types?: Array<'image' | 'text' | 'block' | 'surface' | 'dicom'>;
     mode?: 'all' | 'flat' | 'highest';
   },
   {
     selectedModels: BlockModel[];
   }
 > = (ctx, next) => {
-  const types = ctx.types ?? ['block', 'text', 'image', 'surface'];
+  const types = ctx.types ?? ['block', 'text', 'image', 'surface', 'dicom'];
   const mode = ctx.mode ?? 'flat';
   const selectedModels: BlockModel[] = [];
   ctx.std.command

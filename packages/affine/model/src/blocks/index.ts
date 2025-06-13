@@ -3,6 +3,7 @@ export * from './bookmark/index.js';
 export * from './callout/index.js';
 export * from './code/index.js';
 export * from './database/index.js';
+export * from './dicom/index.js';
 export * from './divider/index.js';
 export * from './edgeless-text/index.js';
 export * from './embed/index.js';
