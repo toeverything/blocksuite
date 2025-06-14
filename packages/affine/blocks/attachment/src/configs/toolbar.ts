@@ -129,6 +129,8 @@ class DicomViewerPopup extends LitElement {
   viewerUrl = '';
   onClose: () => void = () => {};
   model: AttachmentBlockModel | null = null; // Store model reference
+  block: AttachmentBlockComponent | null = null; // Store block reference
+  std: any = null; // Store ctx.std for std.store.getBlock
 
   override render() {
     console.log('Rendering DicomViewerPopup, viewerUrl:', this.viewerUrl);
@@ -255,7 +257,9 @@ export const attachmentViewDropdownMenu = {
         const popup = document.createElement('dicom-viewer-popup') as DicomViewerPopup;
         popup.viewerUrl = viewerUrl;
         popup.model = model; // Pass the model reference
-        console.log('Popup model set:', popup.model); // Debug log
+        popup.block = block; // Pass the block reference
+        popup.std = ctx.std; // Pass ctx.std for std.store.getBlock
+        console.log('Popup set:', { model: popup.model, block: popup.block, stdStore: ctx.std.store }); // Debug log
         popup.onClose = () => {
           currentPopupInstance?.remove();
           currentPopupInstance = null;
@@ -295,20 +299,27 @@ export const attachmentViewDropdownMenu = {
           }
 
           try {
-            if (!currentPopupInstance || !currentPopupInstance.model) {
-              console.log('No active popup instance or model, ignoring message');
+            if (!currentPopupInstance || !currentPopupInstance.model || !currentPopupInstance.block || !currentPopupInstance.std) {
+              console.log('No active popup instance, model, block, or std, ignoring message');
               return;
             }
 
             const model = currentPopupInstance.model;
-            const store = model.store;
-            console.log('Store accessed:', store); // Debug log
-
-            if (!store || typeof store.deleteBlock !== 'function') {
-              console.error('Invalid store or deleteBlock method missing:', store);
-              toast(block.host, 'Failed to update attachment: invalid store');
-              return;
-            }
+            const block = currentPopupInstance.block;
+            const store = model.store; // Workspace
+            const std = currentPopupInstance.std; // Std for std.store.getBlock
+            console.log('Store and Std accessed:', {
+              store,
+              stdStore: std.store,
+              storeMethods: {
+                deleteBlock: typeof store.deleteBlock,
+                addBlock: typeof store.addBlock,
+              },
+              stdStoreMethods: {
+                getBlock: typeof std.store.getBlock,
+              },
+              blobSync: store.blobSync ? 'available' : 'undefined'
+            }); // Debug log
 
             if (event.data.type === 'ohifReady' || event.data.type?.toLowerCase() === 'ohifready') {
               console.log('Processing ohifReady message');
@@ -366,12 +377,22 @@ export const attachmentViewDropdownMenu = {
               console.log('Received appendFiles message');
               const { files }: { files: File[] } = event.data;
               if (files && files.length > 0) {
-                const parent = store.getParent(model);
-                if (!parent) {
+                if (!store || typeof store.addBlock !== 'function' || typeof store.deleteBlock !== 'function') {
+                  console.error('Invalid store or required methods missing:', store);
+                  toast(block.host, 'Failed to update attachment: invalid store');
+                  return;
+                }
+                if (!std || typeof std.store.getBlock !== 'function') {
+                  console.error('Invalid std or getBlock method missing:', std);
+                  toast(block.host, 'Failed to update attachment: invalid std');
+                  return;
+                }
+                if (!model.parent) {
                   console.error('Parent unavailable for block update');
                   toast(block.host, 'Failed to update attachment');
                   return;
                 }
+                const parent = model.parent;
                 const originalName = model.props.name;
                 const originalCaption = model.props.caption;
                 const parentId = parent.id;
@@ -400,11 +421,11 @@ export const attachmentViewDropdownMenu = {
 
                 const oldSourceId = model.props.sourceId;
                 store.deleteBlock(model);
-                if (oldSourceId && store.doc.blobSync) {
-                  await store.doc.blobSync.delete(oldSourceId);
+                if (oldSourceId && store.blobSync) {
+                  await store.blobSync.delete(oldSourceId);
                 }
 
-                const newSourceId = await store.doc.blobSync.set(combinedZipBlob);
+                const newSourceId = await store.blobSync.set(combinedZipBlob);
                 const newAttachmentProps = {
                   name: originalName,
                   size: combinedZipBlob.size,
@@ -420,7 +441,13 @@ export const attachmentViewDropdownMenu = {
                 };
 
                 const newBlockId = store.addBlock('affine:attachment', newAttachmentProps, parentId);
-                const newModel = store.getBlockById(newBlockId) as AttachmentBlockModel;
+                const newBlock = std.store.getBlock(newBlockId);
+                if (!newBlock || !newBlock.model) {
+                  console.error('Failed to retrieve new block:', newBlockId);
+                  toast(block.host, 'Failed to update attachment: block not found');
+                  return;
+                }
+                const newModel = newBlock.model as AttachmentBlockModel;
                 window.dispatchEvent(
                   new CustomEvent('attachmentUpdated', {
                     detail: {
@@ -442,12 +469,22 @@ export const attachmentViewDropdownMenu = {
                 return;
               }
 
-              const parent = store.getParent(model);
-              if (!parent) {
+              if (!store || typeof store.addBlock !== 'function' || typeof store.deleteBlock !== 'function') {
+                console.error('Invalid store or required methods missing:', store);
+                toast(block.host, 'Failed to update attachment: invalid store');
+                return;
+              }
+              if (!std || typeof std.store.getBlock !== 'function') {
+                console.error('Invalid std or getBlock method missing:', std);
+                toast(block.host, 'Failed to update attachment: invalid std');
+                return;
+              }
+              if (!model.parent) {
                 console.error('Parent unavailable for block update');
                 toast(block.host, 'Failed to update attachment');
                 return;
               }
+              const parent = model.parent;
               const originalName = model.props.name;
               const originalCaption = model.props.caption;
               const parentId = parent.id;
@@ -471,11 +508,11 @@ export const attachmentViewDropdownMenu = {
 
               const oldSourceId = model.props.sourceId;
               store.deleteBlock(model);
-              if (oldSourceId && store.doc.blobSync) {
-                await store.doc.blobSync.delete(oldSourceId);
+              if (oldSourceId && store.blobSync) {
+                await store.blobSync.delete(oldSourceId);
               }
 
-              const newSourceId = await store.doc.blobSync.set(updatedZipBlob);
+              const newSourceId = await store.blobSync.set(updatedZipBlob);
               const newAttachmentProps = {
                 name: originalName,
                 size: updatedZipBlob.size,
@@ -491,7 +528,13 @@ export const attachmentViewDropdownMenu = {
               };
 
               const newBlockId = store.addBlock('affine:attachment', newAttachmentProps, parentId);
-              const newModel = store.getBlockById(newBlockId) as AttachmentBlockModel;
+              const newBlock = std.store.getBlock(newBlockId);
+              if (!newBlock || !newBlock.model) {
+                console.error('Failed to retrieve new block:', newBlockId);
+                toast(block.host, 'Failed to update attachment: block not found');
+                return;
+              }
+              const newModel = newBlock.model as AttachmentBlockModel;
               console.log('Attachment replaced with updated ZIP (files removed)');
               window.dispatchEvent(
                 new CustomEvent('attachmentUpdated', {
