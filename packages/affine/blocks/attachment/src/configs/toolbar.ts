@@ -40,6 +40,13 @@ import { AttachmentBlockComponent } from '../attachment-block';
 import { RenameModal } from '../components/rename-model';
 import { AttachmentEmbedProvider } from '../embed';
 
+// Utility to normalize filenames for comparison
+function normalizeFilename(filename: string): string {
+  if (typeof filename !== 'string') return '';
+  // Trim whitespace, convert to lowercase, extract basename (remove path)
+  return filename.trim().toLowerCase().split('/').pop() || '';
+}
+
 // Utility to get attachment blob
 async function getAttachmentBlob(block: AttachmentBlockComponent): Promise<Blob | null> {
   const { model, blobUrl, resourceController, host } = block;
@@ -402,11 +409,13 @@ export const attachmentViewDropdownMenu = {
 
                 if (originalBlob) {
                   const originalZip = await zip.loadAsync(originalBlob);
+                  console.log('Original ZIP files in appendFiles:', Object.keys(originalZip.files));
                   await Promise.all(
                     Object.entries(originalZip.files).map(async ([filename, file]) => {
                       if (!file.dir) {
                         const blob = await file.async('blob');
                         zip.file(filename, blob);
+                        console.log('Added file to zip in appendFiles:', filename);
                       }
                     })
                   );
@@ -415,17 +424,22 @@ export const attachmentViewDropdownMenu = {
                 Array.from(files).forEach((file, index) => {
                   const filename = file.name;
                   zip.file(filename, file);
+                  console.log('Appended new file:', filename);
                 });
 
                 const combinedZipBlob = await zip.generateAsync({ type: 'blob' });
+                console.log('Generated combinedZipBlob, size:', combinedZipBlob.size);
 
                 const oldSourceId = model.props.sourceId;
                 store.deleteBlock(model);
+                console.log('Deleted block:', model.id);
                 if (oldSourceId && store.blobSync) {
+                  console.log('Deleting old blob:', oldSourceId);
                   await store.blobSync.delete(oldSourceId);
                 }
 
                 const newSourceId = await store.blobSync.set(combinedZipBlob);
+                console.log('Set new blob, sourceId:', newSourceId);
                 const newAttachmentProps = {
                   name: originalName,
                   size: combinedZipBlob.size,
@@ -441,6 +455,7 @@ export const attachmentViewDropdownMenu = {
                 };
 
                 const newBlockId = store.addBlock('affine:attachment', newAttachmentProps, parentId);
+                console.log('Added new block:', newBlockId);
                 const newBlock = std.store.getBlock(newBlockId);
                 if (!newBlock || !newBlock.model) {
                   console.error('Failed to retrieve new block:', newBlockId);
@@ -463,9 +478,19 @@ export const attachmentViewDropdownMenu = {
             } else if (event.data.type === 'removeFiles' || event.data.type?.toLowerCase() === 'removefiles') {
               console.log('Received removeFiles message');
               const { file_names }: { file_names: string[] } = event.data;
+              console.log('File names to remove:', file_names);
+
               if (!Array.isArray(file_names) || file_names.length === 0) {
                 console.error('Invalid or empty file_names:', file_names);
                 toast(block.host, 'Failed to update attachment: invalid file names');
+                return;
+              }
+
+              // Validate file_names entries
+              const validFileNames = file_names.filter(name => typeof name === 'string' && name.trim().length > 0);
+              if (validFileNames.length === 0) {
+                console.error('No valid file names after filtering:', file_names);
+                toast(block.host, 'Failed to update attachment: no valid file names');
                 return;
               }
 
@@ -491,28 +516,52 @@ export const attachmentViewDropdownMenu = {
 
               const originalBlob = await getAttachmentBlob(block);
               const newZip = new JSZip();
+              const includedFiles: string[] = [];
+              const excludedFiles: string[] = [];
 
               if (originalBlob) {
-                const originalZip = await newZip.loadAsync(originalBlob);
-                await Promise.all(
-                  Object.entries(originalZip.files).map(async ([filename, file]) => {
-                    if (!file.dir && !file_names.includes(filename)) {
+                const originalZip = await JSZip.loadAsync(originalBlob);
+                console.log('Original ZIP files in removeFiles:', Object.keys(originalZip.files));
+
+                // Normalize file_names for comparison
+                const normalizedFileNames = validFileNames.map(normalizeFilename);
+                console.log('Normalized file names to remove:', normalizedFileNames);
+
+                // Build ZIP from scratch, adding only non-removed files
+                for (const [filename, file] of Object.entries(originalZip.files)) {
+                  if (!file.dir) {
+                    const normalizedFilename = normalizeFilename(filename);
+                    if (!normalizedFileNames.includes(normalizedFilename)) {
                       const blob = await file.async('blob');
                       newZip.file(filename, blob);
+                      includedFiles.push(filename);
+                      console.log('Included file in newZip:', filename);
+                    } else {
+                      excludedFiles.push(filename);
+                      console.log('Excluded file:', filename);
                     }
-                  })
-                );
+                  }
+                }
+              } else {
+                console.log('No original blob, creating empty ZIP');
               }
 
+              console.log('Included files in newZip:', includedFiles);
+              console.log('Excluded files:', excludedFiles);
+
               const updatedZipBlob = await newZip.generateAsync({ type: 'blob' });
+              console.log('Generated updatedZipBlob, size:', updatedZipBlob.size);
 
               const oldSourceId = model.props.sourceId;
               store.deleteBlock(model);
+              console.log('Deleted block:', model.id);
               if (oldSourceId && store.blobSync) {
+                console.log('Deleting old blob:', oldSourceId);
                 await store.blobSync.delete(oldSourceId);
               }
 
               const newSourceId = await store.blobSync.set(updatedZipBlob);
+              console.log('Set new blob, sourceId:', newSourceId);
               const newAttachmentProps = {
                 name: originalName,
                 size: updatedZipBlob.size,
@@ -528,6 +577,7 @@ export const attachmentViewDropdownMenu = {
               };
 
               const newBlockId = store.addBlock('affine:attachment', newAttachmentProps, parentId);
+              console.log('Added new block:', newBlockId);
               const newBlock = std.store.getBlock(newBlockId);
               if (!newBlock || !newBlock.model) {
                 console.error('Failed to retrieve new block:', newBlockId);
@@ -535,7 +585,7 @@ export const attachmentViewDropdownMenu = {
                 return;
               }
               const newModel = newBlock.model as AttachmentBlockModel;
-              console.log('Attachment replaced with updated ZIP (files removed)');
+              console.log('Attachment replaced with updated ZIP (files removed)', { newBlockId, zipSize: updatedZipBlob.size });
               window.dispatchEvent(
                 new CustomEvent('attachmentUpdated', {
                   detail: {
