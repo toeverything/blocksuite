@@ -128,6 +128,7 @@ class DicomViewerPopup extends LitElement {
   // Properties
   viewerUrl = '';
   onClose: () => void = () => {};
+  model: AttachmentBlockModel | null = null; // Store model reference
 
   override render() {
     console.log('Rendering DicomViewerPopup, viewerUrl:', this.viewerUrl);
@@ -253,6 +254,8 @@ export const attachmentViewDropdownMenu = {
         const abortController = new AbortController();
         const popup = document.createElement('dicom-viewer-popup') as DicomViewerPopup;
         popup.viewerUrl = viewerUrl;
+        popup.model = model; // Pass the model reference
+        console.log('Popup model set:', popup.model); // Debug log
         popup.onClose = () => {
           currentPopupInstance?.remove();
           currentPopupInstance = null;
@@ -283,142 +286,168 @@ export const attachmentViewDropdownMenu = {
             return;
           }
 
-          if (typeof event.data === 'object' && event.data && (event.data.type === 'ohifReady' || event.data.type?.toLowerCase() === 'ohifready')) {
-            console.log('Processing ohifReady message');
-            const fetchedBlob = await getAttachmentBlob(block);
-            if (!fetchedBlob) {
-              console.error('Failed to fetch blob, cannot send to iframe');
-              toast(block.host, 'Failed to load DICOM content');
+          // Log all message types for debugging
+          if (typeof event.data === 'object' && event.data && event.data.type) {
+            console.log(`Received message type: ${event.data.type}`);
+          } else {
+            console.log('Received invalid or unknown message:', event.data);
+            return;
+          }
+
+          try {
+            if (!currentPopupInstance || !currentPopupInstance.model) {
+              console.log('No active popup instance or model, ignoring message');
               return;
             }
 
-            try {
-              const zip = new JSZip();
-              const zipFile = await zip.loadAsync(fetchedBlob);
-              console.log('ZIP file loaded, files:', Object.keys(zipFile.files));
-              const blobs = await Promise.all(
-                Object.entries(zipFile.files)
-                  .filter(([fileName, file]) => !file.dir)
-                  .map(async ([fileName, file]) => {
-                    const blob = await file.async('blob');
-                    (blob as any).name = fileName;
-                    console.log('Processed blob:', fileName, 'size:', blob.size);
-                    return blob;
-                  })
-              );
-              const blobsWithMeta = blobs.map(blob => ({
-                blob,
-                name: (blob as any).name,
-              }));
-              console.log('Prepared blobsWithMeta:', blobsWithMeta.length);
+            const model = currentPopupInstance.model;
+            const store = model.store;
+            console.log('Store accessed:', store); // Debug log
 
-              // Access the popup instance directly
-              const popupEl = currentPopupInstance;
-              console.log('Using popup instance:', popupEl);
-              if (!popupEl) {
-                console.error('Popup instance not available');
-                toast(block.host, 'Failed to load DICOM viewer');
-                return;
-              }
-
-              const iframe = popupEl.shadowRoot?.getElementById('dicom-viewer') as HTMLIFrameElement | null;
-              if (!iframe || !iframe.contentWindow) {
-                console.error('DICOM viewer iframe not found or contentWindow unavailable');
-                toast(block.host, 'Failed to load DICOM viewer');
-                return;
-              }
-              console.log('Sending blobs to iframe:', viewerUrl);
-              iframe.contentWindow.postMessage(blobsWithMeta, viewerUrl);
-
-              blobsWithMeta.length = 0;
-              blobs.length = 0;
-            } catch (error) {
-              console.error('Error processing ZIP:', error);
-              toast(block.host, 'Failed to process DICOM content');
+            if (!store || typeof store.deleteBlock !== 'function') {
+              console.error('Invalid store or deleteBlock method missing:', store);
+              toast(block.host, 'Failed to update attachment: invalid store');
+              return;
             }
-          } else if (event.data.type === 'appendFiles') {
-            console.log('Received appendFiles message');
-            const { files }: { files: File[] } = event.data;
-            if (files && files.length > 0) {
-              const doc = block.std.doc || model.doc;
-              if (!doc) {
-                console.error('Document unavailable for block update');
-                toast(block.host, 'Failed to update attachment');
+
+            if (event.data.type === 'ohifReady' || event.data.type?.toLowerCase() === 'ohifready') {
+              console.log('Processing ohifReady message');
+              const fetchedBlob = await getAttachmentBlob(block);
+              if (!fetchedBlob) {
+                console.error('Failed to fetch blob, cannot send to iframe');
+                toast(block.host, 'Failed to load DICOM content');
                 return;
               }
-              const parent = model.parent;
-              const originalName = model.props.name;
-              const originalCaption = model.props.caption;
-              const parentId = parent.id;
 
-              const originalBlob = await getAttachmentBlob(block);
-              const zip = new JSZip();
-
-              if (originalBlob) {
-                const originalZip = await zip.loadAsync(originalBlob);
-                await Promise.all(
-                  Object.entries(originalZip.files).map(async ([filename, file]) => {
-                    if (!file.dir) {
+              try {
+                const zip = new JSZip();
+                const zipFile = await zip.loadAsync(fetchedBlob);
+                console.log('ZIP file loaded, files:', Object.keys(zipFile.files));
+                const blobs = await Promise.all(
+                  Object.entries(zipFile.files)
+                    .filter(([fileName, file]) => !file.dir)
+                    .map(async ([fileName, file]) => {
                       const blob = await file.async('blob');
-                      zip.file(filename, blob);
-                    }
+                      (blob as any).name = fileName;
+                      console.log('Processed blob:', fileName, 'size:', blob.size);
+                      return blob;
+                    })
+                );
+                const blobsWithMeta = blobs.map(blob => ({
+                  blob,
+                  name: (blob as any).name,
+                }));
+                console.log('Prepared blobsWithMeta:', blobsWithMeta.length);
+
+                const popupEl = currentPopupInstance;
+                console.log('Using popup instance:', popupEl);
+                if (!popupEl) {
+                  console.error('Popup instance not available');
+                  toast(block.host, 'Failed to load DICOM viewer');
+                  return;
+                }
+
+                const iframe = popupEl.shadowRoot?.getElementById('dicom-viewer') as HTMLIFrameElement | null;
+                if (!iframe || !iframe.contentWindow) {
+                  console.error('DICOM viewer iframe not found or contentWindow unavailable');
+                  toast(block.host, 'Failed to load DICOM viewer');
+                  return;
+                }
+                console.log('Sending blobs to iframe:', viewerUrl);
+                iframe.contentWindow.postMessage(blobsWithMeta, viewerUrl);
+
+                blobsWithMeta.length = 0;
+                blobs.length = 0;
+              } catch (error) {
+                console.error('Error processing ZIP:', error);
+                toast(block.host, 'Failed to process DICOM content');
+              }
+            } else if (event.data.type === 'appendFiles') {
+              console.log('Received appendFiles message');
+              const { files }: { files: File[] } = event.data;
+              if (files && files.length > 0) {
+                const parent = store.getParent(model);
+                if (!parent) {
+                  console.error('Parent unavailable for block update');
+                  toast(block.host, 'Failed to update attachment');
+                  return;
+                }
+                const originalName = model.props.name;
+                const originalCaption = model.props.caption;
+                const parentId = parent.id;
+
+                const originalBlob = await getAttachmentBlob(block);
+                const zip = new JSZip();
+
+                if (originalBlob) {
+                  const originalZip = await zip.loadAsync(originalBlob);
+                  await Promise.all(
+                    Object.entries(originalZip.files).map(async ([filename, file]) => {
+                      if (!file.dir) {
+                        const blob = await file.async('blob');
+                        zip.file(filename, blob);
+                      }
+                    })
+                  );
+                }
+
+                Array.from(files).forEach((file, index) => {
+                  const filename = file.name;
+                  zip.file(filename, file);
+                });
+
+                const combinedZipBlob = await zip.generateAsync({ type: 'blob' });
+
+                const oldSourceId = model.props.sourceId;
+                store.deleteBlock(model);
+                if (oldSourceId && store.doc.blobSync) {
+                  await store.doc.blobSync.delete(oldSourceId);
+                }
+
+                const newSourceId = await store.doc.blobSync.set(combinedZipBlob);
+                const newAttachmentProps = {
+                  name: originalName,
+                  size: combinedZipBlob.size,
+                  type: 'application/zip',
+                  sourceId: newSourceId,
+                  caption: originalCaption,
+                  embed: false,
+                  style: model.props.style || 'horizontalThin',
+                  index: model.props.index,
+                  xywh: model.props.xywh,
+                  lockedBySelf: false,
+                  rotate: 0,
+                };
+
+                const newBlockId = store.addBlock('affine:attachment', newAttachmentProps, parentId);
+                const newModel = store.getBlockById(newBlockId) as AttachmentBlockModel;
+                window.dispatchEvent(
+                  new CustomEvent('attachmentUpdated', {
+                    detail: {
+                      blockId: newBlockId,
+                      size: combinedZipBlob.size,
+                    },
                   })
                 );
+
+                console.log('Attachment replaced with combined ZIP');
+                Object.assign(model, newModel);
+              }
+            } else if (event.data.type === 'removeFiles' || event.data.type?.toLowerCase() === 'removefiles') {
+              console.log('Received removeFiles message');
+              const { file_names }: { file_names: string[] } = event.data;
+              if (!Array.isArray(file_names) || file_names.length === 0) {
+                console.error('Invalid or empty file_names:', file_names);
+                toast(block.host, 'Failed to update attachment: invalid file names');
+                return;
               }
 
-              Array.from(files).forEach((file, index) => {
-                const filename = file.name;
-                zip.file(filename, file);
-              });
-
-              const combinedZipBlob = await zip.generateAsync({ type: 'blob' });
-
-              const oldSourceId = model.props.sourceId;
-              doc.deleteBlock(model);
-              if (oldSourceId) {
-                await doc.blobSync.delete(oldSourceId);
-              }
-
-              const newSourceId = await doc.blobSync.set(combinedZipBlob);
-              const newAttachmentProps = {
-                name: originalName,
-                size: combinedZipBlob.size,
-                type: 'application/zip',
-                sourceId: newSourceId,
-                caption: originalCaption,
-                embed: false,
-                style: model.props.style || 'horizontalThin',
-                index: model.props.index,
-                xywh: model.props.xywh,
-                lockedBySelf: false,
-                rotate: 0,
-              };
-
-              const newBlockId = doc.addBlock('affine:attachment', newAttachmentProps, parentId);
-              const newModel = doc.getBlockById(newBlockId) as AttachmentBlockModel;
-              window.dispatchEvent(
-                new CustomEvent('attachmentUpdated', {
-                  detail: {
-                    blockId: newBlockId,
-                    size: combinedZipBlob.size,
-                  },
-                })
-              );
-
-              console.log('Attachment replaced with combined ZIP');
-              Object.assign(model, newModel);
-            }
-          } else if (event.data.type === 'removeFiles') {
-            console.log('Received removeFiles message');
-            const { file_names }: { file_names: string[] } = event.data;
-            if (file_names && file_names.length > 0) {
-              const doc = block.std.doc || model.doc;
-              if (!doc) {
-                console.error('Document unavailable for block update');
+              const parent = store.getParent(model);
+              if (!parent) {
+                console.error('Parent unavailable for block update');
                 toast(block.host, 'Failed to update attachment');
                 return;
               }
-              const parent = model.parent;
               const originalName = model.props.name;
               const originalCaption = model.props.caption;
               const parentId = parent.id;
@@ -441,12 +470,12 @@ export const attachmentViewDropdownMenu = {
               const updatedZipBlob = await newZip.generateAsync({ type: 'blob' });
 
               const oldSourceId = model.props.sourceId;
-              doc.deleteBlock(model);
-              if (oldSourceId) {
-                await doc.blobSync.delete(oldSourceId);
+              store.deleteBlock(model);
+              if (oldSourceId && store.doc.blobSync) {
+                await store.doc.blobSync.delete(oldSourceId);
               }
 
-              const newSourceId = await doc.blobSync.set(updatedZipBlob);
+              const newSourceId = await store.doc.blobSync.set(updatedZipBlob);
               const newAttachmentProps = {
                 name: originalName,
                 size: updatedZipBlob.size,
@@ -461,20 +490,25 @@ export const attachmentViewDropdownMenu = {
                 rotate: 0,
               };
 
-              const newBlockId = doc.addBlock('affine:attachment', newAttachmentProps, parentId);
-              const newModel = doc.getBlockById(newBlockId) as AttachmentBlockModel;
+              const newBlockId = store.addBlock('affine:attachment', newAttachmentProps, parentId);
+              const newModel = store.getBlockById(newBlockId) as AttachmentBlockModel;
               console.log('Attachment replaced with updated ZIP (files removed)');
               window.dispatchEvent(
                 new CustomEvent('attachmentUpdated', {
                   detail: {
                     blockId: newBlockId,
-                    size: combinedZipBlob.size,
+                    size: updatedZipBlob.size,
                   },
                 })
               );
 
               Object.assign(model, newModel);
+            } else {
+              console.log('Unhandled message type:', event.data.type);
             }
+          } catch (error) {
+            console.error('Error handling message:', error, event.data);
+            toast(block.host, 'Error processing message');
           }
         };
 
