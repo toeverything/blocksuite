@@ -78,7 +78,6 @@ export const attachmentViewDropdownMenu = {
         if (!model) return;
 
         const provider = ctx.std.get(AttachmentEmbedProvider);
-
         // TODO(@fundon): should auto focus image block.
         if (
           provider.shouldBeConverted(model) &&
@@ -98,6 +97,29 @@ export const attachmentViewDropdownMenu = {
         });
       },
     },
+    {
+      id: 'dicom',
+      label: 'DICOM view',
+      disabled: ctx => {
+        const model = ctx.getCurrentModelByType(AttachmentBlockModel);
+        if (!model) return true;
+        const fileName = model.props.name || '';
+        return !fileName.endsWith('.dicomdir');
+      },
+      run(ctx) {
+        const model = ctx.getCurrentModelByType(AttachmentBlockModel);
+        if (!model) return;
+
+        console.log('Opening DICOM view for:', model.props.name);
+        // Placeholder for future implementation (e.g., window.open)
+
+        ctx.track('SelectedView', {
+          ...trackBaseProps,
+          control: 'select view',
+          type: 'dicom view',
+        });
+      },
+    },
   ],
   content(ctx) {
     const block = ctx.getCurrentBlockByType(AttachmentBlockComponent);
@@ -106,27 +128,37 @@ export const attachmentViewDropdownMenu = {
     const model = block.model;
     const embedProvider = ctx.std.get(AttachmentEmbedProvider);
     const actions = computed(() => {
-      const [cardAction, embedAction] = this.actions.map(action => ({
+      const [cardAction, embedAction, dicomAction] = this.actions.map(action => ({
         ...action,
       }));
 
       const ok = block.resourceController.resolvedState$.value.state === 'none';
       const sourceId = Boolean(model.props.sourceId$.value);
       const embed = model.props.embed$.value ?? false;
-      // 1. Check whether `sourceId` exists.
-      // 2. Check if `embedded` is allowed.
-      // 3. Check `blobState$`
+      const fileName = model.props.name || '';
+      const isDicom = fileName.endsWith('.dicomdir');
+
       const allowed = ok && sourceId && embedProvider.embedded(model) && !embed;
 
-      cardAction.disabled = !embed;
+      // For DICOM, Card view is always selectable; for non-DICOM, disable Card view when in Card view
+      cardAction.disabled = isDicom ? false : !embed;
       embedAction.disabled = !allowed;
+      dicomAction.disabled = !isDicom || !ok || !sourceId;
 
-      return [cardAction, embedAction];
+      // For DICOM, only include Card view and DICOM view
+      return isDicom ? [cardAction, dicomAction] : [cardAction, embedAction];
     });
     const viewType$ = computed(() => {
-      const [cardAction, embedAction] = actions.value;
       const embed = model.props.embed$.value ?? false;
-      return embed ? embedAction.label : cardAction.label;
+      const fileName = model.props.name || '';
+      const isDicom = fileName.endsWith('.dicomdir');
+
+      // For DICOM, default to Card view
+      if (isDicom) {
+        return 'Card view'; // Since embed: false for DICOM, and DICOM view isn't persisted
+      }
+      // For non-DICOM, use embed state
+      return embed ? actions.value[1].label : actions.value[0].label;
     });
     const onToggle = (e: CustomEvent<boolean>) => {
       e.stopPropagation();
