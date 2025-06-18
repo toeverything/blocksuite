@@ -73,6 +73,7 @@ import { css, html } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import * as lz from 'lz-string';
 import type { Pane } from 'tweakpane';
+import JSZip from 'jszip';
 
 import type { CommentPanel } from '../../comment/index.js';
 import { createTestEditor } from '../../starter/utils/extensions.js';
@@ -574,7 +575,7 @@ export class StarterDebugMenu extends ShadowlessElement {
           type: 'request-save',
           documentType: 'doc',
         },
-                '*'
+        '*'
       );
       if (this.editor.host) {
         toast(this.editor.host, 'Requested save operation.');
@@ -589,8 +590,8 @@ export class StarterDebugMenu extends ShadowlessElement {
 
   private _handleSaveWithToken = async (saveCredentials: unknown) => {
     try {
-      if (!this.collection) {
-        throw new Error('Workspace collection is undefined');
+      if (!this.collection || !this.doc || !this.editor || !this.editor.std) {
+        throw new Error('Workspace, document, or editor is undefined');
       }
 
       const credential = saveCredentials as any;
@@ -601,25 +602,47 @@ export class StarterDebugMenu extends ShadowlessElement {
       const storage = StorageManager.CreateStorage(credential.storageType);
       storage.initialize(credential);
 
-      // Create snapshot using original logic
-      const workspaceImpl = this.collection;
-      const docs = [this.doc];
+      const doc = this.doc;
+      const blobSync = this.editor.std.store.blobSync;
+
+      // Fetch previous manifest to check for unchanged attachments
+      let previousManifest: { attachments: { sourceId: string, name: string, type: string, cloudPath: string }[] } = { attachments: [] };
+      const snapshotName = 'affine.zip';
+      const fileUrl = storage.getFileUrl(snapshotName);
+      if (fileUrl) {
+        try {
+          const response = await fetch(fileUrl);
+          if (response.ok) {
+            const snapshotBlob = await response.blob();
+            const zip = await JSZip.loadAsync(snapshotBlob);
+            const manifestFile = zip.file('manifest.json');
+            if (manifestFile) {
+              previousManifest = JSON.parse(await manifestFile.async('string'));
+            }
+          }
+        } catch (error) {
+          console.warn('Failed to fetch previous manifest:', error);
+        }
+      }
+
+      // Create document snapshot
+      const docs = [doc];
       const zip = new Zip();
       const job = new Transformer({
         schema: this.editor.doc.schema,
-        blobCRUD: workspaceImpl.blobSync,
+        blobCRUD: this.collection.blobSync,
         docCRUD: {
-          create: (id: string) => workspaceImpl.createDoc(id).getStore({ id }),
-          get: (id: string) => workspaceImpl.getDoc(id)?.getStore({ id }) ?? null,
-          delete: (id: string) => workspaceImpl.removeDoc(id),
+          create: (id: string) => this.collection.createDoc(id).getStore({ id }),
+          get: (id: string) => this.collection.getDoc(id)?.getStore({ id }) ?? null,
+          delete: (id: string) => this.collection.removeDoc(id),
         },
         middlewares: [
-          replaceIdMiddleware(workspaceImpl.idGenerator),
-          titleMiddleware(workspaceImpl.meta.docMetas),
+          replaceIdMiddleware(this.collection.idGenerator),
+          titleMiddleware(this.collection.meta.docMetas),
         ],
       });
-      const snapshots = await Promise.all(docs.map(job.docToSnapshot));
 
+      const snapshots = await Promise.all(docs.map(job.docToSnapshot));
       await Promise.all(
         snapshots
           .filter((snapshot): snapshot is DocSnapshot => !!snapshot)
@@ -628,35 +651,65 @@ export class StarterDebugMenu extends ShadowlessElement {
             await zip.file(snapshotName, JSON.stringify(snapshot, null, 2));
           })
       );
-      const assets = zip.folder('assets');
+
+      // Upload new or modified attachment blobs
+      const attachmentBlocks = doc.getBlocksByFlavour('affine:attachment');
       const pathBlobIdMap = job.assetsManager.getPathBlobIdMap();
       const assetsMap = job.assets;
+      const uploadedBlobs = new Set<string>();
+      const manifest = {
+        attachments: [],
+      };
 
-      const results = await Promise.all(
-        Array.from(pathBlobIdMap.values()).map(async blobId => {
-          try {
-            await job.assetsManager.readFromBlob(blobId);
-            const ext = getAssetName(assetsMap, blobId).split('.').at(-1);
-            const blob = assetsMap.get(blobId);
-            if (blob) {
-              await assets.file(`${blobId}.${ext}`, blob);
-              return { success: true, blobId };
-            }
-            return { success: false, blobId, error: 'Blob not found' };
-          } catch (error) {
-            console.error(`Failed to process blob: ${blobId}`, error);
-            return { success: false, blobId, error };
+      // Log assetsMap keys for debugging
+      console.log('assetsMap keys:', Array.from(assetsMap.keys()));
+
+      await Promise.all(
+        attachmentBlocks.map(async block => {
+          const { sourceId, name, type } = block.model.props;
+          if (!sourceId) {
+            console.warn(`No sourceId for attachment block ${block.id}`);
+            return;
           }
+
+          const blob = await blobSync.get(sourceId);
+          if (!blob) {
+            console.warn(`Blob ${sourceId} not found in blobSync`);
+            return;
+          }
+
+          // Log sourceId to check if it’s in assetsMap
+          console.log(`Processing sourceId: ${sourceId}, in assetsMap: ${assetsMap.has(sourceId)}`);
+
+          // Generate file extension
+          const ext = name.split('.').pop() || type.split('/').pop() || 'bin';
+          const cloudPath = `assets/${sourceId}.${ext}`;
+
+          // Check if attachment is unchanged
+          const prevAttachment = previousManifest.attachments.find(
+            att => att.sourceId === sourceId && att.name === name && att.type === type
+          );
+          let cloudUrl = prevAttachment ? storage.getFileUrl(cloudPath) : undefined;
+
+          if (!cloudUrl) {
+            cloudUrl = await storage.uploadFile(blob, cloudPath, null);
+            uploadedBlobs.add(sourceId);
+          }
+
+          manifest.attachments.push({
+            sourceId,
+            name,
+            type,
+            cloudPath,
+          });
         })
       );
 
-      const failures = results.filter(r => !r.success);
-      if (failures.length > 0) {
-        console.warn(`Failed to process ${failures.length} blobs:`, failures);
-      }
+      // Add manifest
+      await zip.file('manifest.json', JSON.stringify(manifest, null, 2));
 
+      // Upload snapshot (overwrites existing)
       const downloadBlob = await zip.generate();
-      const snapshotName = `affine.zip`;
       await storage.uploadFile(downloadBlob, snapshotName, null);
 
       window.parent.postMessage(
@@ -681,8 +734,8 @@ export class StarterDebugMenu extends ShadowlessElement {
 
   private _loadSnapshotWithToken = async (readCredentials: unknown) => {
     try {
-      if (!this.collection) {
-        throw new Error('Workspace collection is undefined');
+      if (!this.collection || !this.editor || !this.editor.std) {
+        throw new Error('Workspace or editor is undefined');
       }
 
       const credential = readCredentials as ReadCredentials;
@@ -693,22 +746,20 @@ export class StarterDebugMenu extends ShadowlessElement {
       const storage = StorageManager.CreateStorage(credential.storageType);
       storage.initialize(credential);
 
-      // Download affine.zip using getFileUrl
-      const fileFullPath = `affine.zip`;
+      // Use fixed snapshot name
+      const fileFullPath = 'affine.zip';
       const fileUrl = storage.getFileUrl(fileFullPath);
       if (!fileUrl) {
-        throw new Error('Failed to get file URL for affine.zip');
+        throw new Error(`Failed to get file URL for snapshot: ${fileFullPath}`);
       }
 
       const response = await fetch(fileUrl);
       if (!response.ok) {
-        throw new Error(`Failed to fetch affine.zip: ${response.statusText}`);
+        throw new Error(`Failed to fetch snapshot: ${response.statusText}`);
       }
       const snapshotBlob = await response.blob();
 
-      console.log('Downloaded snapshot size:', snapshotBlob.size);
-
-      // Import document into workspace
+      // Import document
       const docs = await ZipTransformer.importDocs(
         this.collection,
         this.editor.doc.schema,
@@ -721,6 +772,29 @@ export class StarterDebugMenu extends ShadowlessElement {
 
       const newDoc = docs[0];
       this.editor.doc = newDoc;
+
+      // Load manifest and fetch attachments
+      const zip = await JSZip.loadAsync(snapshotBlob);
+      const manifestFile = zip.file('manifest.json');
+      if (manifestFile) {
+        const manifest = JSON.parse(await manifestFile.async('string'));
+        const blobSync = this.editor.std.store.blobSync;
+        for (const attachment of manifest.attachments) {
+          const { sourceId, cloudPath, name, type } = attachment;
+          const localBlob = await blobSync.get(sourceId);
+          if (!localBlob) {
+            const fileUrl = storage.getFileUrl(cloudPath);
+            if (fileUrl) {
+              const blobResponse = await fetch(fileUrl);
+              if (blobResponse.ok) {
+                const blob = await blobResponse.blob();
+                await blobSync.set(sourceId, new File([blob], name, { type }));
+              }
+            }
+          }
+        }
+      }
+
       this.requestUpdate();
 
       window.parent.postMessage(
@@ -741,6 +815,36 @@ export class StarterDebugMenu extends ShadowlessElement {
       }
     }
   };
+
+  private async cancelChanges() {
+    try {
+      if (!this.doc || !this.editor || !this.editor.std) {
+        throw new Error('Document or editor is undefined');
+      }
+      const blobSync = this.editor.std.store.blobSync;
+      const blocks = this.doc.getBlocksByFlavour('affine:attachment');
+
+      for (const block of blocks) {
+        const { sourceId } = block.model.props;
+        if (sourceId) {
+          const blob = await blobSync.get(sourceId);
+          if (blob) {
+            await blobSync.delete(sourceId);
+            this.editor.std.store.deleteBlock(block);
+          }
+        }
+      }
+
+      if (this.editor.host) {
+        toast(this.editor.host, 'Changes canceled successfully.');
+      }
+    } catch (error) {
+      console.error('Failed to cancel changes:', error);
+      if (this.editor.host) {
+        toast(this.editor.host, 'Failed to cancel changes.');
+      }
+    }
+  }
 
   private _setThemeMode(dark: boolean) {
     const html = document.querySelector('html');
@@ -1125,8 +1229,12 @@ export class StarterDebugMenu extends ShadowlessElement {
           <sl-tooltip content="Save Data" placement="bottom" hoist>
             <sl-button size="small" @click="${this._saveData}">
               <sl-icon name="floppy"></sl-icon>
-              <!-- Fallback: Uncomment below to use 'save' icon if 'floppy' doesn't work -->
-              <!-- <sl-icon name="save"></sl-icon> -->
+            </sl-button>
+          </sl-tooltip>
+
+          <sl-tooltip content="Cancel Changes" placement="bottom" hoist>
+            <sl-button size="small" @click="${this.cancelChanges}">
+              <sl-icon name="x-circle"></sl-icon> Cancel
             </sl-button>
           </sl-tooltip>
 
