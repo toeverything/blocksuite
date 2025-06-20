@@ -84,7 +84,7 @@ import type { CustomOutlinePanel } from './custom-outline-panel.js';
 import type { CustomOutlineViewer } from './custom-outline-viewer.js';
 import type { DocsPanel } from './docs-panel.js';
 import type { LeftSidePanel } from './left-side-panel.js';
-import { StorageManager } from "../storage/storage-manager";
+import { StorageManager } from '../storage/storage-manager';
 import { Zip } from '../../../../affine/widgets/linked-doc/src/transformers/utils.js';
 import { AttachmentBlockComponent } from '@blocksuite/affine-block-attachment';
 
@@ -197,7 +197,7 @@ interface AdapterConfig {
 }
 
 interface ReadCredentials {
-  storageType: "aws" | "oss";
+  storageType: 'aws' | 'oss';
   accessKeyId?: string;
   secretAccessKey?: string;
   bucket?: string;
@@ -773,44 +773,72 @@ export class StarterDebugMenu extends ShadowlessElement {
       const newDoc = docs[0];
       this.editor.doc = newDoc;
 
-      // Load manifest and fetch attachments
+      // Load manifest and fetch attachments with retry
       const zip = await JSZip.loadAsync(snapshotBlob);
       const manifestFile = zip.file('manifest.json');
       if (manifestFile) {
         const manifest = JSON.parse(await manifestFile.async('string'));
+        console.log('Loaded manifest with attachments:', manifest.attachments);
         const blobSync = this.editor.std.store.blobSync;
+        const maxRetries = 3;
         for (const attachment of manifest.attachments) {
           const { sourceId, cloudPath, name, type } = attachment;
-          console.log('Processing attachment:', { sourceId, cloudPath, name, type }); // Debug log
-          const localBlob = await blobSync.get(sourceId);
+          console.log('Processing attachment:', { sourceId, cloudPath, name, type });
+
+          let localBlob = await blobSync.get(sourceId);
           if (!localBlob) {
             const fileUrl = storage.getFileUrl(cloudPath);
-            console.log('Fetching blob from:', fileUrl); // Debug log
+            console.log('Fetching blob from:', fileUrl);
             if (fileUrl) {
-              const blobResponse = await fetch(fileUrl);
-              if (blobResponse.ok) {
-                const blob = await blobResponse.blob();
-                await blobSync.set(sourceId, new File([blob], name, { type }));
-                console.log('Blob stored successfully:', sourceId); // Debug log
-              } else {
-                console.error('Failed to fetch blob:', fileUrl, blobResponse.statusText);
+              let attempts = 0;
+              while (attempts < maxRetries) {
+                try {
+                  const blobResponse = await fetch(fileUrl);
+                  if (blobResponse.ok) {
+                    const blob = await blobResponse.blob();
+                    await blobSync.set(sourceId, new File([blob], name, { type }));
+                    localBlob = await blobSync.get(sourceId); // Verify storage
+                    if (localBlob) {
+                      console.log('Blob stored successfully:', sourceId, 'size:', blob.size);
+                      break;
+                    } else {
+                      throw new Error(`Failed to verify blob storage for sourceId: ${sourceId}`);
+                    }
+                  } else {
+                    throw new Error(`Fetch failed: ${blobResponse.statusText}`);
+                  }
+                } catch (error) {
+                  attempts++;
+                  console.error(`Attempt ${attempts} failed for blob ${sourceId}:`, error);
+                  if (attempts === maxRetries) {
+                    console.error('Max retries reached for blob:', sourceId);
+                    if (this.editor.host) {
+                      toast(this.editor.host, `Failed to fetch blob for ${name}`);
+                    }
+                  }
+                  await new Promise(resolve => setTimeout(resolve, 1000)); // Wait before retry
+                }
               }
             }
           } else {
-            console.log('Blob already exists locally:', sourceId); // Debug log
+            console.log('Blob already exists locally:', sourceId, 'size:', localBlob.size);
           }
         }
       }
 
       // Ensure attachment blocks are initialized without preloading blobs
       const attachmentBlocks = newDoc.getBlocksByFlavour('affine:attachment');
+      console.log('Attachment blocks found:', attachmentBlocks.length);
       for (const block of attachmentBlocks) {
         const blockComponent = this.editor.std.store.getBlock(block.id);
         if (blockComponent && blockComponent instanceof AttachmentBlockComponent) {
-          console.log('Initialized attachment block:', block.id); // Debug log
-          // Do not call reload() to avoid preloading
+          console.log('Initialized attachment block:', block.id, 'sourceId:', block.model.props.sourceId);
         }
       }
+
+      // Reset document history to clear initial changes
+      newDoc.history.reset();
+      console.log('Document history reset, canUndo:', newDoc.canUndo);
 
       this.requestUpdate();
 
@@ -838,29 +866,32 @@ export class StarterDebugMenu extends ShadowlessElement {
       if (!this.doc || !this.editor || !this.editor.std) {
         throw new Error('Document or editor is undefined');
       }
-      const blobSync = this.editor.std.store.blobSync;
-      const blocks = this.doc.getBlocksByFlavour('affine:attachment');
 
-      for (const block of blocks) {
-        const { sourceId } = block.model.props;
-        if (sourceId) {
-          const blob = await blobSync.get(sourceId);
-          if (blob) {
-            await blobSync.delete(sourceId);
-            this.editor.std.store.deleteBlock(block);
-          }
+      console.log('Canceling changes, canUndo:', this.doc.canUndo);
+      if (this.doc.canUndo) {
+        this.doc.undo();
+        console.log('Performed undo operation');
+        if (this.editor.host) {
+          toast(this.editor.host, 'Changes reverted successfully.');
         }
-      }
-
-      if (this.editor.host) {
-        toast(this.editor.host, 'Changes canceled successfully.');
+      } else {
+        console.log('No changes to undo');
+        if (this.editor.host) {
+          toast(this.editor.host, 'No changes to revert.');
+        }
       }
     } catch (error) {
       console.error('Failed to cancel changes:', error);
       if (this.editor.host) {
-        toast(this.editor.host, 'Failed to cancel changes.');
+        toast(this.editor.host, 'Failed to revert changes.');
       }
     }
+  }
+
+  private _hasUndoableChanges(): boolean {
+    const canUndo = !!this.doc && this.doc.canUndo;
+    console.log('Checking hasUndoableChanges, canUndo:', canUndo);
+    return canUndo;
   }
 
   private _setThemeMode(dark: boolean) {
@@ -1010,15 +1041,6 @@ export class StarterDebugMenu extends ShadowlessElement {
     window.addEventListener('message', this._handleMessage.bind(this));
   }
 
-  override createRenderRoot() {
-    this._setThemeMode(this._dark);
-
-    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
-    matchMedia.addEventListener('change', this._darkModeChange);
-
-    return this;
-  }
-
   override disconnectedCallback() {
     super.disconnectedCallback();
 
@@ -1029,10 +1051,20 @@ export class StarterDebugMenu extends ShadowlessElement {
   }
 
   private _handleMessage(event: MessageEvent) {
+    console.log('Received message:', event.data, 'this._loadSnapshotWithToken exists:', !!this._loadSnapshotWithToken);
     if (event.data.type === 'save' && event.data.saveCredentials) {
+      console.log('Calling _handleSaveWithToken');
       this._handleSaveWithToken(event.data.saveCredentials);
     } else if (event.data.type === 'load' && event.data.credential) {
-      this._loadSnapshotWithToken(event.data.credential);
+      console.log('Calling _loadSnapshotWithToken');
+      if (typeof this._loadSnapshotWithToken === 'function') {
+        this._loadSnapshotWithToken(event.data.credential);
+      } else {
+        console.error('_loadSnapshotWithToken is not a function');
+        if (this.editor.host) {
+          toast(this.editor.host, 'Failed to load snapshot: internal error');
+        }
+      }
     }
   }
 
@@ -1040,6 +1072,8 @@ export class StarterDebugMenu extends ShadowlessElement {
     this.doc.history.onUpdated.subscribe(() => {
       this._canUndo = this.doc.canUndo;
       this._canRedo = this.doc.canRedo;
+      console.log('History updated, canUndo:', this._canUndo, 'canRedo:', this._canRedo);
+      this.requestUpdate();
     });
 
     this.editor.std.get(DocModeProvider).onPrimaryModeChange(() => {
@@ -1066,6 +1100,7 @@ export class StarterDebugMenu extends ShadowlessElement {
   }
 
   override render() {
+    console.log('Rendering toolbar, hasUndoableChanges:', this._hasUndoableChanges());
     return html`
       <style>
         .debug-menu {
@@ -1249,11 +1284,13 @@ export class StarterDebugMenu extends ShadowlessElement {
             </sl-button>
           </sl-tooltip>
 
-          <sl-tooltip content="Cancel Changes" placement="bottom" hoist>
-            <sl-button size="small" @click="${this.cancelChanges}">
-              <sl-icon name="x-circle"></sl-icon> Cancel
-            </sl-button>
-          </sl-tooltip>
+          ${this._hasUndoableChanges() ? html`
+            <sl-tooltip content="Cancel Changes" placement="bottom" hoist>
+              <sl-button size="small" @click="${this.cancelChanges}">
+                <sl-icon name="x-circle"></sl-icon> Cancel
+              </sl-button>
+            </sl-tooltip>
+          ` : null}
 
           <sl-tooltip content="Clear Site Data" placement="bottom" hoist>
             <sl-button size="small" @click="${this._clearSiteData}">
