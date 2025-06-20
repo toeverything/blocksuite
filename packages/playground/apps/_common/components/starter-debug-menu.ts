@@ -84,9 +84,9 @@ import type { CustomOutlinePanel } from './custom-outline-panel.js';
 import type { CustomOutlineViewer } from './custom-outline-viewer.js';
 import type { DocsPanel } from './docs-panel.js';
 import type { LeftSidePanel } from './left-side-panel.js';
-
 import { StorageManager } from "../storage/storage-manager";
 import { Zip } from '../../../../affine/widgets/linked-doc/src/transformers/utils.js';
+import { AttachmentBlockComponent } from '@blocksuite/affine-block-attachment';
 
 const basePath =
   'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.11.2/dist';
@@ -781,17 +781,34 @@ export class StarterDebugMenu extends ShadowlessElement {
         const blobSync = this.editor.std.store.blobSync;
         for (const attachment of manifest.attachments) {
           const { sourceId, cloudPath, name, type } = attachment;
+          console.log('Processing attachment:', { sourceId, cloudPath, name, type }); // Debug log
           const localBlob = await blobSync.get(sourceId);
           if (!localBlob) {
             const fileUrl = storage.getFileUrl(cloudPath);
+            console.log('Fetching blob from:', fileUrl); // Debug log
             if (fileUrl) {
               const blobResponse = await fetch(fileUrl);
               if (blobResponse.ok) {
                 const blob = await blobResponse.blob();
                 await blobSync.set(sourceId, new File([blob], name, { type }));
+                console.log('Blob stored successfully:', sourceId); // Debug log
+              } else {
+                console.error('Failed to fetch blob:', fileUrl, blobResponse.statusText);
               }
             }
+          } else {
+            console.log('Blob already exists locally:', sourceId); // Debug log
           }
+        }
+      }
+
+      // Ensure attachment blocks are initialized without preloading blobs
+      const attachmentBlocks = newDoc.getBlocksByFlavour('affine:attachment');
+      for (const block of attachmentBlocks) {
+        const blockComponent = this.editor.std.store.getBlock(block.id);
+        if (blockComponent && blockComponent instanceof AttachmentBlockComponent) {
+          console.log('Initialized attachment block:', block.id); // Debug log
+          // Do not call reload() to avoid preloading
         }
       }
 
