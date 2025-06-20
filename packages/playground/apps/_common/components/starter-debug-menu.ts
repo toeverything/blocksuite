@@ -837,7 +837,7 @@ export class StarterDebugMenu extends ShadowlessElement {
       }
 
       // Reset document history to clear initial changes
-      newDoc.history.reset();
+      newDoc.history.store.resetHistory();
       console.log('Document history reset, canUndo:', newDoc.canUndo);
 
       this.requestUpdate();
