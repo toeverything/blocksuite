@@ -229,6 +229,8 @@ export class StarterDebugMenu extends ShadowlessElement {
 
   private _styleMenu!: Pane;
 
+  private _historySubscription: any = null;
+
   get doc() {
     return this.editor.doc;
   }
@@ -661,7 +663,6 @@ export class StarterDebugMenu extends ShadowlessElement {
         attachments: [],
       };
 
-      // Log assetsMap keys for debugging
       console.log('assetsMap keys:', Array.from(assetsMap.keys()));
 
       await Promise.all(
@@ -678,14 +679,11 @@ export class StarterDebugMenu extends ShadowlessElement {
             return;
           }
 
-          // Log sourceId to check if it’s in assetsMap
           console.log(`Processing sourceId: ${sourceId}, in assetsMap: ${assetsMap.has(sourceId)}`);
 
-          // Generate file extension
           const ext = name.split('.').pop() || type.split('/').pop() || 'bin';
           const cloudPath = `assets/${sourceId}.${ext}`;
 
-          // Check if attachment is unchanged
           const prevAttachment = previousManifest.attachments.find(
             att => att.sourceId === sourceId && att.name === name && att.type === type
           );
@@ -705,10 +703,8 @@ export class StarterDebugMenu extends ShadowlessElement {
         })
       );
 
-      // Add manifest
       await zip.file('manifest.json', JSON.stringify(manifest, null, 2));
 
-      // Upload snapshot (overwrites existing)
       const downloadBlob = await zip.generate();
       await storage.uploadFile(downloadBlob, snapshotName, null);
 
@@ -746,7 +742,6 @@ export class StarterDebugMenu extends ShadowlessElement {
       const storage = StorageManager.CreateStorage(credential.storageType);
       storage.initialize(credential);
 
-      // Use fixed snapshot name
       const fileFullPath = 'affine.zip';
       const fileUrl = storage.getFileUrl(fileFullPath);
       if (!fileUrl) {
@@ -758,6 +753,11 @@ export class StarterDebugMenu extends ShadowlessElement {
         throw new Error(`Failed to fetch snapshot: ${response.statusText}`);
       }
       const snapshotBlob = await response.blob();
+
+      // Clear existing documents from the collection
+      Array.from(this.collection.docs.keys()).forEach(id => {
+        this.collection.removeDoc(id);
+      });
 
       // Import document
       const docs = await ZipTransformer.importDocs(
@@ -771,7 +771,17 @@ export class StarterDebugMenu extends ShadowlessElement {
       }
 
       const newDoc = docs[0];
-      this.editor.doc = newDoc;
+      // Create a new editor instance instead of setting doc directly
+      const newEditor = createTestEditor(newDoc, this.collection);
+      const app = document.querySelector('#app');
+      if (app) {
+        app.innerHTML = '';
+        app.append(newEditor);
+        this.editor = newEditor;
+      }
+
+      // Rebind history subscription
+      this._rebindHistorySubscription(newDoc);
 
       // Load manifest and fetch attachments with retry
       const zip = await JSZip.loadAsync(snapshotBlob);
@@ -797,7 +807,7 @@ export class StarterDebugMenu extends ShadowlessElement {
                   if (blobResponse.ok) {
                     const blob = await blobResponse.blob();
                     await blobSync.set(sourceId, new File([blob], name, { type }));
-                    localBlob = await blobSync.get(sourceId); // Verify storage
+                    localBlob = await blobSync.get(sourceId);
                     if (localBlob) {
                       console.log('Blob stored successfully:', sourceId, 'size:', blob.size);
                       break;
@@ -816,7 +826,7 @@ export class StarterDebugMenu extends ShadowlessElement {
                       toast(this.editor.host, `Failed to fetch blob for ${name}`);
                     }
                   }
-                  await new Promise(resolve => setTimeout(resolve, 1000)); // Wait before retry
+                  await new Promise(resolve => setTimeout(resolve, 1000));
                 }
               }
             }
@@ -826,7 +836,7 @@ export class StarterDebugMenu extends ShadowlessElement {
         }
       }
 
-      // Ensure attachment blocks are initialized without preloading blobs
+      // Ensure attachment blocks are initialized
       const attachmentBlocks = newDoc.getBlocksByFlavour('affine:attachment');
       console.log('Attachment blocks found:', attachmentBlocks.length);
       for (const block of attachmentBlocks) {
@@ -860,6 +870,18 @@ export class StarterDebugMenu extends ShadowlessElement {
       }
     }
   };
+
+  private _rebindHistorySubscription(doc: any) {
+    if (this._historySubscription) {
+      this._historySubscription.unsubscribe();
+    }
+    this._historySubscription = doc.history.onUpdated.subscribe(() => {
+      this._canUndo = doc.canUndo;
+      this._canRedo = doc.canRedo;
+      console.log('History updated, canUndo:', this._canUndo, 'canRedo:', this._canRedo);
+      this.requestUpdate();
+    });
+  }
 
   private async cancelChanges() {
     try {
@@ -1048,6 +1070,10 @@ export class StarterDebugMenu extends ShadowlessElement {
     matchMedia.removeEventListener('change', this._darkModeChange);
 
     window.removeEventListener('message', this._handleMessage.bind(this));
+
+    if (this._historySubscription) {
+      this._historySubscription.unsubscribe();
+    }
   }
 
   private _handleMessage(event: MessageEvent) {
@@ -1069,12 +1095,7 @@ export class StarterDebugMenu extends ShadowlessElement {
   }
 
   override firstUpdated() {
-    this.doc.history.onUpdated.subscribe(() => {
-      this._canUndo = this.doc.canUndo;
-      this._canRedo = this.doc.canRedo;
-      console.log('History updated, canUndo:', this._canUndo, 'canRedo:', this._canRedo);
-      this.requestUpdate();
-    });
+    this._rebindHistorySubscription(this.doc);
 
     this.editor.std.get(DocModeProvider).onPrimaryModeChange(() => {
       this.requestUpdate();
@@ -1291,6 +1312,12 @@ export class StarterDebugMenu extends ShadowlessElement {
               </sl-button>
             </sl-tooltip>
           ` : null}
+
+          <sl-tooltip content="Load Snapshot" placement="bottom" hoist>
+            <sl-button size="small" @click="${() => this._loadSnapshotWithToken({ storageType: 'aws' })}">
+              <sl-icon name="download"></sl-icon>
+            </sl-button>
+          </sl-tooltip>
 
           <sl-tooltip content="Clear Site Data" placement="bottom" hoist>
             <sl-button size="small" @click="${this._clearSiteData}">
