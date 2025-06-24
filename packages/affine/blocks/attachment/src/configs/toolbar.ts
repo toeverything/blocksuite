@@ -67,10 +67,14 @@ async function getAttachmentBlob(block: AttachmentBlockComponent): Promise<Blob 
   try {
     resourceController.updateState({ downloading: true });
 
-    // If blobUrl is available, use it
-    if (blobUrl) {
-      console.log('Fetching blob from existing blobUrl:', blobUrl);
-      const response = await fetch(blobUrl);
+    // Trigger refreshData to ensure blob is fetched
+    await block.refreshData();
+    console.log('refreshData completed, checking blobUrl:', block.blobUrl);
+
+    // Check if blobUrl is now available
+    if (block.blobUrl) {
+      console.log('Fetching blob from blobUrl:', block.blobUrl);
+      const response = await fetch(block.blobUrl);
       if (!response.ok) {
         throw new Error(`Failed to fetch blob from blobUrl: ${response.statusText}`);
       }
@@ -80,9 +84,17 @@ async function getAttachmentBlob(block: AttachmentBlockComponent): Promise<Blob 
       return blob;
     }
 
-    // If no blobUrl, fetch from blobSync using sourceId
+    // If no blobUrl, try fetching from blobSync
     if (!model.props.sourceId) {
-      throw new Error('No sourceId available for attachment');
+      // Handle local file case
+      console.log('No sourceId, checking for local blob');
+      const localBlob = await std.store.blobSync.getLocalBlob?.(model.id);
+      if (localBlob) {
+        console.log('Local blob found, size:', localBlob.size);
+        resourceController.updateState({ downloading: false, state: 'none' });
+        return localBlob;
+      }
+      throw new Error('No sourceId or local blob available for attachment');
     }
 
     console.log('Fetching blob from blobSync with sourceId:', model.props.sourceId);
@@ -90,17 +102,14 @@ async function getAttachmentBlob(block: AttachmentBlockComponent): Promise<Blob 
     if (!blob) {
       throw new Error(`Blob not found in blobSync for sourceId: ${model.props.sourceId}`);
     }
-
-    // Create blobUrl for future use
-    block.blobUrl = URL.createObjectURL(blob);
-    console.log('Blob fetched from blobSync, size:', blob.size, 'new blobUrl:', block.blobUrl);
+    console.log('Blob fetched from blobSync, size:', blob.size);
     resourceController.updateState({ downloading: false, state: 'none' });
     return blob;
   } catch (error) {
     console.error('Blob fetch error:', error, {
       name: model.props.name,
       sourceId: model.props.sourceId,
-      blobUrl: blobUrl,
+      blobUrl: block.blobUrl,
     });
     toast(host, `Failed to fetch blob for ${model.props.name}!`);
     resourceController.updateState({ downloading: false, state: 'error' });

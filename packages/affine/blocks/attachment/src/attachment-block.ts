@@ -66,10 +66,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
     return this.resourceController.blobUrl$.value;
   }
 
-  set blobUrl(value: string | null) {
-    this.resourceController.blobUrl$.value = value;
-  }
-
   get filetype() {
     const name = this.model.props.name$.value;
     return name.split('.').pop() ?? '';
@@ -124,30 +120,14 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
     window.open(blobUrl, '_blank');
   };
 
-  // Refreshes data and ensures blobUrl is set
-  refreshData = async () => {
-    if (this.model.props.sourceId && !this.blobUrl) {
-      try {
-        this.resourceController.updateState({ downloading: true });
-        const blob = await this.std.store.blobSync.get(this.model.props.sourceId);
-        if (blob) {
-          this.blobUrl = URL.createObjectURL(blob);
-          this.resourceController.updateState({ downloading: false, state: 'none' });
-          console.log('Blob URL fetched for:', this.model.props.name, this.blobUrl);
-        } else {
-          throw new Error(`Blob not found for sourceId: ${this.model.props.sourceId}`);
-        }
-      } catch (error) {
-        console.error('Failed to fetch blob URL:', error);
-        this.resourceController.updateState({ downloading: false, state: 'error' });
-        toast(this.host, `Failed to load ${this.model.props.name}`);
-      }
-    }
+  // Refreshes data.
+  refreshData = () => {
+    refreshData(this).catch(console.error);
   };
 
   private readonly _refreshKey$ = signal<string | null>(null);
 
-  // Refreshes the embed component or data
+  // Refreshes the embed component.
   reload = () => {
     if (this.model.props.embed) {
       this._refreshKey$.value = nanoid();
@@ -200,16 +180,12 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
 
     this.resourceController.setEngine(this.std.store.blobSync);
 
-    // Initialize resourceController state to 'none' to avoid error state
-    this.resourceController.updateState({ downloading: false, state: 'none' });
-
     this.disposables.add(this.resourceController.subscribe());
     this.disposables.add(this.resourceController);
 
     this.disposables.add(
       this.model.props.sourceId$.subscribe(() => {
-        // Do not call refreshData() to avoid preloading
-        this.requestUpdate();
+        this.refreshData();
       })
     );
 
@@ -266,7 +242,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
                   module: 'attachment',
                   control: 'upgrade',
                   category: 'card',
-                  type: this.filetype,
+                  type: this.model.props.name.split('.').pop() ?? '',
                 });
             }
           }}
@@ -404,11 +380,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
       description: formatSize(size),
     });
 
-    // Override error state if sourceId exists
-    if (resolvedState.state === 'error' && this.model.props.sourceId) {
-      return { ...resolvedState, state: 'none', error: false };
-    }
-
     return { ...resolvedState, kind };
   });
 
@@ -449,7 +420,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
       ${when(enabled, () => {
         const resolvedState = this.resolvedState$.value;
         if (resolvedState.state !== 'error') return null;
-        // It should be an error message.
+        // It should be an error messge.
         const message = resolvedState.description;
         if (!message) return null;
 
