@@ -49,70 +49,36 @@ function normalizeFilename(filename: string): string {
 
 // Utility to get attachment blob
 async function getAttachmentBlob(block: AttachmentBlockComponent): Promise<Blob | null> {
-  const { model, blobUrl, resourceController, host, std } = block;
+  const { model, blobUrl, resourceController, host } = block;
 
-  console.log('getAttachmentBlob called for:', {
-    name: model.props.name,
-    sourceId: model.props.sourceId,
-    blobUrl: blobUrl,
-    blobSyncAvailable: !!std.store.blobSync,
-  });
+  console.log('getAttachmentBlob called for:', model.props.name, 'blobUrl:', blobUrl);
 
   if (resourceController.state$.peek().downloading) {
-    console.log('Download in progress, returning null');
     toast(host, 'Download in progress...');
+    console.log('Download in progress, returning null');
+    return null;
+  }
+
+  if (!blobUrl) {
+    toast(host, `Failed to fetch blob for ${model.props.name}!`);
+    console.log('No blobUrl available');
     return null;
   }
 
   try {
     resourceController.updateState({ downloading: true });
-
-    // Trigger refreshData to ensure blob is fetched
-    await block.refreshData();
-    console.log('refreshData completed, checking blobUrl:', block.blobUrl);
-
-    // Check if blobUrl is now available
-    if (block.blobUrl) {
-      console.log('Fetching blob from blobUrl:', block.blobUrl);
-      const response = await fetch(block.blobUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch blob from blobUrl: ${response.statusText}`);
-      }
-      const blob = await response.blob();
-      console.log('Blob fetched from blobUrl, size:', blob.size);
-      resourceController.updateState({ downloading: false, state: 'none' });
-      return blob;
+    const response = await fetch(blobUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch blob: ${response.statusText}`);
     }
-
-    // If no blobUrl, try fetching from blobSync
-    if (!model.props.sourceId) {
-      // Handle local file case
-      console.log('No sourceId, checking for local blob');
-      const localBlob = await std.store.blobSync.getLocalBlob?.(model.id);
-      if (localBlob) {
-        console.log('Local blob found, size:', localBlob.size);
-        resourceController.updateState({ downloading: false, state: 'none' });
-        return localBlob;
-      }
-      throw new Error('No sourceId or local blob available for attachment');
-    }
-
-    console.log('Fetching blob from blobSync with sourceId:', model.props.sourceId);
-    const blob = await std.store.blobSync.get(model.props.sourceId);
-    if (!blob) {
-      throw new Error(`Blob not found in blobSync for sourceId: ${model.props.sourceId}`);
-    }
-    console.log('Blob fetched from blobSync, size:', blob.size);
-    resourceController.updateState({ downloading: false, state: 'none' });
+    const blob = await response.blob();
+    resourceController.updateState({ downloading: false });
+    console.log('Blob fetched successfully, size:', blob.size);
     return blob;
   } catch (error) {
-    console.error('Blob fetch error:', error, {
-      name: model.props.name,
-      sourceId: model.props.sourceId,
-      blobUrl: block.blobUrl,
-    });
+    console.error('Blob fetch error:', error);
     toast(host, `Failed to fetch blob for ${model.props.name}!`);
-    resourceController.updateState({ downloading: false, state: 'error' });
+    resourceController.updateState({ downloading: false });
     return null;
   }
 }
@@ -164,17 +130,6 @@ class DicomViewerPopup extends LitElement {
       height: 100%;
       border: none;
     }
-    .loading-message {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(255, 255, 255, 0.8);
-      padding: 16px;
-      border-radius: 4px;
-      font-size: 16px;
-      color: #333;
-    }
   `;
 
   // Properties
@@ -183,15 +138,13 @@ class DicomViewerPopup extends LitElement {
   model: AttachmentBlockModel | null = null; // Store model reference
   block: AttachmentBlockComponent | null = null; // Store block reference
   std: any = null; // Store ctx.std for std.store.getBlock
-  loading = true; // Add loading state
 
   override render() {
-    console.log('Rendering DicomViewerPopup, viewerUrl:', this.viewerUrl, 'loading:', this.loading);
+    console.log('Rendering DicomViewerPopup, viewerUrl:', this.viewerUrl);
     return html`
       <div class="popup-overlay" @click=${this._handleOutsideClick}>
         <div class="popup-container">
           <button class="close-button" @click=${this._handleClose}>Close</button>
-          ${this.loading ? html`<div class="loading-message">Loading DICOM content...</div>` : null}
           <iframe id="dicom-viewer" src=${this.viewerUrl} title="DICOM Viewer"></iframe>
         </div>
       </div>
@@ -313,7 +266,6 @@ export const attachmentViewDropdownMenu = {
         popup.model = model; // Pass the model reference
         popup.block = block; // Pass the block reference
         popup.std = ctx.std; // Pass ctx.std for std.store.getBlock
-        popup.loading = true; // Start in loading state
         console.log('Popup set:', { model: popup.model, block: popup.block, stdStore: ctx.std.store }); // Debug log
         popup.onClose = () => {
           currentPopupInstance?.remove();
@@ -382,8 +334,6 @@ export const attachmentViewDropdownMenu = {
               if (!fetchedBlob) {
                 console.error('Failed to fetch blob, cannot send to iframe');
                 toast(block.host, 'Failed to load DICOM content');
-                currentPopupInstance.loading = false;
-                currentPopupInstance.requestUpdate();
                 return;
               }
 
@@ -412,8 +362,6 @@ export const attachmentViewDropdownMenu = {
                 if (!popupEl) {
                   console.error('Popup instance not available');
                   toast(block.host, 'Failed to load DICOM viewer');
-                  currentPopupInstance.loading = false;
-                  currentPopupInstance.requestUpdate();
                   return;
                 }
 
@@ -421,8 +369,6 @@ export const attachmentViewDropdownMenu = {
                 if (!iframe || !iframe.contentWindow) {
                   console.error('DICOM viewer iframe not found or contentWindow unavailable');
                   toast(block.host, 'Failed to load DICOM viewer');
-                  currentPopupInstance.loading = false;
-                  currentPopupInstance.requestUpdate();
                   return;
                 }
                 console.log('Sending blobs to iframe:', viewerUrl);
@@ -430,13 +376,9 @@ export const attachmentViewDropdownMenu = {
 
                 blobsWithMeta.length = 0;
                 blobs.length = 0;
-                currentPopupInstance.loading = false;
-                currentPopupInstance.requestUpdate();
               } catch (error) {
                 console.error('Error processing ZIP:', error);
                 toast(block.host, 'Failed to process DICOM content');
-                currentPopupInstance.loading = false;
-                currentPopupInstance.requestUpdate();
               }
             } else if (event.data.type === 'appendFiles') {
               console.log('Received appendFiles message');
@@ -698,10 +640,11 @@ export const attachmentViewDropdownMenu = {
       const fileName = model.props.name || '';
       const isDicom = fileName.endsWith('.dicomdir');
 
-      // Only disable DICOM action if it's not a DICOM file
+      const allowed = ok && sourceId && embedProvider.embedded(model) && !embed;
+
       cardAction.disabled = isDicom ? false : !embed;
-      embedAction.disabled = !ok || !sourceId || !embedProvider.embedded(model) || embed;
-      dicomAction.disabled = !isDicom; // Simplified condition
+      embedAction.disabled = !allowed;
+      dicomAction.disabled = !isDicom || !ok || !sourceId;
 
       return isDicom ? [cardAction, dicomAction] : [cardAction, embedAction];
     });
