@@ -127,14 +127,17 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
 
   private readonly _refreshKey$ = signal<string | null>(null);
 
-  // Refreshes the embed component.
   reload = () => {
-    if (this.model.props.embed) {
-      this._refreshKey$.value = nanoid();
-      return;
-    }
-
+    console.log('Reloading:', {
+      name: this.model.props.name,
+      embed: this.model.props.embed$.value,
+      blobUrl: this.blobUrl,
+    });
+    this.resourceController.updateState({ downloading: true });
     this.refreshData();
+    this.resourceController.updateState({ downloading: false, state: 'none' });
+    this._refreshKey$.value = nanoid();
+    console.log('Updated refreshKey:', this._refreshKey$.value);
   };
 
   private _selectBlock() {
@@ -227,25 +230,25 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
         <button
           class="affine-attachment-content-button"
           @click=${(event: MouseEvent) => {
-            event.stopPropagation();
-            onOverFileSize?.();
+          event.stopPropagation();
+          onOverFileSize?.();
 
-            {
-              const mode =
-                this.std.get(DocModeProvider).getEditorMode() ?? 'page';
-              const segment = mode === 'page' ? 'doc' : 'whiteboard';
-              this.std
-                .getOptional(TelemetryProvider)
-                ?.track('AttachmentUpgradedEvent', {
-                  segment,
-                  page: `${segment} editor`,
-                  module: 'attachment',
-                  control: 'upgrade',
-                  category: 'card',
-                  type: this.model.props.name.split('.').pop() ?? '',
-                });
-            }
-          }}
+          {
+            const mode =
+              this.std.get(DocModeProvider).getEditorMode() ?? 'page';
+            const segment = mode === 'page' ? 'doc' : 'whiteboard';
+            this.std
+              .getOptional(TelemetryProvider)
+              ?.track('AttachmentUpgradedEvent', {
+                segment,
+                page: `${segment} editor`,
+                module: 'attachment',
+                control: 'upgrade',
+                category: 'card',
+                type: this.model.props.name.split('.').pop() ?? '',
+              });
+          }
+        }}
         >
           ${UpgradeIcon()} Upgrade
         </button>
@@ -254,43 +257,8 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
   };
 
   protected renderNormalButton = (needUpload: boolean) => {
-    const label = needUpload ? 'retry' : 'reload';
-    const run = async () => {
-      if (needUpload) {
-        await this.resourceController.upload();
-        return;
-      }
-
-      this.refreshData();
-    };
-
-    return html`
-      <button
-        class="affine-attachment-content-button"
-        @click=${(event: MouseEvent) => {
-          event.stopPropagation();
-          run().catch(console.error);
-
-          {
-            const mode =
-              this.std.get(DocModeProvider).getEditorMode() ?? 'page';
-            const segment = mode === 'page' ? 'doc' : 'whiteboard';
-            this.std
-              .getOptional(TelemetryProvider)
-              ?.track('AttachmentReloadedEvent', {
-                segment,
-                page: `${segment} editor`,
-                module: 'attachment',
-                control: label,
-                category: 'card',
-                type: this.filetype,
-              });
-          }
-        }}
-      >
-        ${ResetIcon()} ${label}
-      </button>
-    `;
+    // Suppress button rendering
+    return null;
   };
 
   protected renderWithHorizontal(
@@ -312,16 +280,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
             <div class="affine-attachment-content-title-text truncate">
               ${title}
             </div>
-          </div>
-
-          <div class="affine-attachment-content-description">
-            <div class="affine-attachment-content-info truncate">
-              ${description}
-            </div>
-            ${choose(state, [
-              ['error', () => this.renderNormalButton(needUpload)],
-              ['error:oversize', this.renderUpgradeButton],
-            ])}
           </div>
         </div>
 
@@ -356,13 +314,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
           </div>
         </div>
 
-        <div class="affine-attachment-banner">
-          ${kind}
-          ${choose(state, [
-            ['error', () => this.renderNormalButton(needUpload)],
-            ['error:oversize', this.renderUpgradeButton],
-          ])}
-        </div>
+        <div class="affine-attachment-banner">${kind}</div>
       </div>
     `;
   }
@@ -411,32 +363,10 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
     const render = provider.getRender(model, _maxFileSize);
     if (!render) return null;
 
-    const enabled = provider.shouldShowStatus(model);
-
     return html`
       <div class="affine-attachment-embed-container">
         ${guard([this._refreshKey$.value], () => render(model, blobUrl))}
       </div>
-      ${when(enabled, () => {
-        const resolvedState = this.resolvedState$.value;
-        if (resolvedState.state !== 'error') return null;
-        // It should be an error messge.
-        const message = resolvedState.description;
-        if (!message) return null;
-
-        const needUpload = resolvedState.needUpload;
-        const action = () =>
-          needUpload ? this.resourceController.upload() : this.reload();
-
-        return html`
-          <affine-resource-status
-            class="affine-attachment-embed-status"
-            .message=${message}
-            .needUpload=${needUpload}
-            .action=${action}
-          ></affine-resource-status>
-        `;
-      })}
     `;
   };
 
@@ -453,19 +383,20 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
   };
 
   override renderBlock() {
+    console.log('renderBlock called, flavour:', this.model.flavour, 'state:', this.resolvedState$.value.state);
     return html`
       <div
         class=${classMap({
-          'affine-attachment-container': true,
-          focused: this.selected$.value,
-        })}
+      'affine-attachment-container': true,
+      focused: this.selected$.value,
+    })}
         style=${this.containerStyleMap}
       >
         ${when(
-          this.isCitation,
-          () => this._renderCitation(),
-          () => this.renderEmbedView() ?? this.renderCardView()
-        )}
+      this.isCitation,
+      () => this._renderCitation(),
+      () => this.renderEmbedView() ?? this.renderCardView()
+    )}
       </div>
     `;
   }
