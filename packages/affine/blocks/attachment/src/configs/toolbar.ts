@@ -43,7 +43,6 @@ import { AttachmentEmbedProvider } from '../embed';
 // Utility to normalize filenames for comparison
 function normalizeFilename(filename: string): string {
   if (typeof filename !== 'string') return '';
-  // Trim whitespace, convert to lowercase, extract basename (remove path)
   return filename.trim().toLowerCase().split('/').pop() || '';
 }
 
@@ -109,7 +108,10 @@ async function getAttachmentBlob(block: AttachmentBlockComponent): Promise<Blob 
       sourceId: model.props.sourceId$.value,
       blobUrl: block.blobUrl,
     });
-    toast(host, `Failed to fetch blob for ${model.props.name}!`);
+    // Suppress toast during initial load to avoid error messages
+    if (block.blobUrl) {
+      toast(host, `Failed to fetch blob for ${model.props.name}!`);
+    }
     resourceController.updateState({ downloading: false, state: 'error' });
     return null;
   }
@@ -164,12 +166,11 @@ class DicomViewerPopup extends LitElement {
     }
   `;
 
-  // Properties
   viewerUrl = '';
-  onClose: () => void = () => { };
-  model: AttachmentBlockModel | null = null; // Store model reference
-  block: AttachmentBlockComponent | null = null; // Store block reference
-  std: any = null; // Store ctx.std for std.store.getBlock
+  onClose: () => void = () => {};
+  model: AttachmentBlockModel | null = null;
+  block: AttachmentBlockComponent | null = null;
+  std: any = null;
 
   override render() {
     console.log('Rendering DicomViewerPopup, viewerUrl:', this.viewerUrl);
@@ -201,7 +202,6 @@ class DicomViewerPopup extends LitElement {
   }
 }
 
-// Track current popup instance
 let currentPopupInstance: DicomViewerPopup | null = null;
 
 const trackBaseProps = {
@@ -243,7 +243,7 @@ export const attachmentViewDropdownMenu = {
           sourceId: !!model?.props.sourceId$.value,
           fileName: model?.props.name,
         });
-        return !model || !model.props.sourceId$.value || model.props.name?.endsWith('.dicomdir');
+        return !model || !model?.props.sourceId$.value || model.props.name?.endsWith('.dicomdir');
       },
       run(ctx) {
         console.log('Embed view triggered:', {
@@ -260,13 +260,19 @@ export const attachmentViewDropdownMenu = {
 
         try {
           const provider = ctx.std.get(AttachmentEmbedProvider);
+          console.log('Provider fetched:', !!provider);
           // Force state reset to trigger rendering
           ctx.store.updateBlock(model, { embed: false });
           console.log('Reset embed to false');
           setTimeout(() => {
             provider.convertTo(model);
             block.reload();
-            console.log('Reload called, embed state:', model.props.embed$.value);
+            console.log('Reload called, embed state:', model.props.embed$.value, 'blobUrl:', block.blobUrl);
+            // Perform shouldBeConverted check inside setTimeout
+            if (provider.shouldBeConverted(model) && !ctx.hasSelectedSurfaceModels) {
+              ctx.reset();
+              ctx.select('note');
+            }
           }, 0);
         } catch (err) {
           console.error('Embed view failed:', {
@@ -275,11 +281,6 @@ export const attachmentViewDropdownMenu = {
             name: model.props.name,
           });
           toast(block.host, `Failed to load ${model.props.name}`);
-        }
-
-        if (provider.shouldBeConverted(model) && !ctx.hasSelectedSurfaceModels) {
-          ctx.reset();
-          ctx.select('note');
         }
 
         ctx.track('SelectedView', {
@@ -301,7 +302,7 @@ export const attachmentViewDropdownMenu = {
         });
         if (!model) return true;
         const fileName = model.props.name || '';
-        return !fileName.endsWith('.dicomdir');
+        return !fileName.endsWith('.dicomdir') || !model.props.sourceId$.value;
       },
       run(ctx) {
         console.log('DICOM view triggered:', {
@@ -642,11 +643,11 @@ export const attachmentViewDropdownMenu = {
     return html`${keyed(
       model,
       html`<affine-view-dropdown-menu
-      @toggle=${onToggle}
-      .actions=${actions.value}
-      .context=${ctx}
-      .viewType$=${viewType$}
-    ></affine-view-dropdown-menu>`
+        @toggle=${onToggle}
+        .actions=${actions.value}
+        .context=${ctx}
+        .viewType$=${viewType$}
+      ></affine-view-dropdown-menu>`
     )}`;
   },
 } as const satisfies ToolbarActionGroup<ToolbarAction>;
@@ -700,22 +701,22 @@ const builtinToolbarConfig = {
             aria-label="Rename"
             .tooltip="${'Rename'}"
             @click=${() => {
-            ctx.hide();
+              ctx.hide();
 
-            createLitPortal({
-              template: RenameModal({
-                model: block.model,
-                editorHost: ctx.host,
+              createLitPortal({
+                template: RenameModal({
+                  model: block.model,
+                  editorHost: ctx.host,
+                  abortController,
+                }),
+                computePosition: {
+                  referenceElement: block,
+                  placement: 'top-start',
+                  middleware: [flip(), offset(4)],
+                },
                 abortController,
-              }),
-              computePosition: {
-                referenceElement: block,
-                placement: 'top-start',
-                middleware: [flip(), offset(4)],
-              },
-              abortController,
-            });
-          }}
+              });
+            }}
           >
             ${EditIcon()}
           </editor-icon-button>

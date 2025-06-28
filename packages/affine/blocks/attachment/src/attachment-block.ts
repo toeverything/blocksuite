@@ -27,7 +27,6 @@ import {
   AttachmentIcon,
   ResetIcon,
   UpgradeIcon,
-  WarningIcon,
 } from '@blocksuite/icons/lit';
 import { BlockSelection } from '@blocksuite/std';
 import { nanoid, Slice } from '@blocksuite/store';
@@ -120,7 +119,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
     window.open(blobUrl, '_blank');
   };
 
-  // Refreshes data.
   refreshData = () => {
     refreshData(this).catch(console.error);
   };
@@ -149,7 +147,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
   }
 
   private readonly _trackCitationDeleteEvent = () => {
-    // Check citation delete event
     this._disposables.add(
       this.std.store.slots.blockUpdated
         .pipe(
@@ -204,12 +201,10 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
   }
 
   override firstUpdated() {
-    // lazy bindings
     this.disposables.addFromEvent(this, 'click', this.onClick);
   }
 
   protected onClick(event: MouseEvent) {
-    // the peek view need handle shift + click
     if (event.defaultPrevented) return;
 
     event.stopPropagation();
@@ -230,10 +225,9 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
         <button
           class="affine-attachment-content-button"
           @click=${(event: MouseEvent) => {
-          event.stopPropagation();
-          onOverFileSize?.();
+            event.stopPropagation();
+            onOverFileSize?.();
 
-          {
             const mode =
               this.std.get(DocModeProvider).getEditorMode() ?? 'page';
             const segment = mode === 'page' ? 'doc' : 'whiteboard';
@@ -247,8 +241,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
                 category: 'card',
                 type: this.model.props.name.split('.').pop() ?? '',
               });
-          }
-        }}
+          }}
         >
           ${UpgradeIcon()} Upgrade
         </button>
@@ -257,7 +250,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
   };
 
   protected renderNormalButton = (needUpload: boolean) => {
-    // Suppress button rendering
     return null;
   };
 
@@ -326,7 +318,7 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
 
     const resolvedState = this.resourceController.resolveStateWith({
       loadingIcon: LoadingIcon(),
-      errorIcon: WarningIcon(),
+      errorIcon: null, // Suppress warning symbol
       icon: AttachmentIcon(),
       title: name,
       description: formatSize(size),
@@ -343,7 +335,6 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
       'affine-attachment-card': true,
       [cardStyle]: true,
       loading: resolvedState.loading,
-      error: resolvedState.error,
     };
 
     return when(
@@ -355,13 +346,25 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
 
   protected renderEmbedView = () => {
     const { model, blobUrl } = this;
-    if (!model.props.embed || !blobUrl) return null;
+    if (!model.props.embed || !blobUrl) {
+      console.log('renderEmbedView: Skipping due to missing embed or blobUrl', {
+        embed: model.props.embed,
+        blobUrl,
+        name: model.props.name,
+      });
+      return null;
+    }
 
     const { std, _maxFileSize } = this;
     const provider = std.get(AttachmentEmbedProvider);
 
     const render = provider.getRender(model, _maxFileSize);
-    if (!render) return null;
+    if (!render) {
+      console.log('renderEmbedView: No render function available', {
+        name: model.props.name,
+      });
+      return null;
+    }
 
     return html`
       <div class="affine-attachment-embed-container">
@@ -387,16 +390,16 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
     return html`
       <div
         class=${classMap({
-      'affine-attachment-container': true,
-      focused: this.selected$.value,
-    })}
+          'affine-attachment-container': true,
+          focused: this.selected$.value,
+        })}
         style=${this.containerStyleMap}
       >
         ${when(
-      this.isCitation,
-      () => this._renderCitation(),
-      () => this.renderEmbedView() ?? this.renderCardView()
-    )}
+          this.isCitation,
+          () => this._renderCitation(),
+          () => this.renderEmbedView() ?? this.renderCardView()
+        )}
       </div>
     `;
   }
