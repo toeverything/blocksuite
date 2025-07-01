@@ -125,18 +125,24 @@ export class AttachmentBlockComponent extends CaptionedBlockComponent<Attachment
 
   private readonly _refreshKey$ = signal<string | null>(null);
 
-  reload = () => {
-    console.log('Reloading:', {
-      name: this.model.props.name,
-      embed: this.model.props.embed$.value,
-      blobUrl: this.blobUrl,
-    });
-    this.resourceController.updateState({ downloading: true });
-    this.refreshData();
-    this.resourceController.updateState({ downloading: false, state: 'none' });
+reload = () => {
+  const isEmbedded = this.model.props.embed;
+  const hasBlobUrl = !!this.resourceController.blobUrl$.value;
+
+  if (isEmbedded && hasBlobUrl) {
+    // For embedded attachments with a loaded blob (likely local or cached), update refreshKey
     this._refreshKey$.value = nanoid();
-    console.log('Updated refreshKey:', this._refreshKey$.value);
-  };
+    console.log('Embedded reload with blobUrl, updated refreshKey:', this._refreshKey$.value);
+    return;
+  }
+
+  // For non-embedded or cloud attachments (no blobUrl), perform full refresh
+  this.resourceController.updateState({ downloading: true });
+  this.refreshData();
+  this.resourceController.updateState({ downloading: false, state: 'none' });
+  this._refreshKey$.value = nanoid();
+  console.log('Full reload, updated refreshKey:', this._refreshKey$.value);
+};
 
   private _selectBlock() {
     const selectionManager = this.host.selection;
