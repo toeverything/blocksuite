@@ -4,7 +4,7 @@ import { getTestStoreManager } from '@blocksuite/integration-test/store';
 
 import type { InitFn } from './utils.js';
 
-const presetMarkdown = `Click the 🔁 button to switch between editors dynamically - they are fully compatible!`;
+const presetMarkdown = `Enter your content here.`;
 
 export const preset: InitFn = async (collection: Workspace, id: string) => {
   let doc = collection.getDoc(id);
@@ -21,7 +21,7 @@ export const preset: InitFn = async (collection: Workspace, id: string) => {
   if (!hasDoc) {
     // Add root block and surface block at root level
     const rootId = store.addBlock('affine:page', {
-      title: new Text('BlockSuite Playground'),
+      title: new Text(''),
     });
     store.addBlock('affine:surface', {}, rootId);
 
