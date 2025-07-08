@@ -87,6 +87,9 @@ import type { LeftSidePanel } from './left-side-panel.js';
 import { StorageManager } from '../storage/storage-manager';
 import { Zip } from '../../../../affine/widgets/linked-doc/src/transformers/utils.js';
 import { AttachmentBlockComponent } from '@blocksuite/affine-block-attachment';
+import type { TestWorkspace } from '../../../../framework/store/src/test/test-workspace.js';
+import { BehaviorSubject } from "rxjs";
+declare var decoder: any;
 
 const basePath =
   'https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.11.2/dist';
@@ -626,6 +629,41 @@ export class StarterDebugMenu extends ShadowlessElement {
           console.warn('Failed to fetch previous manifest:', error);
         }
       }
+
+      //////////////////
+      // Access TestWorkspace to get studyManagerRegistry
+      const workspace = this.collection as TestWorkspace;
+      if (!workspace || !workspace.studyManagerRegistry) {
+        console.error('TestWorkspace or studyManagerRegistry not found');
+        // Proceed with saving the snapshot, but DICOM studies won't be saved
+      }
+
+      // Save all DICOM studyManagers
+      const dicomAttachmentBlocks = doc.getBlocksByFlavour('affine:attachment');
+      if (workspace?.studyManagerRegistry) {
+        for (const block of dicomAttachmentBlocks) {
+          const { sourceId, name, type } = block.model.props;
+          if (type === 'application/dicomdir') {
+            const dicomGuid = name.replace(/\.[^/.]+$/, '');
+            const studyManager = workspace.studyManagerRegistry.get(dicomGuid);
+            if (studyManager) {
+              try {
+                const cloudPath = `assets/${sourceId}.dicomdir`;
+                const abortController = new AbortController();
+                const signal = abortController.signal;
+                const uploadedImagesSubject = new BehaviorSubject<number>(0);
+                await decoder.CoreApi.saveStudy(studyManager, storage, cloudPath, signal, uploadedImagesSubject);
+                console.log(`Saved studyManager for DICOM attachment ${dicomGuid}`);
+              } catch (error) {
+                console.error(`Failed to save studyManager ${dicomGuid}:`, error);
+              }
+            } else {
+              console.warn(`No studyManager found for dicomGuid ${dicomGuid}`);
+            }
+          }
+        }
+      }
+      //////////////////
 
       // Create document snapshot
       const docs = [doc];

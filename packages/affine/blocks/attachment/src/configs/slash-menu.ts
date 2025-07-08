@@ -6,8 +6,6 @@ import { addSiblingAttachmentBlocks } from '../utils';
 import { AttachmentTooltip, DicomTooltip, PDFTooltip } from './tooltips';
 import JSZip from 'jszip';
 import { uuidv4 } from '@blocksuite/store';
-import { ImageIcon } from '@blocksuite/icons/lit';
-
 import { svg } from 'lit';
 declare var decoder: any;
 
