@@ -754,12 +754,7 @@ export class StarterDebugMenu extends ShadowlessElement {
       }
       const snapshotBlob = await response.blob();
 
-      // Clear existing documents from the collection
-      Array.from(this.collection.docs.keys()).forEach(id => {
-        this.collection.removeDoc(id);
-      });
-
-      // Import document
+      // Import documents into the collection
       const docs = await ZipTransformer.importDocs(
         this.collection,
         this.editor.doc.schema,
@@ -770,99 +765,30 @@ export class StarterDebugMenu extends ShadowlessElement {
         throw new Error('No documents found in snapshot');
       }
 
-      const newDoc = docs[0];
-      // Create a new editor instance instead of setting doc directly
-      const newEditor = createTestEditor(newDoc, this.collection);
-      const app = document.querySelector('#app');
-      if (app) {
-        app.innerHTML = '';
-        app.append(newEditor);
-        this.editor = newEditor;
+      // Select the first document (or use a specific ID if needed)
+      const newDoc = docs[0]; // Adjust this if you need a specific document
+      if (newDoc === undefined) {
+        throw new Error('Failed to load document from snapshot');
       }
 
-      // Rebind history subscription
-      this._rebindHistorySubscription(newDoc);
-
-      // Load manifest and fetch attachments with retry
-      const zip = await JSZip.loadAsync(snapshotBlob);
-      const manifestFile = zip.file('manifest.json');
-      if (manifestFile) {
-        const manifest = JSON.parse(await manifestFile.async('string'));
-        console.log('Loaded manifest with attachments:', manifest.attachments);
-        const blobSync = this.editor.std.store.blobSync;
-        const maxRetries = 3;
-        for (const attachment of manifest.attachments) {
-          const { sourceId, cloudPath, name, type } = attachment;
-          console.log('Processing attachment:', { sourceId, cloudPath, name, type });
-
-          let localBlob = await blobSync.get(sourceId);
-          if (!localBlob) {
-            const fileUrl = storage.getFileUrl(cloudPath);
-            console.log('Fetching blob from:', fileUrl);
-            if (fileUrl) {
-              let attempts = 0;
-              while (attempts < maxRetries) {
-                try {
-                  const blobResponse = await fetch(fileUrl);
-                  if (blobResponse.ok) {
-                    const blob = await blobResponse.blob();
-                    await blobSync.set(sourceId, new File([blob], name, { type }));
-                    localBlob = await blobSync.get(sourceId);
-                    if (localBlob) {
-                      console.log('Blob stored successfully:', sourceId, 'size:', blob.size);
-                      break;
-                    } else {
-                      throw new Error(`Failed to verify blob storage for sourceId: ${sourceId}`);
-                    }
-                  } else {
-                    throw new Error(`Fetch failed: ${blobResponse.statusText}`);
-                  }
-                } catch (error) {
-                  attempts++;
-                  console.error(`Attempt ${attempts} failed for blob ${sourceId}:`, error);
-                  if (attempts === maxRetries) {
-                    console.error('Max retries reached for blob:', sourceId);
-                    if (this.editor.host) {
-                      toast(this.editor.host, `Failed to fetch blob for ${name}`);
-                    }
-                  }
-                  await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-              }
-            }
-          } else {
-            console.log('Blob already exists locally:', sourceId, 'size:', localBlob.size);
-          }
-        }
+      if (!newDoc.loaded) {
+        newDoc.load(); // Ensure the document is loaded
       }
 
-      // Ensure attachment blocks are initialized
-      const attachmentBlocks = newDoc.getBlocksByFlavour('affine:attachment');
-      console.log('Attachment blocks found:', attachmentBlocks.length);
-      for (const block of attachmentBlocks) {
-        const blockComponent = this.editor.std.store.getBlock(block.id);
-        if (blockComponent && blockComponent instanceof AttachmentBlockComponent) {
-          console.log('Initialized attachment block:', block.id, 'sourceId:', block.model.props.sourceId);
-        }
-      }
+      // Update the editor's document
+      this.editor.doc = newDoc;
+      this._rebindHistorySubscription(this.editor.doc);
 
-      // Reset document history to clear initial changes
-      newDoc.history.store.resetHistory();
-      console.log('Document history reset, canUndo:', newDoc.canUndo);
+      // Update the editor's mode (if necessary)
+      const modeService = this.editor.std.provider.get(DocModeProvider);
+      this.editor.mode = modeService.getPrimaryMode(newDoc.id);
 
-      this.requestUpdate();
-
-      window.parent.postMessage(
-        {
-          type: 'load-complete',
-          documentId: newDoc.id,
-        },
-        'https://parent-domain.com'
-      );
-
+      // Notify the editor's host to re-render
       if (this.editor.host) {
+        this.editor.host.requestUpdate(); // Trigger a re-render of the editor
         toast(this.editor.host, 'Snapshot loaded successfully.');
       }
+
     } catch (error) {
       console.error('Failed to load snapshot:', error);
       if (this.editor.host) {
@@ -870,18 +796,6 @@ export class StarterDebugMenu extends ShadowlessElement {
       }
     }
   };
-
-  private _rebindHistorySubscription(doc: any) {
-    if (this._historySubscription) {
-      this._historySubscription.unsubscribe();
-    }
-    this._historySubscription = doc.history.onUpdated.subscribe(() => {
-      this._canUndo = doc.canUndo;
-      this._canRedo = doc.canRedo;
-      console.log('History updated, canUndo:', this._canUndo, 'canRedo:', this._canRedo);
-      this.requestUpdate();
-    });
-  }
 
   private async cancelChanges() {
     try {
@@ -1094,8 +1008,15 @@ export class StarterDebugMenu extends ShadowlessElement {
     }
   }
 
+  private _rebindHistorySubscription(doc: any) {
+      this._canUndo = doc.canUndo;
+      this._canRedo = doc.canRedo;
+  }
+
   override firstUpdated() {
-    this._rebindHistorySubscription(this.doc);
+    this.doc.history.onUpdated.subscribe(() => {
+      this._rebindHistorySubscription(this.doc);;
+    });
 
     this.editor.std.get(DocModeProvider).onPrimaryModeChange(() => {
       this.requestUpdate();
@@ -1366,17 +1287,17 @@ export class StarterDebugMenu extends ShadowlessElement {
       if (!appRoot) return;
       const style: Partial<CSSStyleDeclaration> = this._hasOffset
         ? {
-            margin: '60px 40px 240px 40px',
-            overflow: 'auto',
-            height: '400px',
-            boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.2)',
-          }
+          margin: '60px 40px 240px 40px',
+          overflow: 'auto',
+          height: '400px',
+          boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.2)',
+        }
         : {
-            margin: '0',
-            overflow: 'initial',
-            height: '100%',
-            boxShadow: 'initial',
-          };
+          margin: '0',
+          overflow: 'initial',
+          height: '100%',
+          boxShadow: 'initial',
+        };
       Object.assign(appRoot.style, style);
     }
     super.update(changedProperties);
