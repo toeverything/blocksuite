@@ -769,7 +769,7 @@ export class StarterDebugMenu extends ShadowlessElement {
   private _loadSnapshotWithToken = async (readCredentials: unknown) => {
     try {
       if (!this.collection || !this.editor || !this.editor.std) {
-        throw new Error('Workspace or editor is undefined');
+        throw new Error('Workspace, document, or editor is undefined');
       }
 
       const credential = readCredentials as ReadCredentials;
@@ -792,6 +792,11 @@ export class StarterDebugMenu extends ShadowlessElement {
       }
       const snapshotBlob = await response.blob();
 
+      // Clear existing documents from the collection
+      Array.from(this.collection.docs.keys()).forEach(id => {
+        this.collection.removeDoc(id);
+      });
+
       // Import documents into the collection
       const docs = await ZipTransformer.importDocs(
         this.collection,
@@ -803,9 +808,8 @@ export class StarterDebugMenu extends ShadowlessElement {
         throw new Error('No documents found in snapshot');
       }
 
-      // Select the first document (or use a specific ID if needed)
       const newDoc = docs[0]; // Adjust this if you need a specific document
-      if (newDoc === undefined) {
+      if (!newDoc) {
         throw new Error('Failed to load document from snapshot');
       }
 
@@ -821,12 +825,106 @@ export class StarterDebugMenu extends ShadowlessElement {
       const modeService = this.editor.std.provider.get(DocModeProvider);
       this.editor.mode = modeService.getPrimaryMode(newDoc.id);
 
-      // Notify the editor's host to re-render
-      if (this.editor.host) {
-        this.editor.host.requestUpdate(); // Trigger a re-render of the editor
-        toast(this.editor.host, 'Snapshot loaded successfully.');
+      // Load manifest and fetch attachments
+      const workspace = this.collection as TestWorkspace;
+      if (!workspace || !workspace.studyManagerRegistry) {
+        console.error('TestWorkspace or studyManagerRegistry not found');
+        // Proceed with loading document, but DICOM studies won't be loaded
       }
 
+      const zip = await JSZip.loadAsync(snapshotBlob);
+      const manifestFile = zip.file('manifest.json');
+      if (manifestFile) {
+        const manifest = JSON.parse(await manifestFile.async('string')) as {
+          attachments: { sourceId: string; cloudPath: string; name: string; type: string }[];
+        };
+        console.log('Loaded manifest with attachments:', manifest.attachments);
+
+        const blobSync = this.editor.std.store.blobSync;
+
+        for (const attachment of manifest.attachments) {
+          const { sourceId, cloudPath, name, type } = attachment;
+          console.log('Processing attachment:', { sourceId, cloudPath, name, type });
+
+          let localBlob = await blobSync.get(sourceId);
+          if (!localBlob) {
+            const fileUrl = storage.getFileUrl(cloudPath);
+            console.log('Fetching blob from:', fileUrl);
+            if (fileUrl) {
+              try {
+                const blobResponse = await fetch(fileUrl);
+                if (blobResponse.ok) {
+                  const blob = await blobResponse.blob();
+                  await blobSync.set(sourceId, new File([blob], name, { type }));
+                  localBlob = await blobSync.get(sourceId);
+                  if (localBlob) {
+                    console.log('Blob stored successfully:', sourceId, 'size:', blob.size);
+                  } else {
+                    throw new Error(`Failed to verify blob storage for sourceId: ${sourceId}`);
+                  }
+                } else {
+                  console.error(`Failed to fetch blob for ${sourceId}: ${blobResponse.statusText}`);
+                  if (this.editor.host) {
+                    toast(this.editor.host, `Failed to fetch blob for ${name}`);
+                  }
+                }
+              } catch (error) {
+                console.error(`Failed to fetch blob for ${sourceId}:`, error);
+                if (this.editor.host) {
+                  toast(this.editor.host, `Failed to fetch blob for ${name}`);
+                }
+              }
+            }
+          } else {
+            console.log('Blob already exists locally:', sourceId, 'size:', localBlob.size);
+          }
+
+          // Reconstruct studyManager for DICOM attachments
+          if (type === 'application/dicomdir' && name.endsWith('.dicomdir') && workspace?.studyManagerRegistry) {
+            const dicomGuid = name.replace('.dicomdir', '');
+            try {
+              const studyManager = decoder.CoreApi.createStudy();
+              await decoder.CoreApi.populateStudy(studyManager, storage, cloudPath);
+              workspace.studyManagerRegistry.set(dicomGuid, studyManager);
+              console.log(`Recreated studyManager for dicomGuid ${dicomGuid} using cloudPath ${cloudPath}`);
+            } catch (error) {
+              console.error(`Failed to recreate studyManager for dicomGuid ${dicomGuid}:`, error);
+              if (this.editor.host) {
+                toast(this.editor.host, `Failed to load DICOM study for ${name}`);
+              }
+            }
+          }
+        }
+      } else {
+        console.warn('No manifest.json found in snapshot');
+        if (this.editor.host) {
+          toast(this.editor.host, 'No manifest found; attachments not loaded');
+        }
+      }
+
+      // Ensure attachment blocks are initialized
+      const attachmentBlocks = newDoc.getBlocksByFlavour('affine:attachment');
+      console.log('Attachment blocks found:', attachmentBlocks.length);
+      for (const block of attachmentBlocks) {
+        const blockComponent = this.editor.std.store.getBlock(block.id);
+        if (blockComponent && blockComponent instanceof AttachmentBlockComponent) {
+          console.log('Initialized attachment block:', block.id, 'sourceId:', block.model.props.sourceId);
+        }
+      }
+
+      // Notify the editor's host to re-render
+      if (this.editor.host) {
+        this.editor.host.requestUpdate();
+        toast(this.editor.host, 'Snapshot and DICOM studies loaded successfully.');
+      }
+
+      window.parent.postMessage(
+        {
+          type: 'load-complete',
+          documentId: newDoc.id,
+        },
+        'https://parent-domain.com'
+      );
     } catch (error) {
       console.error('Failed to load snapshot:', error);
       if (this.editor.host) {
@@ -1047,8 +1145,8 @@ export class StarterDebugMenu extends ShadowlessElement {
   }
 
   private _rebindHistorySubscription(doc: any) {
-      this._canUndo = doc.canUndo;
-      this._canRedo = doc.canRedo;
+    this._canUndo = doc.canUndo;
+    this._canRedo = doc.canRedo;
   }
 
   override firstUpdated() {
