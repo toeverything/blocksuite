@@ -87,13 +87,23 @@ export const attachmentSlashMenuConfig: SlashMenuConfig = {
         });
         if (!files) return;
         if (files.length === 0) return;
+        const workspace = std.store.workspace as any; // Assuming workspace is of type TestWorkspace
+        if (!workspace || !workspace.studyManagerRegistry) {
+          console.error('TestWorkspace or studyManagerRegistry not found');
+          return;
+        }
+
         const studyManager = decoder.CoreApi.createStudy();
         await decoder.CoreApi.createSeriesFromFiles(studyManager, files);
+
         const guid = uuidv4();
+        workspace.studyManagerRegistry.set(guid, studyManager);
+
         const zipFileName = guid + '.dicomdir';
         const zip = new JSZip();
         const blob = await zip.generateAsync({ type: 'blob'});
         const zipFile = new File([blob], zipFileName, { type: "application/dicomdir" });
+
         await addSiblingAttachmentBlocks(std,[zipFile],model);
         if (model.text?.length === 0) {
             std.store.deleteBlock(model);

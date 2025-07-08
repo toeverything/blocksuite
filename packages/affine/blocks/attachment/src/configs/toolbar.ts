@@ -172,13 +172,130 @@ class DicomViewerPopup extends LitElement {
   block: AttachmentBlockComponent | null = null;
   std: any = null;
 
+  override async firstUpdated() {
+    const dicomElement = this.shadowRoot?.querySelector('quantantdk-slide-dicom');
+    if (!dicomElement) {
+      console.error('quantantdk-slide-dicom element not found');
+      toast(this.block.host, 'Failed to load DICOM viewer');
+      return;
+    }
+
+    const workspace = this.std.store.workspace as any;
+    if (!workspace || !workspace.studyManagerRegistry) {
+      console.error('TestWorkspace or studyManagerRegistry not found');
+      toast(this.block.host, 'Failed to load DICOM viewer');
+      return;
+    }
+    const fileName = this.model?.props.name || '';
+    // Remove the file extension for DICOM files
+    const dicomGuid = fileName.replace(/\.[^/.]+$/, '');
+    
+    if (!dicomGuid) {
+      console.error('No dicomGuid found in attachment model');
+      toast(this.block.host, 'No DICOM study ID found');
+      return;
+    }
+
+    const studyManager = workspace.studyManagerRegistry.get(dicomGuid);
+    if (!studyManager) {
+      console.error(`No studyManager found for dicomGuid ${dicomGuid}`);
+      toast(this.block.host, 'DICOM study not found');
+      return;
+    }
+
+    try {
+      // Set the studyManager on the dicomElement
+      await (dicomElement as any).setStudyManager(studyManager);
+      console.log(`Set studyManager for dicomGuid ${dicomGuid}`);
+
+      // Add event listeners for weasisEvent and ohifEvent
+      const weasisListener = (event: any) => {
+        const storageId = event.detail?.studyManager?.getStorageId?.();
+        console.log('weasisEvent received:', { storageId });
+        window.parent.postMessage(
+          {
+            type: 'weasis',
+            storageId,
+          },
+          '*'
+        );
+      };
+
+      const ohifListener = (event: any) => {
+        const storageId = event.detail?.studyManager?.getStorageId?.();
+        console.log('ohifEvent received:', { storageId });
+        if (storageId) {
+          window.parent.postMessage(
+            {
+              type: 'ohif',
+              storageId,
+            },
+            '*'
+          );
+        } else {
+          const localBlobs = event.detail?.studyManager?.getBlobs?.();
+          console.log('Sending blobs:', localBlobs?.length);
+          window.parent.postMessage(
+            {
+              type: 'blobs',
+              blobs: localBlobs,
+            },
+            '*'
+          );
+        }
+      };
+
+      dicomElement.addEventListener('weasisEvent', weasisListener);
+      dicomElement.addEventListener('ohifEvent', ohifListener);
+
+      // Clean up event listeners when the popup is closed
+      const cleanup = () => {
+        (dicomElement as any).clearViews?.();
+        dicomElement.removeEventListener('weasisEvent', weasisListener);
+        dicomElement.removeEventListener('ohifEvent', ohifListener);
+      };
+
+      // Handle close event
+      this.addEventListener('close', () => {
+        cleanup();
+        this.onClose?.();
+        this.remove();
+      });
+
+      // Handle abort signal from the portal
+      const abortController = (this as any).abortController as AbortController | undefined;
+      if (abortController) {
+        abortController.signal.addEventListener('abort', () => {
+          console.log('Cleaning up DICOM viewer on abort');
+          cleanup();
+          this.dispatchEvent(new CustomEvent('close'));
+        });
+      }
+    } catch (error) {
+      console.error('Failed to initialize DICOM viewer:', error);
+      toast(this.block.host, 'Failed to load DICOM viewer');
+    }
+  }
+
   override render() {
-    console.log('Rendering DicomViewerPopup, viewerUrl:', this.viewerUrl);
+    console.log('Rendering DicomViewerPopup');
     return html`
       <div class="popup-overlay" @click=${this._handleOutsideClick}>
         <div class="popup-container">
           <button class="close-button" @click=${this._handleClose}>Close</button>
-          <iframe id="dicom-viewer" src=${this.viewerUrl} title="DICOM Viewer"></iframe>
+          <quantantdk-slide-dicom
+            ng-version="8.2.14"
+            share_type="instant"
+            @click.stop
+            @dblclick.stop
+            @mousewheel.stop
+            @keypress.stop
+            @keydown.stop
+            @keyup.stop
+          >
+            <h1 slot="title"></h1>
+            <section slot="content"></section>
+          </quantantdk-slide-dicom>
         </div>
       </div>
     `;

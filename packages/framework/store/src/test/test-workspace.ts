@@ -65,6 +65,10 @@ export class TestWorkspace implements Workspace {
 
   meta: WorkspaceMeta;
 
+  // Add studyManagerRegistry to store studyManager instances
+  readonly studyManagerRegistry = new Map<string, any>(); // TODO: Replace 'any' with actual StudyManager type
+
+
   slots = {
     docListUpdated: new Subject<void>(),
   };
@@ -170,6 +174,7 @@ export class TestWorkspace implements Workspace {
 
   dispose() {
     this.awarenessStore.destroy();
+    this.studyManagerRegistry.clear();
   }
 
   /**
