@@ -48,7 +48,7 @@ export default defineConfig(({ mode }) => {
   process.env = { ...process.env, ...loadEnv(mode, __dirname, '') };
 
   return {
-    base: '/block/', // Set base path for docnosys.com/block
+    base: '/', // Set base path for docnosys.com/block
     envDir: __dirname,
     define: {
       'import.meta.env.PLAYGROUND_SERVER': JSON.stringify(

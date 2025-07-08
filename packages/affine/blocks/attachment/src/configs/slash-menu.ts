@@ -9,6 +9,8 @@ import { uuidv4 } from '@blocksuite/store';
 import { ImageIcon } from '@blocksuite/icons/lit';
 
 import { svg } from 'lit';
+declare var decoder: any;
+
 
 // Define the DCMFileIcon as a function that returns an SVG template
 export function DCMFileIcon() {
@@ -85,21 +87,13 @@ export const attachmentSlashMenuConfig: SlashMenuConfig = {
         });
         if (!files) return;
         if (files.length === 0) return;
-        // Zip all files into a single file
-        const firstFileFullName = files[0].name;
-        // Remove the extension
-        const firstFileName = firstFileFullName.lastIndexOf('.') > 0
-        ? firstFileFullName.substring(0, firstFileFullName.lastIndexOf('.'))
-        : firstFileFullName;
-        const zipFileName = firstFileName + '.dicomdir';
+        const studyManager = decoder.CoreApi.createStudy();
+        await decoder.CoreApi.createSeriesFromFiles(studyManager, files);
+        const guid = uuidv4();
+        const zipFileName = guid + '.dicomdir';
         const zip = new JSZip();
-        files.forEach(file => {
-          const guid = uuidv4();
-          zip.file(guid, file);
-        });
         const blob = await zip.generateAsync({ type: 'blob'});
         const zipFile = new File([blob], zipFileName, { type: "application/dicomdir" });
-
         await addSiblingAttachmentBlocks(std,[zipFile],model);
         if (model.text?.length === 0) {
             std.store.deleteBlock(model);
