@@ -611,7 +611,9 @@ export class StarterDebugMenu extends ShadowlessElement {
       const blobSync = this.editor.std.store.blobSync;
 
       // Fetch previous manifest to check for unchanged attachments
-      let previousManifest: { attachments: { sourceId: string, name: string, type: string, cloudPath: string }[] } = { attachments: [] };
+      let previousManifest: { attachments: { sourceId: string; name: string; type: string; cloudPath: string }[] } = {
+        attachments: [],
+      };
       const snapshotName = 'affine.zip';
       const fileUrl = storage.getFileUrl(snapshotName);
       if (fileUrl) {
@@ -630,7 +632,6 @@ export class StarterDebugMenu extends ShadowlessElement {
         }
       }
 
-      //////////////////
       // Access TestWorkspace to get studyManagerRegistry
       const workspace = this.collection as TestWorkspace;
       if (!workspace || !workspace.studyManagerRegistry) {
@@ -643,27 +644,29 @@ export class StarterDebugMenu extends ShadowlessElement {
       if (workspace?.studyManagerRegistry) {
         for (const block of dicomAttachmentBlocks) {
           const { sourceId, name, type } = block.model.props;
-          if (type === 'application/dicomdir') {
-            const dicomGuid = name.replace(/\.[^/.]+$/, '');
-            const studyManager = workspace.studyManagerRegistry.get(dicomGuid);
+          if (type === 'application/dicomdir' && name.endsWith('.dicomdir')) {
+            const guid = name.replace('.dicomdir', '');
+            const studyManager = workspace.studyManagerRegistry.get(guid);
             if (studyManager) {
               try {
-                const cloudPath = `assets/${sourceId}.dicomdir`;
+                const cloudPath = `assets/${name}`; // e.g., assets/<guid>.dicomdir
                 const abortController = new AbortController();
                 const signal = abortController.signal;
                 const uploadedImagesSubject = new BehaviorSubject<number>(0);
                 await decoder.CoreApi.saveStudy(studyManager, storage, cloudPath, signal, uploadedImagesSubject);
-                console.log(`Saved studyManager for DICOM attachment ${dicomGuid}`);
+                console.log(`Saved studyManager for DICOM attachment ${guid} at ${cloudPath}`);
               } catch (error) {
-                console.error(`Failed to save studyManager ${dicomGuid}:`, error);
+                console.error(`Failed to save studyManager ${guid}:`, error);
+                if (this.editor.host) {
+                  toast(this.editor.host, `Failed to save DICOM study for ${name}`);
+                }
               }
             } else {
-              console.warn(`No studyManager found for dicomGuid ${dicomGuid}`);
+              console.warn(`No studyManager found for guid ${guid}`);
             }
           }
         }
       }
-      //////////////////
 
       // Create document snapshot
       const docs = [doc];
@@ -694,7 +697,6 @@ export class StarterDebugMenu extends ShadowlessElement {
 
       // Upload new or modified attachment blobs
       const attachmentBlocks = doc.getBlocksByFlavour('affine:attachment');
-      const pathBlobIdMap = job.assetsManager.getPathBlobIdMap();
       const assetsMap = job.assets;
       const uploadedBlobs = new Set<string>();
       const manifest = {
@@ -719,11 +721,10 @@ export class StarterDebugMenu extends ShadowlessElement {
 
           console.log(`Processing sourceId: ${sourceId}, in assetsMap: ${assetsMap.has(sourceId)}`);
 
-          const ext = name.split('.').pop() || type.split('/').pop() || 'bin';
-          const cloudPath = `assets/${sourceId}.${ext}`;
+          const cloudPath = `assets/${name}`; // e.g., assets/<guid>.dicomdir or assets/<filename>
 
           const prevAttachment = previousManifest.attachments.find(
-            att => att.sourceId === sourceId && att.name === name && att.type === type
+            att => att.sourceId === sourceId && att.name === name && att.type === type && att.cloudPath === cloudPath
           );
           let cloudUrl = prevAttachment ? storage.getFileUrl(cloudPath) : undefined;
 
@@ -756,7 +757,7 @@ export class StarterDebugMenu extends ShadowlessElement {
       );
 
       if (this.editor.host) {
-        toast(this.editor.host, 'Document snapshot saved successfully.');
+        toast(this.editor.host, 'Document snapshot and DICOM studies saved successfully.');
       }
     } catch (error) {
       console.error('Failed to save snapshot:', error);
@@ -881,14 +882,14 @@ export class StarterDebugMenu extends ShadowlessElement {
 
           // Reconstruct studyManager for DICOM attachments
           if (type === 'application/dicomdir' && name.endsWith('.dicomdir') && workspace?.studyManagerRegistry) {
-            const dicomGuid = name.replace('.dicomdir', '');
+            const guid = name.replace('.dicomdir', '');
             try {
               const studyManager = decoder.CoreApi.createStudy();
               await decoder.CoreApi.populateStudy(studyManager, storage, cloudPath);
-              workspace.studyManagerRegistry.set(dicomGuid, studyManager);
-              console.log(`Recreated studyManager for dicomGuid ${dicomGuid} using cloudPath ${cloudPath}`);
+              workspace.studyManagerRegistry.set(guid, studyManager);
+              console.log(`Recreated studyManager for guid ${guid} using cloudPath ${cloudPath}`);
             } catch (error) {
-              console.error(`Failed to recreate studyManager for dicomGuid ${dicomGuid}:`, error);
+              console.error(`Failed to recreate studyManager for guid ${guid}:`, error);
               if (this.editor.host) {
                 toast(this.editor.host, `Failed to load DICOM study for ${name}`);
               }

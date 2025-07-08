@@ -79,13 +79,13 @@ export const attachmentSlashMenuConfig: SlashMenuConfig = {
       group: '4_Content & Media@11',
       when: ({ model }) =>
         model.store.schema.flavourSchemaMap.has('affine:attachment'),
-      action: async ({ std, model  }) => {
+      action: async ({ std, model }) => {
         const files = await openFileOrFiles({
-          multiple: true
+          multiple: true,
         });
-        if (!files) return;
-        if (files.length === 0) return;
-        const workspace = std.store.workspace as any; // Assuming workspace is of type TestWorkspace
+        if (!files || files.length === 0) return;
+
+        const workspace = std.store.workspace as any;
         if (!workspace || !workspace.studyManagerRegistry) {
           console.error('TestWorkspace or studyManagerRegistry not found');
           return;
@@ -97,14 +97,14 @@ export const attachmentSlashMenuConfig: SlashMenuConfig = {
         const guid = uuidv4();
         workspace.studyManagerRegistry.set(guid, studyManager);
 
-        const zipFileName = guid + '.dicomdir';
+        const zipFileName = `${guid}.dicomdir`;
         const zip = new JSZip();
-        const blob = await zip.generateAsync({ type: 'blob'});
-        const zipFile = new File([blob], zipFileName, { type: "application/dicomdir" });
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const zipFile = new File([blob], zipFileName, { type: 'application/dicomdir' });
 
-        await addSiblingAttachmentBlocks(std,[zipFile],model);
+        await addSiblingAttachmentBlocks(std, [zipFile], model);
         if (model.text?.length === 0) {
-            std.store.deleteBlock(model);
+          std.store.deleteBlock(model);
         }
       },
     },
