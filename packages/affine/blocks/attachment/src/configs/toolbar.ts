@@ -1,3 +1,4 @@
+// toolbar.ts
 import { createLitPortal } from '@blocksuite/affine-components/portal';
 import {
   AttachmentBlockModel,
@@ -40,7 +41,26 @@ import { AttachmentBlockComponent } from '../attachment-block';
 import { RenameModal } from '../components/rename-model';
 import { AttachmentEmbedProvider } from '../embed';
 
-// Utility to normalize filenames for comparison
+// Declare global decoder type
+interface DecoderCoreApi {
+  studyManager: {
+    studies: Record<string, any>;
+    addStudy(id: string, data: any): void;
+  };
+  createStudy(): { id: string; getImageId: (index: number) => string; getStorageId: () => string; getBlobs: () => any[] };
+  createSeriesFromFiles(studyManager: any, files: File[]): Promise<void>;
+  saveStudy(data: { studyId: string; data: any }): void;
+  displayImage(studyManager: any, element: HTMLElement, imageId: string, isPreview: boolean): void;
+  deletePreview(element: HTMLElement): void;
+}
+
+declare global {
+  interface Window {
+    decoder: { CoreApi: DecoderCoreApi };
+  }
+}
+
+// Utility to normalize filenames
 function normalizeFilename(filename: string): string {
   if (typeof filename !== 'string') return '';
   return filename.trim().toLowerCase().split('/').pop() || '';
@@ -58,7 +78,6 @@ async function getAttachmentBlob(block: AttachmentBlockComponent): Promise<Blob 
     blobSyncAvailable: !!std.store.blobSync,
   });
 
-  // Reset downloading state to avoid conflicts
   if (resourceController.state$.peek().downloading) {
     console.log('Download in progress, resetting state for:', model.props.name);
     resourceController.updateState({ downloading: false, state: 'none' });
@@ -82,7 +101,6 @@ async function getAttachmentBlob(block: AttachmentBlockComponent): Promise<Blob 
       return blob;
     }
 
-    // Fallback to blobSync
     if (!model.props.sourceId$.value) {
       console.log('No sourceId, checking for local blob');
       const localBlob = await std.store.blobSync.getLocalBlob?.(model.id);
@@ -108,7 +126,6 @@ async function getAttachmentBlob(block: AttachmentBlockComponent): Promise<Blob 
       sourceId: model.props.sourceId$.value,
       blobUrl: block.blobUrl,
     });
-    // Suppress toast during initial load to avoid error messages
     if (block.blobUrl) {
       toast(host, `Failed to fetch blob for ${model.props.name}!`);
     }
@@ -117,7 +134,7 @@ async function getAttachmentBlob(block: AttachmentBlockComponent): Promise<Blob 
   }
 }
 
-// Define a Lit component for the DICOM viewer popup
+// Define DicomViewerPopup
 @customElement('dicom-viewer-popup')
 class DicomViewerPopup extends LitElement {
   static override styles = css`
@@ -158,53 +175,73 @@ class DicomViewerPopup extends LitElement {
     .close-button:hover {
       background: #d9363e;
     }
-    iframe {
-      flex: 1;
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
   `;
 
-  viewerUrl = '';
-  onClose: () => void = () => {};
   model: AttachmentBlockModel | null = null;
   block: AttachmentBlockComponent | null = null;
   std: any = null;
+  onClose: () => void = () => {};
 
   override async firstUpdated() {
-    const dicomElement = this.shadowRoot?.querySelector('quantantdk-slide-dicom');
+    // Dynamically load quantant-viewer.js
+    const loadScript = (): Promise<void> =>
+      new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = '/block/qt-sdk/quantant-viewer.js';
+        script.async = true;
+        script.onload = () => {
+          console.log('quantant-viewer.js loaded');
+          resolve();
+        };
+        script.onerror = () => {
+          console.error('Failed to load quantant-viewer.js');
+          reject(new Error('Failed to load quantant-viewer.js'));
+        };
+        // Append to shadow DOM to scope script loading
+        this.shadowRoot?.appendChild(script);
+      });
+
+    try {
+      await loadScript();
+      await this.initializeDicomViewer();
+    } catch (error) {
+      console.error('Failed to initialize DICOM viewer:', error);
+      toast(this.block?.host, 'Failed to load DICOM viewer');
+    }
+  }
+
+  async initializeDicomViewer() {
+    const dicomElement = this.shadowRoot?.querySelector('quantantdk-slide-dicom') as HTMLElement;
     if (!dicomElement) {
       console.error('quantantdk-slide-dicom element not found');
-      toast(this.block.host, 'Failed to load DICOM viewer');
+      toast(this.block?.host, 'Failed to load DICOM viewer');
       return;
     }
 
-    const workspace = this.std.store.workspace as any;
+    const workspace = this.std?.store.workspace as any;
     if (!workspace || !workspace.studyManagerRegistry) {
       console.error('TestWorkspace or studyManagerRegistry not found');
-      toast(this.block.host, 'Failed to load DICOM viewer');
+      toast(this.block?.host, 'Failed to load DICOM viewer');
       return;
     }
+
     const fileName = this.model?.props.name || '';
-    // Remove the file extension for DICOM files
     const dicomGuid = fileName.replace(/\.[^/.]+$/, '');
-    
     if (!dicomGuid) {
       console.error('No dicomGuid found in attachment model');
-      toast(this.block.host, 'No DICOM study ID found');
+      toast(this.block?.host, 'No DICOM study ID found');
       return;
     }
 
     const studyManager = workspace.studyManagerRegistry.get(dicomGuid);
     if (!studyManager) {
       console.error(`No studyManager found for dicomGuid ${dicomGuid}`);
-      toast(this.block.host, 'DICOM study not found');
+      toast(this.block?.host, 'DICOM study not found');
       return;
     }
 
     try {
-      // Set the studyManager on the dicomElement
+      // Set studyManager on the dicomElement
       await (dicomElement as any).setStudyManager(studyManager);
       console.log(`Set studyManager for dicomGuid ${dicomGuid}`);
 
@@ -213,10 +250,7 @@ class DicomViewerPopup extends LitElement {
         const storageId = event.detail?.studyManager?.getStorageId?.();
         console.log('weasisEvent received:', { storageId });
         window.parent.postMessage(
-          {
-            type: 'weasis',
-            storageId,
-          },
+          { type: 'weasis', storageId },
           '*'
         );
       };
@@ -226,20 +260,14 @@ class DicomViewerPopup extends LitElement {
         console.log('ohifEvent received:', { storageId });
         if (storageId) {
           window.parent.postMessage(
-            {
-              type: 'ohif',
-              storageId,
-            },
+            { type: 'ohif', storageId },
             '*'
           );
         } else {
           const localBlobs = event.detail?.studyManager?.getBlobs?.();
           console.log('Sending blobs:', localBlobs?.length);
           window.parent.postMessage(
-            {
-              type: 'blobs',
-              blobs: localBlobs,
-            },
+            { type: 'blobs', blobs: localBlobs },
             '*'
           );
         }
@@ -248,21 +276,19 @@ class DicomViewerPopup extends LitElement {
       dicomElement.addEventListener('weasisEvent', weasisListener);
       dicomElement.addEventListener('ohifEvent', ohifListener);
 
-      // Clean up event listeners when the popup is closed
+      // Clean up event listeners
       const cleanup = () => {
         (dicomElement as any).clearViews?.();
         dicomElement.removeEventListener('weasisEvent', weasisListener);
         dicomElement.removeEventListener('ohifEvent', ohifListener);
       };
 
-      // Handle close event
       this.addEventListener('close', () => {
         cleanup();
         this.onClose?.();
         this.remove();
       });
 
-      // Handle abort signal from the portal
       const abortController = (this as any).abortController as AbortController | undefined;
       if (abortController) {
         abortController.signal.addEventListener('abort', () => {
@@ -273,12 +299,11 @@ class DicomViewerPopup extends LitElement {
       }
     } catch (error) {
       console.error('Failed to initialize DICOM viewer:', error);
-      toast(this.block.host, 'Failed to load DICOM viewer');
+      toast(this.block?.host, 'Failed to load DICOM viewer');
     }
   }
 
   override render() {
-    console.log('Rendering DicomViewerPopup');
     return html`
       <div class="popup-overlay" @click=${this._handleOutsideClick}>
         <div class="popup-container">
@@ -309,11 +334,6 @@ class DicomViewerPopup extends LitElement {
   }
 
   private _handleClose() {
-    const iframe = this.shadowRoot?.getElementById('dicom-viewer') as HTMLIFrameElement;
-    if (iframe) {
-      console.log('Sending cleanup message to iframe:', this.viewerUrl);
-      iframe.contentWindow?.postMessage({ type: 'cleanup' }, this.viewerUrl);
-    }
     console.log('Closing popup');
     this.onClose();
   }
@@ -321,6 +341,7 @@ class DicomViewerPopup extends LitElement {
 
 let currentPopupInstance: DicomViewerPopup | null = null;
 
+// Remainder of toolbar.ts (unchanged)
 const trackBaseProps = {
   category: 'attachment',
   type: 'card view',
@@ -371,21 +392,19 @@ export const attachmentViewDropdownMenu = {
         const block = ctx.getCurrentBlockByType(AttachmentBlockComponent);
         if (!model || !block) {
           console.error('Missing model or block');
-          toast(block.host, 'Failed to load embed view');
+          toast(block?.host, 'Failed to load embed view');
           return;
         }
 
         try {
           const provider = ctx.std.get(AttachmentEmbedProvider);
           console.log('Provider fetched:', !!provider);
-          // Force state reset to trigger rendering
           ctx.store.updateBlock(model, { embed: false });
           console.log('Reset embed to false');
           setTimeout(() => {
             provider.convertTo(model);
             block.reload();
             console.log('Reload called, embed state:', model.props.embed$.value, 'blobUrl:', block.blobUrl);
-            // Perform shouldBeConverted check inside setTimeout
             if (provider.shouldBeConverted(model) && !ctx.hasSelectedSurfaceModels) {
               ctx.reset();
               ctx.select('note');
@@ -397,7 +416,7 @@ export const attachmentViewDropdownMenu = {
             stack: err.stack,
             name: model.props.name,
           });
-          toast(block.host, `Failed to load ${model.props.name}`);
+          toast(block?.host, `Failed to load ${model.props.name}`);
         }
 
         ctx.track('SelectedView', {
@@ -429,13 +448,9 @@ export const attachmentViewDropdownMenu = {
         const block = ctx.getCurrentBlockByType(AttachmentBlockComponent);
         if (!model || !block) {
           console.error('Missing model or block');
+          toast(block?.host, 'Failed to load DICOM view');
           return;
         }
-
-        const isCloudFront = window.location.hostname.includes('docnosys.com');
-        const viewerUrl = isCloudFront
-          ? 'https://docnosys.com/qviewer'
-          : 'http://localhost:5478';
 
         if (currentPopupInstance) {
           console.log('Removing existing popup instance');
@@ -446,7 +461,6 @@ export const attachmentViewDropdownMenu = {
         console.log('Creating DICOM viewer popup for:', model.props.name);
         const abortController = new AbortController();
         const popup = document.createElement('dicom-viewer-popup') as DicomViewerPopup;
-        popup.viewerUrl = viewerUrl;
         popup.model = model;
         popup.block = block;
         popup.std = ctx.std;
@@ -463,97 +477,6 @@ export const attachmentViewDropdownMenu = {
           abortController,
         });
         console.log('currentPopupInstance created:', !!currentPopupInstance);
-
-        const handleMessage = async (event: MessageEvent) => {
-          console.log('BlockSuite iframe received message:', {
-            data: event.data,
-            origin: event.origin,
-            expectedOrigin: viewerUrl,
-          });
-
-          const allowedOrigins = [viewerUrl, window.location.origin];
-          if (!allowedOrigins.includes(event.origin)) {
-            console.log('Ignoring message from unexpected origin:', event.origin);
-            return;
-          }
-
-          if (typeof event.data !== 'object' || !event.data?.type) {
-            console.log('Received invalid message:', event.data);
-            return;
-          }
-
-          if (event.data.type === 'ohifReady' || event.data.type?.toLowerCase() === 'ohifready') {
-            console.log('Processing ohifReady message for:', model.props.name);
-            block.resourceController.updateState({ downloading: true });
-            const fetchedBlob = await getAttachmentBlob(block);
-            block.resourceController.updateState({ downloading: false, state: 'none' });
-            if (!fetchedBlob) {
-              console.error('Failed to fetch blob, cannot send to iframe');
-              toast(block.host, 'Failed to load DICOM content');
-              return;
-            }
-
-            try {
-              const zip = new JSZip();
-              const zipFile = await zip.loadAsync(fetchedBlob);
-              console.log('ZIP file loaded, files:', Object.keys(zipFile.files));
-              if (Object.keys(zipFile.files).length === 0) {
-                console.error('ZIP file is empty for DICOM attachment:', model.props.name);
-                toast(block.host, 'No DICOM files found in attachment');
-                return;
-              }
-              const blobs = await Promise.all(
-                Object.entries(zipFile.files)
-                  .filter(([fileName, file]) => !file.dir)
-                  .map(async ([fileName, file]) => {
-                    const blob = await file.async('blob');
-                    (blob as any).name = fileName;
-                    console.log('Processed DICOM blob:', fileName, 'size:', blob.size);
-                    return blob;
-                  })
-              );
-              if (blobs.length === 0) {
-                console.error('No DICOM files (.dcm) found in ZIP');
-                toast(block.host, 'No DICOM files found in attachment');
-                return;
-              }
-              const blobsWithMeta = blobs.map(blob => ({
-                blob,
-                name: (blob as any).name,
-              }));
-              console.log('Prepared blobsWithMeta:', blobsWithMeta.length);
-
-              const popupEl = currentPopupInstance;
-              if (!popupEl) {
-                console.error('Popup instance not available');
-                toast(block.host, 'Failed to load DICOM viewer');
-                return;
-              }
-
-              const iframe = popupEl.shadowRoot?.getElementById('dicom-viewer') as HTMLIFrameElement | null;
-              if (!iframe || !iframe.contentWindow) {
-                console.error('DICOM viewer iframe not found or contentWindow unavailable');
-                toast(block.host, 'Failed to load DICOM viewer');
-                return;
-              }
-              console.log('Sending blobs to iframe:', viewerUrl);
-              iframe.contentWindow.postMessage(blobsWithMeta, viewerUrl);
-              blobsWithMeta.length = 0;
-              blobs.length = 0;
-            } catch (error) {
-              console.error('Error processing ZIP:', error);
-              toast(block.host, 'Failed to process DICOM content');
-            }
-          } else {
-            console.log('Unhandled message type:', event.data.type);
-          }
-        };
-
-        window.addEventListener('message', handleMessage);
-        abortController.signal.addEventListener('abort', () => {
-          console.log('Cleaning up message listener');
-          window.removeEventListener('message', handleMessage);
-        });
 
         ctx.track('SelectedView', {
           ...trackBaseProps,
@@ -620,10 +543,6 @@ export const attachmentViewDropdownMenu = {
           block.resourceController.updateState({ downloading: false, state: 'none' });
         } else if (viewType$.value === 'DICOM view') {
           console.log('Triggering DICOM view for:', model.props.name);
-          const isCloudFront = window.location.hostname.includes('docnosys.com');
-          const viewerUrl = isCloudFront
-            ? 'https://docnosys.com/qviewer'
-            : 'http://localhost:5478';
 
           if (currentPopupInstance) {
             console.log('Removing existing popup instance');
@@ -634,7 +553,6 @@ export const attachmentViewDropdownMenu = {
           console.log('Creating DICOM viewer popup for:', model.props.name);
           const abortController = new AbortController();
           const popup = document.createElement('dicom-viewer-popup') as DicomViewerPopup;
-          popup.viewerUrl = viewerUrl;
           popup.model = model;
           popup.block = block;
           popup.std = ctx.std;
@@ -652,97 +570,6 @@ export const attachmentViewDropdownMenu = {
           });
           console.log('currentPopupInstance created:', !!currentPopupInstance);
 
-          const handleMessage = async (event: MessageEvent) => {
-            console.log('BlockSuite iframe received message:', {
-              data: event.data,
-              origin: event.origin,
-              expectedOrigin: viewerUrl,
-            });
-
-            const allowedOrigins = [viewerUrl, window.location.origin];
-            if (!allowedOrigins.includes(event.origin)) {
-              console.log('Ignoring message from unexpected origin:', event.origin);
-              return;
-            }
-
-            if (typeof event.data !== 'object' || !event.data?.type) {
-              console.log('Received invalid message:', event.data);
-              return;
-            }
-
-            if (event.data.type === 'ohifReady' || event.data.type?.toLowerCase() === 'ohifready') {
-              console.log('Processing ohifReady message for:', model.props.name);
-              block.resourceController.updateState({ downloading: true });
-              const fetchedBlob = await getAttachmentBlob(block);
-              block.resourceController.updateState({ downloading: false, state: 'none' });
-              if (!fetchedBlob) {
-                console.error('Failed to fetch blob, cannot send to iframe');
-                toast(block.host, 'Failed to load DICOM content');
-                return;
-              }
-
-              try {
-                const zip = new JSZip();
-                const zipFile = await zip.loadAsync(fetchedBlob);
-                console.log('ZIP file loaded, files:', Object.keys(zipFile.files));
-                if (Object.keys(zipFile.files).length === 0) {
-                  console.error('ZIP file is empty for DICOM attachment:', model.props.name);
-                  toast(block.host, 'No DICOM files found in attachment');
-                  return;
-                }
-                const blobs = await Promise.all(
-                  Object.entries(zipFile.files)
-                    .filter(([fileName, file]) => !file.dir)
-                    .map(async ([fileName, file]) => {
-                      const blob = await file.async('blob');
-                      (blob as any).name = fileName;
-                      console.log('Processed DICOM blob:', fileName, 'size:', blob.size);
-                      return blob;
-                    })
-                );
-                if (blobs.length === 0) {
-                  console.error('No DICOM files (.dcm) found in ZIP');
-                  toast(block.host, 'No DICOM files found in attachment');
-                  return;
-                }
-                const blobsWithMeta = blobs.map(blob => ({
-                  blob,
-                  name: (blob as any).name,
-                }));
-                console.log('Prepared blobsWithMeta:', blobsWithMeta.length);
-
-                const popupEl = currentPopupInstance;
-                if (!popupEl) {
-                  console.error('Popup instance not available');
-                  toast(block.host, 'Failed to load DICOM viewer');
-                  return;
-                }
-
-                const iframe = popupEl.shadowRoot?.getElementById('dicom-viewer') as HTMLIFrameElement | null;
-                if (!iframe || !iframe.contentWindow) {
-                  console.error('DICOM viewer iframe not found or contentWindow unavailable');
-                  toast(block.host, 'Failed to load DICOM viewer');
-                  return;
-                }
-                console.log('Sending blobs to iframe:', viewerUrl);
-                iframe.contentWindow.postMessage(blobsWithMeta, viewerUrl);
-                blobsWithMeta.length = 0;
-                blobs.length = 0;
-              } catch (error) {
-                console.error('Error processing ZIP:', error);
-                toast(block.host, 'Failed to process DICOM content');
-              }
-            } else {
-              console.log('Unhandled message type:', event.data.type);
-            }
-          };
-
-          window.addEventListener('message', handleMessage);
-          abortController.signal.addEventListener('abort', () => {
-            console.log('Cleaning up message listener');
-            window.removeEventListener('message', handleMessage);
-          });
-
           ctx.track('SelectedView', {
             ...trackBaseProps,
             control: 'select view',
@@ -756,7 +583,6 @@ export const attachmentViewDropdownMenu = {
       });
     };
 
-    console.log('Rendering dropdown for:', model.props.name);
     return html`${keyed(
       model,
       html`<affine-view-dropdown-menu
