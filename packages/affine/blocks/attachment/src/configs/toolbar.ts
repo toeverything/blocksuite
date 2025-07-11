@@ -182,45 +182,111 @@ class DicomViewerPopup extends LitElement {
   std: any = null;
   onClose: () => void = () => {};
 
-  override async firstUpdated() {
-    // Dynamically load quantant-viewer.js
-    const loadScript = (): Promise<void> =>
-      new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = '/block/qt-sdk/quantant-viewer.js';
-        script.async = true;
-        script.onload = () => {
-          console.log('quantant-viewer.js loaded');
-          resolve();
-        };
-        script.onerror = () => {
-          console.error('Failed to load quantant-viewer.js');
-          reject(new Error('Failed to load quantant-viewer.js'));
-        };
-        // Append to shadow DOM to scope script loading
-        this.shadowRoot?.appendChild(script);
-      });
-
-    try {
-      await loadScript();
-      await this.initializeDicomViewer();
-    } catch (error) {
-      console.error('Failed to initialize DICOM viewer:', error);
-      toast(this.block?.host, 'Failed to load DICOM viewer');
-    }
+  override firstUpdated() {
+    // No direct script loading here; handled in iframe
   }
 
-  async initializeDicomViewer() {
-    const dicomElement = this.shadowRoot?.querySelector('quantantdk-slide-dicom') as HTMLElement;
-    if (!dicomElement) {
-      console.error('quantantdk-slide-dicom element not found');
+  override render() {
+    return html`
+      <div class="popup-overlay" @click=${this._handleOutsideClick}>
+        <div class="popup-container">
+          <button class="close-button" @click=${this._handleClose}>Close</button>
+          <iframe
+            id="dicom-viewer-iframe"
+            style="width: 100%; height: 100%; border: none;"
+            sandbox="allow-scripts allow-same-origin"
+            @load=${this._initializeIframe}
+          ></iframe>
+        </div>
+      </div>
+    `;
+  }
+
+  private _initializeIframe() {
+
+    const iframe = this.shadowRoot?.querySelector('#dicom-viewer-iframe') as HTMLIFrameElement;
+    if (!iframe || !iframe.contentDocument || !iframe.contentWindow) {
+      console.error('Iframe not ready');
       toast(this.block?.host, 'Failed to load DICOM viewer');
       return;
     }
 
+    const doc = iframe.contentDocument;
+    const win = iframe.contentWindow;
+
+    /*
+    (win as any).global = window;
+    (win as any).process = window.process;
+    (win as any).Buffer = window.Buffer;
+    */
+
+    // Add Material Design CSS links to iframe head
+    const link1 = doc.createElement('link');
+    link1.rel = 'stylesheet';
+    link1.href = '/block/material/purple-green.css';
+    doc.head.appendChild(link1);
+
+    const link2 = doc.createElement('link');
+    link2.rel = 'stylesheet';
+    link2.href = '/block/material/material-design-icons.css';
+    doc.head.appendChild(link2);
+
+    // Alias the main window's decoder to the iframe's window
+    if (window.decoder) {
+      win.decoder = window.decoder;
+      console.log('Aliased parent decoder to iframe window');
+    } else {
+      console.error('Parent decoder not found');
+      toast(this.block?.host, 'Failed to load DICOM viewer');
+      return;
+    }
+
+    // Now load quantant-viewer.js
+    const script = doc.createElement('script');
+    script.src = '/block/qt-sdk/quantant-viewer.js';
+    script.async = true;
+    script.onload = () => {
+      console.log('quantant-viewer.js loaded in iframe');
+      this._setupViewerInIframe(iframe);
+    };
+    script.onerror = () => {
+      console.error('Failed to load quantant-viewer.js in iframe');
+      toast(this.block?.host, 'Failed to load DICOM viewer');
+    };
+    doc.head.appendChild(script);
+  }
+
+  private async _setupViewerInIframe(iframe: HTMLIFrameElement) {
+    const doc = iframe.contentDocument!;
+    const win = iframe.contentWindow!;
+
+    // Create the <quantantdk-slide-dicom> element inside the iframe
+    const dicomElement = doc.createElement('quantantdk-slide-dicom');
+    dicomElement.setAttribute('ng-version', '8.2.14');
+    dicomElement.setAttribute('share_type', 'instant');
+
+    // Add slots
+    const titleSlot = doc.createElement('h1');
+    titleSlot.setAttribute('slot', 'title');
+    dicomElement.appendChild(titleSlot);
+
+    const contentSlot = doc.createElement('section');
+    contentSlot.setAttribute('slot', 'content');
+    dicomElement.appendChild(contentSlot);
+
+    // Style the element to fill the iframe
+    dicomElement.style.width = '100%';
+    dicomElement.style.height = '100%';
+
+    // Append to iframe body
+    doc.body.style.margin = '0';
+    doc.body.style.overflow = 'hidden';
+    doc.body.appendChild(dicomElement);
+
+    // Now perform the studyManager setup
     const workspace = this.std?.store.workspace as any;
     if (!workspace || !workspace.studyManagerRegistry) {
-      console.error('TestWorkspace or studyManagerRegistry not found');
+      console.error('Workspace or studyManagerRegistry not found');
       toast(this.block?.host, 'Failed to load DICOM viewer');
       return;
     }
@@ -281,6 +347,7 @@ class DicomViewerPopup extends LitElement {
         (dicomElement as any).clearViews?.();
         dicomElement.removeEventListener('weasisEvent', weasisListener);
         dicomElement.removeEventListener('ohifEvent', ohifListener);
+        dicomElement.remove();
       };
 
       this.addEventListener('close', () => {
@@ -298,32 +365,9 @@ class DicomViewerPopup extends LitElement {
         });
       }
     } catch (error) {
-      console.error('Failed to initialize DICOM viewer:', error);
+      console.error('Failed to initialize DICOM viewer in iframe:', error);
       toast(this.block?.host, 'Failed to load DICOM viewer');
     }
-  }
-
-  override render() {
-    return html`
-      <div class="popup-overlay" @click=${this._handleOutsideClick}>
-        <div class="popup-container">
-          <button class="close-button" @click=${this._handleClose}>Close</button>
-          <quantantdk-slide-dicom
-            ng-version="8.2.14"
-            share_type="instant"
-            @click.stop
-            @dblclick.stop
-            @mousewheel.stop
-            @keypress.stop
-            @keydown.stop
-            @keyup.stop
-          >
-            <h1 slot="title"></h1>
-            <section slot="content"></section>
-          </quantantdk-slide-dicom>
-        </div>
-      </div>
-    `;
   }
 
   private _handleOutsideClick(e: MouseEvent) {
