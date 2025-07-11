@@ -232,8 +232,6 @@ export class StarterDebugMenu extends ShadowlessElement {
 
   private _styleMenu!: Pane;
 
-  private _historySubscription: any = null;
-
   get doc() {
     return this.editor.doc;
   }
@@ -821,7 +819,7 @@ export class StarterDebugMenu extends ShadowlessElement {
       // Update the editor's document
       this.editor.doc = newDoc;
       this._rebindHistorySubscription(this.editor.doc);
-
+      newDoc.history.store.resetHistory();
       // Update the editor's mode (if necessary)
       const modeService = this.editor.std.provider.get(DocModeProvider);
       this.editor.mode = modeService.getPrimaryMode(newDoc.id);
@@ -1121,10 +1119,6 @@ export class StarterDebugMenu extends ShadowlessElement {
     matchMedia.removeEventListener('change', this._darkModeChange);
 
     window.removeEventListener('message', this._handleMessage.bind(this));
-
-    if (this._historySubscription) {
-      this._historySubscription.unsubscribe();
-    }
   }
 
   private _handleMessage(event: MessageEvent) {
