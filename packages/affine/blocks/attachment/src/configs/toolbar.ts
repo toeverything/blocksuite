@@ -194,7 +194,6 @@ class DicomViewerPopup extends LitElement {
           <iframe
             id="dicom-viewer-iframe"
             style="width: 100%; height: 100%; border: none;"
-            sandbox="allow-scripts allow-same-origin"
             @load=${this._initializeIframe}
           ></iframe>
         </div>
@@ -314,7 +313,6 @@ class DicomViewerPopup extends LitElement {
       // Add event listeners for weasisEvent and ohifEvent
       const weasisListener = (event: any) => {
         const storageId = event.detail?.studyManager?.getStorageId?.();
-        console.log('weasisEvent received:', { storageId });
         window.parent.postMessage(
           { type: 'weasis', storageId },
           '*'
@@ -323,7 +321,6 @@ class DicomViewerPopup extends LitElement {
 
       const ohifListener = (event: any) => {
         const storageId = event.detail?.studyManager?.getStorageId?.();
-        console.log('ohifEvent received:', { storageId });
         if (storageId) {
           window.parent.postMessage(
             { type: 'ohif', storageId },
@@ -331,7 +328,6 @@ class DicomViewerPopup extends LitElement {
           );
         } else {
           const localBlobs = event.detail?.studyManager?.getBlobs?.();
-          console.log('Sending blobs:', localBlobs?.length);
           window.parent.postMessage(
             { type: 'blobs', blobs: localBlobs },
             '*'
