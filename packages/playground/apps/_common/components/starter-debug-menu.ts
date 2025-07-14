@@ -883,6 +883,7 @@ export class StarterDebugMenu extends ShadowlessElement {
             const guid = name.replace('.dicomdir', '');
             try {
               const studyManager = decoder.CoreApi.createStudy();
+              studyManager.setAllowDownload(true);
               await decoder.CoreApi.populateStudy(studyManager, storage, cloudPath);
               workspace.studyManagerRegistry.set(guid, studyManager);
               console.log(`Recreated studyManager for guid ${guid} using cloudPath ${cloudPath}`);
