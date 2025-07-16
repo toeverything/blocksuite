@@ -12,6 +12,7 @@ import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
+import '@shoelace-style/shoelace/dist/components/progress-ring/progress-ring.js';
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
 import './left-side-panel.js';
@@ -592,6 +593,10 @@ export class StarterDebugMenu extends ShadowlessElement {
   }
 
   private _handleSaveWithToken = async (saveCredentials: unknown) => {
+    this._isSaving = true;
+    this._saveProgress = 0;
+    this.requestUpdate();
+
     try {
       if (!this.collection || !this.doc || !this.editor || !this.editor.std) {
         throw new Error('Workspace, document, or editor is undefined');
@@ -607,6 +612,9 @@ export class StarterDebugMenu extends ShadowlessElement {
 
       const doc = this.doc;
       const blobSync = this.editor.std.store.blobSync;
+
+      let totalBytes = 0;
+      let uploadedBytes = 0;
 
       // Fetch previous manifest to check for unchanged attachments
       let previousManifest: { attachments: { sourceId: string; name: string; type: string; cloudPath: string }[] } = {
@@ -637,8 +645,46 @@ export class StarterDebugMenu extends ShadowlessElement {
         // Proceed with saving the snapshot, but DICOM studies won't be saved
       }
 
-      // Save all DICOM studyManagers
+      // Pre-calculate total bytes for DICOM studies
       const dicomAttachmentBlocks = doc.getBlocksByFlavour('affine:attachment');
+      const studyProgressInfo = new Map<string, { totalFiles: number; totalBytes: number }>(); // guid -> info
+      if (workspace?.studyManagerRegistry) {
+        for (const block of dicomAttachmentBlocks) {
+          const { sourceId, name, type } = block.model.props;
+          if (type === 'application/dicomdir' && name.endsWith('.dicomdir')) {
+            const guid = name.replace('.dicomdir', '');
+            const studyManager = workspace.studyManagerRegistry.get(guid);
+            if (studyManager) {
+              const blobs = studyManager.getBlobs(); // Assume returns array of blobs
+              const totalFiles = blobs.length;
+              const totalBytesForStudy = blobs.reduce((sum, blob) => sum + (blob.size || 0), 0);
+              studyProgressInfo.set(guid, { totalFiles, totalBytes: totalBytesForStudy });
+              totalBytes += totalBytesForStudy;
+            }
+          }
+        }
+      }
+
+      // Pre-calculate total bytes for regular attachments (including .dicomdir if needed)
+      const attachmentBlocks = doc.getBlocksByFlavour('affine:attachment');
+      for (const block of attachmentBlocks) {
+        const { sourceId, name, type } = block.model.props;
+        if (!sourceId) continue;
+        const blob = await blobSync.get(sourceId);
+        if (!blob) continue;
+        const cloudPath = `assets/${name}`;
+        const prevAttachment = previousManifest.attachments.find(
+          att => att.sourceId === sourceId && att.name === name && att.type === type && att.cloudPath === cloudPath
+        );
+        if (!prevAttachment || !storage.getFileUrl(cloudPath)) {
+          totalBytes += blob.size;
+        }
+      }
+
+      this._saveProgress = totalBytes > 0 ? (uploadedBytes / totalBytes) * 100 : 0;
+      this.requestUpdate();
+
+      // Save all DICOM studyManagers
       if (workspace?.studyManagerRegistry) {
         for (const block of dicomAttachmentBlocks) {
           const { sourceId, name, type } = block.model.props;
@@ -647,10 +693,22 @@ export class StarterDebugMenu extends ShadowlessElement {
             const studyManager = workspace.studyManagerRegistry.get(guid);
             if (studyManager) {
               try {
-                const cloudPath = `assets/${name}`; // e.g., assets/<guid>.dicomdir
+                const cloudPath = `assets/${name}`;
                 const abortController = new AbortController();
                 const signal = abortController.signal;
-                const uploadedImagesSubject = new BehaviorSubject<number>(0);
+
+                const { totalFiles, totalBytes: totalBytesForStudy } = studyProgressInfo.get(guid) || { totalFiles: 0, totalBytes: 0 };
+                let studyUploadedBytes = 0;
+
+                const uploadedImagesSubject = new BehaviorSubject<number>(0); // uploaded files count
+                uploadedImagesSubject.subscribe(newValue => {
+                  const newStudyUploadedBytes = totalFiles > 0 ? (newValue / totalFiles) * totalBytesForStudy : 0;
+                  uploadedBytes += newStudyUploadedBytes - studyUploadedBytes;
+                  studyUploadedBytes = newStudyUploadedBytes;
+                  this._saveProgress = totalBytes > 0 ? (uploadedBytes / totalBytes) * 100 : 0;
+                  this.requestUpdate();
+                });
+
                 await decoder.CoreApi.saveStudy(studyManager, storage, cloudPath, signal, uploadedImagesSubject);
                 console.log(`Saved studyManager for DICOM attachment ${guid} at ${cloudPath}`);
               } catch (error) {
@@ -694,7 +752,6 @@ export class StarterDebugMenu extends ShadowlessElement {
       );
 
       // Upload new or modified attachment blobs
-      const attachmentBlocks = doc.getBlocksByFlavour('affine:attachment');
       const assetsMap = job.assets;
       const uploadedBlobs = new Set<string>();
       const manifest = {
@@ -719,7 +776,7 @@ export class StarterDebugMenu extends ShadowlessElement {
 
           console.log(`Processing sourceId: ${sourceId}, in assetsMap: ${assetsMap.has(sourceId)}`);
 
-          const cloudPath = `assets/${name}`; // e.g., assets/<guid>.dicomdir or assets/<filename>
+          const cloudPath = `assets/${name}`;
 
           const prevAttachment = previousManifest.attachments.find(
             att => att.sourceId === sourceId && att.name === name && att.type === type && att.cloudPath === cloudPath
@@ -727,7 +784,16 @@ export class StarterDebugMenu extends ShadowlessElement {
           let cloudUrl = prevAttachment ? storage.getFileUrl(cloudPath) : undefined;
 
           if (!cloudUrl) {
-            cloudUrl = await storage.uploadFile(blob, cloudPath, null);
+            const fileUploadedBytesSubject = new BehaviorSubject<number>(0);
+            let prevFileUploaded = 0;
+            fileUploadedBytesSubject.subscribe(newValue => {
+              uploadedBytes += newValue - prevFileUploaded;
+              prevFileUploaded = newValue;
+              this._saveProgress = totalBytes > 0 ? (uploadedBytes / totalBytes) * 100 : 0;
+              this.requestUpdate();
+            });
+
+            cloudUrl = await storage.uploadFile(blob, cloudPath, fileUploadedBytesSubject);
             uploadedBlobs.add(sourceId);
           }
 
@@ -743,6 +809,7 @@ export class StarterDebugMenu extends ShadowlessElement {
       await zip.file('manifest.json', JSON.stringify(manifest, null, 2));
 
       const downloadBlob = await zip.generate();
+
       await storage.uploadFile(downloadBlob, snapshotName, null);
 
       window.parent.postMessage(
@@ -762,6 +829,9 @@ export class StarterDebugMenu extends ShadowlessElement {
       if (this.editor.host) {
         toast(this.editor.host, `Failed to save snapshot: ${error.message}`);
       }
+    } finally {
+      this._isSaving = false;
+      this.requestUpdate();
     }
   };
 
@@ -1352,11 +1422,15 @@ export class StarterDebugMenu extends ShadowlessElement {
             </sl-button>
           </sl-tooltip>
 
-          <sl-tooltip content="Save Data" placement="bottom" hoist>
-            <sl-button size="small" @click="${this._saveData}">
-              <sl-icon name="floppy"></sl-icon>
-            </sl-button>
-          </sl-tooltip>
+          ${this._isSaving ? html`
+            <sl-progress-ring size="24" value="${this._saveProgress}"></sl-progress-ring>
+          ` : html`
+            <sl-tooltip content="Save Data" placement="bottom" hoist>
+              <sl-button size="small" @click="${this._saveData}">
+                <sl-icon name="floppy"></sl-icon>
+              </sl-button>
+            </sl-tooltip>
+          `}
 
           ${this._hasUndoableChanges() ? html`
             <sl-tooltip content="Cancel Changes" placement="bottom" hoist>
@@ -1446,6 +1520,12 @@ export class StarterDebugMenu extends ShadowlessElement {
 
   @state()
   private accessor _hasOffset = false;
+
+  @state()
+  private accessor _isSaving = false;
+
+  @state()
+  private accessor _saveProgress = 0;
 
   @query('#block-type-dropdown')
   accessor blockTypeDropdown!: SlDropdown;
