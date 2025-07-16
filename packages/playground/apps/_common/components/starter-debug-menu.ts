@@ -219,6 +219,11 @@ export class StarterDebugMenu extends ShadowlessElement {
     .dg.ac {
       z-index: 1001 !important;
     }
+
+    sl-progress-ring.save-progress {
+      --size: 28px;
+      --track-width: 3px;
+    }
   `;
 
   private readonly _darkModeChange = (e: MediaQueryListEvent) => {
@@ -657,7 +662,7 @@ export class StarterDebugMenu extends ShadowlessElement {
             if (studyManager) {
               const blobs = studyManager.getBlobs(); // Assume returns array of blobs
               const totalFiles = blobs.length;
-              const totalBytesForStudy = blobs.reduce((sum, blob) => sum + (blob.size || 0), 0);
+              const totalBytesForStudy = blobs.reduce((sum, blob) => sum + blob.size, 0);
               studyProgressInfo.set(guid, { totalFiles, totalBytes: totalBytesForStudy });
               totalBytes += totalBytesForStudy;
             }
@@ -681,7 +686,7 @@ export class StarterDebugMenu extends ShadowlessElement {
         }
       }
 
-      this._saveProgress = totalBytes > 0 ? (uploadedBytes / totalBytes) * 100 : 0;
+      this._saveProgress = totalBytes > 0 ? (uploadedBytes * 1.0 / totalBytes) * 100 : 0;
       this.requestUpdate();
 
       // Save all DICOM studyManagers
@@ -698,19 +703,18 @@ export class StarterDebugMenu extends ShadowlessElement {
                 const signal = abortController.signal;
 
                 const { totalFiles, totalBytes: totalBytesForStudy } = studyProgressInfo.get(guid) || { totalFiles: 0, totalBytes: 0 };
-                let studyUploadedBytes = 0;
 
                 const uploadedImagesSubject = new BehaviorSubject<number>(0); // uploaded files count
+                let studyUploadedBytes = 0;
                 uploadedImagesSubject.subscribe(newValue => {
-                  const newStudyUploadedBytes = totalFiles > 0 ? (newValue / totalFiles) * totalBytesForStudy : 0;
+                  const newStudyUploadedBytes = totalFiles > 0 ? (newValue * 1.0 / totalFiles) * totalBytesForStudy : 0;
                   uploadedBytes += newStudyUploadedBytes - studyUploadedBytes;
                   studyUploadedBytes = newStudyUploadedBytes;
-                  this._saveProgress = totalBytes > 0 ? (uploadedBytes / totalBytes) * 100 : 0;
+                  this._saveProgress = totalBytes > 0 ? (uploadedBytes * 1.0 / totalBytes) * 100 : 0;
                   this.requestUpdate();
                 });
 
                 await decoder.CoreApi.saveStudy(studyManager, storage, cloudPath, signal, uploadedImagesSubject);
-                console.log(`Saved studyManager for DICOM attachment ${guid} at ${cloudPath}`);
               } catch (error) {
                 console.error(`Failed to save studyManager ${guid}:`, error);
                 if (this.editor.host) {
@@ -758,8 +762,6 @@ export class StarterDebugMenu extends ShadowlessElement {
         attachments: [],
       };
 
-      console.log('assetsMap keys:', Array.from(assetsMap.keys()));
-
       await Promise.all(
         attachmentBlocks.map(async block => {
           const { sourceId, name, type } = block.model.props;
@@ -789,7 +791,7 @@ export class StarterDebugMenu extends ShadowlessElement {
             fileUploadedBytesSubject.subscribe(newValue => {
               uploadedBytes += newValue - prevFileUploaded;
               prevFileUploaded = newValue;
-              this._saveProgress = totalBytes > 0 ? (uploadedBytes / totalBytes) * 100 : 0;
+              this._saveProgress = totalBytes > 0 ? (uploadedBytes * 1.0 / totalBytes) * 100 : 0;
               this.requestUpdate();
             });
 
@@ -809,7 +811,6 @@ export class StarterDebugMenu extends ShadowlessElement {
       await zip.file('manifest.json', JSON.stringify(manifest, null, 2));
 
       const downloadBlob = await zip.generate();
-
       await storage.uploadFile(downloadBlob, snapshotName, null);
 
       window.parent.postMessage(
@@ -1423,7 +1424,7 @@ export class StarterDebugMenu extends ShadowlessElement {
           </sl-tooltip>
 
           ${this._isSaving ? html`
-            <sl-progress-ring size="24" value="${this._saveProgress}"></sl-progress-ring>
+            <sl-progress-ring class="save-progress" value="${this._saveProgress}"></sl-progress-ring>
           ` : html`
             <sl-tooltip content="Save Data" placement="bottom" hoist>
               <sl-button size="small" @click="${this._saveData}">
