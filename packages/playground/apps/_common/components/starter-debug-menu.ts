@@ -860,7 +860,7 @@ export class StarterDebugMenu extends ShadowlessElement {
       }
       const snapshotBlob = await response.blob();
 
-        // Clear existing documents from the collection
+      // Clear existing documents from the collection
       Array.from(this.collection.docs.keys()).forEach(id => {
         this.collection.removeDoc(id);
       });
@@ -875,7 +875,7 @@ export class StarterDebugMenu extends ShadowlessElement {
       if (docs.length === 0) {
         throw new Error('No documents found in snapshot');
       }
-      
+
       // Load manifest and fetch attachments
       const workspace = this.collection as TestWorkspace;
       if (!workspace || !workspace.studyManagerRegistry) {

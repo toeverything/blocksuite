@@ -99,6 +99,7 @@ export const attachmentSlashMenuConfig: SlashMenuConfig = {
 
         const zipFileName = `${guid}.dicomdir`;
         const zip = new JSZip();
+        zip.file('metadata.txt', guid); // Add unique content to make blob unique
         const blob = await zip.generateAsync({ type: 'blob' });
         const zipFile = new File([blob], zipFileName, { type: 'application/dicomdir' });
 
