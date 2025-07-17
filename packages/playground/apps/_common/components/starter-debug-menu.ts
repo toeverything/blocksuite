@@ -847,6 +847,7 @@ export class StarterDebugMenu extends ShadowlessElement {
       const storage = StorageManager.CreateStorage(credential.storageType);
       storage.initialize(credential);
 
+
       const fileFullPath = 'affine.zip';
       const fileUrl = storage.getFileUrl(fileFullPath);
       if (!fileUrl) {
@@ -859,7 +860,7 @@ export class StarterDebugMenu extends ShadowlessElement {
       }
       const snapshotBlob = await response.blob();
 
-      // Clear existing documents from the collection
+        // Clear existing documents from the collection
       Array.from(this.collection.docs.keys()).forEach(id => {
         this.collection.removeDoc(id);
       });
@@ -874,24 +875,7 @@ export class StarterDebugMenu extends ShadowlessElement {
       if (docs.length === 0) {
         throw new Error('No documents found in snapshot');
       }
-
-      const newDoc = docs[0]; // Adjust this if you need a specific document
-      if (!newDoc) {
-        throw new Error('Failed to load document from snapshot');
-      }
-
-      if (!newDoc.loaded) {
-        newDoc.load(); // Ensure the document is loaded
-      }
-
-      // Update the editor's document
-      this.editor.doc = newDoc;
-      this._rebindHistorySubscription(this.editor.doc);
-      newDoc.history.store.resetHistory();
-      // Update the editor's mode (if necessary)
-      const modeService = this.editor.std.provider.get(DocModeProvider);
-      this.editor.mode = modeService.getPrimaryMode(newDoc.id);
-
+      
       // Load manifest and fetch attachments
       const workspace = this.collection as TestWorkspace;
       if (!workspace || !workspace.studyManagerRegistry) {
@@ -899,22 +883,22 @@ export class StarterDebugMenu extends ShadowlessElement {
         // Proceed with loading document, but DICOM studies won't be loaded
       }
 
+      // Load manifest and pre-load image blobs
       const zip = await JSZip.loadAsync(snapshotBlob);
       const manifestFile = zip.file('manifest.json');
+      const blobSync = this.editor.std.store.blobSync;
       if (manifestFile) {
         const manifest = JSON.parse(await manifestFile.async('string')) as {
           attachments: { sourceId: string; cloudPath: string; name: string; type: string }[];
         };
         console.log('Loaded manifest with attachments:', manifest.attachments);
 
-        const blobSync = this.editor.std.store.blobSync;
-
         for (const attachment of manifest.attachments) {
           const { sourceId, cloudPath, name, type } = attachment;
           console.log('Processing attachment:', { sourceId, cloudPath, name, type });
 
           let localBlob = await blobSync.get(sourceId);
-          if (!localBlob) {
+          if (!localBlob) { // Pre-load only images
             const fileUrl = storage.getFileUrl(cloudPath);
             console.log('Fetching blob from:', fileUrl);
             if (fileUrl) {
@@ -942,7 +926,7 @@ export class StarterDebugMenu extends ShadowlessElement {
                 }
               }
             }
-          } else {
+          } else if (localBlob) {
             console.log('Blob already exists locally:', sourceId, 'size:', localBlob.size);
           }
 
@@ -967,6 +951,35 @@ export class StarterDebugMenu extends ShadowlessElement {
         console.warn('No manifest.json found in snapshot');
         if (this.editor.host) {
           toast(this.editor.host, 'No manifest found; attachments not loaded');
+        }
+      }
+
+
+      const newDoc = docs[0]; // Adjust this if you need a specific document
+      if (!newDoc) {
+        throw new Error('Failed to load document from snapshot');
+      }
+
+      if (!newDoc.loaded) {
+        newDoc.load(); // Ensure the document is loaded
+      }
+
+      // Update the editor's document
+      this.editor.doc = newDoc;
+      this._rebindHistorySubscription(this.editor.doc);
+      newDoc.history.store.resetHistory();
+      // Update the editor's mode (if necessary)
+      const modeService = this.editor.std.provider.get(DocModeProvider);
+      this.editor.mode = modeService.getPrimaryMode(newDoc.id);
+
+
+      // Ensure attachment blocks are initialized
+      const attachmentBlocks = newDoc.getBlocksByFlavour('affine:attachment');
+      console.log('Attachment blocks found:', attachmentBlocks.length);
+      for (const block of attachmentBlocks) {
+        const blockComponent = this.editor.std.store.getBlock(block.id);
+        if (blockComponent && blockComponent instanceof AttachmentBlockComponent) {
+          console.log('Initialized attachment block:', block.id, 'sourceId:', block.model.props.sourceId);
         }
       }
 
@@ -1174,7 +1187,7 @@ export class StarterDebugMenu extends ShadowlessElement {
   override disconnectedCallback() {
     super.disconnectedCallback();
 
-    const matchMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    const matchMedia = window.matchMedia('(prefers-color-scheme: dark');
     matchMedia.removeEventListener('change', this._darkModeChange);
 
     window.removeEventListener('message', this._handleMessage.bind(this));
