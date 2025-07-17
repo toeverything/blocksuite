@@ -650,12 +650,42 @@ export class StarterDebugMenu extends ShadowlessElement {
         // Proceed with saving the snapshot, but DICOM studies won't be saved
       }
 
+      // Collect all asset-referencing blocks (attachments and images)
+      const assetBlocks = [
+        ...doc.getBlocksByFlavour('affine:attachment'),
+        ...doc.getBlocksByFlavour('affine:image')
+      ];
+
+      // Map of sourceId to {blob, name, type} for general assets
+      const assets = new Map<string, { blob: Blob; name: string; type: string }>();
+
+      // Pre-calculate total bytes for general assets and populate assets map
+      for (const block of assetBlocks) {
+        const { sourceId } = block.model.props;
+        if (!sourceId) continue;
+        const blob = await blobSync.get(sourceId);
+        if (!blob) continue;
+
+        // Derive name (attachments have explicit name; images fallback to sourceId or blob.name)
+        const name = 'name' in block.model.props ? block.model.props.name as string : (blob instanceof File ? blob.name : sourceId);
+        const type = blob.type || ('type' in block.model.props ? block.model.props.type as string : '');
+
+        const cloudPath = `assets/${name}`;
+        const prevAttachment = previousManifest.attachments.find(
+          att => att.sourceId === sourceId && att.name === name && att.type === type && att.cloudPath === cloudPath
+        );
+        if (!prevAttachment || !storage.getFileUrl(cloudPath)) {
+          totalBytes += blob.size;
+        }
+
+        assets.set(sourceId, { blob, name, type });
+      }
+
       // Pre-calculate total bytes for DICOM studies
-      const dicomAttachmentBlocks = doc.getBlocksByFlavour('affine:attachment');
       const studyProgressInfo = new Map<string, { totalFiles: number; totalBytes: number }>(); // guid -> info
       if (workspace?.studyManagerRegistry) {
-        for (const block of dicomAttachmentBlocks) {
-          const { sourceId, name, type } = block.model.props;
+        for (const block of assetBlocks) {
+          const { name, type } = assets.get(block.model.props.sourceId) || { name: '', type: '' };
           if (type === 'application/dicomdir' && name.endsWith('.dicomdir')) {
             const guid = name.replace('.dicomdir', '');
             const studyManager = workspace.studyManagerRegistry.get(guid);
@@ -670,29 +700,13 @@ export class StarterDebugMenu extends ShadowlessElement {
         }
       }
 
-      // Pre-calculate total bytes for regular attachments (including .dicomdir if needed)
-      const attachmentBlocks = doc.getBlocksByFlavour('affine:attachment');
-      for (const block of attachmentBlocks) {
-        const { sourceId, name, type } = block.model.props;
-        if (!sourceId) continue;
-        const blob = await blobSync.get(sourceId);
-        if (!blob) continue;
-        const cloudPath = `assets/${name}`;
-        const prevAttachment = previousManifest.attachments.find(
-          att => att.sourceId === sourceId && att.name === name && att.type === type && att.cloudPath === cloudPath
-        );
-        if (!prevAttachment || !storage.getFileUrl(cloudPath)) {
-          totalBytes += blob.size;
-        }
-      }
-
-      this._saveProgress = totalBytes > 0 ? (uploadedBytes * 1.0 / totalBytes) * 100 : 0;
+      this._saveProgress = totalBytes > 0 ? (uploadedBytes / totalBytes) * 100 : 0;
       this.requestUpdate();
 
       // Save all DICOM studyManagers
       if (workspace?.studyManagerRegistry) {
-        for (const block of dicomAttachmentBlocks) {
-          const { sourceId, name, type } = block.model.props;
+        for (const block of assetBlocks) {
+          const { name, type } = assets.get(block.model.props.sourceId) || { name: '', type: '' };
           if (type === 'application/dicomdir' && name.endsWith('.dicomdir')) {
             const guid = name.replace('.dicomdir', '');
             const studyManager = workspace.studyManagerRegistry.get(guid);
@@ -707,10 +721,10 @@ export class StarterDebugMenu extends ShadowlessElement {
                 const uploadedImagesSubject = new BehaviorSubject<number>(0); // uploaded files count
                 let studyUploadedBytes = 0;
                 uploadedImagesSubject.subscribe(newValue => {
-                  const newStudyUploadedBytes = totalFiles > 0 ? (newValue * 1.0 / totalFiles) * totalBytesForStudy : 0;
+                  const newStudyUploadedBytes = totalFiles > 0 ? (newValue / totalFiles) * totalBytesForStudy : 0;
                   uploadedBytes += newStudyUploadedBytes - studyUploadedBytes;
                   studyUploadedBytes = newStudyUploadedBytes;
-                  this._saveProgress = totalBytes > 0 ? (uploadedBytes * 1.0 / totalBytes) * 100 : 0;
+                  this._saveProgress = totalBytes > 0 ? (uploadedBytes / totalBytes) * 100 : 0;
                   this.requestUpdate();
                 });
 
@@ -728,7 +742,7 @@ export class StarterDebugMenu extends ShadowlessElement {
         }
       }
 
-      // Create document snapshot
+      // Create document snapshot (unchanged)
       const docs = [doc];
       const zip = new Zip();
       const job = new Transformer({
@@ -755,58 +769,41 @@ export class StarterDebugMenu extends ShadowlessElement {
           })
       );
 
-      // Upload new or modified attachment blobs
-      const assetsMap = job.assets;
+      // Upload new or modified asset blobs and build manifest
       const uploadedBlobs = new Set<string>();
       const manifest = {
         attachments: [],
       };
 
-      await Promise.all(
-        attachmentBlocks.map(async block => {
-          const { sourceId, name, type } = block.model.props;
-          if (!sourceId) {
-            console.warn(`No sourceId for attachment block ${block.id}`);
-            return;
-          }
+      for (const [sourceId, { blob, name, type }] of assets.entries()) {
+        const cloudPath = `assets/${name}`;
 
-          const blob = await blobSync.get(sourceId);
-          if (!blob) {
-            console.warn(`Blob ${sourceId} not found in blobSync`);
-            return;
-          }
+        const prevAttachment = previousManifest.attachments.find(
+          att => att.sourceId === sourceId && att.name === name && att.type === type && att.cloudPath === cloudPath
+        );
+        let cloudUrl = prevAttachment ? storage.getFileUrl(cloudPath) : undefined;
 
-          console.log(`Processing sourceId: ${sourceId}, in assetsMap: ${assetsMap.has(sourceId)}`);
-
-          const cloudPath = `assets/${name}`;
-
-          const prevAttachment = previousManifest.attachments.find(
-            att => att.sourceId === sourceId && att.name === name && att.type === type && att.cloudPath === cloudPath
-          );
-          let cloudUrl = prevAttachment ? storage.getFileUrl(cloudPath) : undefined;
-
-          if (!cloudUrl) {
-            const fileUploadedBytesSubject = new BehaviorSubject<number>(0);
-            let prevFileUploaded = 0;
-            fileUploadedBytesSubject.subscribe(newValue => {
-              uploadedBytes += newValue - prevFileUploaded;
-              prevFileUploaded = newValue;
-              this._saveProgress = totalBytes > 0 ? (uploadedBytes * 1.0 / totalBytes) * 100 : 0;
-              this.requestUpdate();
-            });
-
-            cloudUrl = await storage.uploadFile(blob, cloudPath, fileUploadedBytesSubject);
-            uploadedBlobs.add(sourceId);
-          }
-
-          manifest.attachments.push({
-            sourceId,
-            name,
-            type,
-            cloudPath,
+        if (!cloudUrl) {
+          const fileUploadedBytesSubject = new BehaviorSubject<number>(0);
+          let prevFileUploaded = 0;
+          fileUploadedBytesSubject.subscribe(newValue => {
+            uploadedBytes += newValue - prevFileUploaded;
+            prevFileUploaded = newValue;
+            this._saveProgress = totalBytes > 0 ? (uploadedBytes / totalBytes) * 100 : 0;
+            this.requestUpdate();
           });
-        })
-      );
+
+          cloudUrl = await storage.uploadFile(blob, cloudPath, fileUploadedBytesSubject);
+          uploadedBlobs.add(sourceId);
+        }
+
+        manifest.attachments.push({
+          sourceId,
+          name,
+          type,
+          cloudPath,
+        });
+      }
 
       await zip.file('manifest.json', JSON.stringify(manifest, null, 2));
 
@@ -970,16 +967,6 @@ export class StarterDebugMenu extends ShadowlessElement {
         console.warn('No manifest.json found in snapshot');
         if (this.editor.host) {
           toast(this.editor.host, 'No manifest found; attachments not loaded');
-        }
-      }
-
-      // Ensure attachment blocks are initialized
-      const attachmentBlocks = newDoc.getBlocksByFlavour('affine:attachment');
-      console.log('Attachment blocks found:', attachmentBlocks.length);
-      for (const block of attachmentBlocks) {
-        const blockComponent = this.editor.std.store.getBlock(block.id);
-        if (blockComponent && blockComponent instanceof AttachmentBlockComponent) {
-          console.log('Initialized attachment block:', block.id, 'sourceId:', block.model.props.sourceId);
         }
       }
 
