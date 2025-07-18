@@ -966,8 +966,8 @@ export class StarterDebugMenu extends ShadowlessElement {
 
       // Update the editor's document
       this.editor.doc = newDoc;
-      this._rebindHistorySubscription(this.editor.doc);
       newDoc.history.store.resetHistory();
+      this._rebindHistorySubscription(this.doc);
       // Update the editor's mode (if necessary)
       const modeService = this.editor.std.provider.get(DocModeProvider);
       this.editor.mode = modeService.getPrimaryMode(newDoc.id);
@@ -1212,14 +1212,14 @@ export class StarterDebugMenu extends ShadowlessElement {
   }
 
   private _rebindHistorySubscription(doc: any) {
-    this._canUndo = doc.canUndo;
-    this._canRedo = doc.canRedo;
+    doc.history.onUpdated.subscribe(() => {
+      this._canUndo = doc.canUndo;
+      this._canRedo = doc.canRedo;
+    });
   }
 
   override firstUpdated() {
-    this.doc.history.onUpdated.subscribe(() => {
-      this._rebindHistorySubscription(this.doc);;
-    });
+    this._rebindHistorySubscription(this.doc);
 
     this.editor.std.get(DocModeProvider).onPrimaryModeChange(() => {
       this.requestUpdate();
