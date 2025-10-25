@@ -59,7 +59,57 @@ import {
   threePointerIconStyle,
 } from './table-cell-css';
 import type { TableDataManager } from './table-data-manager';
+import type { AffineInlineEditor, AffineTextAttributes } from '@blocksuite/affine-shared/types';
 export const TableCellComponentName = 'affine-table-cell';
+
+function toggleStyle(
+  inlineEditor: AffineInlineEditor | null,
+  attrs: AffineTextAttributes
+): void {
+  if (!inlineEditor) return;
+
+  const inlineRange = inlineEditor.getInlineRange();
+  if (!inlineRange) return;
+
+  const root = inlineEditor.rootElement;
+  if (!root) {
+    return;
+  }
+
+  const deltas = inlineEditor.getDeltasByInlineRange(inlineRange);
+  let oldAttributes: AffineTextAttributes = {};
+
+  for (const [delta] of deltas) {
+    const attributes = delta.attributes;
+
+    if (!attributes) {
+      continue;
+    }
+
+    oldAttributes = { ...attributes };
+  }
+
+
+  const newAttributes = Object.fromEntries(
+    Object.entries(attrs).map(([k, v]) => {
+      if (
+        typeof v === 'boolean' &&
+        v === (oldAttributes as Record<string, unknown>)[k]
+      ) {
+        return [k, !v || null];
+      } else {
+        return [k, v];
+      }
+    })
+  ) as AffineTextAttributes;
+
+  inlineEditor.formatText(inlineRange, newAttributes, {
+    mode: 'merge',
+  });
+  root.blur();
+
+  inlineEditor.syncInlineRange();
+}
 export class TableCell extends SignalWatcher(
   WithDisposable(ShadowlessElement)
 ) {
@@ -158,17 +208,17 @@ export class TableCell extends SignalWatcher(
               }),
               ...(column.backgroundColor
                 ? [
-                    menu.action({
-                      name: 'Clear column style',
-                      prefix: CloseIcon(),
-                      select: () => {
-                        this.dataManager.setColumnBackgroundColor(
-                          column.columnId,
-                          undefined
-                        );
-                      },
-                    }),
-                  ]
+                  menu.action({
+                    name: 'Clear column style',
+                    prefix: CloseIcon(),
+                    select: () => {
+                      this.dataManager.setColumnBackgroundColor(
+                        column.columnId,
+                        undefined
+                      );
+                    },
+                  }),
+                ]
                 : []),
             ],
           }),
@@ -284,17 +334,17 @@ export class TableCell extends SignalWatcher(
               }),
               ...(row.backgroundColor
                 ? [
-                    menu.action({
-                      name: 'Clear row style',
-                      prefix: CloseIcon(),
-                      select: () => {
-                        this.dataManager.setRowBackgroundColor(
-                          row.rowId,
-                          undefined
-                        );
-                      },
-                    }),
-                  ]
+                  menu.action({
+                    name: 'Clear row style',
+                    prefix: CloseIcon(),
+                    select: () => {
+                      this.dataManager.setRowBackgroundColor(
+                        row.rowId,
+                        undefined
+                      );
+                    },
+                  }),
+                ]
                 : []),
             ],
           }),
@@ -459,11 +509,11 @@ export class TableCell extends SignalWatcher(
         data-testid="drag-column-handle"
         data-drag-column-id=${column.columnId}
         class=${classMap({
-          [columnOptionsStyle]: true,
-        })}
+      [columnOptionsStyle]: true,
+    })}
         style=${styleMap({
-          opacity: columnIndex === this.hoverColumnIndex$.value ? 1 : undefined,
-        })}
+      opacity: columnIndex === this.hoverColumnIndex$.value ? 1 : undefined,
+    })}
         @click=${openColumnOptions}
       >
         ${threePointerIcon()}
@@ -484,11 +534,11 @@ export class TableCell extends SignalWatcher(
         data-testid="drag-row-handle"
         data-drag-row-id=${row.rowId}
         class=${classMap({
-          [rowOptionsStyle]: true,
-        })}
+      [rowOptionsStyle]: true,
+    })}
         style=${styleMap({
-          opacity: rowIndex === this.hoverRowIndex$.value ? 1 : undefined,
-        })}
+      opacity: rowIndex === this.hoverRowIndex$.value ? 1 : undefined,
+    })}
         @click=${openRowOptions}
       >
         ${threePointerIcon(true)}
@@ -647,13 +697,61 @@ export class TableCell extends SignalWatcher(
     return this.richText$.value?.inlineEditor;
   }
 
-  private readonly _handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key !== 'Escape') {
-      if (e.key === 'Tab') {
-        e.preventDefault();
+  private readonly _handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape') {
+      if (event.key === 'Tab') {
+        event.preventDefault();
         return;
       }
-      e.stopPropagation();
+      event.stopPropagation();
+    }
+
+    const inlineEditor = this.inlineEditor;
+    if (!inlineEditor) return;
+
+    switch (event.key) {
+      // bold ctrl+b
+      case 'B':
+      case 'b':
+        if (event.metaKey || event.ctrlKey) {
+          event.preventDefault();
+          toggleStyle(inlineEditor, { bold: true });
+        }
+        break;
+      // italic ctrl+i
+      case 'I':
+      case 'i':
+        if (event.metaKey || event.ctrlKey) {
+          event.preventDefault();
+          toggleStyle(inlineEditor, { italic: true });
+        }
+        break;
+      // underline ctrl+u
+      case 'U':
+      case 'u':
+        if (event.metaKey || event.ctrlKey) {
+          event.preventDefault();
+          toggleStyle(inlineEditor, { underline: true });
+        }
+        break;
+      // strikethrough ctrl+shift+s
+      case 'S':
+      case 's':
+        if ((event.metaKey || event.ctrlKey) && event.shiftKey) {
+          event.preventDefault();
+          toggleStyle(inlineEditor, { strike: true });
+        }
+        break;
+      // inline code ctrl+shift+e
+      case 'E':
+      case 'e':
+        if ((event.metaKey || event.ctrlKey) && event.shiftKey) {
+          event.preventDefault();
+          toggleStyle(inlineEditor, { code: true });
+        }
+        break;
+      default:
+        break;
     }
   };
 
@@ -729,8 +827,8 @@ export class TableCell extends SignalWatcher(
       return html`<td class=${cellContainerStyle} style=${this.tdStyle()}>
         <div
           style=${styleMap({
-            padding: '8px 12px',
-          })}
+        padding: '8px 12px',
+      })}
         >
           <div style="height:22px"></div>
         </div>
@@ -741,11 +839,11 @@ export class TableCell extends SignalWatcher(
         data-row-id=${this.row?.rowId}
         data-column-id=${this.column?.columnId}
         @mouseenter=${() => {
-          this.tdMouseEnter(this.rowIndex, this.columnIndex);
-        }}
+        this.tdMouseEnter(this.rowIndex, this.columnIndex);
+      }}
         @mouseleave=${() => {
-          this.tdMouseLeave();
-        }}
+        this.tdMouseLeave();
+      }}
         @contextmenu=${this.onContextMenu}
         class=${cellContainerStyle}
         style=${this.tdStyle()}
@@ -755,9 +853,9 @@ export class TableCell extends SignalWatcher(
           data-disable-ask-ai
           data-not-block-text
           style=${styleMap({
-            minHeight: '22px',
-            padding: '8px 12px',
-          })}
+        minHeight: '22px',
+        padding: '8px 12px',
+      })}
           .yText="${this.text}"
           .inlineEventSource="${this.topContenteditableElement ?? nothing}"
           .attributesSchema="${this.inlineManager?.getSchema()}"
@@ -767,9 +865,9 @@ export class TableCell extends SignalWatcher(
           .readonly="${this.readonly}"
           .enableClipboard="${true}"
           .verticalScrollContainerGetter="${() =>
-            this.topContenteditableElement?.host
-              ? getViewportElement(this.topContenteditableElement.host)
-              : null}"
+        this.topContenteditableElement?.host
+          ? getViewportElement(this.topContenteditableElement.host)
+          : null}"
           data-parent-flavour="affine:table"
         ></rich-text>
         ${this.renderOptionsButton()} ${this.renderColumnIndicator()}
@@ -850,8 +948,8 @@ const threePointerIcon = (vertical: boolean = false) => {
     <div
       class=${threePointerIconStyle}
       style=${styleMap({
-        transform: vertical ? 'rotate(90deg)' : undefined,
-      })}
+    transform: vertical ? 'rotate(90deg)' : undefined,
+  })}
     >
       <div class=${threePointerIconDotStyle}></div>
       <div class=${threePointerIconDotStyle}></div>
