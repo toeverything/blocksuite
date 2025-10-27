@@ -65,5 +65,20 @@ export const listBlockStyles = css`
     color: var(--affine-text-secondary-color);
   }
 
+  /* RTL support for list blocks */
+  [dir='rtl'] .affine-list-rich-text-wrapper {
+    flex-direction: row-reverse;
+  }
+
+  [dir='rtl'] .affine-list-block__numbered {
+    margin-left: 0;
+    margin-right: 2px;
+  }
+
+  [dir='rtl'] .affine-list-block__todo-prefix {
+    margin-left: 0;
+    margin-right: 2px;
+  }
+
   ${listPrefix}
 `;

@@ -7,6 +7,7 @@ export enum TextAlign {
   Center = 'center',
   Left = 'left',
   Right = 'right',
+  Justify = 'justify',
 }
 
 export const TextAlignMap = createEnumMap(TextAlign);
@@ -24,6 +25,7 @@ export type TextStyleProps = {
   fontStyle: FontStyle;
   fontWeight: FontWeight;
   textAlign: TextAlign;
+  textDirection?: TextDirection;
 };
 
 export enum FontWeight {
@@ -62,7 +64,14 @@ export enum TextResizing {
   AUTO_HEIGHT,
 }
 
+export enum TextDirection {
+  LTR = 'ltr',
+  RTL = 'rtl',
+  Auto = 'auto',
+}
+
 export const FontFamilySchema = z.nativeEnum(FontFamily);
 export const FontWeightSchema = z.nativeEnum(FontWeight);
 export const FontStyleSchema = z.nativeEnum(FontStyle);
 export const TextAlignSchema = z.nativeEnum(TextAlign);
+export const TextDirectionSchema = z.nativeEnum(TextDirection);

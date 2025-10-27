@@ -11,7 +11,7 @@ import {
   EDGELESS_TOP_CONTENTEDITABLE_SELECTOR,
 } from '@blocksuite/affine-shared/consts';
 import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import { getViewportElement } from '@blocksuite/affine-shared/utils';
+import { getViewportElement, getTextDirection } from '@blocksuite/affine-shared/utils';
 import type { BlockComponent } from '@blocksuite/std';
 import { BlockSelection, TextSelection } from '@blocksuite/std';
 import {
@@ -194,6 +194,7 @@ export class ListBlockComponent extends CaptionedBlockComponent<ListBlockModel> 
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}
             .enableUndoRedo=${false}
+            .textDirection=${getTextDirection(this.model.props.text.yText.toString())}
             .verticalScrollContainerGetter=${() =>
               getViewportElement(this.host)}
           ></rich-text>

@@ -96,6 +96,15 @@ export class PageRootBlockComponent extends BlockComponent<RootBlockModel> {
       display: block;
     }
 
+    /* RTL support for page root */
+    [dir='rtl'] .affine-page-root-block-container {
+      text-align: right;
+    }
+
+    [dir='ltr'] .affine-page-root-block-container {
+      text-align: left;
+    }
+
     @media print {
       .selected {
         background-color: transparent !important;
