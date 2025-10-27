@@ -2,6 +2,12 @@ import type {
   AffineInlineEditor,
   AffineTextAttributes,
 } from '@blocksuite/affine-shared/types';
+import { 
+  getTextDirection, 
+  getRTLTextAlignCSS, 
+  TextDirection,
+  isRTL 
+} from '@blocksuite/affine-shared/utils';
 import { WithDisposable } from '@blocksuite/global/lit';
 import { ShadowlessElement } from '@blocksuite/std';
 import {
@@ -56,11 +62,53 @@ export class RichText extends WithDisposable(ShadowlessElement) {
     rich-text .nowrap-lines v-element span {
       white-space: pre !important;
     }
+
+    /* RTL support */
+    .inline-editor[dir="rtl"] {
+      text-align: right;
+    }
+
+    .inline-editor[dir="ltr"] {
+      text-align: left;
+    }
   `;
 
   #verticalScrollContainer: HTMLElement | null = null;
 
   private readonly _inlineEditor$ = signal<AffineInlineEditor | null>(null);
+  
+  @property({ attribute: false })
+  accessor textDirection: TextDirection = TextDirection.Auto;
+
+  /**
+   * Get the current text direction based on content
+   */
+  private getCurrentTextDirection(): TextDirection {
+    if (this.textDirection !== TextDirection.Auto) {
+      return this.textDirection;
+    }
+    
+    const inlineEditor = this.inlineEditor;
+    if (!inlineEditor) return TextDirection.LTR;
+    
+    const text = inlineEditor.yTextString;
+    return getTextDirection(text);
+  }
+
+  /**
+   * Update the direction attribute on the inline editor
+   */
+  private updateTextDirection() {
+    const inlineEditor = this.inlineEditor;
+    if (!inlineEditor) return;
+    
+    const direction = this.getCurrentTextDirection();
+    const directionValue = direction === TextDirection.RTL ? 'rtl' : 'ltr';
+    
+    if (inlineEditor.rootElement) {
+      inlineEditor.rootElement.setAttribute('dir', directionValue);
+    }
+  }
 
   private readonly _onCopy = (e: ClipboardEvent) => {
     const inlineEditor = this.inlineEditor;
@@ -399,9 +447,13 @@ export class RichText extends WithDisposable(ShadowlessElement) {
       readonly: this.readonly,
     });
 
+    const direction = this.getCurrentTextDirection();
+    const directionValue = direction === TextDirection.RTL ? 'rtl' : 'ltr';
+
     return html`<div
       contenteditable=${this.readonly ? 'false' : 'true'}
       class=${classes}
+      dir=${directionValue}
     ></div>`;
   }
 

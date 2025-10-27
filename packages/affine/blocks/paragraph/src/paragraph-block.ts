@@ -16,6 +16,8 @@ import {
   calculateCollapsedSiblings,
   getNearestHeadingBefore,
   getViewportElement,
+  getTextDirection,
+  TextDirection,
 } from '@blocksuite/affine-shared/utils';
 import type { BlockComponent } from '@blocksuite/std';
 import { TextSelection } from '@blocksuite/std';
@@ -334,6 +336,7 @@ export class ParagraphBlockComponent extends CaptionedBlockComponent<ParagraphBl
             .inlineRangeProvider=${this._inlineRangeProvider}
             .enableClipboard=${false}
             .enableUndoRedo=${false}
+            .textDirection=${getTextDirection(this.model.props.text.yText.toString())}
             .verticalScrollContainerGetter=${() =>
               getViewportElement(this.host)}
           ></rich-text>

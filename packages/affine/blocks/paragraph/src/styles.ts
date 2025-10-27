@@ -129,6 +129,16 @@ export const paragraphBlockStyles = css`
     border-radius: 18px;
   }
 
+  /* RTL support for quote */
+  [dir='rtl'] .quote {
+    padding-left: 0;
+    padding-right: 17px;
+  }
+  [dir='rtl'] .quote::after {
+    left: auto;
+    right: 0;
+  }
+
   .affine-paragraph-placeholder {
     position: absolute;
     display: none;
@@ -141,6 +151,12 @@ export const paragraphBlockStyles = css`
     pointer-events: none;
     color: var(--affine-black-30);
     fill: var(--affine-black-30);
+  }
+
+  /* RTL support for placeholder */
+  [dir='rtl'] .affine-paragraph-placeholder {
+    left: auto;
+    right: 0;
   }
   @media print {
     .affine-paragraph-placeholder {
