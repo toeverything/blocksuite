@@ -11,7 +11,10 @@ import {
   ShapeElementModel,
   ShapeType,
 } from '@blocksuite/affine-model';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
+import {
+  EditPropsStore,
+  TelemetryProvider,
+} from '@blocksuite/affine-shared/services';
 import type { IBound, IVec } from '@blocksuite/global/gfx';
 import { Bound } from '@blocksuite/global/gfx';
 import type { PointerEventState } from '@blocksuite/std';
@@ -22,6 +25,8 @@ import {
   type ConnectionOverlay,
   ConnectorEndpointLocations,
   ConnectorEndpointLocationsOnTriangle,
+  ConnectorEndpointLocationsWithCenter,
+  isCenterAnchorEligible,
 } from './connector-manager';
 
 enum ConnectorToolMode {
@@ -197,11 +202,17 @@ export class ConnectorTool extends BaseTool<ConnectorToolOptions> {
     this._mode = ConnectorToolMode.Quick;
     this._sourceBounds = Bound.deserialize(element.xywh);
     this._sourceBounds.rotate = element.rotate;
+    const centerAnchorEnabled =
+      this.std.getOptional(EditPropsStore)?.getStorage(
+        'connectorCenterAnchor'
+      ) ?? true;
     this._sourceLocations =
       element instanceof ShapeElementModel &&
       element.shapeType === ShapeType.Triangle
         ? ConnectorEndpointLocationsOnTriangle
-        : ConnectorEndpointLocations;
+        : centerAnchorEnabled && isCenterAnchorEligible(element)
+          ? ConnectorEndpointLocationsWithCenter
+          : ConnectorEndpointLocations;
 
     this._source = {
       id: element.id,
