@@ -44,6 +44,7 @@ const LocalPropsSchema = z.object({
   presentNoFrameToastShown: z.boolean(),
 
   autoHideEmbedHTMLFullScreenToolbar: z.boolean(),
+  connectorCenterAnchor: z.boolean().default(false),
 });
 
 type SessionProps = z.infer<typeof SessionPropsSchema>;
@@ -137,6 +138,8 @@ export class EditPropsStore extends LifeCycleWatcher {
         return 'blocksuite:' + id + ':showBidirectional';
       case 'autoHideEmbedHTMLFullScreenToolbar':
         return 'blocksuite:embedHTML:autoHideFullScreenToolbar';
+      case 'connectorCenterAnchor':
+        return 'blocksuite:connector:centerAnchor';
       default:
         return key;
     }

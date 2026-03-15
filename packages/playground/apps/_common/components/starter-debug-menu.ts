@@ -34,7 +34,10 @@ import {
   PlainTextAdapterFactoryIdentifier,
   titleMiddleware,
 } from '@blocksuite/affine/shared/adapters';
-import { DocModeProvider } from '@blocksuite/affine/shared/services';
+import {
+  DocModeProvider,
+  EditPropsStore,
+} from '@blocksuite/affine/shared/services';
 import {
   ColorVariables,
   FontFamilyVariables,
@@ -611,6 +614,17 @@ export class StarterDebugMenu extends ShadowlessElement {
     document.body.append(this.commentPanel);
   }
 
+  private _toggleConnectorCenterAnchor() {
+    const store = this.editor.std.getOptional(EditPropsStore);
+    if (!store) return;
+    const current = store.getStorage('connectorCenterAnchor') ?? true;
+    store.setStorage('connectorCenterAnchor', !current);
+    toast(
+      this.editor.host!,
+      `Connector center anchor: ${!current ? 'enabled' : 'disabled'}`
+    );
+  }
+
   private _toggleDarkMode() {
     this._setThemeMode(!this._dark);
   }
@@ -907,6 +921,9 @@ export class StarterDebugMenu extends ShadowlessElement {
               </sl-menu-item>
               <sl-menu-item @click="${this._toggleAdapterPanel}">
                 Toggle Adapter Panel
+              </sl-menu-item>
+              <sl-menu-item @click="${this._toggleConnectorCenterAnchor}">
+                Toggle Connector Center Anchor
               </sl-menu-item>
             </sl-menu>
           </sl-dropdown>

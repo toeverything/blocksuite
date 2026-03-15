@@ -6,8 +6,13 @@ import {
   ConnectorMode,
   GroupElementModel,
   type LocalConnectorElementModel,
+  ShapeElementModel,
+  ShapeType,
 } from '@blocksuite/affine-model';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
+import {
+  EditPropsStore,
+  ThemeProvider,
+} from '@blocksuite/affine-shared/services';
 import { BlockSuiteError } from '@blocksuite/global/exceptions';
 import type { IBound, IVec, IVec3 } from '@blocksuite/global/gfx';
 import {
@@ -28,6 +33,7 @@ import {
   Vec,
 } from '@blocksuite/global/gfx';
 import { assertType } from '@blocksuite/global/utils';
+import type { BlockStdScope } from '@blocksuite/std';
 import type {
   GfxController,
   GfxLocalElementModel,
@@ -59,6 +65,19 @@ export const ConnectorEndpointLocations: IVec[] = [
   [0, 0.5],
 ];
 
+export const ConnectorEndpointLocationsWithCenter: IVec[] = [
+  // At top
+  [0.5, 0],
+  // At right
+  [1, 0.5],
+  // At bottom
+  [0.5, 1],
+  // At left
+  [0, 0.5],
+  // At center
+  [0.5, 0.5],
+];
+
 export const ConnectorEndpointLocationsOnTriangle: IVec[] = [
   // At top
   [0.5, 0],
@@ -68,7 +87,130 @@ export const ConnectorEndpointLocationsOnTriangle: IVec[] = [
   [0.5, 1],
   // At left
   [0.25, 0.5],
+  // At center
+  [0.5, 0.5],
 ];
+
+/**
+ * Checks if a GfxModel is a shape eligible for center anchor point.
+ * Only Rect (including roundedRect), Ellipse, Diamond, and Triangle are eligible.
+ * Triangle and other complex shapes are excluded.
+ */
+export function isCenterAnchorEligible(ele: GfxModel): boolean {
+  if (!(ele instanceof ShapeElementModel)) return false;
+  const { shapeType } = ele;
+  return (
+    shapeType === ShapeType.Rect ||
+    shapeType === ShapeType.Ellipse ||
+    shapeType === ShapeType.Diamond ||
+    shapeType === ShapeType.Triangle
+  );
+}
+
+/**
+ * Checks if the center anchor feature is enabled via the global toggle.
+ * Defaults to true (enabled) when no value is stored in localStorage.
+ */
+export function isCenterAnchorEnabled(std: BlockStdScope): boolean {
+  const store = std.getOptional(EditPropsStore);
+  if (!store) return true;
+  return store.getStorage('connectorCenterAnchor') ?? true;
+}
+
+/**
+ * Checks if a normalized anchor position is the center point [0.5, 0.5].
+ */
+function isCenterAnchorPosition(position: IVec): boolean {
+  return (
+    almostEqual(position[0], 0.5, 0.001) &&
+    almostEqual(position[1], 0.5, 0.001)
+  );
+}
+
+/**
+ * For a center-anchored connector endpoint, computes the perimeter intersection
+ * point so the connector visually terminates at the shape edge rather than
+ * penetrating to the center. The logical anchor remains [0.5, 0.5] but the
+ * visual endpoint is where the line from otherPoint to center crosses the
+ * shape boundary.
+ *
+ * Handles each eligible shape type (Rect, roundedRect, Ellipse, Diamond, Triangle) by
+ * using the shape's own getLineIntersections method, which dispatches to
+ * shape-specific geometry (polygon boundary for Rect/Diamond, ellipse math
+ * for Ellipse). For roundedRect, the polygon approximation of the bounding
+ * rectangle is used, which is consistent with existing edge anchor behavior.
+ *
+ * The function extends the ray beyond the center to handle cases where
+ * otherPoint is inside or very close to the shape, ensuring a boundary
+ * intersection is always found.
+ *
+ * Returns a new PointLocation at the perimeter with an appropriate tangent,
+ * or the original centerPoint if no intersection is found.
+ */
+function computePerimeterPointForCenterAnchor(
+  connectable: GfxModel,
+  centerPoint: PointLocation,
+  otherPoint: PointLocation
+): PointLocation {
+  const bound = Bound.deserialize(connectable.xywh);
+  const center: IVec = [centerPoint[0], centerPoint[1]];
+  const other: IVec = [otherPoint[0], otherPoint[1]];
+
+  // Compute direction from other point to center
+  let direction = Vec.sub(center, other);
+  const dirLen = Vec.len(direction);
+
+  // If the other point is effectively at the center (e.g. both endpoints
+  // on the same shape center, or overlapping shapes), use a default
+  // direction pointing right — this gives a deterministic perimeter point
+  if (dirLen < 0.01) {
+    direction = [1, 0];
+  } else {
+    direction = Vec.normalize(direction);
+  }
+
+  // Extend the ray well beyond the center through the shape to guarantee
+  // it crosses the boundary, even when otherPoint is inside the shape.
+  // Use the shape's diagonal length as a generous extension distance.
+  const diagonal = Math.sqrt(bound.w * bound.w + bound.h * bound.h);
+  const rayStart = Vec.sub(center, Vec.mul(direction, diagonal));
+  const rayEnd = Vec.add(center, Vec.mul(direction, diagonal));
+
+  // Use shape-specific line intersection (rect uses polygon, ellipse uses
+  // analytic ellipse math, diamond uses polygon)
+  const intersections = connectable.getLineIntersections(rayStart, rayEnd);
+
+  if (intersections && intersections.length > 0) {
+    // Pick the intersection closest to the other point — this is the
+    // perimeter point that the connector should visually terminate at
+    // (the "entry" side of the shape from the other endpoint's perspective)
+    let bestIntersection = intersections[0];
+    let bestDist = Vec.dist(bestIntersection, other);
+
+    for (let i = 1; i < intersections.length; i++) {
+      const dist = Vec.dist(intersections[i], other);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIntersection = intersections[i];
+      }
+    }
+
+    // The intersection PointLocation already carries an appropriate tangent
+    // from the shape's getLineIntersections (polygon tangent for Rect/Diamond,
+    // ellipse normal-derived tangent for Ellipse), which the connector
+    // routing engine uses for orthogonal/curve path computation.
+    return bestIntersection;
+  }
+
+  // Fallback: use getNearestPoint on shape boundary from the other endpoint
+  const nearest = connectable.getNearestPoint(other);
+  if (nearest) {
+    const relPos = bound.toRelative(nearest);
+    return getConnectableRelativePosition(connectable, relPos);
+  }
+
+  return centerPoint;
+}
 
 export function isConnectorWithLabel(model: GfxModel | GfxLocalElementModel) {
   return model instanceof ConnectorElementModel && model.hasLabel();
@@ -130,7 +272,7 @@ export function isConnectorAndBindingsAllSelected(
   return false;
 }
 
-export function getAnchors(ele: GfxModel) {
+export function getAnchors(ele: GfxModel, includeCenterAnchor = true) {
   const bound = Bound.deserialize(ele.xywh);
   const offset = 10;
   const anchors: { point: PointLocation; coord: IVec }[] = [];
@@ -155,6 +297,17 @@ export function getAnchors(ele: GfxModel) {
       );
       anchors.push({ point: rst[0], coord: bound.toRelative(originPoint) });
     });
+
+  // Add center anchor for eligible shapes (Rect, roundedRect, Ellipse, Diamond, Triangle)
+  if (includeCenterAnchor && isCenterAnchorEligible(ele)) {
+    const centerPoint = getPointFromBoundsWithRotation(
+      { ...bound, rotate },
+      bound.center
+    );
+    const centerPointLocation = new PointLocation(centerPoint);
+    anchors.push({ point: centerPointLocation, coord: [0.5, 0.5] });
+  }
+
   return anchors;
 }
 
@@ -171,8 +324,12 @@ function getConnectableRelativePosition(connectable: GfxModel, position: IVec) {
   return location;
 }
 
-export function getNearestConnectableAnchor(ele: Connectable, point: IVec) {
-  const anchors = getAnchors(ele);
+export function getNearestConnectableAnchor(
+  ele: Connectable,
+  point: IVec,
+  includeCenterAnchor = true
+) {
+  const anchors = getAnchors(ele, includeCenterAnchor);
   return closestPoint(
     anchors.map(a => a.point),
     point
@@ -863,6 +1020,17 @@ export class ConnectionOverlay extends Overlay {
 
   targetBounds: IBound | null = null;
 
+  /**
+   * Checks whether the center anchor toggle is enabled.
+   * Returns true (enabled) by default if no stored value is found.
+   */
+  get centerAnchorEnabled(): boolean {
+    const store = this.gfx.std.getOptional(EditPropsStore);
+    if (!store) return true;
+    const value = store.getStorage('connectorCenterAnchor');
+    return value ?? true;
+  }
+
   constructor(gfx: GfxController) {
     super(gfx);
     this._emphasisColor = this._getEmphasisColor();
@@ -976,7 +1144,7 @@ export class ConnectionOverlay extends Overlay {
       if (!rotateBound.expand(10).isPointInBound(point)) continue;
 
       // then check if closes to anchors
-      const anchors = getAnchors(connectable);
+      const anchors = getAnchors(connectable, this.centerAnchorEnabled);
       const len = anchors.length;
       const pointerViewCoord = context.viewport.toViewCoord(point[0], point[1]);
 
@@ -1258,7 +1426,8 @@ export class ConnectorPathGenerator extends PathGenerator {
 
     if (!startPoint || !endPoint) return [];
 
-    return [startPoint, endPoint];
+    // Adjust center-anchored endpoints to perimeter
+    return this._adjustCenterAnchorEndpoints(connector, startPoint, endPoint);
   }
 
   private _generateConnectorPath(
@@ -1319,6 +1488,14 @@ export class ConnectorPathGenerator extends PathGenerator {
       }
 
       if (!startPoint || !endPoint) return [];
+
+      // Adjust center-anchored endpoints to perimeter before computing
+      // control vectors, so tangent and position are correct
+      [startPoint, endPoint] = this._adjustCenterAnchorEndpoints(
+        connector,
+        startPoint,
+        endPoint
+      );
 
       if (source.id) {
         const startTangentVertical = Vec.rot(startPoint.tangent, -Math.PI / 2);
@@ -1386,12 +1563,96 @@ export class ConnectorPathGenerator extends PathGenerator {
       const eb = Bound.deserialize(end.xywh);
       const startPoint = getNearestConnectableAnchor(start, eb.center);
       const endPoint = getNearestConnectableAnchor(end, sb.center);
-      return (startPoint && endPoint && [startPoint, endPoint]) ?? [];
+      if (!startPoint || !endPoint) return [];
+      const [adjStart, adjEnd] = this._adjustCenterAnchorEndpoints(
+        connector,
+        startPoint,
+        endPoint
+      );
+      return [adjStart, adjEnd];
     } else {
       const endPoint = this._getConnectionPoint(connector, 'target');
       const startPoint = this._getConnectionPoint(connector, 'source');
-      return (startPoint && endPoint && [startPoint, endPoint]) ?? [];
+      if (!startPoint || !endPoint) return [];
+      const [adjStart, adjEnd] = this._adjustCenterAnchorEndpoints(
+        connector,
+        startPoint,
+        endPoint
+      );
+      return [adjStart, adjEnd];
     }
+  }
+
+  /**
+   * Adjusts connector endpoints so that center-anchored endpoints visually
+   * terminate at the shape perimeter rather than at the center.
+   *
+   * For each endpoint, checks if the logical anchor is the center point
+   * [0.5, 0.5] on a center-eligible shape. If so, computes the perimeter
+   * intersection from the opposite endpoint toward the center, and replaces
+   * the endpoint with the perimeter point.
+   */
+  private _adjustCenterAnchorEndpoints(
+    connector: ConnectorElementModel | LocalConnectorElementModel,
+    startPoint: PointLocation,
+    endPoint: PointLocation
+  ): [PointLocation, PointLocation] {
+    const { source, target } = connector;
+    const start = this._getConnectorEndElement(connector, 'source');
+    const end = this._getConnectorEndElement(connector, 'target');
+
+    let adjustedStart = startPoint;
+    let adjustedEnd = endPoint;
+
+    // Check if source is center-anchored
+    if (start && source.id /* && isCenterAnchorEligible(start) */) {
+      const isCenter = source.position
+        ? isCenterAnchorPosition(source.position)
+        : this._isPointAtShapeCenter(start, startPoint);
+      if (isCenter) {
+        adjustedStart = computePerimeterPointForCenterAnchor(
+          start,
+          startPoint,
+          endPoint
+        );
+      }
+    }
+
+    // Check if target is center-anchored
+    if (end && target.id && isCenterAnchorEligible(end)) {
+      const isCenter = target.position
+        ? isCenterAnchorPosition(target.position)
+        : this._isPointAtShapeCenter(end, endPoint);
+      if (isCenter) {
+        adjustedEnd = computePerimeterPointForCenterAnchor(
+          end,
+          endPoint,
+          // Use adjusted start if it was modified, for accurate direction
+          adjustedStart
+        );
+      }
+    }
+
+    return [adjustedStart, adjustedEnd];
+  }
+
+  /**
+   * Checks if a PointLocation is at the center of a shape (for detecting
+   * auto-selected center anchors when no explicit position is set).
+   */
+  private _isPointAtShapeCenter(
+    connectable: GfxModel,
+    point: PointLocation
+  ): boolean {
+    const bound = Bound.deserialize(connectable.xywh);
+    const center = getPointFromBoundsWithRotation(
+      { ...bound, rotate: connectable.rotate },
+      bound.center
+    );
+    return (
+      almostEqual(point[0], center[0], 1) &&
+      almostEqual(point[1], center[1], 1)
+    );
   }
 
   private _getConnectionPoint(
