@@ -4,6 +4,7 @@ export * from './draggable';
 export * from './element-renderer';
 export * from './element-view';
 export * from './overlay';
+export * from './polygon-tool';
 export * from './shape-tool';
 export * from './text';
 export * from './toolbar';

@@ -212,6 +212,50 @@ export const ScribbledRoundedRectangleIcon = html`<svg
   />
 </svg>`;
 
+export const GeneralPolygonIcon = html`<svg
+  width="20"
+  height="20"
+  viewBox="0 0 20 20"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M10 2L18 7.6L14.9 17H5.1L2 7.6L10 2Z"
+    stroke="currentColor"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+    fill="none"
+  />
+</svg>`;
+
+export const ScribbledPolygonIcon = html`<svg
+  width="20"
+  height="20"
+  viewBox="0 0 20 20"
+  fill="currentColor"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M9.7 2.2C9.88 2.09 10.12 2.09 10.3 2.2L18.1 7.7C18.23 7.79 18.31 7.94 18.33 8.1C18.35 8.26 18.3 8.42 18.2 8.54L15.15 17.3C15.09 17.49 14.91 17.62 14.71 17.62H5.29C5.09 17.62 4.91 17.49 4.85 17.3L1.8 8.54C1.7 8.42 1.65 8.26 1.67 8.1C1.69 7.94 1.77 7.79 1.9 7.7L9.7 2.2ZM10 3.25L3.05 8.1L5.8 16.38H14.2L16.95 8.1L10 3.25Z"
+  />
+</svg>`;
+
+export const polygonSvg = html`<svg
+  width="50"
+  height="48"
+  viewBox="0 0 50 48"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M25 0.8L49.2 18.4L39.95 47.2H10.05L0.8 18.4L25 0.8Z"
+    fill="currentColor"
+    stroke="inherit"
+  />
+</svg> `;
+
 export const ellipseSvg = html`<svg
   width="48"
   height="48"

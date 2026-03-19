@@ -6,6 +6,8 @@ import {
   ConnectorMode,
   GroupElementModel,
   type LocalConnectorElementModel,
+  ShapeElementModel,
+  ShapeType,
 } from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { BlockSuiteError } from '@blocksuite/global/exceptions';
@@ -135,6 +137,90 @@ export function getAnchors(ele: GfxModel) {
   const offset = 10;
   const anchors: { point: PointLocation; coord: IVec }[] = [];
   const rotate = ele.rotate;
+
+  // For polygon shapes, generate anchors at each vertex and edge midpoint
+  if (
+    ele instanceof ShapeElementModel &&
+    ele.shapeType === ShapeType.Polygon
+  ) {
+    const verts: number[][] = ele.vertices ?? [
+      [0.5, 0],
+      [1, 0.38],
+      [0.81, 1],
+      [0.19, 1],
+      [0, 0.38],
+    ];
+
+    // Compute the polygon centroid in normalized space for outward normal calc
+    let cx = 0,
+      cy = 0;
+    for (const v of verts) {
+      cx += v[0];
+      cy += v[1];
+    }
+    cx /= verts.length;
+    cy /= verts.length;
+
+    for (let i = 0; i < verts.length; i++) {
+      const curr = verts[i];
+      const next = verts[(i + 1) % verts.length];
+
+      // --- Vertex anchor ---
+      const vertCoord: IVec = [curr[0], curr[1]];
+      const vertAbs: IVec = [
+        bound.x + vertCoord[0] * bound.w,
+        bound.y + vertCoord[1] * bound.h,
+      ];
+      const vertRotated = getPointFromBoundsWithRotation(
+        { ...bound, rotate },
+        vertAbs
+      );
+      // Tangent at vertex: outward direction from centroid through vertex
+      const vOutX = curr[0] - cx;
+      const vOutY = curr[1] - cy;
+      const vOutLen = Math.sqrt(vOutX * vOutX + vOutY * vOutY) || 1;
+      const vertTangent: IVec = [vOutX / vOutLen, vOutY / vOutLen];
+      anchors.push({
+        point: new PointLocation(vertRotated, vertTangent),
+        coord: vertCoord,
+      });
+
+      // --- Edge midpoint anchor ---
+      const midCoord: IVec = [
+        (curr[0] + next[0]) / 2,
+        (curr[1] + next[1]) / 2,
+      ];
+      const midAbs: IVec = [
+        bound.x + midCoord[0] * bound.w,
+        bound.y + midCoord[1] * bound.h,
+      ];
+      const midRotated = getPointFromBoundsWithRotation(
+        { ...bound, rotate },
+        midAbs
+      );
+      // Tangent at edge midpoint: outward normal of the edge
+      // Edge direction (curr → next), then rotate 90° to get normal
+      const edx = (next[0] - curr[0]) * bound.w;
+      const edy = (next[1] - curr[1]) * bound.h;
+      // Perpendicular candidates: (edy, -edx) and (-edy, edx)
+      // Pick the one pointing away from centroid
+      let nx = edy,
+        ny = -edx;
+      const toMidX = midCoord[0] - cx;
+      const toMidY = midCoord[1] - cy;
+      if (nx * toMidX + ny * toMidY < 0) {
+        nx = -nx;
+        ny = -ny;
+      }
+      const nLen = Math.sqrt(nx * nx + ny * ny) || 1;
+      const midTangent: IVec = [nx / nLen, ny / nLen];
+      anchors.push({
+        point: new PointLocation(midRotated, midTangent),
+        coord: midCoord,
+      });
+    }
+    return anchors;
+  }
 
   (
     [
