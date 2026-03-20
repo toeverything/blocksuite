@@ -4,7 +4,8 @@
       "Bash(npx tsc:*)",
       "Bash(npx vitest:*)",
       "Bash(python:*)",
-      "Bash(yarn dev:*)"
+      "Bash(yarn dev:*)",
+      "Bash(git log:*)"
     ]
   }
 }

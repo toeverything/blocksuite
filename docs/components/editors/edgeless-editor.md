@@ -7,7 +7,7 @@ This editor component offers a canvas with infinite logical dimensions, suitable
 ## Features
 
 - All the rich text editing capabilities in the [page editor](./page-editor).
-- `CanvasElement` rendered to HTML5 canvas, including shapes, brushes, connectors, and text.
+- `CanvasElement` rendered to HTML5 canvas, including shapes (rectangles, ellipses, diamonds, triangles, and custom polygons), brushes, connectors, and text.
 - Use of [frames](../blocks/frame-block) to denote canvas areas of any size.
 - Presentation mode achieved by switching between multiple frames in sequence.
 - Nestable group elements.
