@@ -196,6 +196,11 @@ function drawPolygon(
       ? shapeModel.smoothFlags
       : null;
 
+  const controlPoints: ((number[] | null)[] | null) =
+    'controlPoints' in shapeModel && (shapeModel as unknown as Record<string, unknown>).controlPoints
+      ? (shapeModel as unknown as { controlPoints: (number[] | null)[] }).controlPoints
+      : null;
+
   const count = vertices.length;
   if (count === 0) return;
 
@@ -208,13 +213,6 @@ function drawPolygon(
       ctx.lineTo(vertices[i][0] * width, vertices[i][1] * height);
     }
   } else {
-    // Some vertices have Bezier smoothing
-    // For each edge (from vertex i to vertex i+1):
-    // - If vertex i is smooth, the outgoing control point is at 1/3 toward next
-    // - If vertex i+1 is smooth, the incoming control point is at 1/3 toward prev
-    // - If both endpoints are sharp, draw a straight line
-    // - If either endpoint is smooth, draw a cubic Bezier
-
     const abs = (v: number[]): [number, number] => [v[0] * width, v[1] * height];
 
     ctx.moveTo(vertices[0][0] * width, vertices[0][1] * height);
@@ -228,25 +226,23 @@ function drawPolygon(
       const [nx, ny] = abs(vertices[next]);
 
       if (!currSmooth && !nextSmooth) {
-        // Both sharp: straight line
         ctx.lineTo(nx, ny);
       } else {
-        // At least one endpoint is smooth: draw cubic Bezier
-        // Control point near current vertex
         let cp1x: number, cp1y: number;
+        const customCurr = controlPoints?.[i];
         if (currSmooth) {
-          cp1x = cx + (nx - cx) / 3;
-          cp1y = cy + (ny - cy) / 3;
+          cp1x = customCurr ? customCurr[2] * width : cx + (nx - cx) / 3;
+          cp1y = customCurr ? customCurr[3] * height : cy + (ny - cy) / 3;
         } else {
           cp1x = cx;
           cp1y = cy;
         }
 
-        // Control point near next vertex
         let cp2x: number, cp2y: number;
+        const customNext = controlPoints?.[next];
         if (nextSmooth) {
-          cp2x = nx + (cx - nx) / 3;
-          cp2y = ny + (cy - ny) / 3;
+          cp2x = customNext ? customNext[0] * width : nx + (cx - nx) / 3;
+          cp2y = customNext ? customNext[1] * height : ny + (cy - ny) / 3;
         } else {
           cp2x = nx;
           cp2y = ny;

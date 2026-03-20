@@ -100,6 +100,9 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
   /** Index of the vertex whose Bezier control handle is being dragged (-1 = none). */
   activeBezierHandleIndex = -1;
 
+  /** Which handle of the active bezier vertex is being dragged (0=cp1, 1=cp2, -1=none). */
+  activeBezierHandleType: number = -1;
+
   // ── Snap guide state ────────────────────────────────────────────────
 
   /** Horizontal snap guide Y coordinate (null = hidden). */
@@ -282,6 +285,97 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
   }
 
   /**
+   * Test if a model-coordinate point hits a bezier control handle.
+   * Returns { vertexIndex, handleIndex: 0=cp1, 1=cp2 } or null.
+   */
+  hitTestBezierHandle(
+    modelX: number,
+    modelY: number
+  ): { vertexIndex: number; handleIndex: number } | null {
+    const model = this._getPolygonModel();
+    if (!model || !model.vertices || !model.smoothFlags) return null;
+
+    const zoom = this.gfx.viewport.zoom;
+    const hitDist = BEZIER_HANDLE_RADIUS * 2 / zoom;
+
+    for (let i = 0; i < model.vertices.length; i++) {
+      if (!model.smoothFlags[i]) continue;
+      const cp = this.getBezierControlPoints(i);
+      if (!cp) continue;
+
+      // Check cp1
+      const dx1 = modelX - cp.cp1[0];
+      const dy1 = modelY - cp.cp1[1];
+      if (Math.sqrt(dx1 * dx1 + dy1 * dy1) < hitDist) {
+        return { vertexIndex: i, handleIndex: 0 };
+      }
+
+      // Check cp2
+      const dx2 = modelX - cp.cp2[0];
+      const dy2 = modelY - cp.cp2[1];
+      if (Math.sqrt(dx2 * dx2 + dy2 * dy2) < hitDist) {
+        return { vertexIndex: i, handleIndex: 1 };
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Move a bezier control handle to an absolute model position.
+   * Stores the result as normalized coordinates in model.controlPoints.
+   */
+  moveBezierHandle(
+    vertexIndex: number,
+    handleIndex: number,
+    modelX: number,
+    modelY: number
+  ): void {
+    const model = this._getPolygonModel();
+    if (!model || !model.vertices) return;
+
+    const bound = Bound.deserialize(model.xywh);
+    const count = model.vertices.length;
+
+    // Initialize controlPoints array if null
+    let controlPoints: (number[] | null)[] = model.controlPoints
+      ? [...model.controlPoints]
+      : new Array(count).fill(null);
+
+    // Ensure array is the right length
+    while (controlPoints.length < count) controlPoints.push(null);
+
+    // Auto-compute current control points for this vertex if not set
+    if (!controlPoints[vertexIndex]) {
+      const cp = this.getBezierControlPoints(vertexIndex);
+      if (!cp) return;
+      // Store as normalized [cp1x, cp1y, cp2x, cp2y]
+      controlPoints[vertexIndex] = [
+        (cp.cp1[0] - bound.x) / bound.w,
+        (cp.cp1[1] - bound.y) / bound.h,
+        (cp.cp2[0] - bound.x) / bound.w,
+        (cp.cp2[1] - bound.y) / bound.h,
+      ];
+    }
+
+    // Convert absolute position to normalized coordinates
+    const normX = (modelX - bound.x) / bound.w;
+    const normY = (modelY - bound.y) / bound.h;
+
+    // Update the specific handle
+    const entry = [...controlPoints[vertexIndex]!];
+    if (handleIndex === 0) {
+      entry[0] = normX;
+      entry[1] = normY;
+    } else {
+      entry[2] = normX;
+      entry[3] = normY;
+    }
+    controlPoints[vertexIndex] = entry;
+
+    model.controlPoints = controlPoints;
+  }
+
+  /**
    * Insert a new vertex at the midpoint of edge `edgeIndex` (between vertex
    * edgeIndex and edgeIndex+1). Returns the index of the newly inserted vertex.
    */
@@ -309,6 +403,13 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
       model.smoothFlags = flags;
     }
 
+    // Update controlPoints if present
+    if (model.controlPoints) {
+      const cps = [...model.controlPoints];
+      cps.splice(insertIdx, 0, null);
+      model.controlPoints = cps;
+    }
+
     model.vertices = vertices;
     return insertIdx;
   }
@@ -330,6 +431,13 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
       const flags = [...model.smoothFlags];
       flags.splice(vertexIndex, 1);
       model.smoothFlags = flags;
+    }
+
+    // Update controlPoints if present
+    if (model.controlPoints) {
+      const cps = [...model.controlPoints];
+      cps.splice(vertexIndex, 1);
+      model.controlPoints = cps;
     }
 
     // Re-compute bounding box from remaining vertices
@@ -377,8 +485,10 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
     while (flags.length < count) flags.push(false);
     if (flags.length > count) flags = flags.slice(0, count);
 
-    flags[vertexIndex] = !flags[vertexIndex];
+    const wasSmooth = flags[vertexIndex];
+    flags[vertexIndex] = !wasSmooth;
     model.smoothFlags = flags;
+
   }
 
   /**
@@ -404,6 +514,22 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
     if (!model.smoothFlags || !model.smoothFlags[vertexIndex]) return null;
 
     const bound = Bound.deserialize(model.xywh);
+
+    // Check for custom control points first
+    const custom = model.controlPoints?.[vertexIndex];
+    if (custom) {
+      const cp1: [number, number] = [
+        custom[0] * bound.w + bound.x,
+        custom[1] * bound.h + bound.y,
+      ];
+      const cp2: [number, number] = [
+        custom[2] * bound.w + bound.x,
+        custom[3] * bound.h + bound.y,
+      ];
+      return { cp1, cp2 };
+    }
+
+    // Fall back to auto-computation
     const vertices = model.vertices;
     const count = vertices.length;
 
@@ -411,8 +537,6 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
     const curr = this._toAbsolute(vertices[vertexIndex], bound);
     const next = this._toAbsolute(vertices[(vertexIndex + 1) % count], bound);
 
-    // Compute control points as 1/3 of the distance along the tangent
-    // that bisects the angle formed by prev-curr-next
     const dx1 = prev[0] - curr[0];
     const dy1 = prev[1] - curr[1];
     const dx2 = next[0] - curr[0];
@@ -421,7 +545,6 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
     const len1 = Math.sqrt(dx1 * dx1 + dy1 * dy1) || 1;
     const len2 = Math.sqrt(dx2 * dx2 + dy2 * dy2) || 1;
 
-    // Control points at 1/3 of the edge length toward the neighbours
     const cpDist1 = len1 / 3;
     const cpDist2 = len2 / 3;
 

@@ -14,11 +14,7 @@ import {
   GfxElementModelView,
   GfxViewInteractionExtension,
 } from '@blocksuite/std/gfx';
-import type {
-  DragEndContext,
-  DragMoveContext,
-  DragStartContext,
-} from '@blocksuite/std/gfx';
+import type { PointerEventState } from '@blocksuite/std';
 
 import { normalizeShapeBound } from './element-renderer';
 import { PolygonVertexEditingOverlay } from './overlay/polygon-vertex-editing-overlay';
@@ -44,141 +40,22 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
   override onDestroyed(): void {
     this._escapeKeyDisposer?.();
     this._escapeKeyDisposer = null;
+    for (const disposer of this._dragHandlerDisposers) {
+      disposer();
+    }
+    this._dragHandlerDisposers = [];
     this._removeVertexEditingOverlay();
     super.onDestroyed();
-  }
-
-  /**
-   * Override framework drag handlers to wire both polygon-body drag-to-move
-   * and vertex drag through the same pipeline.
-   *
-   * Design rationale
-   * ────────────────
-   * `GfxViewEventManager.dispatch('dragstart')` returns `true` whenever the
-   * view has *any* 'dragstart' listener registered – regardless of whether
-   * the listener actually does anything.  When it returns `true`, DefaultTool
-   * sees `handledByView = true` and skips the default drag-to-move path.
-   *
-   * The old approach registered a 'dragstart' handler in _enterVertexEditingMode
-   * and removed it in _exitVertexEditingMode.  That worked for the non-editing
-   * case but had a bug in editing mode: clicking on the polygon BODY (not a
-   * vertex) still had handledByView=true so the polygon could not be moved
-   * while vertex editing was active.
-   *
-   * The new approach:
-   *   1. A 'pointerdown' handler (always registered for polygons) records
-   *      which vertex was pressed → `_pendingVertexIndex`.
-   *   2. NO 'dragstart' listener is ever registered on this view.
-   *      ⇒ dispatch('dragstart') always returns false
-   *      ⇒ handledByView is always false
-   *      ⇒ DefaultTool always proceeds to call handleElementMove()
-   *      ⇒ InteractivityManager eventually calls view.onDragStart/Move/End
-   *   3. Here in onDragStart we inspect _pendingVertexIndex and branch:
-   *        • ≥ 0 AND overlay.isEditing  → vertex drag  (suppress super)
-   *        • otherwise                  → element move (call super)
-   *
-   * This guarantees that:
-   *   • Clicking anywhere inside the polygon body (PIP-hit via includesPoint)
-   *     always initiates a normal element move – both in normal mode and in
-   *     vertex-editing mode.
-   *   • Clicking a vertex handle in editing mode initiates a vertex drag.
-   */
-  override onDragStart(ctx: DragStartContext): void {
-    // If in vertex editing mode and a vertex was pressed, start vertex drag.
-    if (
-      this._vertexEditingOverlay?.isEditing &&
-      this._pendingVertexIndex >= 0
-    ) {
-      const verts = this.model.vertices;
-      if (verts && this._pendingVertexIndex < verts.length) {
-        this._isDraggingVertex = true;
-        this._vertexEditingOverlay.activeVertexIndex = this._pendingVertexIndex;
-
-        // Stash so intermediate vertex moves do not flood the CRDT.
-        this.model.stash('xywh');
-        this.model.stash('vertices');
-
-        // Record the vertex's absolute model position so that onDragMove can
-        // convert the framework's cumulative dx/dy back to an absolute
-        // target coordinate for moveVertex().
-        const bound = Bound.deserialize(this.model.xywh);
-        const v = verts[this._pendingVertexIndex];
-        this._vertexDragStartModelCoord = [
-          bound.x + v[0] * bound.w,
-          bound.y + v[1] * bound.h,
-        ];
-
-        this._surfaceComponent?.refresh();
-        return; // suppress default element-move stash
-      }
-    }
-
-    // Default: let the framework move the whole element.
-    // This runs for:
-    //   • Non-editing mode – click anywhere in polygon body (PIP tested)
-    //   • Editing mode     – click on body but not on a vertex handle
-    super.onDragStart(ctx);
-  }
-
-  override onDragMove(ctx: DragMoveContext): void {
-    if (this._isDraggingVertex) {
-      if (this._vertexEditingOverlay && this._vertexDragStartModelCoord) {
-        // Convert the cumulative delta provided by the framework into the
-        // absolute model-space target position for the vertex.
-        const targetX = this._vertexDragStartModelCoord[0] + ctx.dx;
-        const targetY = this._vertexDragStartModelCoord[1] + ctx.dy;
-        this._vertexEditingOverlay.moveVertex(
-          this._vertexEditingOverlay.activeVertexIndex,
-          targetX,
-          targetY
-        );
-
-        // Sub-AC 5b: Recalculate connector paths in real-time as polygon
-        // vertices are dragged.
-        //
-        // Two complementary mechanisms keep connectors in sync:
-        //
-        // 1. Implicit path (already in place):
-        //    moveVertex() updates stashed `xywh` and `vertices` → the stash
-        //    setter fires `surface.elementUpdated` synchronously → the
-        //    connector-watcher reacts and schedules `queueMicrotask` →
-        //    microtask runs before the next RAF → canvas renders with
-        //    up-to-date connector paths.
-        //
-        // 2. Explicit path (added here for determinism):
-        //    Directly call ConnectorPathGenerator.updatePath() for each
-        //    connector attached to this polygon.  This is synchronous, so
-        //    connector paths are guaranteed to be current before refresh()
-        //    even if the microtask scheduling is delayed for any reason.
-        //    The connector-watcher's subsequent microtask is a harmless
-        //    no-op because it will compute the same path.
-        this._syncConnectorPaths();
-
-        this._surfaceComponent?.refresh();
-      }
-      return;
-    }
-
-    super.onDragMove(ctx);
   }
 
   /**
    * Synchronously recalculate and apply the path for every connector
    * attached to this polygon shape.
    *
-   * Called from `onDragMove` during polygon vertex drag so that connector
-   * routing stays visually correct on every drag frame (Sub-AC 5b).
-   *
-   * Uses `ConnectorPathGenerator.updatePath()` — the same function used by
-   * the connector-watcher middleware — so routing logic is consistent.
-   *
-   * The cast to `SurfaceBlockModel` (affine) is required because
-   * `GfxPrimitiveElementModel.surface` is typed as the framework base class
-   * which does not declare `getConnectors()`.  At runtime this is always the
-   * affine SurfaceBlockModel that does have the method.
+   * Called during polygon vertex drag so that connector routing stays
+   * visually correct on every drag frame.
    */
   private _syncConnectorPaths(): void {
-    // Cast to the affine SurfaceBlockModel which provides getConnectors().
     const surface = this.model.surface as unknown as SurfaceBlockModel;
     const connectors = surface.getConnectors(
       this.model.id
@@ -195,27 +72,6 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
     }
   }
 
-  override onDragEnd(ctx: DragEndContext): void {
-    if (this._isDraggingVertex) {
-      this._isDraggingVertex = false;
-      this._vertexDragStartModelCoord = null;
-      this._pendingVertexIndex = -1;
-
-      if (this._vertexEditingOverlay) {
-        this._vertexEditingOverlay.activeVertexIndex = -1;
-        this._vertexEditingOverlay.clearSnapGuides();
-      }
-
-      // Commit the final vertex / bounding-box state to the CRDT.
-      this.model.pop('xywh');
-      this.model.pop('vertices');
-      this._surfaceComponent?.refresh();
-      return;
-    }
-
-    super.onDragEnd(ctx);
-  }
-
   private _initDblClickToEdit(): void {
     this.on('dblclick', () => {
       const edgeless = this.std.view.getBlock(this.std.store.root!.id);
@@ -225,12 +81,6 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
         !this.model.isLocked() &&
         this.model instanceof ShapeElementModel
       ) {
-        // All shapes (including polygon) open the text editor on double-click.
-        // Vertex editing for polygons is accessed via the toolbar "Edit vertices"
-        // button instead.
-        //
-        // Text-editing mode and vertex-editing mode are mutually exclusive:
-        // if vertex editing is active, exit it before opening the text editor.
         if (this._vertexEditingOverlay?.isEditing) {
           this._exitVertexEditingMode();
         }
@@ -245,6 +95,11 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
    */
   private _isDraggingVertex = false;
 
+  /** Bezier handle being dragged (null = none). */
+  private _pendingBezierHandle: { vertexIndex: number; handleIndex: number } | null = null;
+  private _isDraggingBezierHandle = false;
+  private _bezierDragStartModelCoord: [number, number] | null = null;
+
   /**
    * The vertex index pressed on the last pointerdown (-1 = none).
    * Examined in onDragStart to determine whether to enter vertex-drag mode.
@@ -253,14 +108,22 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
   private _pendingVertexIndex = -1;
 
   /**
+   * Pointer model-space position at drag start.
+   * Used to compute model-space deltas from PointerEventState screen coords.
+   */
+  private _pointerStartModelCoord: [number, number] | null = null;
+
+  /**
    * Absolute model-space position of the dragged vertex at drag start.
-   * Lets onDragMove convert the framework's cumulative (dx, dy) deltas into
-   * absolute target coordinates for moveVertex().
+   * Combined with pointer delta to compute absolute target for moveVertex().
    */
   private _vertexDragStartModelCoord: [number, number] | null = null;
 
   /** Disposer for the Escape/Delete/B key listener used in vertex editing mode. */
   private _escapeKeyDisposer: (() => void) | null = null;
+
+  /** Disposers for drag event handlers registered during vertex editing mode. */
+  private _dragHandlerDisposers: (() => void)[] = [];
 
   /**
    * Enter polygon vertex editing mode: set overlay to editing, update
@@ -307,7 +170,9 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
           if (this.model.smoothFlags) {
             this.model.stash('smoothFlags');
           }
+          this.model.stash('controlPoints');
           const deleted = this._vertexEditingOverlay.deleteVertex(idx);
+          this.model.pop('controlPoints');
           this.model.pop('xywh');
           this.model.pop('vertices');
           if (this.model.smoothFlags) {
@@ -337,7 +202,9 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
           // so that elementUpdated is emitted with props['smoothFlags'] in all
           // cases (null → array, array → modified array).
           this.model.stash('smoothFlags');
+          this.model.stash('controlPoints');
           this._vertexEditingOverlay.toggleVertexSmooth(idx);
+          this.model.pop('controlPoints');
           this.model.pop('smoothFlags');
           this._surfaceComponent?.refresh();
         }
@@ -351,12 +218,135 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
       });
     };
 
-    // Vertex drag is now handled entirely through onDragStart/Move/End via
-    // the _pendingVertexIndex set in the 'pointerdown' handler registered by
-    // _initPolygonVertexEditing().  No 'dragstart'/'dragmove'/'dragend'
-    // handlers are registered here so that dispatch('dragstart') always
-    // returns false, keeping handledByView=false and letting DefaultTool
-    // invoke handleElementMove → view.onDragStart/Move/End for all drags.
+    // ── Drag handlers for vertex/bezier editing ───────────────────────────
+    // Registered handlers receive PointerEventState and are dispatched by
+    // GfxViewEventManager BEFORE DefaultTool checks selection.editing.
+    // This means they work even when editing=true (which causes DefaultTool
+    // to skip handleElementMove and the lifecycle onDragStart/Move/End).
+    //
+    // When editing mode exits, these are unregistered so dispatch('dragstart')
+    // returns false → DefaultTool proceeds normally → element move works.
+
+    const dragstartDisposer = this.on('dragstart', (e: PointerEventState) => {
+      // Vertex drag
+      if (this._pendingVertexIndex >= 0) {
+        const verts = this.model.vertices;
+        if (verts && this._pendingVertexIndex < verts.length) {
+          this._isDraggingVertex = true;
+          this._vertexEditingOverlay!.activeVertexIndex = this._pendingVertexIndex;
+
+          this.model.stash('xywh');
+          this.model.stash('vertices');
+          this.model.stash('controlPoints');
+
+          // Record pointer start in model space for delta computation
+          const [startMX, startMY] = this.gfx.viewport.toModelCoord(e.x, e.y);
+          this._pointerStartModelCoord = [startMX, startMY];
+
+          // Record vertex absolute model position
+          const bound = Bound.deserialize(this.model.xywh);
+          const v = verts[this._pendingVertexIndex];
+          this._vertexDragStartModelCoord = [
+            bound.x + v[0] * bound.w,
+            bound.y + v[1] * bound.h,
+          ];
+
+          this._surfaceComponent?.refresh();
+          return;
+        }
+      }
+
+      // Bezier handle drag
+      if (this._pendingBezierHandle) {
+        this._isDraggingBezierHandle = true;
+        this._vertexEditingOverlay!.activeBezierHandleIndex = this._pendingBezierHandle.vertexIndex;
+        this._vertexEditingOverlay!.activeBezierHandleType = this._pendingBezierHandle.handleIndex;
+
+        this.model.stash('xywh');
+        this.model.stash('controlPoints');
+
+        const [startMX, startMY] = this.gfx.viewport.toModelCoord(e.x, e.y);
+        this._pointerStartModelCoord = [startMX, startMY];
+
+        const cp = this._vertexEditingOverlay!.getBezierControlPoints(this._pendingBezierHandle.vertexIndex);
+        if (cp) {
+          const pt = this._pendingBezierHandle.handleIndex === 0 ? cp.cp1 : cp.cp2;
+          this._bezierDragStartModelCoord = pt;
+        }
+
+        this._surfaceComponent?.refresh();
+      }
+    });
+
+    const dragmoveDisposer = this.on('dragmove', (e: PointerEventState) => {
+      if (!this._pointerStartModelCoord) return;
+
+      const [curMX, curMY] = this.gfx.viewport.toModelCoord(e.x, e.y);
+      const dx = curMX - this._pointerStartModelCoord[0];
+      const dy = curMY - this._pointerStartModelCoord[1];
+
+      // Bezier handle drag
+      if (this._isDraggingBezierHandle && this._pendingBezierHandle && this._bezierDragStartModelCoord) {
+        this._vertexEditingOverlay!.moveBezierHandle(
+          this._pendingBezierHandle.vertexIndex,
+          this._pendingBezierHandle.handleIndex,
+          this._bezierDragStartModelCoord[0] + dx,
+          this._bezierDragStartModelCoord[1] + dy
+        );
+        this._syncConnectorPaths();
+        this._surfaceComponent?.refresh();
+        return;
+      }
+
+      // Vertex drag
+      if (this._isDraggingVertex && this._vertexDragStartModelCoord) {
+        this._vertexEditingOverlay!.moveVertex(
+          this._vertexEditingOverlay!.activeVertexIndex,
+          this._vertexDragStartModelCoord[0] + dx,
+          this._vertexDragStartModelCoord[1] + dy
+        );
+        this._syncConnectorPaths();
+        this._surfaceComponent?.refresh();
+      }
+    });
+
+    const dragendDisposer = this.on('dragend', (_e: PointerEventState) => {
+      // Bezier handle drag end
+      if (this._isDraggingBezierHandle) {
+        this._isDraggingBezierHandle = false;
+        this._bezierDragStartModelCoord = null;
+        this._pointerStartModelCoord = null;
+        this._pendingBezierHandle = null;
+        if (this._vertexEditingOverlay) {
+          this._vertexEditingOverlay.activeBezierHandleIndex = -1;
+          this._vertexEditingOverlay.activeBezierHandleType = -1;
+        }
+        this.model.pop('controlPoints');
+        this.model.pop('xywh');
+        this._surfaceComponent?.refresh();
+        return;
+      }
+
+      // Vertex drag end
+      if (this._isDraggingVertex) {
+        this._isDraggingVertex = false;
+        this._vertexDragStartModelCoord = null;
+        this._pointerStartModelCoord = null;
+        this._pendingVertexIndex = -1;
+
+        if (this._vertexEditingOverlay) {
+          this._vertexEditingOverlay.activeVertexIndex = -1;
+          this._vertexEditingOverlay.clearSnapGuides();
+        }
+
+        this.model.pop('xywh');
+        this.model.pop('vertices');
+        this.model.pop('controlPoints');
+        this._surfaceComponent?.refresh();
+      }
+    });
+
+    this._dragHandlerDisposers = [dragstartDisposer, dragmoveDisposer, dragendDisposer];
   }
 
   /**
@@ -382,10 +372,23 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
     this._escapeKeyDisposer?.();
     this._escapeKeyDisposer = null;
 
+    // Unregister drag handlers so dispatch('dragstart') returns false
+    // and DefaultTool proceeds with normal element move.
+    for (const disposer of this._dragHandlerDisposers) {
+      disposer();
+    }
+    this._dragHandlerDisposers = [];
+
     // Reset any pending or active vertex drag state.
     this._pendingVertexIndex = -1;
     this._isDraggingVertex = false;
     this._vertexDragStartModelCoord = null;
+    this._pointerStartModelCoord = null;
+
+    // Reset bezier handle drag state.
+    this._pendingBezierHandle = null;
+    this._isDraggingBezierHandle = false;
+    this._bezierDragStartModelCoord = null;
   }
 
   /**
@@ -415,15 +418,9 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
     );
 
     // ── Vertex press tracking ─────────────────────────────────────────────
-    // Record which vertex (if any) the pointer pressed on.  onDragStart reads
+    // Record which vertex (if any) the pointer pressed on.  The registered
+    // dragstart handler (added in _enterVertexEditingMode) reads
     // _pendingVertexIndex to decide whether to enter vertex-drag mode.
-    //
-    // We do NOT use a 'dragstart' handler for this because registering one
-    // would cause GfxViewEventManager.dispatch('dragstart') to return true,
-    // making DefaultTool see handledByView=true and skip handleElementMove
-    // entirely – which would break body drag-to-move.  Using 'pointerdown'
-    // avoids that: pointerdown dispatch does not affect the handledByView
-    // flag checked by DefaultTool.dragStart().
     this.on('pointerdown', (e) => {
       if (!this._vertexEditingOverlay?.isEditing) {
         // Outside editing mode no vertex drag is possible.
@@ -434,6 +431,14 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
       const [mx, my] = this.gfx.viewport.toModelCoord(e.x, e.y);
       this._pendingVertexIndex =
         this._vertexEditingOverlay.hitTestVertex(mx, my);
+
+      // If no vertex hit, check bezier handle hit
+      if (this._pendingVertexIndex < 0) {
+        this._pendingBezierHandle =
+          this._vertexEditingOverlay.hitTestBezierHandle(mx, my);
+      } else {
+        this._pendingBezierHandle = null;
+      }
     });
 
     // Listen for pointer move to update hover state on the overlay
@@ -489,7 +494,9 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
         this.model.stash('xywh');
         this.model.stash('vertices');
         this.model.stash('smoothFlags');
+        this.model.stash('controlPoints');
         const newIdx = this._vertexEditingOverlay.insertVertexAtMidpoint(midIdx);
+        this.model.pop('controlPoints');
         this.model.pop('xywh');
         this.model.pop('vertices');
         this.model.pop('smoothFlags');
@@ -529,11 +536,16 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
     this._surfaceComponent?.renderer.removeOverlay(this._vertexEditingOverlay);
     this._vertexEditingOverlay = null;
 
-    // Reset vertex drag state in case the overlay is removed during an
-    // active drag (e.g. element deselected externally while dragging).
+    // Clean up drag handlers and reset drag state in case the overlay is
+    // removed during an active drag (e.g. element deselected externally).
+    for (const disposer of this._dragHandlerDisposers) {
+      disposer();
+    }
+    this._dragHandlerDisposers = [];
     this._pendingVertexIndex = -1;
     this._isDraggingVertex = false;
     this._vertexDragStartModelCoord = null;
+    this._pointerStartModelCoord = null;
 
     this._surfaceComponent?.renderer.refresh();
   }
@@ -556,6 +568,22 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
 
 export const ShapeViewInteraction =
   GfxViewInteractionExtension<ShapeElementView>(ShapeElementView.type, {
+    handleSelection: ({ gfx, view }) => {
+      return {
+        onSelect(context) {
+          // When polygon vertex editing is active, preserve the editing flag
+          // so that the bounding-box / resize handles stay hidden.
+          if (view.vertexEditingOverlay?.isEditing) {
+            gfx.selection.set({
+              elements: [context.model.id],
+              editing: true,
+            });
+            return;
+          }
+          context.default(context);
+        },
+      };
+    },
     handleResize: () => {
       return {
         onResizeMove({ newBound, model }) {

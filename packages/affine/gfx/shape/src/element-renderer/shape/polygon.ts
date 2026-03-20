@@ -68,12 +68,14 @@ export function polygon(
         ? model.smoothFlags
         : null;
 
+    const controlPoints: ((number[] | null)[] | null) =
+      'controlPoints' in model && (model as unknown as Record<string, unknown>).controlPoints
+        ? (model as unknown as { controlPoints: (number[] | null)[] }).controlPoints
+        : null;
+
     const hasBezier = smoothFlags && smoothFlags.some(f => f);
 
     if (hasBezier) {
-      // For Bezier polygons with rough.js, build the path manually
-      // since rough.js polygon() only supports straight lines.
-      // We use rough.path() with an SVG path string.
       const count = absPoints.length;
       let pathD = `M ${absPoints[0][0]} ${absPoints[0][1]} `;
       for (let i = 0; i < count; i++) {
@@ -88,17 +90,19 @@ export function polygon(
           pathD += `L ${nx} ${ny} `;
         } else {
           let cp1x: number, cp1y: number;
+          const customCurr = controlPoints?.[i];
           if (currSmooth) {
-            cp1x = cx + (nx - cx) / 3;
-            cp1y = cy + (ny - cy) / 3;
+            cp1x = customCurr ? customCurr[2] * renderWidth : cx + (nx - cx) / 3;
+            cp1y = customCurr ? customCurr[3] * renderHeight : cy + (ny - cy) / 3;
           } else {
             cp1x = cx;
             cp1y = cy;
           }
           let cp2x: number, cp2y: number;
+          const customNext = controlPoints?.[next];
           if (nextSmooth) {
-            cp2x = nx + (cx - nx) / 3;
-            cp2y = ny + (cy - ny) / 3;
+            cp2x = customNext ? customNext[0] * renderWidth : nx + (cx - nx) / 3;
+            cp2y = customNext ? customNext[1] * renderHeight : ny + (cy - ny) / 3;
           } else {
             cp2x = nx;
             cp2y = ny;

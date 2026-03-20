@@ -64,6 +64,15 @@ export type ShapeProps = BaseElementProps & {
    */
   smoothFlags?: boolean[] | null;
 
+  /**
+   * Optional custom Bezier control points per vertex (normalized [0-1] coords).
+   * Each entry is [cp1x, cp1y, cp2x, cp2y] or null (auto-compute).
+   * cp1 = incoming control point (toward previous vertex direction)
+   * cp2 = outgoing control point (toward next vertex direction)
+   * null array = all auto-computed.
+   */
+  controlPoints?: (number[] | null)[] | null;
+
   text?: Y.Text;
   textHorizontalAlign?: TextAlign;
   textVerticalAlign?: TextVerticalAlign;
@@ -228,6 +237,14 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
   @field()
   accessor smoothFlags: boolean[] | null = null;
 
+  /**
+   * Optional custom Bezier control points per vertex (normalized [0-1] coords).
+   * Each entry is [cp1x, cp1y, cp2x, cp2y] or null (auto-compute).
+   * null array = all auto-computed.
+   */
+  @field()
+  accessor controlPoints: (number[] | null)[] | null = null;
+
   @field()
   accessor xywh: SerializedXYWH = '[0,0,100,100]';
 }
@@ -313,4 +330,7 @@ export class LocalShapeElementModel extends GfxLocalElementModel {
 
   @prop()
   accessor smoothFlags: boolean[] | null = null;
+
+  @prop()
+  accessor controlPoints: (number[] | null)[] | null = null;
 }
