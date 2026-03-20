@@ -151,19 +151,20 @@ export function getAnchors(ele: GfxModel) {
       [0, 0.38],
     ];
 
-    // Compute the polygon centroid in normalized space for outward normal calc
-    let cx = 0,
-      cy = 0;
-    for (const v of verts) {
-      cx += v[0];
-      cy += v[1];
-    }
-    cx /= verts.length;
-    cy /= verts.length;
-
     for (let i = 0; i < verts.length; i++) {
       const curr = verts[i];
       const next = verts[(i + 1) % verts.length];
+
+      // CW edge direction in absolute space, with element rotation applied.
+      // This matches the convention used by linePolygonIntersects / polygonGetPointTangent:
+      // Vec.rot(CW_edge_direction, -π/2) yields the outward normal.
+      const edx = (next[0] - curr[0]) * bound.w;
+      const edy = (next[1] - curr[1]) * bound.h;
+      const edLen = Math.sqrt(edx * edx + edy * edy) || 1;
+      const edgeTangent: IVec = Vec.rot(
+        [edx / edLen, edy / edLen],
+        toRadian(rotate)
+      );
 
       // --- Vertex anchor ---
       const vertCoord: IVec = [curr[0], curr[1]];
@@ -175,13 +176,8 @@ export function getAnchors(ele: GfxModel) {
         { ...bound, rotate },
         vertAbs
       );
-      // Tangent at vertex: outward direction from centroid through vertex
-      const vOutX = curr[0] - cx;
-      const vOutY = curr[1] - cy;
-      const vOutLen = Math.sqrt(vOutX * vOutX + vOutY * vOutY) || 1;
-      const vertTangent: IVec = [vOutX / vOutLen, vOutY / vOutLen];
       anchors.push({
-        point: new PointLocation(vertRotated, vertTangent),
+        point: new PointLocation(vertRotated, edgeTangent),
         coord: vertCoord,
       });
 
@@ -198,24 +194,8 @@ export function getAnchors(ele: GfxModel) {
         { ...bound, rotate },
         midAbs
       );
-      // Tangent at edge midpoint: outward normal of the edge
-      // Edge direction (curr → next), then rotate 90° to get normal
-      const edx = (next[0] - curr[0]) * bound.w;
-      const edy = (next[1] - curr[1]) * bound.h;
-      // Perpendicular candidates: (edy, -edx) and (-edy, edx)
-      // Pick the one pointing away from centroid
-      let nx = edy,
-        ny = -edx;
-      const toMidX = midCoord[0] - cx;
-      const toMidY = midCoord[1] - cy;
-      if (nx * toMidX + ny * toMidY < 0) {
-        nx = -nx;
-        ny = -ny;
-      }
-      const nLen = Math.sqrt(nx * nx + ny * ny) || 1;
-      const midTangent: IVec = [nx / nLen, ny / nLen];
       anchors.push({
-        point: new PointLocation(midRotated, midTangent),
+        point: new PointLocation(midRotated, edgeTangent),
         coord: midCoord,
       });
     }

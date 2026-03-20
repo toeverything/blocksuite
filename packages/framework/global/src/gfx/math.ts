@@ -93,6 +93,34 @@ export function polygonNearestPoint(points: IVec[], point: IVec) {
   return rst;
 }
 
+export function polygonNearestPointAndTangent(
+  points: IVec[],
+  point: IVec
+): { point: IVec; tangent: IVec } {
+  const len = points.length;
+  if (len < 2) throw new Error('Polygon must have at least 2 points');
+
+  let rst: IVec = points[0];
+  let dis = Vec.dist(points[0], point);
+  let edgeIdx = 0;
+
+  for (let i = 0; i < len; i++) {
+    const p = points[i];
+    const p2 = points[(i + 1) % len];
+    const temp = Vec.nearestPointOnLineSegment(p, p2, point, true);
+    const curDis = Vec.dist(temp, point);
+    if (curDis < dis) {
+      dis = curDis;
+      rst = temp;
+      edgeIdx = i;
+    }
+  }
+
+  const p = points[edgeIdx];
+  const p2 = points[(edgeIdx + 1) % len];
+  return { point: rst, tangent: Vec.normalize(Vec.sub(p2, p)) };
+}
+
 export function polygonPointDistance(points: IVec[], point: IVec) {
   const nearest = polygonNearestPoint(points, point);
   return Vec.dist(nearest, point);

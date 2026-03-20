@@ -6,9 +6,10 @@ import {
   pointInPolygon,
   PointLocation,
   pointOnPolygonStoke,
-  polygonGetPointTangent,
   polygonNearestPoint,
+  polygonNearestPointAndTangent,
   rotatePoints,
+  Vec,
 } from '@blocksuite/global/gfx';
 import type { PointTestOptions } from '@blocksuite/std/gfx';
 import type { ShapeElementModel } from '../shape.js';
@@ -158,17 +159,22 @@ export const polygon = {
 
   getRelativePointLocation(position: IVec, element: ShapeElementModel) {
     const bound = Bound.deserialize(element.xywh);
-    const point = bound.getRelativePoint(position);
     const verts = element.vertices ?? DEFAULT_POLYGON_VERTICES;
-    let points: IVec[] = verts.map(v => [
+    const points: IVec[] = verts.map(v => [
       bound.x + v[0] * bound.w,
       bound.y + v[1] * bound.h,
     ]);
-    points.push(point);
 
-    points = rotatePoints(points, bound.center, element.rotate);
-    const rotatePoint = points.pop() as IVec;
-    const tangent = polygonGetPointTangent(points, rotatePoint);
-    return new PointLocation(rotatePoint, tangent);
+    const boxPoint = bound.getRelativePoint(position);
+    const { point: nearest, tangent } = polygonNearestPointAndTangent(points, boxPoint);
+
+    const rotated = rotatePoints([nearest, ...points], bound.center, element.rotate);
+    const rotatePoint = rotated[0];
+    // Rotate the tangent by the element's rotation angle
+    const rotatedTangent = element.rotate
+      ? Vec.rot(tangent, (element.rotate * Math.PI) / 180)
+      : tangent;
+
+    return new PointLocation(rotatePoint, rotatedTangent);
   },
 };
