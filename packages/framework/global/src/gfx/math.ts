@@ -340,16 +340,38 @@ export function pointInEllipse(
   return (tdx * tdx) / (rx * rx) + (tdy * tdy) / (ry * ry) <= 1;
 }
 
+/**
+ * Tests whether a point `p` is inside a polygon defined by `points` using the
+ * **winding-number algorithm**.
+ *
+ * The winding number counts how many times the polygon boundary winds around
+ * the test point.  A non-zero winding number means the point is inside.
+ *
+ * Key advantages over a simple bounding-box (AABB) check or ray-casting:
+ * - **Concave polygons**: correctly reports points inside a concave "notch" as
+ *   outside, and all points in the true interior as inside.
+ * - **No degenerate ray issues**: the winding-number approach handles
+ *   horizontal edges and vertices that lie on the test ray without special
+ *   casing.
+ * - Used by `polygon.includesPoint` to enable accurate drag-to-move
+ *   hit-testing that works anywhere inside the visible polygon body.
+ *
+ * @param p      - The point to test [x, y].
+ * @param points - Ordered array of polygon vertex positions [x, y][].
+ * @returns `true` if `p` is strictly inside the polygon, `false` otherwise.
+ */
 export function pointInPolygon(p: IVec, points: IVec[]): boolean {
   let wn = 0; // winding number
 
   points.forEach((a, i) => {
     const b = points[(i + 1) % points.length];
     if (a[1] <= p[1]) {
+      // Upward crossing: edge goes from below/on to above the ray
       if (b[1] > p[1] && Vec.cross(a, b, p) > 0) {
         wn += 1;
       }
     } else if (b[1] <= p[1] && Vec.cross(a, b, p) < 0) {
+      // Downward crossing: edge goes from above to below/on the ray
       wn -= 1;
     }
   });

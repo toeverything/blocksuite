@@ -1,7 +1,6 @@
 import type { IBound, IVec } from '@blocksuite/global/gfx';
 import {
   Bound,
-  getCenterAreaBounds,
   getPointsFromBoundWithRotation,
   linePolygonIntersects,
   pointInPolygon,
@@ -12,8 +11,6 @@ import {
   rotatePoints,
 } from '@blocksuite/global/gfx';
 import type { PointTestOptions } from '@blocksuite/std/gfx';
-
-import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts/index.js';
 import type { ShapeElementModel } from '../shape.js';
 
 /**
@@ -83,6 +80,33 @@ export const polygon = {
     ctx.restore();
   },
 
+  /**
+   * Determines whether the given model-space point `(x, y)` is considered
+   * a "hit" on this polygon shape.
+   *
+   * Hit-testing is performed in two passes:
+   *
+   * 1. **Stroke pass** – `pointOnPolygonStoke` checks whether the point lies
+   *    within `hitThreshold / zoom` model units of any polygon edge.  This
+   *    enables selecting a polygon by clicking on its visible outline.
+   *
+   * 2. **Interior pass** – `pointInPolygon` uses the **winding-number
+   *    algorithm** to decide whether the point falls inside the filled area.
+   *    Unlike a bounding-box check, the winding-number algorithm correctly
+   *    classifies points in the concave "notches" of non-convex polygons as
+   *    outside, and all points inside the true polygon boundary as inside.
+   *    This is what makes drag-to-move work from anywhere in the visible
+   *    polygon body regardless of the shape's convexity.
+   *
+   * Rotation is handled transparently: `getPointsFromBoundWithRotation`
+   * returns the polygon's absolute vertex positions already transformed by
+   * the element's `rotate` angle, so both `x`/`y` and `points` are expressed
+   * in the same (model) coordinate space.
+   *
+   * Note: unlike `rect` / `ellipse` which skip the interior check for
+   * transparent/unfilled shapes, polygon always tests the interior — a
+   * freeform polygon is always interactable regardless of fill settings.
+   */
   includesPoint(
     this: ShapeElementModel,
     x: number,
@@ -91,8 +115,12 @@ export const polygon = {
   ) {
     const point: IVec = [x, y];
     const pointsFn = getPolygonVertices(this);
+    // Apply rotation transformation so vertices are in the same model-space
+    // coordinate system as the incoming (x, y) hit-test point.
     const points = getPointsFromBoundWithRotation(this, pointsFn);
 
+    // Pass 1: stroke hit-test (scaled by zoom so the threshold is constant
+    // in screen pixels regardless of the current viewport zoom level).
     let hit = pointOnPolygonStoke(
       point,
       points,
@@ -100,32 +128,11 @@ export const polygon = {
     );
 
     if (!hit) {
-      if (!options.ignoreTransparent || this.filled) {
-        hit = pointInPolygon([x, y], points);
-      } else {
-        // If shape is not filled or transparent
-        const text = this.text;
-        if (!text || !text.length) {
-          // Check the center area of the shape
-          const centralBounds = getCenterAreaBounds(
-            this,
-            DEFAULT_CENTRAL_AREA_RATIO
-          );
-          const centralPoints = getPointsFromBoundWithRotation(
-            centralBounds,
-            pointsFn
-          );
-          hit = pointInPolygon([x, y], centralPoints);
-        } else if (this.textBound) {
-          hit = pointInPolygon(
-            point,
-            getPointsFromBoundWithRotation(
-              this,
-              () => Bound.from(this.textBound!).points
-            )
-          );
-        }
-      }
+      // Pass 2: winding-number interior test.  This replaces any naïve
+      // axis-aligned bounding-box containment check and correctly handles
+      // concave polygons — a point inside the bounding box but inside a
+      // concave notch is correctly reported as NOT a hit.
+      hit = pointInPolygon([x, y], points);
     }
 
     return hit;

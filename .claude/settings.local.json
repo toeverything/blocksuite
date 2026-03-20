@@ -1,0 +1,5 @@
+{
+  "permissions": {
+    "allow": ["Bash(npx tsc:*)", "Bash(npx vitest:*)", "Bash(python:*)"]
+  }
+}

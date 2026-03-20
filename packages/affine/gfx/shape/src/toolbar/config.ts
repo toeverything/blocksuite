@@ -35,12 +35,13 @@ import {
   renderMenu,
 } from '@blocksuite/affine-widget-edgeless-toolbar';
 import { Bound } from '@blocksuite/global/gfx';
-import { AddTextIcon, ShapeIcon } from '@blocksuite/icons/lit';
+import { AddTextIcon, EditIcon, ShapeIcon } from '@blocksuite/icons/lit';
 import { BlockFlavourIdentifier } from '@blocksuite/std';
 import { html } from 'lit';
 import isEqual from 'lodash-es/isEqual';
 
 import { normalizeShapeBound } from '../element-renderer';
+import { ShapeElementView } from '../element-view';
 import type { ShapeToolOption } from '../shape-tool';
 import { mountShapeTextEditor } from '../text/edgeless-shape-text-editor';
 import { ShapeComponentConfig } from './shape-menu-config';
@@ -274,6 +275,28 @@ export const shapeToolbarConfig = {
         if (!rootBlock) return;
 
         mountShapeTextEditor(model, rootBlock);
+      },
+    },
+    {
+      id: 'f1.edit-vertices',
+      tooltip: 'Edit vertices',
+      icon: EditIcon(),
+      when(ctx) {
+        const models = ctx.getSurfaceModelsByType(ShapeElementModel);
+        return (
+          models.length === 1 &&
+          models[0].shapeType === ShapeType.Polygon &&
+          !hasGrouped(models[0])
+        );
+      },
+      run(ctx) {
+        const model = ctx.getCurrentModelByType(ShapeElementModel);
+        if (!model) return;
+
+        const view = ctx.gfx.view.get(model.id);
+        if (view instanceof ShapeElementView) {
+          view.enterVertexEditingMode();
+        }
       },
     },
     // id: `g.text`
