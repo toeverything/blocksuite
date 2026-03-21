@@ -1,10 +1,10 @@
 import type {
-  Bound,
   IBound,
   IVec,
   PointLocation,
   SerializedXYWH,
 } from '@blocksuite/global/gfx';
+import { Bound, getBoundWithRotation } from '@blocksuite/global/gfx';
 import type { BaseElementProps, PointTestOptions } from '@blocksuite/std/gfx';
 import {
   field,
@@ -99,6 +99,33 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
     }
 
     return props;
+  }
+
+  /**
+   * Override elementBound for polygon shapes to encompass Bezier curve
+   * arcs and control handles. For non-polygon shapes, delegates to the
+   * default implementation.
+   */
+  override get elementBound() {
+    const polygonApi = shapeMethods[ShapeType.Polygon] as typeof shapeMethods[ShapeType] & {
+      elementBound?: (element: ShapeElementModel) => Bound;
+    };
+    if (this.shapeType === ShapeType.Polygon && polygonApi.elementBound) {
+      const bezierBound = polygonApi.elementBound(this);
+      if (this.rotate) {
+        return Bound.from(
+          getBoundWithRotation({
+            x: bezierBound.x,
+            y: bezierBound.y,
+            w: bezierBound.w,
+            h: bezierBound.h,
+            rotate: this.rotate,
+          })
+        );
+      }
+      return bezierBound;
+    }
+    return super.elementBound;
   }
 
   override containsBound(bounds: Bound) {

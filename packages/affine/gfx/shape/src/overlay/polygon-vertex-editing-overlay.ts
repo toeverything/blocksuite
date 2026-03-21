@@ -3,7 +3,11 @@ import {
   ToolOverlay,
 } from '@blocksuite/affine-block-surface';
 import { ShapeElementModel, ShapeType } from '@blocksuite/affine-model';
-import { Bound } from '@blocksuite/global/gfx';
+import {
+  Bound,
+  type BezierCurveParameters,
+  getBezierCurveBoundingBox,
+} from '@blocksuite/global/gfx';
 import type { GfxController } from '@blocksuite/std/gfx';
 
 // ─── Visual constants ───────────────────────────────────────────────────────
@@ -230,6 +234,75 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
       if (vy > maxY) maxY = vy;
     }
 
+    // Expand bounds to encompass Bezier geometry (control handles + arc curves)
+    const smoothFlags = model.smoothFlags;
+    const controlPoints = model.controlPoints;
+    const count = model.vertices.length;
+
+    if (smoothFlags) {
+      for (let i = 0; i < count; i++) {
+        const next = (i + 1) % count;
+        const currSmooth = smoothFlags[i] ?? false;
+        const nextSmooth = smoothFlags[next] ?? false;
+
+        if (!currSmooth && !nextSmooth) continue;
+
+        const [cx, cy] = newAbsVertices[i];
+        const [nx, ny] = newAbsVertices[next];
+
+        // Outgoing control point of current vertex
+        let cp1x: number, cp1y: number;
+        const customCurr = controlPoints?.[i];
+        if (currSmooth && customCurr) {
+          cp1x = customCurr[2] * bound.w + bound.x;
+          cp1y = customCurr[3] * bound.h + bound.y;
+        } else if (currSmooth) {
+          cp1x = cx + (nx - cx) / 3;
+          cp1y = cy + (ny - cy) / 3;
+        } else {
+          cp1x = cx;
+          cp1y = cy;
+        }
+
+        // Incoming control point of next vertex
+        let cp2x: number, cp2y: number;
+        const customNext = controlPoints?.[next];
+        if (nextSmooth && customNext) {
+          cp2x = customNext[0] * bound.w + bound.x;
+          cp2y = customNext[1] * bound.h + bound.y;
+        } else if (nextSmooth) {
+          cp2x = nx + (cx - nx) / 3;
+          cp2y = ny + (cy - ny) / 3;
+        } else {
+          cp2x = nx;
+          cp2y = ny;
+        }
+
+        // Include control handle positions
+        if (cp1x < minX) minX = cp1x;
+        if (cp1y < minY) minY = cp1y;
+        if (cp1x > maxX) maxX = cp1x;
+        if (cp1y > maxY) maxY = cp1y;
+        if (cp2x < minX) minX = cp2x;
+        if (cp2y < minY) minY = cp2y;
+        if (cp2x > maxX) maxX = cp2x;
+        if (cp2y > maxY) maxY = cp2y;
+
+        // Use getBezierCurveBoundingBox for tight arc bounds
+        const bezierParams: BezierCurveParameters = [
+          [cx, cy],
+          [cp1x, cp1y],
+          [cp2x, cp2y],
+          [nx, ny],
+        ];
+        const arcBound = getBezierCurveBoundingBox(bezierParams);
+        if (arcBound.x < minX) minX = arcBound.x;
+        if (arcBound.y < minY) minY = arcBound.y;
+        if (arcBound.x + arcBound.w > maxX) maxX = arcBound.x + arcBound.w;
+        if (arcBound.y + arcBound.h > maxY) maxY = arcBound.y + arcBound.h;
+      }
+    }
+
     const w = Math.max(maxX - minX, 1);
     const h = Math.max(maxY - minY, 1);
 
@@ -244,6 +317,24 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
     // Update model
     model.xywh = newBound.serialize();
     model.vertices = normalized;
+
+    // Re-normalize control points to new bounding box
+    if (controlPoints) {
+      const normalizedCPs = controlPoints.map(cp => {
+        if (!cp) return null;
+        const absCp1x = cp[0] * bound.w + bound.x;
+        const absCp1y = cp[1] * bound.h + bound.y;
+        const absCp2x = cp[2] * bound.w + bound.x;
+        const absCp2y = cp[3] * bound.h + bound.y;
+        return [
+          (absCp1x - minX) / w,
+          (absCp1y - minY) / h,
+          (absCp2x - minX) / w,
+          (absCp2y - minY) / h,
+        ];
+      });
+      model.controlPoints = normalizedCPs;
+    }
   }
 
   /** Clear snap guides (call on drag end). */
@@ -357,7 +448,7 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
       ];
     }
 
-    // Convert absolute position to normalized coordinates
+    // Convert absolute position to normalized coordinates (in current bound)
     const normX = (modelX - bound.x) / bound.w;
     const normY = (modelY - bound.y) / bound.h;
 
@@ -372,7 +463,118 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
     }
     controlPoints[vertexIndex] = entry;
 
-    model.controlPoints = controlPoints;
+    // ── Re-normalize: expand bounding box to encompass all Bezier geometry ──
+    // Collect all absolute vertex positions
+    const absVertices: [number, number][] = model.vertices.map(
+      v => [bound.x + v[0] * bound.w, bound.y + v[1] * bound.h] as [number, number]
+    );
+
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
+
+    for (const [vx, vy] of absVertices) {
+      if (vx < minX) minX = vx;
+      if (vy < minY) minY = vy;
+      if (vx > maxX) maxX = vx;
+      if (vy > maxY) maxY = vy;
+    }
+
+    // Expand bounds using getBezierCurveBoundingBox for each Bezier edge
+    const smoothFlags = model.smoothFlags;
+    if (smoothFlags) {
+      for (let i = 0; i < count; i++) {
+        const next = (i + 1) % count;
+        const currSmooth = smoothFlags[i] ?? false;
+        const nextSmooth = smoothFlags[next] ?? false;
+
+        if (!currSmooth && !nextSmooth) continue;
+
+        const [cx, cy] = absVertices[i];
+        const [nx, ny] = absVertices[next];
+
+        // Outgoing control point of current vertex
+        let cp1x: number, cp1y: number;
+        const customCurr = controlPoints[i];
+        if (currSmooth && customCurr) {
+          cp1x = customCurr[2] * bound.w + bound.x;
+          cp1y = customCurr[3] * bound.h + bound.y;
+        } else if (currSmooth) {
+          cp1x = cx + (nx - cx) / 3;
+          cp1y = cy + (ny - cy) / 3;
+        } else {
+          cp1x = cx;
+          cp1y = cy;
+        }
+
+        // Incoming control point of next vertex
+        let cp2x: number, cp2y: number;
+        const customNext = controlPoints[next];
+        if (nextSmooth && customNext) {
+          cp2x = customNext[0] * bound.w + bound.x;
+          cp2y = customNext[1] * bound.h + bound.y;
+        } else if (nextSmooth) {
+          cp2x = nx + (cx - nx) / 3;
+          cp2y = ny + (cy - ny) / 3;
+        } else {
+          cp2x = nx;
+          cp2y = ny;
+        }
+
+        // Include control handle positions
+        if (cp1x < minX) minX = cp1x;
+        if (cp1y < minY) minY = cp1y;
+        if (cp1x > maxX) maxX = cp1x;
+        if (cp1y > maxY) maxY = cp1y;
+        if (cp2x < minX) minX = cp2x;
+        if (cp2y < minY) minY = cp2y;
+        if (cp2x > maxX) maxX = cp2x;
+        if (cp2y > maxY) maxY = cp2y;
+
+        // Use getBezierCurveBoundingBox for tight arc bounds
+        const bezierParams: BezierCurveParameters = [
+          [cx, cy],
+          [cp1x, cp1y],
+          [cp2x, cp2y],
+          [nx, ny],
+        ];
+        const arcBound = getBezierCurveBoundingBox(bezierParams);
+        if (arcBound.x < minX) minX = arcBound.x;
+        if (arcBound.y < minY) minY = arcBound.y;
+        if (arcBound.x + arcBound.w > maxX) maxX = arcBound.x + arcBound.w;
+        if (arcBound.y + arcBound.h > maxY) maxY = arcBound.y + arcBound.h;
+      }
+    }
+
+    const newW = Math.max(maxX - minX, 1);
+    const newH = Math.max(maxY - minY, 1);
+
+    // Re-normalize vertices to new bounding box
+    const normalizedVerts = absVertices.map(([vx, vy]) => [
+      (vx - minX) / newW,
+      (vy - minY) / newH,
+    ]);
+
+    // Re-normalize control points to new bounding box
+    const normalizedCPs = controlPoints.map(cp => {
+      if (!cp) return null;
+      const absCp1x = cp[0] * bound.w + bound.x;
+      const absCp1y = cp[1] * bound.h + bound.y;
+      const absCp2x = cp[2] * bound.w + bound.x;
+      const absCp2y = cp[3] * bound.h + bound.y;
+      return [
+        (absCp1x - minX) / newW,
+        (absCp1y - minY) / newH,
+        (absCp2x - minX) / newW,
+        (absCp2y - minY) / newH,
+      ];
+    });
+
+    const newBound = new Bound(minX, minY, newW, newH);
+    model.xywh = newBound.serialize();
+    model.vertices = normalizedVerts;
+    model.controlPoints = normalizedCPs;
   }
 
   /**
@@ -442,7 +644,9 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
 
     // Re-compute bounding box from remaining vertices
     const bound = Bound.deserialize(model.xywh);
-    const absVertices = vertices.map(v => this._toAbsolute(v, bound));
+    const absVertices: [number, number][] = vertices.map(
+      v => this._toAbsolute(v, bound) as [number, number]
+    );
 
     let minX = Infinity,
       minY = Infinity,
@@ -453,6 +657,70 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
       if (vy < minY) minY = vy;
       if (vx > maxX) maxX = vx;
       if (vy > maxY) maxY = vy;
+    }
+
+    // Expand bounds to encompass Bezier geometry after deletion
+    const updatedFlags = model.smoothFlags;
+    const updatedCPs = model.controlPoints;
+    if (updatedFlags) {
+      const cnt = vertices.length;
+      for (let i = 0; i < cnt; i++) {
+        const next = (i + 1) % cnt;
+        const currSmooth = updatedFlags[i] ?? false;
+        const nextSmooth = updatedFlags[next] ?? false;
+
+        if (!currSmooth && !nextSmooth) continue;
+
+        const [cx, cy] = absVertices[i];
+        const [nx, ny] = absVertices[next];
+
+        let cp1x: number, cp1y: number;
+        const customCurr = updatedCPs?.[i];
+        if (currSmooth && customCurr) {
+          cp1x = customCurr[2] * bound.w + bound.x;
+          cp1y = customCurr[3] * bound.h + bound.y;
+        } else if (currSmooth) {
+          cp1x = cx + (nx - cx) / 3;
+          cp1y = cy + (ny - cy) / 3;
+        } else {
+          cp1x = cx;
+          cp1y = cy;
+        }
+
+        let cp2x: number, cp2y: number;
+        const customNext = updatedCPs?.[next];
+        if (nextSmooth && customNext) {
+          cp2x = customNext[0] * bound.w + bound.x;
+          cp2y = customNext[1] * bound.h + bound.y;
+        } else if (nextSmooth) {
+          cp2x = nx + (cx - nx) / 3;
+          cp2y = ny + (cy - ny) / 3;
+        } else {
+          cp2x = nx;
+          cp2y = ny;
+        }
+
+        if (cp1x < minX) minX = cp1x;
+        if (cp1y < minY) minY = cp1y;
+        if (cp1x > maxX) maxX = cp1x;
+        if (cp1y > maxY) maxY = cp1y;
+        if (cp2x < minX) minX = cp2x;
+        if (cp2y < minY) minY = cp2y;
+        if (cp2x > maxX) maxX = cp2x;
+        if (cp2y > maxY) maxY = cp2y;
+
+        const bezierParams: BezierCurveParameters = [
+          [cx, cy],
+          [cp1x, cp1y],
+          [cp2x, cp2y],
+          [nx, ny],
+        ];
+        const arcBound = getBezierCurveBoundingBox(bezierParams);
+        if (arcBound.x < minX) minX = arcBound.x;
+        if (arcBound.y < minY) minY = arcBound.y;
+        if (arcBound.x + arcBound.w > maxX) maxX = arcBound.x + arcBound.w;
+        if (arcBound.y + arcBound.h > maxY) maxY = arcBound.y + arcBound.h;
+      }
     }
 
     const w = Math.max(maxX - minX, 1);
@@ -466,6 +734,25 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
     const newBound = new Bound(minX, minY, w, h);
     model.xywh = newBound.serialize();
     model.vertices = normalized;
+
+    // Re-normalize control points to new bounding box
+    if (updatedCPs) {
+      const normalizedCPs = updatedCPs.map(cp => {
+        if (!cp) return null;
+        const absCp1x = cp[0] * bound.w + bound.x;
+        const absCp1y = cp[1] * bound.h + bound.y;
+        const absCp2x = cp[2] * bound.w + bound.x;
+        const absCp2y = cp[3] * bound.h + bound.y;
+        return [
+          (absCp1x - minX) / w,
+          (absCp1y - minY) / h,
+          (absCp2x - minX) / w,
+          (absCp2y - minY) / h,
+        ];
+      });
+      model.controlPoints = normalizedCPs;
+    }
+
     return true;
   }
 
@@ -478,6 +765,7 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
     const model = this._getPolygonModel();
     if (!model || !model.vertices) return;
 
+    const bound = Bound.deserialize(model.xywh);
     const count = model.vertices.length;
     let flags = model.smoothFlags ? [...model.smoothFlags] : new Array(count).fill(false);
 
@@ -489,6 +777,128 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
     flags[vertexIndex] = !wasSmooth;
     model.smoothFlags = flags;
 
+    // If toggling off, clear custom control points for this vertex
+    let controlPoints: (number[] | null)[] = model.controlPoints
+      ? [...model.controlPoints]
+      : new Array(count).fill(null);
+    while (controlPoints.length < count) controlPoints.push(null);
+
+    if (wasSmooth) {
+      controlPoints[vertexIndex] = null;
+    }
+
+    // ── Re-normalize: expand bounding box to encompass all Bezier geometry ──
+    // We need to temporarily apply the new flags so getBezierControlPoints uses them
+    // Instead, compute everything inline using the new flags
+
+    // Collect all absolute vertex positions
+    const absVertices: [number, number][] = model.vertices.map(
+      v => [bound.x + v[0] * bound.w, bound.y + v[1] * bound.h] as [number, number]
+    );
+
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
+
+    for (const [vx, vy] of absVertices) {
+      if (vx < minX) minX = vx;
+      if (vy < minY) minY = vy;
+      if (vx > maxX) maxX = vx;
+      if (vy > maxY) maxY = vy;
+    }
+
+    // Expand bounds using getBezierCurveBoundingBox for each Bezier edge
+    for (let i = 0; i < count; i++) {
+      const next = (i + 1) % count;
+      const currSmooth = flags[i] ?? false;
+      const nextSmooth = flags[next] ?? false;
+
+      if (!currSmooth && !nextSmooth) continue;
+
+      const [cx, cy] = absVertices[i];
+      const [nx, ny] = absVertices[next];
+
+      // Outgoing control point of current vertex (cp2 of its control points)
+      let cp1x: number, cp1y: number;
+      const customCurr = controlPoints[i];
+      if (currSmooth && customCurr) {
+        cp1x = customCurr[2] * bound.w + bound.x;
+        cp1y = customCurr[3] * bound.h + bound.y;
+      } else if (currSmooth) {
+        cp1x = cx + (nx - cx) / 3;
+        cp1y = cy + (ny - cy) / 3;
+      } else {
+        cp1x = cx;
+        cp1y = cy;
+      }
+
+      // Incoming control point of next vertex (cp1 of its control points)
+      let cp2x: number, cp2y: number;
+      const customNext = controlPoints[next];
+      if (nextSmooth && customNext) {
+        cp2x = customNext[0] * bound.w + bound.x;
+        cp2y = customNext[1] * bound.h + bound.y;
+      } else if (nextSmooth) {
+        cp2x = nx + (cx - nx) / 3;
+        cp2y = ny + (cy - ny) / 3;
+      } else {
+        cp2x = nx;
+        cp2y = ny;
+      }
+
+      // Include control handle positions
+      if (cp1x < minX) minX = cp1x;
+      if (cp1y < minY) minY = cp1y;
+      if (cp1x > maxX) maxX = cp1x;
+      if (cp1y > maxY) maxY = cp1y;
+      if (cp2x < minX) minX = cp2x;
+      if (cp2y < minY) minY = cp2y;
+      if (cp2x > maxX) maxX = cp2x;
+      if (cp2y > maxY) maxY = cp2y;
+
+      // Use getBezierCurveBoundingBox for tight arc bounds
+      const bezierParams: BezierCurveParameters = [
+        [cx, cy],
+        [cp1x, cp1y],
+        [cp2x, cp2y],
+        [nx, ny],
+      ];
+      const arcBound = getBezierCurveBoundingBox(bezierParams);
+      if (arcBound.x < minX) minX = arcBound.x;
+      if (arcBound.y < minY) minY = arcBound.y;
+      if (arcBound.x + arcBound.w > maxX) maxX = arcBound.x + arcBound.w;
+      if (arcBound.y + arcBound.h > maxY) maxY = arcBound.y + arcBound.h;
+    }
+
+    const newW = Math.max(maxX - minX, 1);
+    const newH = Math.max(maxY - minY, 1);
+
+    // Re-normalize vertices to new bounding box
+    const normalizedVerts = absVertices.map(([vx, vy]) => [
+      (vx - minX) / newW,
+      (vy - minY) / newH,
+    ]);
+
+    // Re-normalize control points to new bounding box
+    const normalizedCPs = controlPoints.map(cp => {
+      if (!cp) return null;
+      const absCp1x = cp[0] * bound.w + bound.x;
+      const absCp1y = cp[1] * bound.h + bound.y;
+      const absCp2x = cp[2] * bound.w + bound.x;
+      const absCp2y = cp[3] * bound.h + bound.y;
+      return [
+        (absCp1x - minX) / newW,
+        (absCp1y - minY) / newH,
+        (absCp2x - minX) / newW,
+        (absCp2y - minY) / newH,
+      ];
+    });
+
+    const newBound = new Bound(minX, minY, newW, newH);
+    model.xywh = newBound.serialize();
+    model.vertices = normalizedVerts;
+    model.controlPoints = normalizedCPs;
   }
 
   /**

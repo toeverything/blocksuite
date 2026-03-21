@@ -201,11 +201,15 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
           // a boolean array; stash/pop must bracket the mutation symmetrically
           // so that elementUpdated is emitted with props['smoothFlags'] in all
           // cases (null → array, array → modified array).
+          this.model.stash('xywh');
+          this.model.stash('vertices');
           this.model.stash('smoothFlags');
           this.model.stash('controlPoints');
           this._vertexEditingOverlay.toggleVertexSmooth(idx);
           this.model.pop('controlPoints');
           this.model.pop('smoothFlags');
+          this.model.pop('vertices');
+          this.model.pop('xywh');
           this._surfaceComponent?.refresh();
         }
         return;
@@ -263,6 +267,7 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
         this._vertexEditingOverlay!.activeBezierHandleType = this._pendingBezierHandle.handleIndex;
 
         this.model.stash('xywh');
+        this.model.stash('vertices');
         this.model.stash('controlPoints');
 
         const [startMX, startMY] = this.gfx.viewport.toModelCoord(e.x, e.y);
@@ -322,6 +327,7 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
           this._vertexEditingOverlay.activeBezierHandleType = -1;
         }
         this.model.pop('controlPoints');
+        this.model.pop('vertices');
         this.model.pop('xywh');
         this._surfaceComponent?.refresh();
         return;
