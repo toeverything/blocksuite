@@ -251,6 +251,33 @@ export class PolygonTool extends BaseTool<PolygonToolOption> {
       (vy - minY) / h,
     ]);
 
+    // Ensure clockwise winding order using the shoelace formula.
+    // Positive signed area = counter-clockwise, so reverse to make clockwise.
+    // This is done once at creation time so downstream tangent computation
+    // always produces outward-pointing normals.
+    let signedArea2 = 0;
+    for (let i = 0; i < normalizedVertices.length; i++) {
+      const [x1, y1] = normalizedVertices[i];
+      const [x2, y2] =
+        normalizedVertices[(i + 1) % normalizedVertices.length];
+      signedArea2 += (x2 - x1) * (y2 + y1);
+    }
+    // In screen coordinates (Y-down), positive signedArea2 means
+    // counter-clockwise winding, so reverse to get clockwise.
+    // smoothFlags and controlPoints arrays are indexed parallel to vertices,
+    // so they must be reversed in sync to maintain correct per-vertex mapping.
+    let smoothFlagsForModel: boolean[] | null = null;
+    let controlPointsForModel: (number[] | null)[] | null = null;
+    if (signedArea2 > 0) {
+      normalizedVertices.reverse();
+      if (smoothFlagsForModel) {
+        smoothFlagsForModel = [...smoothFlagsForModel].reverse();
+      }
+      if (controlPointsForModel) {
+        controlPointsForModel = [...controlPointsForModel].reverse();
+      }
+    }
+
     const bound = new Bound(minX, minY, w, h);
 
     // Get last-used shape attributes for styling
@@ -269,7 +296,8 @@ export class PolygonTool extends BaseTool<PolygonToolOption> {
       radius: 0,
       vertices: normalizedVertices,
       isClosed: true,
-      smoothFlags: null,
+      smoothFlags: smoothFlagsForModel,
+      ...(controlPointsForModel ? { controlPoints: controlPointsForModel } : {}),
     });
 
     this.std.getOptional(TelemetryProvider)?.track('CanvasElementAdded', {
