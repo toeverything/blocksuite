@@ -162,10 +162,26 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
     const zoom = this.gfx.viewport.zoom;
     const hitDist = VERTEX_HIT_DISTANCE / zoom;
 
+    // Inverse-rotate incoming world coordinates into polygon's local space
+    let localX = modelX;
+    let localY = modelY;
+    const rotate = model.rotate ?? 0;
+    if (rotate) {
+      const cx = bound.x + bound.w / 2;
+      const cy = bound.y + bound.h / 2;
+      const rad = -(rotate * Math.PI) / 180; // negative for inverse rotation
+      const cos = Math.cos(rad);
+      const sin = Math.sin(rad);
+      const dx = modelX - cx;
+      const dy = modelY - cy;
+      localX = cx + dx * cos - dy * sin;
+      localY = cy + dx * sin + dy * cos;
+    }
+
     for (let i = 0; i < model.vertices.length; i++) {
       const [ax, ay] = this._toAbsolute(model.vertices[i], bound);
-      const dx = modelX - ax;
-      const dy = modelY - ay;
+      const dx = localX - ax;
+      const dy = localY - ay;
       if (Math.sqrt(dx * dx + dy * dy) < hitDist) {
         return i;
       }
@@ -190,25 +206,39 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
     const zoom = this.gfx.viewport.zoom;
     const snapDist = SNAP_GUIDE_DISTANCE / zoom;
 
-    // Collect absolute positions of all other vertices for snapping
+    // Inverse-rotate mouse position from world space to local (unrotated) space
+    const rotate = model.rotate ?? 0;
+    let localX = modelX;
+    let localY = modelY;
+    if (rotate) {
+      const cx = bound.x + bound.w / 2;
+      const cy = bound.y + bound.h / 2;
+      const rad = (-rotate * Math.PI) / 180; // negative for inverse
+      const dx = modelX - cx;
+      const dy = modelY - cy;
+      localX = cx + dx * Math.cos(rad) - dy * Math.sin(rad);
+      localY = cy + dx * Math.sin(rad) + dy * Math.cos(rad);
+    }
+
+    // Collect local-space absolute positions of all other vertices for snapping
     const otherAbsolute: [number, number][] = [];
     for (let i = 0; i < model.vertices.length; i++) {
       if (i === vertexIndex) continue;
       otherAbsolute.push(this._toAbsolute(model.vertices[i], bound));
     }
 
-    // Attempt coordinate snapping
-    let snappedX = modelX;
-    let snappedY = modelY;
+    // Attempt coordinate snapping in local (unrotated) space
+    let snappedX = localX;
+    let snappedY = localY;
     this.snapGuideX = null;
     this.snapGuideY = null;
 
     for (const [ox, oy] of otherAbsolute) {
-      if (Math.abs(modelX - ox) < snapDist) {
+      if (Math.abs(localX - ox) < snapDist) {
         snappedX = ox;
         this.snapGuideX = ox;
       }
-      if (Math.abs(modelY - oy) < snapDist) {
+      if (Math.abs(localY - oy) < snapDist) {
         snappedY = oy;
         this.snapGuideY = oy;
       }
@@ -359,6 +389,22 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
     const zoom = this.gfx.viewport.zoom;
     const hitDist = MIDPOINT_HIT_DISTANCE / zoom;
 
+    // Inverse-rotate incoming world coordinates into polygon's local space
+    let localX = modelX;
+    let localY = modelY;
+    const rotate = model.rotate ?? 0;
+    if (rotate) {
+      const cx = bound.x + bound.w / 2;
+      const cy = bound.y + bound.h / 2;
+      const rad = -(rotate * Math.PI) / 180; // negative for inverse rotation
+      const cos = Math.cos(rad);
+      const sin = Math.sin(rad);
+      const dx = modelX - cx;
+      const dy = modelY - cy;
+      localX = cx + dx * cos - dy * sin;
+      localY = cy + dx * sin + dy * cos;
+    }
+
     for (let i = 0; i < model.vertices.length; i++) {
       const [ax, ay] = this._toAbsolute(model.vertices[i], bound);
       const nextIdx = (i + 1) % model.vertices.length;
@@ -366,8 +412,8 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
       const mx = (ax + bx) / 2;
       const my = (ay + by) / 2;
 
-      const dx = modelX - mx;
-      const dy = modelY - my;
+      const dx = localX - mx;
+      const dy = localY - my;
       if (Math.sqrt(dx * dx + dy * dy) < hitDist) {
         return i;
       }
@@ -386,8 +432,25 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
     const model = this._getPolygonModel();
     if (!model || !model.vertices || !model.smoothFlags) return null;
 
+    const bound = Bound.deserialize(model.xywh);
     const zoom = this.gfx.viewport.zoom;
     const hitDist = BEZIER_HANDLE_RADIUS * 2 / zoom;
+
+    // Inverse-rotate incoming world coordinates into polygon's local space
+    let localX = modelX;
+    let localY = modelY;
+    const rotate = model.rotate ?? 0;
+    if (rotate) {
+      const cx = bound.x + bound.w / 2;
+      const cy = bound.y + bound.h / 2;
+      const rad = (-rotate * Math.PI) / 180;
+      const cos = Math.cos(rad);
+      const sin = Math.sin(rad);
+      const dx = modelX - cx;
+      const dy = modelY - cy;
+      localX = cx + dx * cos - dy * sin;
+      localY = cy + dx * sin + dy * cos;
+    }
 
     for (let i = 0; i < model.vertices.length; i++) {
       if (!model.smoothFlags[i]) continue;
@@ -395,15 +458,15 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
       if (!cp) continue;
 
       // Check cp1
-      const dx1 = modelX - cp.cp1[0];
-      const dy1 = modelY - cp.cp1[1];
+      const dx1 = localX - cp.cp1[0];
+      const dy1 = localY - cp.cp1[1];
       if (Math.sqrt(dx1 * dx1 + dy1 * dy1) < hitDist) {
         return { vertexIndex: i, handleIndex: 0 };
       }
 
       // Check cp2
-      const dx2 = modelX - cp.cp2[0];
-      const dy2 = modelY - cp.cp2[1];
+      const dx2 = localX - cp.cp2[0];
+      const dy2 = localY - cp.cp2[1];
       if (Math.sqrt(dx2 * dx2 + dy2 * dy2) < hitDist) {
         return { vertexIndex: i, handleIndex: 1 };
       }
@@ -427,6 +490,22 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
     const bound = Bound.deserialize(model.xywh);
     const count = model.vertices.length;
 
+    // Inverse-rotate mouse position from world space to local (unrotated) space
+    const rotate = model.rotate ?? 0;
+    let localX = modelX;
+    let localY = modelY;
+    if (rotate) {
+      const cx = bound.x + bound.w / 2;
+      const cy = bound.y + bound.h / 2;
+      const rad = -(rotate * Math.PI) / 180;
+      const cos = Math.cos(rad);
+      const sin = Math.sin(rad);
+      const dx = modelX - cx;
+      const dy = modelY - cy;
+      localX = cx + dx * cos - dy * sin;
+      localY = cy + dx * sin + dy * cos;
+    }
+
     // Initialize controlPoints array if null
     let controlPoints: (number[] | null)[] = model.controlPoints
       ? [...model.controlPoints]
@@ -449,8 +528,8 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
     }
 
     // Convert absolute position to normalized coordinates (in current bound)
-    const normX = (modelX - bound.x) / bound.w;
-    const normY = (modelY - bound.y) / bound.h;
+    const normX = (localX - bound.x) / bound.w;
+    const normY = (localY - bound.y) / bound.h;
 
     // Update the specific handle
     const entry = [...controlPoints[vertexIndex]!];
@@ -983,6 +1062,17 @@ export class PolygonVertexEditingOverlay extends ToolOverlay {
 
     ctx.save();
     ctx.globalAlpha = this.globalAlpha;
+
+    // ── Apply rotation around shape center ─────────────────────────
+    const rotate = model.rotate ?? 0;
+    if (rotate) {
+      const cx = bound.x + bound.w / 2;
+      const cy = bound.y + bound.h / 2;
+      const rad = (rotate * Math.PI) / 180;
+      ctx.translate(cx, cy);
+      ctx.rotate(rad);
+      ctx.translate(-cx, -cy);
+    }
 
     // ── Draw snap guides ────────────────────────────────────────────
     if (this.activeVertexIndex >= 0) {

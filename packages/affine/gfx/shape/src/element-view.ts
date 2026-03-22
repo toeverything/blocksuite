@@ -8,7 +8,7 @@ import {
   ShapeElementModel,
   ShapeType,
 } from '@blocksuite/affine-model';
-import { Bound } from '@blocksuite/global/gfx';
+import { Bound, rotatePoint } from '@blocksuite/global/gfx';
 import type { GfxModel } from '@blocksuite/std/gfx';
 import {
   GfxElementModelView,
@@ -250,10 +250,15 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
           // Record vertex absolute model position
           const bound = Bound.deserialize(this.model.xywh);
           const v = verts[this._pendingVertexIndex];
-          this._vertexDragStartModelCoord = [
+          const localCoord: [number, number] = [
             bound.x + v[0] * bound.w,
             bound.y + v[1] * bound.h,
           ];
+          this._vertexDragStartModelCoord = rotatePoint(
+            localCoord,
+            bound.center as [number, number],
+            this.model.rotate ?? 0
+          ) as [number, number];
 
           this._surfaceComponent?.refresh();
           return;
@@ -276,7 +281,12 @@ export class ShapeElementView extends GfxElementModelView<ShapeElementModel> {
         const cp = this._vertexEditingOverlay!.getBezierControlPoints(this._pendingBezierHandle.vertexIndex);
         if (cp) {
           const pt = this._pendingBezierHandle.handleIndex === 0 ? cp.cp1 : cp.cp2;
-          this._bezierDragStartModelCoord = pt;
+          const bound = Bound.deserialize(this.model.xywh);
+          this._bezierDragStartModelCoord = rotatePoint(
+            pt,
+            bound.center as [number, number],
+            this.model.rotate ?? 0
+          ) as [number, number];
         }
 
         this._surfaceComponent?.refresh();
