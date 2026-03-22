@@ -271,7 +271,7 @@ describe('polygon vertex add (insertVertexAtMidpoint)', () => {
 
   test('inserts false into smoothFlags at the correct index', () => {
     const smoothFlags = [true, false, true, false]; // SQUARE has 4 vertices
-    const { vertices, smoothFlags: newFlags, insertedIndex } =
+    const { smoothFlags: newFlags, insertedIndex } =
       insertVertexAtMidpoint(SQUARE, smoothFlags, 1);
     expect(newFlags).not.toBeNull();
     expect(newFlags!.length).toBe(5);
@@ -605,9 +605,7 @@ describe('proportional resize (vertices remain normalized)', () => {
     // Simulate what happens during resize: only xywh changes, vertices stay
     const originalVertices = [...PENTAGON];
 
-    // "Resize" by updating the bound only
-    const _newBound = { x: 50, y: 50, w: 300, h: 150 };
-
+    // "Resize" by updating the bound only (vertices stay in normalized [0-1] space)
     // The vertex array should be identical (resize doesn't touch vertices)
     expect(PENTAGON).toEqual(originalVertices);
   });
