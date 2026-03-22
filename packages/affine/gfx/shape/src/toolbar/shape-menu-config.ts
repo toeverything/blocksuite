@@ -10,8 +10,10 @@ import {
 import type { TemplateResult } from 'lit';
 
 import {
+  GeneralPolygonIcon,
   ScribbledDiamondIcon,
   ScribbledEllipseIcon,
+  ScribbledPolygonIcon,
   ScribbledRoundedRectangleIcon,
   ScribbledSquareIcon,
   ScribbledTriangleIcon,
@@ -52,6 +54,13 @@ export const ShapeComponentConfig: Config[] = [
     generalIcon: TriangleIcon(),
     scribbledIcon: ScribbledTriangleIcon,
     tooltip: 'Triangle',
+    disabled: false,
+  },
+  {
+    name: ShapeType.Polygon,
+    generalIcon: GeneralPolygonIcon,
+    scribbledIcon: ScribbledPolygonIcon,
+    tooltip: 'Polygon',
     disabled: false,
   },
   {

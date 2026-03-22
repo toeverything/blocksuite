@@ -188,6 +188,7 @@ export const NodePropsSchema = z.object({
   'shape:ellipse': ShapeSchema,
   'shape:rect': ShapeSchema,
   'shape:triangle': ShapeSchema,
+  'shape:polygon': ShapeSchema,
   'shape:roundedRect': RoundedShapeSchema,
 });
 

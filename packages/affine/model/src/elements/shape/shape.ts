@@ -1,10 +1,10 @@
 import type {
-  Bound,
   IBound,
   IVec,
   PointLocation,
   SerializedXYWH,
 } from '@blocksuite/global/gfx';
+import { Bound, getBoundWithRotation } from '@blocksuite/global/gfx';
 import type { BaseElementProps, PointTestOptions } from '@blocksuite/std/gfx';
 import {
   field,
@@ -44,6 +44,35 @@ export type ShapeProps = BaseElementProps & {
   // https://github.com/rough-stuff/rough/wiki#roughness
   roughness?: number;
 
+  /**
+   * Vertices for polygon shapes, stored as normalized [0-1] coordinates
+   * relative to the bounding box.
+   */
+  vertices?: number[][] | null;
+
+  /**
+   * Whether the polygon is closed (last vertex connects back to first).
+   * Defaults to true for completed polygons.
+   */
+  isClosed?: boolean;
+
+  /**
+   * Per-vertex smooth flags for Bezier curve conversion.
+   * Each entry corresponds to a vertex in `vertices` by index.
+   * When true, the vertex uses smooth Bezier curves instead of a sharp corner.
+   * null or undefined means all vertices are sharp (no smoothing).
+   */
+  smoothFlags?: boolean[] | null;
+
+  /**
+   * Optional custom Bezier control points per vertex (normalized [0-1] coords).
+   * Each entry is [cp1x, cp1y, cp2x, cp2y] or null (auto-compute).
+   * cp1 = incoming control point (toward previous vertex direction)
+   * cp2 = outgoing control point (toward next vertex direction)
+   * null array = all auto-computed.
+   */
+  controlPoints?: (number[] | null)[] | null;
+
   text?: Y.Text;
   textHorizontalAlign?: TextAlign;
   textVerticalAlign?: TextVerticalAlign;
@@ -70,6 +99,33 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
     }
 
     return props;
+  }
+
+  /**
+   * Override elementBound for polygon shapes to encompass Bezier curve
+   * arcs and control handles. For non-polygon shapes, delegates to the
+   * default implementation.
+   */
+  override get elementBound() {
+    const polygonApi = shapeMethods[ShapeType.Polygon] as typeof shapeMethods[ShapeType] & {
+      elementBound?: (element: ShapeElementModel) => Bound;
+    };
+    if (this.shapeType === ShapeType.Polygon && polygonApi.elementBound) {
+      const bezierBound = polygonApi.elementBound(this);
+      if (this.rotate) {
+        return Bound.from(
+          getBoundWithRotation({
+            x: bezierBound.x,
+            y: bezierBound.y,
+            w: bezierBound.w,
+            h: bezierBound.h,
+            rotate: this.rotate,
+          })
+        );
+      }
+      return bezierBound;
+    }
+    return super.elementBound;
   }
 
   override containsBound(bounds: Bound) {
@@ -181,6 +237,41 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
   @field(TextVerticalAlign.Center as TextVerticalAlign)
   accessor textVerticalAlign!: TextVerticalAlign;
 
+  /**
+   * Vertices for polygon shapes, stored as normalized [0-1] coordinates
+   * relative to the bounding box. Each vertex is [x, y] where (0,0) is
+   * the top-left corner and (1,1) is the bottom-right corner.
+   * Only used when shapeType === ShapeType.Polygon.
+   */
+  @field()
+  accessor vertices: number[][] | null = null;
+
+  /**
+   * Whether the polygon is closed (last vertex connects back to first).
+   * Defaults to true for completed polygons.
+   * Only used when shapeType === ShapeType.Polygon.
+   */
+  @field()
+  accessor isClosed: boolean = true;
+
+  /**
+   * Per-vertex smooth flags for Bezier curve conversion.
+   * Each entry corresponds to a vertex in `vertices` by index.
+   * When true, the vertex uses smooth Bezier curves instead of a sharp corner.
+   * null means all vertices are sharp (no smoothing).
+   * Only used when shapeType === ShapeType.Polygon.
+   */
+  @field()
+  accessor smoothFlags: boolean[] | null = null;
+
+  /**
+   * Optional custom Bezier control points per vertex (normalized [0-1] coords).
+   * Each entry is [cp1x, cp1y, cp2x, cp2y] or null (auto-compute).
+   * null array = all auto-computed.
+   */
+  @field()
+  accessor controlPoints: (number[] | null)[] | null = null;
+
   @field()
   accessor xywh: SerializedXYWH = '[0,0,100,100]';
 }
@@ -257,4 +348,16 @@ export class LocalShapeElementModel extends GfxLocalElementModel {
 
   @prop()
   accessor textVerticalAlign: TextVerticalAlign = TextVerticalAlign.Center;
+
+  @prop()
+  accessor vertices: number[][] | null = null;
+
+  @prop()
+  accessor isClosed: boolean = true;
+
+  @prop()
+  accessor smoothFlags: boolean[] | null = null;
+
+  @prop()
+  accessor controlPoints: (number[] | null)[] | null = null;
 }

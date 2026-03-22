@@ -24,6 +24,7 @@ import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { when } from 'lit/directives/when.js';
 
+import { PolygonTool } from '../polygon-tool';
 import { ShapeTool } from '../shape-tool';
 import { ShapeComponentConfig } from '../toolbar';
 
@@ -125,6 +126,8 @@ export class EdgelessShapeMenu extends SignalWatcher(
           if (shapeName) {
             this._shapeName$.value = shapeName;
           }
+        } else if (value && value.toolType === PolygonTool) {
+          this._shapeName$.value = ShapeType.Polygon;
         }
       })
     );

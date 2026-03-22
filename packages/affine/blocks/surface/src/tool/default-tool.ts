@@ -153,7 +153,32 @@ export class DefaultTool extends BaseTool {
 
   private _determineDragType(evt: PointerEventState): DefaultModeDragType {
     const { x, y } = this.controller.lastMousePos$.peek();
-    if (this.selection.isInSelectedRect(x, y)) {
+
+    // Use each selected element's own hit-test (includesPoint) instead of the
+    // common axis-aligned bounding-box (isInSelectedRect). For polygon shapes
+    // this delegates to the winding-number algorithm, so a click inside a
+    // concave "notch" (inside the bbox but outside the polygon body) correctly
+    // falls through to handleElementSelection rather than triggering a move.
+    // For all other shapes the per-element check is equivalent to – or
+    // stricter than – the old bounding-box approach and is therefore safe.
+    //
+    // ignoreTransparent: false ensures that already-selected transparent
+    // (unfilled) shapes can still be dragged by clicking anywhere inside their
+    // visible extent, preserving the intent of the old bounding-box check.
+    const hitsSelected = this.selection.selectedElements.some(el =>
+      el.includesPoint(
+        x,
+        y,
+        {
+          hitThreshold: 10,
+          zoom: this.gfx.viewport.zoom,
+          ignoreTransparent: false,
+        },
+        this.std.host
+      )
+    );
+
+    if (hitsSelected) {
       return this.selection.editing
         ? DefaultModeDragType.NativeEditing
         : DefaultModeDragType.ContentMoving;

@@ -44,6 +44,20 @@ The surface block can store two types of content:
 - The `block.children` field can contain edgeless-specific card blocks, such as embed-style links to YouTube, Figma, or other BlockSuite documents.
 - Graphical content like brushstrokes and polygons are modeled as `SurfaceElement`s and stored in the `block.elements` field. Common element types include `BrushElement`, `ShapeElement`, and `ConnectorElement`.
 
+### Polygon Shapes
+
+The `ShapeElement` type supports freeform polygons in addition to built-in geometric shapes (rectangle, ellipse, diamond, triangle). Polygon vertices are stored as **normalized `[0, 1]` coordinates** relative to the element's bounding box — `[0, 0]` maps to the top-left corner and `[1, 1]` to the bottom-right. This normalized representation ensures polygons scale correctly when the bounding box is resized.
+
+A polygon element carries three polygon-specific fields:
+
+| Field         | Type                 | Description                                                                                                                                                                         |
+| ------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vertices`    | `number[][] \| null` | Array of `[x, y]` normalized vertex positions. `null` uses a default regular pentagon.                                                                                              |
+| `isClosed`    | `boolean`            | Whether the last vertex connects back to the first (`true` by default).                                                                                                             |
+| `smoothFlags` | `boolean[] \| null`  | Per-vertex flags — `true` slightly rounds the corner at that vertex using cubic Bézier curves (control points at 1/3 of adjacent edge lengths). `null` means all corners are sharp. |
+
+Users create polygons by clicking to place vertices one by one. Double-clicking or clicking near the first vertex finishes the shape. The tool normalizes the placed vertices into `[0, 1]` space before storing them. All vertices start sharp by default; to round a corner, enter vertex editing mode (double-click the polygon) and press **B** while hovering over a vertex.
+
 A typical edgeless document structure with a surface block might look like this:
 
 ```

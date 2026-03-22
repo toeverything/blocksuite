@@ -6,6 +6,8 @@ import {
   ConnectorMode,
   GroupElementModel,
   type LocalConnectorElementModel,
+  ShapeElementModel,
+  ShapeType,
 } from '@blocksuite/affine-model';
 import { ThemeProvider } from '@blocksuite/affine-shared/services';
 import { BlockSuiteError } from '@blocksuite/global/exceptions';
@@ -135,6 +137,70 @@ export function getAnchors(ele: GfxModel) {
   const offset = 10;
   const anchors: { point: PointLocation; coord: IVec }[] = [];
   const rotate = ele.rotate;
+
+  // For polygon shapes, generate anchors at each vertex and edge midpoint
+  if (
+    ele instanceof ShapeElementModel &&
+    ele.shapeType === ShapeType.Polygon
+  ) {
+    const verts: number[][] = ele.vertices ?? [
+      [0.5, 0],
+      [1, 0.38],
+      [0.81, 1],
+      [0.19, 1],
+      [0, 0.38],
+    ];
+
+    for (let i = 0; i < verts.length; i++) {
+      const curr = verts[i];
+      const next = verts[(i + 1) % verts.length];
+
+      // CW edge direction in absolute space, with element rotation applied.
+      // This matches the convention used by linePolygonIntersects / polygonGetPointTangent:
+      // Vec.rot(CW_edge_direction, -π/2) yields the outward normal.
+      const edx = (next[0] - curr[0]) * bound.w;
+      const edy = (next[1] - curr[1]) * bound.h;
+      const edLen = Math.sqrt(edx * edx + edy * edy) || 1;
+      const edgeTangent: IVec = Vec.rot(
+        [edx / edLen, edy / edLen],
+        toRadian(rotate)
+      );
+
+      // --- Vertex anchor ---
+      const vertCoord: IVec = [curr[0], curr[1]];
+      const vertAbs: IVec = [
+        bound.x + vertCoord[0] * bound.w,
+        bound.y + vertCoord[1] * bound.h,
+      ];
+      const vertRotated = getPointFromBoundsWithRotation(
+        { ...bound, rotate },
+        vertAbs
+      );
+      anchors.push({
+        point: new PointLocation(vertRotated, edgeTangent),
+        coord: vertCoord,
+      });
+
+      // --- Edge midpoint anchor ---
+      const midCoord: IVec = [
+        (curr[0] + next[0]) / 2,
+        (curr[1] + next[1]) / 2,
+      ];
+      const midAbs: IVec = [
+        bound.x + midCoord[0] * bound.w,
+        bound.y + midCoord[1] * bound.h,
+      ];
+      const midRotated = getPointFromBoundsWithRotation(
+        { ...bound, rotate },
+        midAbs
+      );
+      anchors.push({
+        point: new PointLocation(midRotated, edgeTangent),
+        coord: midCoord,
+      });
+    }
+    return anchors;
+  }
 
   (
     [

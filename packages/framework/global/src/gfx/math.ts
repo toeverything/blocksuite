@@ -93,6 +93,34 @@ export function polygonNearestPoint(points: IVec[], point: IVec) {
   return rst;
 }
 
+export function polygonNearestPointAndTangent(
+  points: IVec[],
+  point: IVec
+): { point: IVec; tangent: IVec } {
+  const len = points.length;
+  if (len < 2) throw new Error('Polygon must have at least 2 points');
+
+  let rst: IVec = points[0];
+  let dis = Vec.dist(points[0], point);
+  let edgeIdx = 0;
+
+  for (let i = 0; i < len; i++) {
+    const p = points[i];
+    const p2 = points[(i + 1) % len];
+    const temp = Vec.nearestPointOnLineSegment(p, p2, point, true);
+    const curDis = Vec.dist(temp, point);
+    if (curDis < dis) {
+      dis = curDis;
+      rst = temp;
+      edgeIdx = i;
+    }
+  }
+
+  const p = points[edgeIdx];
+  const p2 = points[(edgeIdx + 1) % len];
+  return { point: rst, tangent: Vec.normalize(Vec.sub(p2, p)) };
+}
+
 export function polygonPointDistance(points: IVec[], point: IVec) {
   const nearest = polygonNearestPoint(points, point);
   return Vec.dist(nearest, point);
@@ -340,16 +368,38 @@ export function pointInEllipse(
   return (tdx * tdx) / (rx * rx) + (tdy * tdy) / (ry * ry) <= 1;
 }
 
+/**
+ * Tests whether a point `p` is inside a polygon defined by `points` using the
+ * **winding-number algorithm**.
+ *
+ * The winding number counts how many times the polygon boundary winds around
+ * the test point.  A non-zero winding number means the point is inside.
+ *
+ * Key advantages over a simple bounding-box (AABB) check or ray-casting:
+ * - **Concave polygons**: correctly reports points inside a concave "notch" as
+ *   outside, and all points in the true interior as inside.
+ * - **No degenerate ray issues**: the winding-number approach handles
+ *   horizontal edges and vertices that lie on the test ray without special
+ *   casing.
+ * - Used by `polygon.includesPoint` to enable accurate drag-to-move
+ *   hit-testing that works anywhere inside the visible polygon body.
+ *
+ * @param p      - The point to test [x, y].
+ * @param points - Ordered array of polygon vertex positions [x, y][].
+ * @returns `true` if `p` is strictly inside the polygon, `false` otherwise.
+ */
 export function pointInPolygon(p: IVec, points: IVec[]): boolean {
   let wn = 0; // winding number
 
   points.forEach((a, i) => {
     const b = points[(i + 1) % points.length];
     if (a[1] <= p[1]) {
+      // Upward crossing: edge goes from below/on to above the ray
       if (b[1] > p[1] && Vec.cross(a, b, p) > 0) {
         wn += 1;
       }
     } else if (b[1] <= p[1] && Vec.cross(a, b, p) < 0) {
+      // Downward crossing: edge goes from above to below/on the ray
       wn -= 1;
     }
   });

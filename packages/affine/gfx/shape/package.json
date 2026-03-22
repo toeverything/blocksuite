@@ -11,6 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@blocksuite/affine-block-surface": "workspace:*",
+    "@blocksuite/affine-gfx-connector": "workspace:*",
     "@blocksuite/affine-components": "workspace:*",
     "@blocksuite/affine-ext-loader": "workspace:*",
     "@blocksuite/affine-gfx-text": "workspace:*",
