@@ -2,7 +2,7 @@
 
 ## Fundamentals
 
-In BlockSuite, documents in edgeless mode are isomorphic to those in page mode. Edgeless documents are also composed of blocks, with no data conversion occurring during mode switching.
+In BlockSuite, documents in edgeless mode are isomorphic to those in page mode. Edgeless documents are also composed of blocks, with no data conversion occurring during mode switching.www
 
 By default, the root block of a rich text document contains a single note block child, with a block tree structure like this:
 

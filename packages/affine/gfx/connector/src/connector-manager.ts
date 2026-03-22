@@ -1190,6 +1190,7 @@ export class ConnectorPathGenerator extends PathGenerator {
     const instance = new ConnectorPathGenerator({
       getElementById: elementGetter ?? (() => null),
     });
+
     const points = path ?? instance._generateConnectorPath(connector) ?? [];
     const bound =
       connector.mode === ConnectorMode.Curve
@@ -1348,7 +1349,7 @@ export class ConnectorPathGenerator extends PathGenerator {
               )
             );
       }
-      return [startPoint, endPoint];
+      return this._applyCurveControlPoint(connector, startPoint, endPoint);
     } else {
       startPoint = this._getConnectionPoint(connector, 'source');
       endPoint = this._getConnectionPoint(connector, 'target');
@@ -1365,8 +1366,47 @@ export class ConnectorPathGenerator extends PathGenerator {
         startPoint.out = [0, Vec.mul(Vec.sub(endPoint, startPoint), 2 / 3)[1]];
         endPoint.in = [0, Vec.mul(Vec.sub(startPoint, endPoint), 2 / 3)[1]];
       }
-      return [startPoint, endPoint];
+      return this._applyCurveControlPoint(connector, startPoint, endPoint);
     }
+  }
+
+  /**
+   * If the connector has a curveControlPoint, recalculate absIn/absOut so the
+   * cubic Bézier passes exactly through the control point at t = 0.5.
+   *
+   * Given endpoints P0 (start) and P3 (end), and desired passthrough C:
+   *   P1 = (4C − P3) / 3          →  startPoint.out = P1 − P0
+   *   P2 = (4C − P0) / 3          →  endPoint.in    = P2 − P3
+   *
+   * Proof: B(0.5) = (P0 + 3P1 + 3P2 + P3)/8
+   *               = (P0 + (4C−P3) + (4C−P0) + P3)/8 = 8C/8 = C  ✓
+   */
+  private _applyCurveControlPoint(
+    connector: ConnectorElementModel | LocalConnectorElementModel,
+    startPoint: PointLocation,
+    endPoint: PointLocation
+  ): PointLocation[] {
+    if (
+      connector instanceof ConnectorElementModel &&
+      connector.curveControlPoint
+    ) {
+      const C = connector.curveControlPoint;
+      const P0: IVec = [startPoint[0], startPoint[1]];
+      const P3: IVec = [endPoint[0], endPoint[1]];
+
+      // out = P1 - P0 = (4C - P3 - 3P0) / 3
+      startPoint.out = Vec.div(
+        Vec.sub(Vec.sub(Vec.mul(C, 4), P3), Vec.mul(P0, 3)),
+        3
+      );
+
+      // in = P2 - P3 = (4C - P0 - 3P3) / 3
+      endPoint.in = Vec.div(
+        Vec.sub(Vec.sub(Vec.mul(C, 4), P0), Vec.mul(P3, 3)),
+        3
+      );
+    }
+    return [startPoint, endPoint];
   }
 
   private _generateStraightConnectorPath(

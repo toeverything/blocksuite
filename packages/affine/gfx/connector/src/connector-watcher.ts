@@ -62,9 +62,21 @@ export const connectorWatcher: SurfaceMiddleware = (
       if (
         'type' in element &&
         element.type === 'connector' &&
-        (props['mode'] !== undefined || props['target'] || props['source'])
+        (props['mode'] !== undefined ||
+          props['target'] ||
+          props['source'] ||
+          props['curveControlPoint'] !== undefined)
       ) {
-        addToUpdateList(element as ConnectorElementModel);
+        const connector = element as ConnectorElementModel;
+
+        // Clear custom handle data when connector mode changes
+        if (props['mode'] !== undefined) {
+          if (connector.curveControlPoint !== null) {
+            connector.curveControlPoint = null;
+          }
+        }
+
+        addToUpdateList(connector);
       }
     }),
     surface.store.slots.blockUpdated.subscribe(payload => {

@@ -205,6 +205,8 @@ export const ConnectorInteraction =
           model.stash('labelXYWH');
           model.stash('source');
           model.stash('target');
+          model.stash('curveControlPoint');
+
         },
 
         onResizeMove(context): void {
@@ -218,6 +220,8 @@ export const ConnectorInteraction =
           model.pop('labelXYWH');
           model.pop('source');
           model.pop('target');
+          model.pop('curveControlPoint');
+
         },
       };
     },
@@ -229,6 +233,8 @@ export const ConnectorInteraction =
           model.stash('labelXYWH');
           model.stash('source');
           model.stash('target');
+          model.stash('curveControlPoint');
+
         },
 
         onRotateMove(context): void {
@@ -242,6 +248,8 @@ export const ConnectorInteraction =
           model.pop('labelXYWH');
           model.pop('source');
           model.pop('target');
+          model.pop('curveControlPoint');
+
         },
       };
     },
