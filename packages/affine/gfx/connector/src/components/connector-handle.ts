@@ -2,9 +2,11 @@ import {
   EdgelessLegacySlotIdentifier,
   OverlayIdentifier,
 } from '@blocksuite/affine-block-surface';
+import { ConnectorMode } from '@blocksuite/affine-model';
 import type { ConnectorElementModel } from '@blocksuite/affine-model';
 import { DisposableGroup } from '@blocksuite/global/disposable';
-import { Vec } from '@blocksuite/global/gfx';
+import type { IVec } from '@blocksuite/global/gfx';
+import { getBezierParameters, getBezierPoint, Vec } from '@blocksuite/global/gfx';
 import { WithDisposable } from '@blocksuite/global/lit';
 import {
   type BlockComponent,
@@ -15,7 +17,7 @@ import {
 import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
 import type { Store } from '@blocksuite/store';
 import { consume } from '@lit/context';
-import { css, html, LitElement } from 'lit';
+import { css, html, LitElement, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -77,7 +79,74 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
     });
     this._disposables.add(() => {
       this.connectionOverlay.clear();
+      this._curveHandleDisposables.dispose();
     });
+  }
+
+  private _curveHandleDisposables = new DisposableGroup();
+
+  /**
+   * Binds a pointerdown handler to the curve midpoint handle so the user
+   * can drag it to set a custom control point.  The dragged position is
+   * stored as an absolute IVec on `connector.curveControlPoint` via @field().
+   *
+   * Called after every render; previous listeners are cleaned up first.
+   */
+  private _bindCurveMidpointEvents() {
+    this._curveHandleDisposables.dispose();
+    this._curveHandleDisposables = new DisposableGroup();
+
+    const el = this.shadowRoot?.querySelector(
+      '.curve-midpoint'
+    ) as HTMLElement | null;
+    if (!el) return;
+
+    this._curveHandleDisposables.addFromEvent(
+      el,
+      'pointerdown',
+      (e: PointerEvent) => {
+        e.stopPropagation();
+        this._startCurveMidpointDrag(e);
+      }
+    );
+  }
+
+  /**
+   * Handles the full drag lifecycle (pointerdown → pointermove → pointerup)
+   * for the curve midpoint handle.  On each move the pointer position is
+   * converted to absolute model coordinates and written to
+   * `connector.curveControlPoint`.  The entire drag is grouped as a single
+   * undo entry via `doc.captureSync()` on pointerup (same pattern as
+   * endpoint drags).
+   */
+  private _startCurveMidpointDrag(_startEvent: PointerEvent) {
+    const { gfx, connector, slots, _disposables } = this;
+
+    slots.elementResizeStart.next();
+
+    _disposables.addFromEvent(document, 'pointermove', (e: PointerEvent) => {
+      // Convert client coordinates to absolute model coordinates
+      const modelPoint: IVec = gfx.viewport.toModelCoordFromClientCoord([
+        e.clientX,
+        e.clientY,
+      ]);
+
+      // Store the absolute control point on the model (persisted via @field)
+      connector.curveControlPoint = modelPoint;
+      this.requestUpdate();
+    });
+
+    _disposables.addFromEvent(document, 'pointerup', () => {
+      this.doc.captureSync();
+      _disposables.dispose();
+      this._disposables = new DisposableGroup();
+      this._bindEvent();
+      slots.elementResizeEnd.next();
+    });
+  }
+
+  override updated() {
+    this._bindCurveMidpointEvents();
   }
 
   private _capPointerDown(e: PointerEvent, connection: 'target' | 'source') {
@@ -119,10 +188,35 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
     this._bindEvent();
   }
 
+  private _renderCurveMidpointHandle(zoom: number) {
+    const { path } = this.connector;
+    if (this.connector.mode !== ConnectorMode.Curve || path.length < 2) {
+      return nothing;
+    }
+
+    const bezierParams = getBezierParameters(path);
+    const midpoint = getBezierPoint(bezierParams, 0.5);
+    if (!midpoint) return nothing;
+
+    const screenPoint = Vec.subScalar(Vec.mul(midpoint, zoom), HALF_SIZE);
+    const style = {
+      transform: `translate3d(${screenPoint[0]}px,${screenPoint[1]}px,0)`,
+    };
+
+    return html`
+      <div
+        class="line-controller curve-midpoint"
+        style=${styleMap(style)}
+      ></div>
+    `;
+  }
+
   override render() {
     const { gfx } = this;
     // path is relative to the element's xywh
     const { path } = this.connector;
+    if (!path || path.length < 2) return nothing;
+
     const zoom = gfx.viewport.zoom;
     const startPoint = Vec.subScalar(Vec.mul(path[0], zoom), HALF_SIZE);
     const endPoint = Vec.subScalar(
@@ -141,6 +235,7 @@ export class EdgelessConnectorHandle extends WithDisposable(LitElement) {
         style=${styleMap(startStyle)}
       ></div>
       <div class="line-controller line-end" style=${styleMap(endStyle)}></div>
+      ${this._renderCurveMidpointHandle(zoom)}
     `;
   }
 
