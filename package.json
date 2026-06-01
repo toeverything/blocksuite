@@ -55,7 +55,7 @@
     "size-limit": "^11.1.4",
     "tsx": "^4.19.0",
     "typescript": "5.8.2",
-    "vite": "6.2.7",
+    "vite": "6.4.2",
     "vite-plugin-web-components-hmr": "^0.1.3"
   },
   "stackblitz": {
