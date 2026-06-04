@@ -260,8 +260,12 @@ export class ShapeElementModel extends GfxPrimitiveElementModel<ShapeProps> {
    * When true, the vertex uses smooth Bezier curves instead of a sharp corner.
    * null means all vertices are sharp (no smoothing).
    * Only used when shapeType === ShapeType.Polygon.
+   *
+   * The explicit `null` fallback is required because the `@field` getter
+   * collapses a stored `null` through its `??` chain; without it a persisted
+   * `null` would be read back as `undefined` after a CRDT round-trip.
    */
-  @field()
+  @field(null as boolean[] | null)
   accessor smoothFlags: boolean[] | null = null;
 
   /**
