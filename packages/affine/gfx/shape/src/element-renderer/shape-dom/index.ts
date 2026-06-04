@@ -14,7 +14,11 @@ function applyShapeSpecificStyles(
   element.style.removeProperty('clip-path');
   element.style.removeProperty('border-radius');
   // Clear DOM for shapes that don't use SVG, or if type changes from SVG-based to non-SVG-based
-  if (model.shapeType !== 'diamond' && model.shapeType !== 'triangle') {
+  if (
+    model.shapeType !== 'diamond' &&
+    model.shapeType !== 'triangle' &&
+    model.shapeType !== 'polygon'
+  ) {
     while (element.firstChild) element.firstChild.remove();
   }
 
@@ -37,6 +41,21 @@ function applyShapeSpecificStyles(
     case 'triangle':
       element.style.clipPath = 'polygon(50% 0%, 100% 100%, 0% 100%)';
       break;
+    case 'polygon': {
+      // Build CSS clip-path from normalized vertices
+      const vertices = model.vertices ?? [
+        [0.5, 0],
+        [1, 0.38],
+        [0.81, 1],
+        [0.19, 1],
+        [0, 0.38],
+      ];
+      const clipPoints = vertices
+        .map(v => `${(v[0] * 100).toFixed(1)}% ${(v[1] * 100).toFixed(1)}%`)
+        .join(', ');
+      element.style.clipPath = `polygon(${clipPoints})`;
+      break;
+    }
   }
   // No 'else' needed to clear styles, as they are reset at the beginning of the function.
 }
@@ -117,7 +136,11 @@ export const shapeDomRenderer = (
   // Apply shape-specific clipping, border-radius, and potentially clear innerHTML
   applyShapeSpecificStyles(model, element, zoom);
 
-  if (model.shapeType === 'diamond' || model.shapeType === 'triangle') {
+  if (
+    model.shapeType === 'diamond' ||
+    model.shapeType === 'triangle' ||
+    model.shapeType === 'polygon'
+  ) {
     // For diamond and triangle, fill and border are handled by inline SVG
     element.style.border = 'none'; // Ensure no standard CSS border interferes
     element.style.backgroundColor = 'transparent'; // Host element is transparent
@@ -132,13 +155,30 @@ export const shapeDomRenderer = (
         unscaledHeight,
         strokeW
       );
-    } else {
+    } else if (model.shapeType === 'triangle') {
       // triangle - generate triangle points using shared utility
       svgPoints = SVGShapeBuilder.triangle(
         unscaledWidth,
         unscaledHeight,
         strokeW
       );
+    } else if (model.shapeType === 'polygon') {
+      // Generate polygon points from normalized vertices
+      const vertices = model.vertices ?? [
+        [0.5, 0],
+        [1, 0.38],
+        [0.81, 1],
+        [0.19, 1],
+        [0, 0.38],
+      ];
+      const halfStroke = strokeW / 2;
+      svgPoints = vertices
+        .map(v => {
+          const px = halfStroke + v[0] * (unscaledWidth - strokeW);
+          const py = halfStroke + v[1] * (unscaledHeight - strokeW);
+          return `${px},${py}`;
+        })
+        .join(' ');
     }
 
     // Determine if stroke should be visible and its color

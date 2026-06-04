@@ -355,6 +355,7 @@ export class ShapeTool extends BaseTool<ShapeToolOption> {
       ShapeType.Ellipse,
       ShapeType.Diamond,
       ShapeType.Triangle,
+      ShapeType.Polygon,
       'roundedRect',
     ];
 

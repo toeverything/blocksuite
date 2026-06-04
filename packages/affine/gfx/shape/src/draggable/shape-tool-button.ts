@@ -3,6 +3,7 @@ import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-too
 import { SignalWatcher } from '@blocksuite/global/lit';
 import { css, html, LitElement } from 'lit';
 
+import { PolygonTool } from '../polygon-tool.js';
 import { ShapeTool } from '../shape-tool.js';
 import type { DraggableShape } from './utils.js';
 
@@ -23,32 +24,40 @@ export class EdgelessShapeToolButton extends EdgelessToolbarToolMixin(
   `;
 
   private readonly _handleShapeClick = (shape: DraggableShape) => {
-    this.setEdgelessTool(this.type, {
-      shapeName: shape.name,
-    });
+    if (shape.name === ShapeType.Polygon) {
+      this.setEdgelessTool(PolygonTool);
+    } else {
+      this.setEdgelessTool(ShapeTool, {
+        shapeName: shape.name,
+      });
+    }
     if (!this.popper) this._toggleMenu();
   };
 
   private readonly _handleWrapperClick = () => {
     if (this.tryDisposePopper()) return;
 
-    this.setEdgelessTool(this.type, {
+    this.setEdgelessTool(ShapeTool, {
       shapeName: ShapeType.Rect,
     });
     if (!this.popper) this._toggleMenu();
   };
 
-  override type = ShapeTool;
+  override type = [ShapeTool, PolygonTool];
 
   private _toggleMenu() {
     this.createPopper('edgeless-shape-menu', this, {
       setProps: ele => {
         ele.edgeless = this.edgeless;
         ele.onChange = (shapeName: ShapeName) => {
-          this.setEdgelessTool(this.type, {
-            shapeName,
-          });
-          this._updateOverlay();
+          if (shapeName === ShapeType.Polygon) {
+            this.setEdgelessTool(PolygonTool);
+          } else {
+            this.setEdgelessTool(ShapeTool, {
+              shapeName,
+            });
+            this._updateOverlay();
+          }
         };
       },
     });

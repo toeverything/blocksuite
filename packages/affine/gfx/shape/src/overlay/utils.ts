@@ -32,6 +32,9 @@ export const drawGeneralShape = (
     case 'roundedRect':
       drawRoundedRect(ctx, xywh);
       break;
+    case 'polygon':
+      shapeMethods.polygon.draw(ctx, bound);
+      break;
     default:
       throw new Error(`Unknown shape type: ${type}`);
   }

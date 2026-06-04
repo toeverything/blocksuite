@@ -49,6 +49,10 @@ export function drawGeneralShape(
       break;
     case 'triangle':
       drawTriangle(ctx, 0, 0, w, h);
+      break;
+    case 'polygon':
+      drawPolygon(ctx, w, h, shapeModel);
+      break;
   }
 
   ctx.lineWidth = shapeModel.strokeWidth;
@@ -58,9 +62,14 @@ export function drawGeneralShape(
   switch (shapeModel.strokeStyle) {
     case 'none':
       ctx.strokeStyle = 'transparent';
+      ctx.setLineDash([]);
       break;
     case 'dash':
       ctx.setLineDash([12, 12]);
+      break;
+    default:
+      // 'solid' — ensure no dash pattern is active
+      ctx.setLineDash([]);
       break;
   }
 
@@ -161,6 +170,89 @@ function drawTriangle(
   ctx.moveTo(width / 2, y);
   ctx.lineTo(width, height);
   ctx.lineTo(x, height);
+  ctx.closePath();
+}
+
+function drawPolygon(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  shapeModel: ShapeElementModel | LocalShapeElementModel
+) {
+  // Default pentagon vertices if none set
+  const vertices =
+    'vertices' in shapeModel && shapeModel.vertices
+      ? shapeModel.vertices
+      : [
+          [0.5, 0],
+          [1, 0.38],
+          [0.81, 1],
+          [0.19, 1],
+          [0, 0.38],
+        ];
+
+  const smoothFlags =
+    'smoothFlags' in shapeModel && shapeModel.smoothFlags
+      ? shapeModel.smoothFlags
+      : null;
+
+  const controlPoints: ((number[] | null)[] | null) =
+    'controlPoints' in shapeModel && (shapeModel as unknown as Record<string, unknown>).controlPoints
+      ? (shapeModel as unknown as { controlPoints: (number[] | null)[] }).controlPoints
+      : null;
+
+  const count = vertices.length;
+  if (count === 0) return;
+
+  ctx.beginPath();
+
+  if (!smoothFlags || smoothFlags.every(f => !f)) {
+    // No Bezier smoothing - draw straight lines
+    ctx.moveTo(vertices[0][0] * width, vertices[0][1] * height);
+    for (let i = 1; i < count; i++) {
+      ctx.lineTo(vertices[i][0] * width, vertices[i][1] * height);
+    }
+  } else {
+    const abs = (v: number[]): [number, number] => [v[0] * width, v[1] * height];
+
+    ctx.moveTo(vertices[0][0] * width, vertices[0][1] * height);
+
+    for (let i = 0; i < count; i++) {
+      const next = (i + 1) % count;
+      const currSmooth = smoothFlags[i] ?? false;
+      const nextSmooth = smoothFlags[next] ?? false;
+
+      const [cx, cy] = abs(vertices[i]);
+      const [nx, ny] = abs(vertices[next]);
+
+      if (!currSmooth && !nextSmooth) {
+        ctx.lineTo(nx, ny);
+      } else {
+        let cp1x: number, cp1y: number;
+        const customCurr = controlPoints?.[i];
+        if (currSmooth) {
+          cp1x = customCurr ? customCurr[2] * width : cx + (nx - cx) / 3;
+          cp1y = customCurr ? customCurr[3] * height : cy + (ny - cy) / 3;
+        } else {
+          cp1x = cx;
+          cp1y = cy;
+        }
+
+        let cp2x: number, cp2y: number;
+        const customNext = controlPoints?.[next];
+        if (nextSmooth) {
+          cp2x = customNext ? customNext[0] * width : nx + (cx - nx) / 3;
+          cp2y = customNext ? customNext[1] * height : ny + (cy - ny) / 3;
+        } else {
+          cp2x = nx;
+          cp2y = ny;
+        }
+
+        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, nx, ny);
+      }
+    }
+  }
+
   ctx.closePath();
 }
 

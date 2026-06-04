@@ -202,17 +202,41 @@ export class ConnectorTool extends BaseTool<ConnectorToolOptions> {
     this._mode = ConnectorToolMode.Quick;
     this._sourceBounds = Bound.deserialize(element.xywh);
     this._sourceBounds.rotate = element.rotate;
-    const centerAnchorEnabled =
-      this.std.getOptional(EditPropsStore)?.getStorage(
-        'connectorCenterAnchor'
-      ) ?? true;
-    this._sourceLocations =
+    if (
       element instanceof ShapeElementModel &&
-      element.shapeType === ShapeType.Triangle
-        ? ConnectorEndpointLocationsOnTriangle
-        : centerAnchorEnabled && isCenterAnchorEligible(element)
-          ? ConnectorEndpointLocationsWithCenter
-          : ConnectorEndpointLocations;
+      element.shapeType === ShapeType.Polygon
+    ) {
+      // Use polygon vertices and edge midpoints as endpoint locations
+      const verts: number[][] = element.vertices ?? [
+        [0.5, 0],
+        [1, 0.38],
+        [0.81, 1],
+        [0.19, 1],
+        [0, 0.38],
+      ];
+      const locations: IVec[] = [];
+      for (let i = 0; i < verts.length; i++) {
+        locations.push([verts[i][0], verts[i][1]]);
+        const next = verts[(i + 1) % verts.length];
+        locations.push([
+          (verts[i][0] + next[0]) / 2,
+          (verts[i][1] + next[1]) / 2,
+        ]);
+      }
+      this._sourceLocations = locations;
+    } else {
+      const centerAnchorEnabled =
+        this.std.getOptional(EditPropsStore)?.getStorage(
+          'connectorCenterAnchor'
+        ) ?? true;
+      this._sourceLocations =
+        element instanceof ShapeElementModel &&
+        element.shapeType === ShapeType.Triangle
+          ? ConnectorEndpointLocationsOnTriangle
+          : centerAnchorEnabled && isCenterAnchorEligible(element)
+            ? ConnectorEndpointLocationsWithCenter
+            : ConnectorEndpointLocations;
+    }
 
     this._source = {
       id: element.id,
