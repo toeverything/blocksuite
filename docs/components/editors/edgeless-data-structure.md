@@ -48,15 +48,23 @@ The surface block can store two types of content:
 
 The `ShapeElement` type supports freeform polygons in addition to built-in geometric shapes (rectangle, ellipse, diamond, triangle). Polygon vertices are stored as **normalized `[0, 1]` coordinates** relative to the element's bounding box — `[0, 0]` maps to the top-left corner and `[1, 1]` to the bottom-right. This normalized representation ensures polygons scale correctly when the bounding box is resized.
 
-A polygon element carries three polygon-specific fields:
+A polygon element carries four polygon-specific fields:
 
-| Field         | Type                 | Description                                                                                                                                                                         |
-| ------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `vertices`    | `number[][] \| null` | Array of `[x, y]` normalized vertex positions. `null` uses a default regular pentagon.                                                                                              |
-| `isClosed`    | `boolean`            | Whether the last vertex connects back to the first (`true` by default).                                                                                                             |
-| `smoothFlags` | `boolean[] \| null`  | Per-vertex flags — `true` slightly rounds the corner at that vertex using cubic Bézier curves (control points at 1/3 of adjacent edge lengths). `null` means all corners are sharp. |
+| Field           | Type                           | Description                                                                                                                                              |
+| --------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vertices`      | `number[][] \| null`           | Array of `[x, y]` normalized vertex positions. `null` uses a default regular pentagon.                                                                   |
+| `isClosed`      | `boolean`                      | Whether the last vertex connects back to the first (`true` by default).                                                                                  |
+| `smoothFlags`   | `boolean[] \| null`            | Per-vertex flags — `true` turns the corner at that vertex into a cubic Bézier curve. `null` means all corners are sharp.                                 |
+| `controlPoints` | `(number[] \| null)[] \| null` | Per-vertex Bézier control points `[cp1x, cp1y, cp2x, cp2y]` (normalized). `null`, or a `null` entry, auto-computes the handles at 1/3 of adjacent edges. |
 
-Users create polygons by clicking to place vertices one by one. Double-clicking or clicking near the first vertex finishes the shape. The tool normalizes the placed vertices into `[0, 1]` space before storing them. All vertices start sharp by default; to round a corner, enter vertex editing mode (double-click the polygon) and press **B** while hovering over a vertex.
+Users create polygons by clicking to place vertices one by one; double-clicking or clicking near the first vertex finishes the shape. Vertices are normalized into `[0, 1]` space before storing, and all corners start sharp.
+
+To edit a polygon, select it and click **Edit vertices** in the toolbar (double-clicking the shape opens its text editor instead). In vertex editing mode you can:
+
+- **Drag a vertex** to move it, or **drag an edge midpoint** to insert a new vertex.
+- Hover a vertex and press **B** to toggle it between sharp and smooth (Bézier); drag the pink control handles of a smooth vertex to shape the curve.
+- Hover a vertex and press **Delete** / **Backspace** to remove it.
+- Press **Escape** (or double-click) to exit editing mode.
 
 A typical edgeless document structure with a surface block might look like this:
 
