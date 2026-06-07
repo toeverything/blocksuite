@@ -93,6 +93,47 @@ export function polygonNearestPoint(points: IVec[], point: IVec) {
   return rst;
 }
 
+/**
+ * Computes the area (geometric) centroid of a simple polygon using the
+ * shoelace formula. Callers pass normalized [0..1] vertices and receive a
+ * normalized [0..1] centroid. The shoelace centroid is covariant under the
+ * per-axis scale/translate that maps normalized to absolute space, so the
+ * centroid of normalized vertices denormalizes to the absolute centroid.
+ *
+ * Falls back to the vertex average for polygons with fewer than 3 vertices or
+ * (near-)zero area (degenerate / collinear), and returns the box center for an
+ * empty input.
+ *
+ * @param points - Polygon vertices [x, y], normalized to [0..1]
+ * @returns The normalized [0..1] centroid
+ */
+export function polygonCentroid(points: number[][]): IVec {
+  const n = points.length;
+  if (n === 0) return [0.5, 0.5];
+  const average = (): IVec => {
+    const sum = points.reduce<IVec>(
+      (acc, p) => [acc[0] + p[0], acc[1] + p[1]],
+      [0, 0]
+    );
+    return [sum[0] / n, sum[1] / n];
+  };
+  if (n < 3) return average();
+  let area = 0;
+  let cx = 0;
+  let cy = 0;
+  for (let i = 0; i < n; i++) {
+    const [x0, y0] = points[i];
+    const [x1, y1] = points[(i + 1) % n];
+    const cross = x0 * y1 - x1 * y0;
+    area += cross;
+    cx += (x0 + x1) * cross;
+    cy += (y0 + y1) * cross;
+  }
+  area *= 0.5;
+  if (Math.abs(area) < EPSILON) return average();
+  return [cx / (6 * area), cy / (6 * area)];
+}
+
 export function polygonNearestPointAndTangent(
   points: IVec[],
   point: IVec

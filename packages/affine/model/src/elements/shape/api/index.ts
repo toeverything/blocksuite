@@ -5,6 +5,8 @@ import { polygon } from './polygon.js';
 import { rect } from './rect.js';
 import { triangle } from './triangle.js';
 
+export { DEFAULT_POLYGON_VERTICES } from './polygon.js';
+
 export const shapeMethods: Record<ShapeType, typeof rect> = {
   rect,
   triangle,

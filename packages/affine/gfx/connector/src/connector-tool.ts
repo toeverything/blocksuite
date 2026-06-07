@@ -7,6 +7,7 @@ import {
   type Connection,
   type ConnectorElementModel,
   ConnectorMode,
+  DEFAULT_POLYGON_VERTICES,
   GroupElementModel,
   ShapeElementModel,
   ShapeType,
@@ -16,7 +17,7 @@ import {
   TelemetryProvider,
 } from '@blocksuite/affine-shared/services';
 import type { IBound, IVec } from '@blocksuite/global/gfx';
-import { Bound } from '@blocksuite/global/gfx';
+import { Bound, polygonCentroid } from '@blocksuite/global/gfx';
 import type { PointerEventState } from '@blocksuite/std';
 import { BaseTool, type GfxModel } from '@blocksuite/std/gfx';
 
@@ -207,13 +208,7 @@ export class ConnectorTool extends BaseTool<ConnectorToolOptions> {
       element.shapeType === ShapeType.Polygon
     ) {
       // Use polygon vertices and edge midpoints as endpoint locations
-      const verts: number[][] = element.vertices ?? [
-        [0.5, 0],
-        [1, 0.38],
-        [0.81, 1],
-        [0.19, 1],
-        [0, 0.38],
-      ];
+      const verts: number[][] = element.vertices ?? DEFAULT_POLYGON_VERTICES;
       const locations: IVec[] = [];
       for (let i = 0; i < verts.length; i++) {
         locations.push([verts[i][0], verts[i][1]]);
@@ -222,6 +217,15 @@ export class ConnectorTool extends BaseTool<ConnectorToolOptions> {
           (verts[i][0] + next[0]) / 2,
           (verts[i][1] + next[1]) / 2,
         ]);
+      }
+      // Geometric centroid as a center anchor (gated on the global toggle),
+      // mirroring the center anchor offered for other shape types.
+      const centerAnchorEnabled =
+        this.std.getOptional(EditPropsStore)?.getStorage(
+          'connectorCenterAnchor'
+        ) ?? true;
+      if (centerAnchorEnabled) {
+        locations.push(polygonCentroid(verts));
       }
       this._sourceLocations = locations;
     } else {

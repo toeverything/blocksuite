@@ -21,7 +21,7 @@ import type { ShapeElementModel } from '../shape.js';
  * are provided. Stored as normalized [0-1] coordinates relative to the
  * bounding box.
  */
-const DEFAULT_POLYGON_VERTICES: number[][] = [
+export const DEFAULT_POLYGON_VERTICES: number[][] = [
   [0.5, 0],
   [1, 0.38],
   [0.81, 1],

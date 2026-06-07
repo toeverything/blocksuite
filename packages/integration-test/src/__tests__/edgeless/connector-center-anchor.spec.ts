@@ -11,7 +11,7 @@ import {
   isCenterAnchorEligible,
   isCenterAnchorEnabled,
 } from '@blocksuite/affine-gfx-connector';
-import { Bound } from '@blocksuite/global/gfx';
+import { Bound, polygonCentroid } from '@blocksuite/global/gfx';
 import type { BlockStdScope } from '@blocksuite/std';
 import { beforeEach, describe, expect, test } from 'vitest';
 
@@ -223,6 +223,182 @@ describe('Connector center anchor', () => {
     expect(connector.path.length).toBeGreaterThan(0);
     expect(connector.source.id).toBe(shape1Id);
     expect(connector.target.id).toBe(shape2Id);
+  });
+
+  // --- Polygon (freeshape) center anchor ---
+
+  // Asymmetric right-triangle polygon: centroid = (1/3, 1/3), clearly NOT the
+  // bounding-box center [0.5, 0.5].
+  const TRI_VERTS = [
+    [0, 0],
+    [1, 0],
+    [0, 1],
+  ];
+
+  const addPolygon = (vertices: number[][], extra: Record<string, unknown> = {}) => {
+    const id = service.crud.addElement('shape', {
+      shapeType: ShapeType.Polygon,
+      xywh: '[0,0,100,100]',
+      vertices,
+      ...extra,
+    });
+    if (!id) throw new Error('Failed to create polygon');
+    return id;
+  };
+
+  test('polygon is center-anchor eligible', () => {
+    const shape = service.crud.getElementById(
+      addPolygon(TRI_VERTS)
+    ) as ShapeElementModel;
+    expect(isCenterAnchorEligible(shape)).toBe(true);
+  });
+
+  test('getAnchors adds the geometric centroid for a polygon (2N+1)', () => {
+    const shape = service.crud.getElementById(
+      addPolygon(TRI_VERTS)
+    ) as ShapeElementModel;
+
+    const withCenter = getAnchors(shape, true);
+    expect(withCenter.length).toBe(TRI_VERTS.length * 2 + 1);
+
+    const centroid = polygonCentroid(TRI_VERTS);
+    const last = withCenter[withCenter.length - 1];
+    expect(last.coord[0]).toBeCloseTo(centroid[0], 5);
+    expect(last.coord[1]).toBeCloseTo(centroid[1], 5);
+
+    // The centroid must NOT be the bounding-box center [0.5, 0.5].
+    const isBboxCenter =
+      Math.abs(last.coord[0] - 0.5) < 0.01 &&
+      Math.abs(last.coord[1] - 0.5) < 0.01;
+    expect(isBboxCenter).toBe(false);
+
+    // Without the center flag, no centroid anchor is emitted.
+    const withoutCenter = getAnchors(shape, false);
+    expect(withoutCenter.length).toBe(TRI_VERTS.length * 2);
+  });
+
+  test('toggle off removes the polygon centroid anchor', () => {
+    const store = std.get(EditPropsStore);
+    store.setStorage('connectorCenterAnchor', false);
+
+    const shape = service.crud.getElementById(
+      addPolygon(TRI_VERTS)
+    ) as ShapeElementModel;
+    const anchors = getAnchors(shape, isCenterAnchorEnabled(std));
+    expect(anchors.length).toBe(TRI_VERTS.length * 2);
+  });
+
+  test('connector to polygon center terminates on an edge, not at the centroid', async () => {
+    const rectId = service.crud.addElement('shape', {
+      shapeType: ShapeType.Rect,
+      xywh: '[300,300,100,100]',
+    });
+    const polyId = addPolygon(TRI_VERTS);
+    if (!rectId) throw new Error('Failed to create rect');
+
+    const centroid = polygonCentroid(TRI_VERTS);
+    const connId = service.crud.addElement('connector', {
+      mode: ConnectorMode.Straight,
+      source: { id: rectId, position: [0.5, 0.5] },
+      target: { id: polyId, position: [centroid[0], centroid[1]] },
+    });
+    if (!connId) throw new Error('Failed to create connector');
+    await wait(200);
+
+    const connector = service.crud.getElementById(
+      connId
+    ) as ConnectorElementModel;
+    const poly = service.crud.getElementById(polyId) as ShapeElementModel;
+    expect(connector.path.length).toBeGreaterThan(0);
+
+    const connBound = Bound.deserialize(connector.xywh);
+    const last = connector.path[connector.path.length - 1];
+    const end: [number, number] = [
+      last[0] + connBound.x,
+      last[1] + connBound.y,
+    ];
+
+    // polygon bound is [0,0,100,100] => absolute centroid
+    const centroidAbs = [centroid[0] * 100, centroid[1] * 100];
+    const atCentroid =
+      Math.abs(end[0] - centroidAbs[0]) < 1 &&
+      Math.abs(end[1] - centroidAbs[1]) < 1;
+    expect(atCentroid).toBe(false);
+
+    // The endpoint must lie on the polygon boundary.
+    const nearest = poly.getNearestPoint(end);
+    const dist = Math.hypot(end[0] - nearest[0], end[1] - nearest[1]);
+    expect(dist).toBeLessThan(2);
+  });
+
+  test('rotated polygon: center-anchored endpoint stays on the (rotated) edge', async () => {
+    const rectId = service.crud.addElement('shape', {
+      shapeType: ShapeType.Rect,
+      xywh: '[400,0,100,100]',
+    });
+    const polyId = addPolygon(TRI_VERTS, { rotate: 30 });
+    if (!rectId) throw new Error('Failed to create rect');
+
+    const centroid = polygonCentroid(TRI_VERTS);
+    const connId = service.crud.addElement('connector', {
+      mode: ConnectorMode.Straight,
+      source: { id: rectId, position: [0.5, 0.5] },
+      target: { id: polyId, position: [centroid[0], centroid[1]] },
+    });
+    if (!connId) throw new Error('Failed to create connector');
+    await wait(200);
+
+    const connector = service.crud.getElementById(
+      connId
+    ) as ConnectorElementModel;
+    const poly = service.crud.getElementById(polyId) as ShapeElementModel;
+    expect(connector.path.length).toBeGreaterThan(0);
+
+    const connBound = Bound.deserialize(connector.xywh);
+    const last = connector.path[connector.path.length - 1];
+    const end: [number, number] = [
+      last[0] + connBound.x,
+      last[1] + connBound.y,
+    ];
+    const nearest = poly.getNearestPoint(end);
+    const dist = Math.hypot(end[0] - nearest[0], end[1] - nearest[1]);
+    expect(dist).toBeLessThan(2);
+  });
+
+  test('concave polygon center anchor still produces a finite edge endpoint', async () => {
+    // Arrowhead-like concave polygon; its centroid may sit near a notch.
+    const CONCAVE = [
+      [0, 0],
+      [1, 0.5],
+      [0, 1],
+      [0.3, 0.5],
+    ];
+    const rectId = service.crud.addElement('shape', {
+      shapeType: ShapeType.Rect,
+      xywh: '[400,400,100,100]',
+    });
+    const polyId = addPolygon(CONCAVE);
+    if (!rectId) throw new Error('Failed to create rect');
+
+    const centroid = polygonCentroid(CONCAVE);
+    const connId = service.crud.addElement('connector', {
+      mode: ConnectorMode.Straight,
+      source: { id: rectId, position: [0.5, 0.5] },
+      target: { id: polyId, position: [centroid[0], centroid[1]] },
+    });
+    if (!connId) throw new Error('Failed to create connector');
+    await wait(200);
+
+    const connector = service.crud.getElementById(
+      connId
+    ) as ConnectorElementModel;
+    expect(connector.path.length).toBeGreaterThan(0);
+
+    const connBound = Bound.deserialize(connector.xywh);
+    const last = connector.path[connector.path.length - 1];
+    const endX = last[0] + connBound.x;
+    const endY = last[1] + connBound.y;
+    expect(Number.isFinite(endX) && Number.isFinite(endY)).toBe(true);
   });
 });
 

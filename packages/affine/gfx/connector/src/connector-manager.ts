@@ -4,6 +4,7 @@ import {
   type Connection,
   ConnectorElementModel,
   ConnectorMode,
+  DEFAULT_POLYGON_VERTICES,
   GroupElementModel,
   type LocalConnectorElementModel,
   ShapeElementModel,
@@ -28,6 +29,7 @@ import {
   lineIntersects,
   PI2,
   PointLocation,
+  polygonCentroid,
   sign,
   toRadian,
   Vec,
@@ -103,8 +105,21 @@ export function isCenterAnchorEligible(ele: GfxModel): boolean {
     shapeType === ShapeType.Rect ||
     shapeType === ShapeType.Ellipse ||
     shapeType === ShapeType.Diamond ||
-    shapeType === ShapeType.Triangle
+    shapeType === ShapeType.Triangle ||
+    shapeType === ShapeType.Polygon
   );
+}
+
+/**
+ * Returns the normalized [0..1] coordinate of a shape's center anchor.
+ * For polygons this is the geometric centroid of the (normalized) vertices;
+ * for all other eligible shapes it is the bounding-box center [0.5, 0.5].
+ */
+function getCenterAnchorCoord(ele: GfxModel): IVec {
+  if (ele instanceof ShapeElementModel && ele.shapeType === ShapeType.Polygon) {
+    return polygonCentroid(ele.vertices ?? DEFAULT_POLYGON_VERTICES);
+  }
+  return [0.5, 0.5];
 }
 
 /**
@@ -118,12 +133,14 @@ export function isCenterAnchorEnabled(std: BlockStdScope): boolean {
 }
 
 /**
- * Checks if a normalized anchor position is the center point [0.5, 0.5].
+ * Checks if a normalized anchor position is the shape's center anchor.
+ * Shape-aware: for polygons the center is the geometric centroid, otherwise
+ * the bounding-box center [0.5, 0.5].
  */
-function isCenterAnchorPosition(position: IVec): boolean {
+function isCenterAnchorPosition(position: IVec, ele: GfxModel): boolean {
+  const [cx, cy] = getCenterAnchorCoord(ele);
   return (
-    almostEqual(position[0], 0.5, 0.001) &&
-    almostEqual(position[1], 0.5, 0.001)
+    almostEqual(position[0], cx, 0.001) && almostEqual(position[1], cy, 0.001)
   );
 }
 
@@ -283,13 +300,7 @@ export function getAnchors(ele: GfxModel, includeCenterAnchor = true) {
     ele instanceof ShapeElementModel &&
     ele.shapeType === ShapeType.Polygon
   ) {
-    const verts: number[][] = ele.vertices ?? [
-      [0.5, 0],
-      [1, 0.38],
-      [0.81, 1],
-      [0.19, 1],
-      [0, 0.38],
-    ];
+    const verts: number[][] = ele.vertices ?? DEFAULT_POLYGON_VERTICES;
 
     for (let i = 0; i < verts.length; i++) {
       const curr = verts[i];
@@ -337,6 +348,23 @@ export function getAnchors(ele: GfxModel, includeCenterAnchor = true) {
       anchors.push({
         point: new PointLocation(midRotated, edgeTangent),
         coord: midCoord,
+      });
+    }
+
+    // Center anchor at the polygon's geometric centroid (gated on the toggle).
+    if (includeCenterAnchor) {
+      const centroid = polygonCentroid(verts);
+      const centroidAbs: IVec = [
+        bound.x + centroid[0] * bound.w,
+        bound.y + centroid[1] * bound.h,
+      ];
+      const centroidRotated = getPointFromBoundsWithRotation(
+        { ...bound, rotate },
+        centroidAbs
+      );
+      anchors.push({
+        point: new PointLocation(centroidRotated),
+        coord: centroid,
       });
     }
     return anchors;
@@ -1709,9 +1737,9 @@ export class ConnectorPathGenerator extends PathGenerator {
     let adjustedEnd = endPoint;
 
     // Check if source is center-anchored
-    if (start && source.id /* && isCenterAnchorEligible(start) */) {
+    if (start && source.id && isCenterAnchorEligible(start)) {
       const isCenter = source.position
-        ? isCenterAnchorPosition(source.position)
+        ? isCenterAnchorPosition(source.position, start)
         : this._isPointAtShapeCenter(start, startPoint);
       if (isCenter) {
         adjustedStart = computePerimeterPointForCenterAnchor(
@@ -1725,7 +1753,7 @@ export class ConnectorPathGenerator extends PathGenerator {
     // Check if target is center-anchored
     if (end && target.id && isCenterAnchorEligible(end)) {
       const isCenter = target.position
-        ? isCenterAnchorPosition(target.position)
+        ? isCenterAnchorPosition(target.position, end)
         : this._isPointAtShapeCenter(end, endPoint);
       if (isCenter) {
         adjustedEnd = computePerimeterPointForCenterAnchor(
