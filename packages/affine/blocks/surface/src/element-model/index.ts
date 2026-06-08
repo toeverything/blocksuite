@@ -6,6 +6,7 @@ import {
   MindmapElementModel,
   ShapeElementModel,
   TextElementModel,
+  WardleyBackgroundElementModel,
 } from '@blocksuite/affine-model';
 
 import { SurfaceElementModel } from './base.js';
@@ -18,6 +19,7 @@ export const elementsCtorMap = {
   text: TextElementModel,
   mindmap: MindmapElementModel,
   highlighter: HighlighterElementModel,
+  wardley: WardleyBackgroundElementModel,
 };
 
 export {
@@ -29,6 +31,7 @@ export {
   ShapeElementModel,
   SurfaceElementModel,
   TextElementModel,
+  WardleyBackgroundElementModel,
 };
 
 export enum CanvasElementType {
@@ -39,6 +42,7 @@ export enum CanvasElementType {
   SHAPE = 'shape',
   TEXT = 'text',
   HIGHLIGHTER = 'highlighter',
+  WARDLEY = 'wardley',
 }
 
 export type ElementModelMap = {
@@ -49,6 +53,7 @@ export type ElementModelMap = {
   ['group']: GroupElementModel;
   ['mindmap']: MindmapElementModel;
   ['highlighter']: HighlighterElementModel;
+  ['wardley']: WardleyBackgroundElementModel;
 };
 
 export function isCanvasElementType(type: string): type is CanvasElementType {

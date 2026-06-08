@@ -1562,6 +1562,23 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@blocksuite/affine-gfx-wardley@workspace:*, @blocksuite/affine-gfx-wardley@workspace:packages/affine/gfx/wardley":
+  version: 0.0.0-use.local
+  resolution: "@blocksuite/affine-gfx-wardley@workspace:packages/affine/gfx/wardley"
+  dependencies:
+    "@blocksuite/affine-block-surface": "workspace:*"
+    "@blocksuite/affine-ext-loader": "workspace:*"
+    "@blocksuite/affine-gfx-pointer": "workspace:*"
+    "@blocksuite/affine-model": "workspace:*"
+    "@blocksuite/affine-shared": "workspace:*"
+    "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*"
+    "@blocksuite/global": "workspace:*"
+    "@blocksuite/std": "workspace:*"
+    "@blocksuite/store": "workspace:*"
+    lit: "npm:^3.2.0"
+  languageName: unknown
+  linkType: soft
+
 "@blocksuite/affine-inline-comment@workspace:*, @blocksuite/affine-inline-comment@workspace:packages/affine/inlines/comment":
   version: 0.0.0-use.local
   resolution: "@blocksuite/affine-inline-comment@workspace:packages/affine/inlines/comment"
@@ -2296,6 +2313,7 @@ __metadata:
     "@blocksuite/affine-gfx-template": "workspace:*"
     "@blocksuite/affine-gfx-text": "workspace:*"
     "@blocksuite/affine-gfx-turbo-renderer": "workspace:*"
+    "@blocksuite/affine-gfx-wardley": "workspace:*"
     "@blocksuite/affine-inline-comment": "workspace:*"
     "@blocksuite/affine-inline-footnote": "workspace:*"
     "@blocksuite/affine-inline-latex": "workspace:*"
