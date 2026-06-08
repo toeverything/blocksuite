@@ -9,7 +9,10 @@
   "references": [
     { "path": "../../blocks/surface" },
     { "path": "../../ext-loader" },
+    { "path": "../connector" },
+    { "path": "../group" },
     { "path": "../pointer" },
+    { "path": "../shape" },
     { "path": "../../model" },
     { "path": "../../shared" },
     { "path": "../../widgets/edgeless-toolbar" },

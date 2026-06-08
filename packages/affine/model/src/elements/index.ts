@@ -6,7 +6,10 @@ import type { HighlighterElementModel } from './highlighter/index.js';
 import type { MindmapElementModel } from './mindmap/index.js';
 import type { ShapeElementModel } from './shape/index.js';
 import type { TextElementModel } from './text/index.js';
-import type { WardleyBackgroundElementModel } from './wardley/index.js';
+import type {
+  WardleyBackgroundElementModel,
+  WardleyNodeElementModel,
+} from './wardley/index.js';
 
 export * from './brush/index.js';
 export * from './connector/index.js';
@@ -26,6 +29,7 @@ export type SurfaceElementModelMap = {
   shape: ShapeElementModel;
   text: TextElementModel;
   wardley: WardleyBackgroundElementModel;
+  wardleyNode: WardleyNodeElementModel;
 };
 
 export type SurfaceTextModelMap = {

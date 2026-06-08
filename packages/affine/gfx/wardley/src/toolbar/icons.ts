@@ -32,3 +32,38 @@ export const wardleyBackgroundIcon = svg`<svg width="24" height="24" viewBox="0 
   <line x1="11" y1="6" x2="11" y2="19" stroke="currentColor" stroke-width="0.9" stroke-dasharray="1.8 1.8" opacity="0.6"/>
   <line x1="16" y1="6" x2="16" y2="19" stroke="currentColor" stroke-width="0.9" stroke-dasharray="1.8 1.8" opacity="0.6"/>
 </svg>`;
+
+/** Wardley red — matches the renderer presets (consts WARDLEY_RED). */
+const RED = '#d6455d';
+
+/** Component node (validated COMP-C2): single circle. */
+export const wardleyComponentIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="12" cy="12" r="6.3" fill="#fff" stroke="currentColor" stroke-width="1.5"/>
+</svg>`;
+
+/** Anchor (validated ANCH-B): person glyph inscribed in a circle. */
+export const wardleyAnchorIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="12" cy="12" r="6" fill="#fff" stroke="currentColor" stroke-width="1.6"/>
+  <circle cx="12" cy="9.4" r="1.8" fill="none" stroke="currentColor" stroke-width="1.3"/>
+  <path d="M7.4 15.9 C 8.2 12.1, 15.8 12.1, 16.6 15.9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+</svg>`;
+
+/** Dependency link (validated LINK-A3): two outline nodes joined by a line. */
+export const wardleyLinkIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <line x1="5.5" y1="16" x2="18.5" y2="8" stroke="currentColor" stroke-width="1.8"/>
+  <circle cx="5.5" cy="16" r="2.2" fill="#fff" stroke="currentColor" stroke-width="1.5"/>
+  <circle cx="18.5" cy="8" r="2.2" fill="#fff" stroke="currentColor" stroke-width="1.5"/>
+</svg>`;
+
+/** Evolution arrow (validated ARR-B): red dashed arrow. */
+export const wardleyArrowIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <line x1="4.5" y1="12" x2="16" y2="12" stroke="${RED}" stroke-width="1.7" stroke-dasharray="2.4 2.2" stroke-linecap="round"/>
+  <path d="M14.5 7.8 L20 12 L14.5 16.2 Z" fill="${RED}"/>
+</svg>`;
+
+/** Inertia (validated INER): black bar barring the red dashed arrow. */
+export const wardleyInertiaIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <line x1="3.5" y1="12" x2="16.5" y2="12" stroke="${RED}" stroke-width="1.7" stroke-dasharray="2.4 2.2" stroke-linecap="round"/>
+  <path d="M15 7.8 L20.5 12 L15 16.2 Z" fill="${RED}"/>
+  <rect x="9.6" y="5.4" width="2.9" height="13.2" rx="0.6" fill="currentColor"/>
+</svg>`;

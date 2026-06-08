@@ -295,6 +295,17 @@ export function getAnchors(ele: GfxModel, includeCenterAnchor = true) {
   const anchors: { point: PointLocation; coord: IVec }[] = [];
   const rotate = ele.rotate;
 
+  // Elements that opt into center-only anchoring (e.g. Wardley nodes) expose a
+  // single anchor at their center; links clip to the perimeter via
+  // getLineIntersections.
+  if ((ele as { centerAnchorOnly?: boolean }).centerAnchorOnly) {
+    const centerPoint = getPointFromBoundsWithRotation(
+      { ...bound, rotate },
+      bound.center
+    );
+    return [{ point: new PointLocation(centerPoint), coord: [0.5, 0.5] as IVec }];
+  }
+
   // For polygon shapes, generate anchors at each vertex and edge midpoint
   if (
     ele instanceof ShapeElementModel &&

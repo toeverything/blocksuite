@@ -29,6 +29,14 @@ export class WardleyBackgroundElementModel extends GfxPrimitiveElementModel<Ward
     return 'wardley';
   }
 
+  /**
+   * The background is a passive canvas: connectors must not snap their
+   * endpoints to it (a Wardley arrow should connect nodes, never the map).
+   */
+  override get connectable() {
+    return false;
+  }
+
   override containsBound(bounds: Bound): boolean {
     const points = getPointsFromBoundWithRotation(this);
     return points.some(point => bounds.containsPoint(point));

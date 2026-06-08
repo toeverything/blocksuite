@@ -228,6 +228,9 @@ export class ConnectorTool extends BaseTool<ConnectorToolOptions> {
         locations.push(polygonCentroid(verts));
       }
       this._sourceLocations = locations;
+    } else if ((element as { centerAnchorOnly?: boolean }).centerAnchorOnly) {
+      // Wardley nodes connect from their center only.
+      this._sourceLocations = [[0.5, 0.5]];
     } else {
       const centerAnchorEnabled =
         this.std.getOptional(EditPropsStore)?.getStorage(

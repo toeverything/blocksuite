@@ -1,16 +1,47 @@
 import { DefaultTool } from '@blocksuite/affine-block-surface';
+import { ConnectorTool } from '@blocksuite/affine-gfx-connector';
+import { createGroupCommand } from '@blocksuite/affine-gfx-group';
 import { EmptyTool } from '@blocksuite/affine-gfx-pointer';
+import {
+  ConnectorMode,
+  FontFamily,
+  PointStyle,
+  ShapeStyle,
+  StrokeStyle,
+} from '@blocksuite/affine-model';
+import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
 import { Bound } from '@blocksuite/global/gfx';
 import { css, html, LitElement } from 'lit';
 
 import { REF_WIDTH } from '../consts';
-import { wardleyBackgroundIcon } from './icons';
+import {
+  INERTIA_COLOR,
+  INERTIA_SIZE,
+  LABEL_DEFAULT,
+  LABEL_FONT_SIZE,
+  LABEL_GAP,
+  LINK_GREY,
+  LINK_STROKE_WIDTH,
+  NODE_FILL,
+  NODE_SIZE,
+  NODE_STROKE,
+  NODE_STROKE_WIDTH,
+  WARDLEY_RED,
+} from '../node/consts';
+import {
+  wardleyAnchorIcon,
+  wardleyArrowIcon,
+  wardleyBackgroundIcon,
+  wardleyComponentIcon,
+  wardleyInertiaIcon,
+  wardleyLinkIcon,
+} from './icons';
 
 /**
- * The "Others"-style popover that opens above the toolbar for the Wardley
- * toolbox. Its first item creates a Wardley map background. New specialties can
- * be added as further buttons here.
+ * The popover that opens above the toolbar for the Wardley toolbox. Each item
+ * creates a pre-formatted Wardley object. Nodes (component / anchor) are a
+ * native ellipse + a native text label, grouped together.
  */
 export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
   static override styles = css`
@@ -42,7 +73,6 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
     const { gfx } = this;
     if (!gfx.surface) return;
 
-    // Size = the largest existing Wardley background, kept 16:9.
     let width = REF_WIDTH;
     for (const el of gfx.surface.getElementsByType('wardley')) {
       const [, , ew, eh] = el.deserializedXYWH;
@@ -60,10 +90,107 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
         height
       ).serialize(),
     });
+    this._finish(id);
+  }
+
+  private _createNode(kind: 'component' | 'anchor') {
+    const { gfx } = this;
+    if (!gfx.surface) return;
+
+    const { centerX: cx, centerY: cy } = gfx.viewport;
+    const d = NODE_SIZE;
+
+    // Native ellipse — inherits all shape behaviour (editable border, etc.).
+    const nodeId = gfx.surface.addElement({
+      type: 'wardleyNode',
+      kind,
+      shapeType: 'ellipse',
+      filled: true,
+      fillColor: NODE_FILL,
+      strokeColor: NODE_STROKE,
+      strokeWidth: NODE_STROKE_WIDTH,
+      xywh: new Bound(cx - d / 2, cy - d / 2, d, d).serialize(),
+    });
+
+    // Native free-text label (same Inter family as the axis labels, size 18).
+    const lh = LABEL_FONT_SIZE + 8;
+    const labelId = gfx.surface.addElement({
+      type: 'text',
+      text: LABEL_DEFAULT[kind],
+      fontFamily: FontFamily.Inter,
+      fontSize: LABEL_FONT_SIZE,
+      color: NODE_STROKE,
+      textAlign: 'left',
+      xywh: new Bound(cx + d / 2 + LABEL_GAP, cy - lh / 2, 120, lh).serialize(),
+    });
+
+    // Group node + label so they move together (label follows the node; enter
+    // the group to reposition / edit the label).
+    let selId: string = nodeId;
+    const [, ctx] = this.edgeless.std.command.exec(createGroupCommand, {
+      elements: [nodeId, labelId],
+    });
+    const groupId = (ctx as { groupId?: string } | undefined)?.groupId;
+    if (groupId) selId = groupId;
+
+    this._finish(selId);
+  }
+
+  private _createInertia() {
+    const { gfx } = this;
+    if (!gfx.surface) return;
+
+    const { w, h } = INERTIA_SIZE;
+    const { centerX, centerY } = gfx.viewport;
+    const id = gfx.surface.addElement({
+      type: 'shape',
+      shapeType: 'rect',
+      filled: true,
+      fillColor: INERTIA_COLOR,
+      strokeColor: INERTIA_COLOR,
+      strokeWidth: 0,
+      shapeStyle: ShapeStyle.General,
+      roughness: 0,
+      radius: 0,
+      xywh: new Bound(centerX - w / 2, centerY - h / 2, w, h).serialize(),
+    });
+    this._finish(id);
+  }
+
+  /**
+   * Activate the native connector tool, pre-styled for a Wardley link (grey,
+   * solid, no arrow) or evolution arrow (red, dashed, FILLED triangle). The
+   * user then draws from one node to another (endpoints attach to centers).
+   */
+  private _activateConnector(kind: 'link' | 'arrow') {
+    const props =
+      kind === 'arrow'
+        ? {
+            mode: ConnectorMode.Straight,
+            stroke: WARDLEY_RED,
+            strokeStyle: StrokeStyle.Dash,
+            strokeWidth: LINK_STROKE_WIDTH,
+            frontEndpointStyle: PointStyle.None,
+            rearEndpointStyle: PointStyle.Triangle,
+          }
+        : {
+            mode: ConnectorMode.Straight,
+            stroke: LINK_GREY,
+            strokeStyle: StrokeStyle.Solid,
+            strokeWidth: LINK_STROKE_WIDTH,
+            frontEndpointStyle: PointStyle.None,
+            rearEndpointStyle: PointStyle.None,
+          };
+    this.edgeless.std.get(EditPropsStore).recordLastProps('connector', props);
+    this.gfx.tool.setTool(ConnectorTool, { mode: ConnectorMode.Straight });
+    this.toolbar?.activePopper?.dispose();
+  }
+
+  private _finish(id: string) {
+    const { gfx } = this;
     gfx.doc.captureSync();
     gfx.tool.setTool(DefaultTool);
     gfx.selection.set({ elements: [id], editing: false });
-
     this.toolbar?.activePopper?.dispose();
   }
 
@@ -73,11 +200,40 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
         <div class="menu-content">
           <div class="button-group-container">
             <edgeless-tool-icon-button
-              .activeMode=${'background'}
               .tooltip=${'Fond de carte Wardley'}
               @click=${this._createBackground}
             >
               ${wardleyBackgroundIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Composant'}
+              @click=${() => this._createNode('component')}
+            >
+              ${wardleyComponentIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Ancre'}
+              @click=${() => this._createNode('anchor')}
+            >
+              ${wardleyAnchorIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Lien'}
+              @click=${() => this._activateConnector('link')}
+            >
+              ${wardleyLinkIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Flèche (évolution)'}
+              @click=${() => this._activateConnector('arrow')}
+            >
+              ${wardleyArrowIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Inertie'}
+              @click=${this._createInertia}
+            >
+              ${wardleyInertiaIcon}
             </edgeless-tool-icon-button>
           </div>
         </div>

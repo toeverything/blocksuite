@@ -119,8 +119,10 @@ export const wardley: ElementRenderer<WardleyBackgroundElementModel> = (
   // ── Axes (L shape) + arrowheads ─────────────────────────────────────
   ctx.strokeStyle = COLORS.axis;
   ctx.lineWidth = LINE.axis;
-  line(px0, py1, px1, py1); // X axis
-  line(px0, py1, px0, py0); // Y axis
+  // Stop each axis line at the base of its arrowhead (with a 1px overlap, hidden
+  // under the triangle) so the line thickness never pokes past the tip on zoom.
+  line(px0, py1, px1 - ARROW + 1, py1); // X axis (arrow tip at px1)
+  line(px0, py1, px0, py0 + ARROW - 1); // Y axis (arrow tip at py0)
   ctx.fillStyle = COLORS.axis;
   // X arrow (points right)
   ctx.beginPath();
