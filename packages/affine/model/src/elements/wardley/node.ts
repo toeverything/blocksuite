@@ -2,15 +2,16 @@ import { field } from '@blocksuite/std/gfx';
 
 import { ShapeElementModel } from '../shape/index.js';
 
-export type WardleyNodeKind = 'component' | 'anchor';
+export type WardleyNodeKind = 'component' | 'anchor' | 'pipeline' | 'handle';
 
 /**
  * A Wardley map node. Extends {@link ShapeElementModel} (a native ellipse) so it
  * inherits ALL shape behaviour — editable stroke width / colors, native resize,
  * center connector anchor, the shape context toolbar — for free. `kind`
- * discriminates the plain `component` from the `anchor` (which the renderer
- * decorates with an inscribed person glyph). The text label is a SEPARATE
- * native text element grouped with the node, not stored here.
+ * discriminates the plain `component`, the `anchor` (which the renderer
+ * decorates with an inscribed person glyph), and the two pieces of a pipeline:
+ * the `pipeline` body (a wide rect) and its square `handle`. The text label is a
+ * SEPARATE native text element grouped with the node, not stored here.
  */
 export class WardleyNodeElementModel extends ShapeElementModel {
   override get type() {
@@ -20,10 +21,19 @@ export class WardleyNodeElementModel extends ShapeElementModel {
   /**
    * Connector anchors are restricted to the center for Wardley nodes (read by
    * the connector manager / tool). Links therefore always attach to the node
-   * center and clip at the circle perimeter — the clean Wardley behaviour.
+   * center and clip at the perimeter — the clean Wardley behaviour.
    */
   get centerAnchorOnly() {
     return true;
+  }
+
+  /**
+   * The pipeline body offers NO connector anchors: a pipeline is connected only
+   * through its handle's center. All other kinds keep the native connectable
+   * behaviour (with center-only anchoring via {@link centerAnchorOnly}).
+   */
+  override get connectable() {
+    return this.kind !== 'pipeline';
   }
 
   @field('component' as WardleyNodeKind)

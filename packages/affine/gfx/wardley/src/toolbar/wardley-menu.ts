@@ -16,6 +16,7 @@ import { css, html, LitElement } from 'lit';
 
 import { REF_WIDTH } from '../consts';
 import {
+  HANDLE_SIZE,
   INERTIA_COLOR,
   INERTIA_SIZE,
   LABEL_DEFAULT,
@@ -27,6 +28,10 @@ import {
   NODE_SIZE,
   NODE_STROKE,
   NODE_STROKE_WIDTH,
+  PIPELINE_FILL,
+  PIPELINE_HEIGHT,
+  PIPELINE_LABEL,
+  PIPELINE_WIDTH,
   WARDLEY_RED,
 } from '../node/consts';
 import {
@@ -36,6 +41,7 @@ import {
   wardleyComponentIcon,
   wardleyInertiaIcon,
   wardleyLinkIcon,
+  wardleyPipelineIcon,
 } from './icons';
 
 /**
@@ -158,6 +164,87 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
   }
 
   /**
+   * Create a pipeline: a wide thin native rect body (white semi-transparent,
+   * NON-connectable) + a node-sized square handle straddling its top edge (the
+   * only connection point, center anchor) + a native text label. The handle and
+   * label are grouped, then grouped again with the body so the whole pipeline
+   * moves as one. Pure composition of native elements — no custom type / view.
+   */
+  private _createPipeline() {
+    const { gfx } = this;
+    if (!gfx.surface) return;
+
+    const { centerX: cx, centerY: cy } = gfx.viewport;
+    const W = PIPELINE_WIDTH;
+    const H = PIPELINE_HEIGHT;
+    const d = HANDLE_SIZE;
+    const top = cy - H / 2;
+
+    // Body: a WardleyNode rect, made non-connectable by `kind: 'pipeline'`.
+    const bodyId = gfx.surface.addElement({
+      type: 'wardleyNode',
+      kind: 'pipeline',
+      shapeType: 'rect',
+      filled: true,
+      fillColor: PIPELINE_FILL,
+      strokeColor: NODE_STROKE,
+      strokeWidth: NODE_STROKE_WIDTH,
+      shapeStyle: ShapeStyle.General,
+      roughness: 0,
+      radius: 0,
+      xywh: new Bound(cx - W / 2, top, W, H).serialize(),
+    });
+
+    // Handle: a node-sized WardleyNode square straddling the top edge. Inherits
+    // `centerAnchorOnly` so connectors attach to its center only.
+    const handleId = gfx.surface.addElement({
+      type: 'wardleyNode',
+      kind: 'handle',
+      shapeType: 'rect',
+      filled: true,
+      fillColor: NODE_FILL,
+      strokeColor: NODE_STROKE,
+      strokeWidth: NODE_STROKE_WIDTH,
+      shapeStyle: ShapeStyle.General,
+      roughness: 0,
+      radius: 0,
+      xywh: new Bound(cx - d / 2, top - d / 2, d, d).serialize(),
+    });
+
+    // Native free-text label (same Inter family as the axis labels, size 18),
+    // centered horizontally on the pipeline and sitting ABOVE the handle (not
+    // astride the top edge).
+    const lh = LABEL_FONT_SIZE + 8;
+    const labelW = 120;
+    const labelId = gfx.surface.addElement({
+      type: 'text',
+      text: PIPELINE_LABEL,
+      fontFamily: FontFamily.Inter,
+      fontSize: LABEL_FONT_SIZE,
+      color: NODE_STROKE,
+      textAlign: 'center',
+      xywh: new Bound(
+        cx - labelW / 2,
+        top - d / 2 - lh - LABEL_GAP,
+        labelW,
+        lh
+      ).serialize(),
+    });
+
+    // Nested groups: (handle + label), then (body + that group).
+    const [, c1] = this.edgeless.std.command.exec(createGroupCommand, {
+      elements: [handleId, labelId],
+    });
+    const innerId = (c1 as { groupId?: string } | undefined)?.groupId;
+    const [, c2] = this.edgeless.std.command.exec(createGroupCommand, {
+      elements: innerId ? [bodyId, innerId] : [bodyId, handleId, labelId],
+    });
+    const outerId = (c2 as { groupId?: string } | undefined)?.groupId;
+
+    this._finish(outerId ?? bodyId);
+  }
+
+  /**
    * Activate the native connector tool, pre-styled for a Wardley link (grey,
    * solid, no arrow) or evolution arrow (red, dashed, FILLED triangle). The
    * user then draws from one node to another (endpoints attach to centers).
@@ -234,6 +321,12 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
               @click=${this._createInertia}
             >
               ${wardleyInertiaIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Pipeline'}
+              @click=${this._createPipeline}
+            >
+              ${wardleyPipelineIcon}
             </edgeless-tool-icon-button>
           </div>
         </div>

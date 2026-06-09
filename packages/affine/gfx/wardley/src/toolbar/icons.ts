@@ -67,3 +67,9 @@ export const wardleyInertiaIcon = svg`<svg width="24" height="24" viewBox="0 0 2
   <path d="M15 7.8 L20.5 12 L15 16.2 Z" fill="${RED}"/>
   <rect x="9.6" y="5.4" width="2.9" height="13.2" rx="0.6" fill="currentColor"/>
 </svg>`;
+
+/** Pipeline (validated PIPE-D): wide thin rect + square handle astride the top edge, thin borders. */
+export const wardleyPipelineIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="3.5" y="11" width="17" height="7" rx="1" fill="#fff" stroke="currentColor" stroke-width="1.2"/>
+  <rect x="10" y="9" width="4" height="4" rx="0.6" fill="#fff" stroke="currentColor" stroke-width="1.2"/>
+</svg>`;

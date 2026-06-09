@@ -35,6 +35,21 @@ export const LABEL_GAP = 8;
 export const LABEL_DEFAULT = { component: 'Composant', anchor: 'Ancre' };
 
 /**
+ * Pipeline defaults. The body is a wide, thin native rect (≈ 1.4× the node
+ * diameter tall) with a white slightly-transparent fill and a node-weight
+ * border. The handle is a node-sized square straddling the top edge — the only
+ * connection point (center anchor). Both reuse the WardleyNode (rect) so they
+ * stay native and editable; the body is made non-connectable in the model.
+ */
+export const PIPELINE_HEIGHT = Math.round(NODE_SIZE * 1.4); // 25
+export const PIPELINE_WIDTH = 120;
+/** White ~60% opacity — fill only; the 1px border stays opaque. */
+export const PIPELINE_FILL = '#ffffff99';
+/** Handle square = node diameter. */
+export const HANDLE_SIZE = NODE_SIZE;
+export const PIPELINE_LABEL = 'Pipeline';
+
+/**
  * Connector line width. Connectors are constrained to the LineWidth enum
  * {2,4,6,8,10,12}, so the thinnest available (2) is used — as close as possible
  * to the 1px node border.
