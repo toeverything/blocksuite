@@ -32,7 +32,7 @@ export const ANCHOR = {
 /** Native text label, same family as the axis labels, size 18. */
 export const LABEL_FONT_SIZE = 18;
 export const LABEL_GAP = 8;
-export const LABEL_DEFAULT = { component: 'Composant', anchor: 'Ancre' };
+export const LABEL_DEFAULT = { component: 'Component', anchor: 'Anchor' };
 
 /**
  * Pipeline defaults. The body is a wide, thin native rect (≈ 1.4× the node
@@ -77,7 +77,7 @@ export const MARKET_DOT_STROKE_WIDTH = 2;
 /** Triangle connectors: thin + dark, no arrows. */
 export const MARKET_LINK_WIDTH = 1;
 export const MARKET_LINK_COLOR = NODE_STROKE;
-export const MARKET_LABEL = 'Marché';
+export const MARKET_LABEL = 'Market';
 
 /**
  * Ecosystem node: a single connectable circle drawn as a GLYPH — a double border
@@ -93,7 +93,7 @@ export const ECOSYSTEM = {
   hatchOuterRatio: 0.86, // hatch stays just inside the 2nd border
   hatchSpacingRatio: 0.15, // gap between hatch lines
 };
-export const ECOSYSTEM_LABEL = 'Écosystème';
+export const ECOSYSTEM_LABEL = 'Ecosystem';
 
 /**
  * Method node: a component inscribed in a slightly larger outer circle whose
@@ -106,4 +106,4 @@ export const METHOD_FILL = '#d9d9d9';
 export const METHOD = {
   centerRatio: 0.5, // inner white component radius / R
 };
-export const METHOD_LABEL = 'Composant';
+export const METHOD_LABEL = 'Component';

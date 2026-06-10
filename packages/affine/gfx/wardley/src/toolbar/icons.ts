@@ -8,7 +8,7 @@ export const wardleyToolbarIcon = svg`<svg width="100%" height="100%" viewBox="0
       <stop offset="1" stop-color="#fdf3e3"/>
     </linearGradient>
   </defs>
-  <!-- emprise = 50×50 centrée dans la viewBox 56 (marge 3px) -->
+  <!-- footprint = 50x50 centered in the viewBox 56 (3px margin) -->
   <svg x="3" y="3" width="48" height="48" viewBox="6 6 28 28">
     <rect x="6" y="6" width="28" height="28" rx="1" fill="url(#wardley-evo)" />
     <line x1="17" y1="12" x2="17" y2="30" stroke="#c3cad4" stroke-width="0.8" stroke-dasharray="1.6 1.6"/>
@@ -35,6 +35,8 @@ export const wardleyBackgroundIcon = svg`<svg width="24" height="24" viewBox="0 
 
 /** Wardley red — matches the renderer presets (consts WARDLEY_RED). */
 const RED = '#d6455d';
+/** Gradient green — matches gradient.ts GRADIENT_GREEN. */
+const GREEN = '#1f9e4d';
 
 /** Component node (validated COMP-C2): single circle. */
 export const wardleyComponentIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -123,15 +125,15 @@ export const wardleyLegendIcon = svg`<svg width="24" height="24" viewBox="0 0 24
 /** Opportunity gradient background: axes + green differential hump + red operational bump. */
 export const wardleyOpportunityIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M4 20V4M4 20h16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-  <path d="M5 12 C6 7, 8.5 7, 9.5 11 C11 17, 14 19, 18 20" stroke="#1f9e4d" stroke-width="1.7" fill="none" stroke-linecap="round"/>
-  <path d="M14.5 19.5 C15.5 16.5, 17 16.5, 18 19" stroke="#d6455d" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+  <path d="M5 12 C6 7, 8.5 7, 9.5 11 C11 17, 14 19, 18 20" stroke="${GREEN}" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+  <path d="M14.5 19.5 C15.5 16.5, 17 16.5, 18 19" stroke="${RED}" stroke-width="1.7" fill="none" stroke-linecap="round"/>
 </svg>`;
 
 /** Benefit/Investment gradient background: axes + zero line + green J-curve. */
 export const wardleyBenefitIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M4 20V4M4 20h16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
   <line x1="4" y1="14" x2="20" y2="14" stroke="currentColor" stroke-width="0.9" opacity="0.45"/>
-  <path d="M5 17 C6 18.5, 7 18.5, 8 15 C9.5 9, 12 5.5, 13.5 8 C16 12, 18 14, 20 14.5" stroke="#1f9e4d" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+  <path d="M5 17 C6 18.5, 7 18.5, 8 15 C9.5 9, 12 5.5, 13.5 8 C16 12, 18 14, 20 14.5" stroke="${GREEN}" stroke-width="1.7" fill="none" stroke-linecap="round"/>
 </svg>`;
 
 /** Evolution-gradient background (Wardley's S-curve presentation): grey at both edges fading to white center. */

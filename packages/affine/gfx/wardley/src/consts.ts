@@ -12,9 +12,8 @@
  * matter how large the background is enlarged.
  */
 
-/** Reference / fallback element size (16:9). */
+/** Reference / fallback element width (16:9 — the height is derived). */
 export const REF_WIDTH = 1600;
-export const REF_HEIGHT = 900;
 
 /** Fixed inner margins (sized to hold the fixed-size labels). */
 export const MARGIN = { left: 40, right: 30, top: 30, bottom: 38 };

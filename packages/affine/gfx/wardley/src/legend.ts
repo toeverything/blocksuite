@@ -1,11 +1,14 @@
 import { createGroupCommand } from '@blocksuite/affine-gfx-group';
 import {
+  ConnectorElementModel,
   ConnectorMode,
   FontFamily,
   PointStyle,
+  ShapeElementModel,
   ShapeStyle,
   StrokeStyle,
   type WardleyBackgroundElementModel,
+  WardleyNodeElementModel,
 } from '@blocksuite/affine-model';
 import { Bound } from '@blocksuite/global/gfx';
 import type { BlockStdScope } from '@blocksuite/std';
@@ -28,7 +31,7 @@ import {
 } from './node/consts';
 
 /** Component kinds the legend can describe, in display order. */
-export type LegendType =
+type LegendType =
   | 'component'
   | 'anchor'
   | 'market'
@@ -51,17 +54,17 @@ const LEGEND_ORDER: LegendType[] = [
   'inertia',
 ];
 
-/** Default (editable) French descriptions for each legend row. */
+/** Default (editable) descriptions for each legend row. */
 const LEGEND_DESC: Record<LegendType, string> = {
-  component: 'Besoin / capacité (activité, pratique, donnée…)',
-  anchor: 'Partie prenante (client, utilisateur…)',
-  market: "Marché (ensemble d'acteurs)",
-  ecosystem: 'Écosystème',
-  method: 'Composant + méthode (couleur = phase)',
-  pipeline: 'Pipeline (choix possibles pour une capacité)',
-  link: 'Relation de besoin (parent → enfant)',
-  arrow: 'Évolution / mouvement (rouge = futur)',
-  inertia: 'Inertie au changement',
+  component: 'Need / capability (activity, practice, data…)',
+  anchor: 'Stakeholder (customer, user…)',
+  market: 'Market (set of actors)',
+  ecosystem: 'Ecosystem',
+  method: 'Component + method (color = phase)',
+  pipeline: 'Pipeline (possible choices for a capability)',
+  link: 'Need relation (parent → child)',
+  arrow: 'Evolution / movement (red = future)',
+  inertia: 'Inertia to change',
 };
 
 type GradientVariant = Exclude<WardleyBackgroundElementModel['variant'], 'classic'>;
@@ -73,16 +76,16 @@ const LEGEND_GRADIENT: Record<
 > = {
   opportunity: {
     caption:
-      "Gradient d'opportunité : valeur différentielle (vert) vs valeur opérationnelle (rouge).",
+      'Opportunity gradient: differential value (green) vs operational value (red).',
     swatch: [GRADIENT_GREEN, GRADIENT_RED],
   },
   benefit: {
-    caption: 'Gradient : investissement (rouge) puis bénéfice (vert).',
+    caption: 'Gradient: investment (red) then benefit (green).',
     swatch: [GRADIENT_RED, GRADIENT_GREEN],
   },
   'evolution-gradient': {
     caption:
-      "Gradient représentant la croissance de la fonction d'évolution de Wardley.",
+      "Gradient representing the growth of Wardley's evolution function.",
     swatch: ['#9aa0a6', '#cfd2d6'],
   },
 };
@@ -110,19 +113,19 @@ export function createWardleyLegend(
   for (const el of gfx.getElementsByBound(Bound.deserialize(bg.xywh), {
     type: 'canvas',
   })) {
-    if (el.type === 'wardleyNode') {
-      const kind = (el as { kind?: string }).kind;
-      if (kind && kind !== 'handle') present.add(kind as LegendType);
-    } else if (el.type === 'connector') {
-      const stroke = (el as { stroke?: unknown }).stroke;
-      const dashed = (el as { strokeStyle?: string }).strokeStyle === StrokeStyle.Dash;
-      if (dashed || stroke === WARDLEY_RED) present.add('arrow');
-      else if (stroke === LINK_GREY) present.add('link');
-      // market triangle connectors (NODE_STROKE) are ignored.
-    } else if (el.type === 'shape') {
-      if ((el as { fillColor?: unknown }).fillColor === INERTIA_COLOR) {
-        present.add('inertia');
+    // Note: WardleyNodeElementModel extends ShapeElementModel, so the order of
+    // these instanceof checks matters.
+    if (el instanceof WardleyNodeElementModel) {
+      if (el.kind !== 'handle') present.add(el.kind);
+    } else if (el instanceof ConnectorElementModel) {
+      if (el.strokeStyle === StrokeStyle.Dash || el.stroke === WARDLEY_RED) {
+        present.add('arrow');
+      } else if (el.stroke === LINK_GREY) {
+        present.add('link');
       }
+      // market triangle connectors (NODE_STROKE) are ignored.
+    } else if (el instanceof ShapeElementModel) {
+      if (el.fillColor === INERTIA_COLOR) present.add('inertia');
     }
   }
   const rows = LEGEND_ORDER.filter(t => present.has(t));
@@ -356,7 +359,7 @@ export function createWardleyLegend(
 
   // Title.
   ids.push(
-    text('Légende', x0 + PAD, y0 + PAD, W - PAD * 2, TITLE_FS + 6, TITLE_FS)
+    text('Legend', x0 + PAD, y0 + PAD, W - PAD * 2, TITLE_FS + 6, TITLE_FS)
   );
 
   // Rows.
@@ -427,9 +430,9 @@ export function createWardleyLegend(
   }
 
   // 4. Group everything and select it.
-  let selId = ids[0];
-  const [, ctx] = std.command.exec(createGroupCommand, { elements: ids });
-  const groupId = (ctx as { groupId?: string } | undefined)?.groupId;
-  if (groupId) selId = groupId;
-  gfx.selection.set({ elements: [selId], editing: false });
+  const [, result] = std.command.exec(createGroupCommand, { elements: ids });
+  gfx.selection.set({
+    elements: [result.groupId || ids[0]],
+    editing: false,
+  });
 }

@@ -49,11 +49,11 @@ const norm = (v: number, lo: number, hi: number) => (hi > lo ? (v - lo) / (hi - 
 
 export const GRADIENT_GREEN = '#1f9e4d';
 export const GRADIENT_RED = '#d6455d';
-export const GRADIENT_GREY = '#7c8389';
+const GRADIENT_GREY = '#7c8389';
 /** Validated peak opacity for the green/red variants. */
-export const GRADIENT_MAX_OPACITY = 0.45;
+const GRADIENT_MAX_OPACITY = 0.45;
 /** Peak opacity for the grey evolution-gradient variant. */
-export const GREY_MAX_OPACITY = 0.38;
+const GREY_MAX_OPACITY = 0.38;
 /** Benefit/investment zero-line height (fraction of plot height from bottom). */
 export const BENEFIT_ZERO_FRAC = 0.3;
 

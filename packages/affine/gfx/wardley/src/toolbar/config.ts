@@ -136,6 +136,8 @@ const VisibilityIcon = html`<svg
 </svg>`;
 
 type WardleyToggleProp =
+  | 'resizeEnabled'
+  | 'showGradient'
   | 'showXAxis'
   | 'showYAxis'
   | 'showColumnDividers'
@@ -144,20 +146,22 @@ type WardleyToggleProp =
   | 'showVisibilityLabels';
 
 /**
- * Build a toolbar toggle that flips a boolean visibility flag on every selected
- * Wardley background. Mirrors the `toggle-resize` pattern: `active` reflects the
- * current state, `run` flips it (with an undo checkpoint).
+ * Build a toolbar toggle that flips a boolean flag on every selected Wardley
+ * background: `active` reflects the current state, `run` flips it (with an
+ * undo checkpoint). An optional `when` predicate hides the button.
  */
-function visibilityToggle(
+function booleanToggle(
   id: string,
   tooltip: string,
   icon: TemplateResult,
-  prop: WardleyToggleProp
+  prop: WardleyToggleProp,
+  when?: (ctx: ToolbarContext) => boolean
 ) {
   return {
     id,
     tooltip,
     icon,
+    when: when ?? true,
     active(ctx: ToolbarContext) {
       const models = ctx.getSurfaceModelsByType(WardleyBackgroundElementModel);
       return models.length > 0 && models.every(model => model[prop]);
@@ -178,99 +182,65 @@ function visibilityToggle(
 
 export const wardleyToolbarConfig = {
   actions: [
-    {
-      id: 'a.toggle-resize',
-      tooltip: 'Activer / verrouiller le redimensionnement',
-      icon: ResizeIcon,
-      active(ctx) {
-        const models = ctx.getSurfaceModelsByType(WardleyBackgroundElementModel);
-        return models.length > 0 && models.every(model => model.resizeEnabled);
-      },
-      run(ctx) {
-        const models = ctx.getSurfaceModelsByType(WardleyBackgroundElementModel);
-        if (!models.length) return;
-
-        const enable = !models.every(model => model.resizeEnabled);
-        ctx.std.store.captureSync();
-        const crud = ctx.std.get(EdgelessCRUDIdentifier);
-        for (const model of models) {
-          crud.updateElement(model.id, { resizeEnabled: enable });
-        }
-      },
-    },
+    booleanToggle(
+      'a.toggle-resize',
+      'Enable / lock resizing',
+      ResizeIcon,
+      'resizeEnabled'
+    ),
     // Group 1 — evolution (X) side: axis, phase labels, columns, corner
     // labels, and the gradient toggle.
     {
       id: 'b.evolution',
       actions: [
-        visibilityToggle(
+        booleanToggle(
           'b.1-axis-x',
-          "Axe de l'évolution (X)",
+          'Evolution axis (X)',
           XAxisIcon,
           'showXAxis'
         ),
-        visibilityToggle(
+        booleanToggle(
           'b.2-column-labels',
-          "Labels des phases d'évolution",
+          'Evolution phase labels',
           ColumnLabelsIcon,
           'showColumnLabels'
         ),
-        visibilityToggle(
+        booleanToggle(
           'b.3-columns',
-          'Colonnes (séparateurs)',
+          'Columns (dividers)',
           ColumnsIcon,
           'showColumnDividers'
         ),
-        visibilityToggle(
+        booleanToggle(
           'b.4-corner-labels',
           'Labels Uncharted / Industrialized',
           CornerLabelsIcon,
           'showCornerLabels'
         ),
-        {
-          id: 'b.5-gradient',
-          tooltip: 'Afficher / masquer le gradient',
-          icon: GradientIcon,
-          // Only relevant when the selection has a gradient variant.
-          when(ctx) {
-            const models = ctx.getSurfaceModelsByType(
-              WardleyBackgroundElementModel
-            );
-            return models.some(model => model.variant !== 'classic');
-          },
-          active(ctx) {
-            const models = ctx.getSurfaceModelsByType(
-              WardleyBackgroundElementModel
-            );
-            return models.length > 0 && models.every(model => model.showGradient);
-          },
-          run(ctx) {
-            const models = ctx.getSurfaceModelsByType(
-              WardleyBackgroundElementModel
-            );
-            if (!models.length) return;
-
-            const enable = !models.every(model => model.showGradient);
-            ctx.std.store.captureSync();
-            const crud = ctx.std.get(EdgelessCRUDIdentifier);
-            for (const model of models) {
-              crud.updateElement(model.id, { showGradient: enable });
-            }
-          },
-        },
+        // Only relevant when the selection has a gradient variant.
+        booleanToggle(
+          'b.5-gradient',
+          'Show / hide the gradient',
+          GradientIcon,
+          'showGradient',
+          ctx =>
+            ctx
+              .getSurfaceModelsByType(WardleyBackgroundElementModel)
+              .some(model => model.variant !== 'classic')
+        ),
       ],
     },
     // Group 2 — value-chain (Y) side: axis and Visible/Invisible labels.
     {
       id: 'c.value-chain',
       actions: [
-        visibilityToggle(
+        booleanToggle(
           'c.1-axis-y',
-          'Axe de la chaîne de valeur (Y)',
+          'Value Chain axis (Y)',
           YAxisIcon,
           'showYAxis'
         ),
-        visibilityToggle(
+        booleanToggle(
           'c.2-visibility-labels',
           'Labels Visible / Invisible',
           VisibilityIcon,
@@ -282,7 +252,7 @@ export const wardleyToolbarConfig = {
     // background's perimeter (+ a gradient-meaning block for gradient variants).
     {
       id: 'd.legend',
-      tooltip: 'Générer la légende (composants présents)',
+      tooltip: 'Generate the legend (components present)',
       icon: wardleyLegendIcon,
       run(ctx) {
         const models = ctx.getSurfaceModelsByType(WardleyBackgroundElementModel);

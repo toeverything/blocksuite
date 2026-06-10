@@ -8,10 +8,12 @@ import {
   PointStyle,
   ShapeStyle,
   StrokeStyle,
+  type WardleyBgVariant,
 } from '@blocksuite/affine-model';
 import { EditPropsStore } from '@blocksuite/affine-shared/services';
 import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
 import { Bound } from '@blocksuite/global/gfx';
+import type { GfxController } from '@blocksuite/std/gfx';
 import { css, html, LitElement } from 'lit';
 
 import { REF_WIDTH } from '../consts';
@@ -62,41 +64,54 @@ import {
   wardleyPipelineIcon,
 } from './icons';
 
-/** Background flavours creatable from the menu. */
-type BgVariant = 'classic' | 'opportunity' | 'benefit' | 'evolution-gradient';
-
 /**
  * Per-variant default label overrides applied at creation (all remain editable
- * afterwards via the Slice-B inline editor / toggles). The gradient itself is
- * driven by `variant` in the renderer.
+ * afterwards via the inline editor / toggles). The gradient itself is driven by
+ * `variant` in the renderer.
  */
-const BACKGROUND_VARIANT_DEFAULTS: Record<BgVariant, Record<string, unknown>> = {
+const BACKGROUND_VARIANT_DEFAULTS: Record<
+  WardleyBgVariant,
+  Record<string, unknown>
+> = {
   classic: {},
+  // The Y axis becomes "Opportunity"; phase labels keep the classic defaults.
   opportunity: {
-    xAxisTitle: 'Évolution',
     yAxisTitle: 'Opportunity',
-    phase0: 'Genèse',
-    phase1: 'Sur mesure',
-    phase2: 'Produit (+ location)',
-    phase3: 'Commodité (+ utilitaire)',
     showVisibilityLabels: false,
     showCornerLabels: false,
   },
+  // The Y axis splits into Benefit (top) / Investment (bottom) around a zero
+  // line drawn by the renderer.
   benefit: {
-    xAxisTitle: 'Évolution',
     yAxisTitle: '',
     visibilityHigh: 'Benefit',
     visibilityLow: 'Investment',
-    phase0: 'Genèse',
-    phase1: 'Sur mesure',
-    phase2: 'Produit (+ location)',
-    phase3: 'Commodité (+ utilitaire)',
     showCornerLabels: false,
   },
   // Keeps the classic labels (Value Chain / Uncharted / Industrialized…); only
   // the grey gradient differs.
   'evolution-gradient': {},
 };
+
+type Surface = NonNullable<GfxController['surface']>;
+
+/** Height of the native free-text labels (Inter, size 18). */
+const LABEL_H = LABEL_FONT_SIZE + 8;
+
+/**
+ * The single-circle node flavours: one connectable ellipse + a label to its
+ * right, grouped. The glyph itself (anchor silhouette, ecosystem hatching,
+ * method inner circle) is drawn by the node renderer from `kind`.
+ */
+const NODE_PRESETS = {
+  component: { d: NODE_SIZE, fill: NODE_FILL, label: LABEL_DEFAULT.component },
+  anchor: { d: NODE_SIZE, fill: NODE_FILL, label: LABEL_DEFAULT.anchor },
+  // Ecosystem: glyph = double border + hatched donut; connectors attach to
+  // this outer circle's center.
+  ecosystem: { d: ECOSYSTEM_SIZE, fill: NODE_FILL, label: ECOSYSTEM_LABEL },
+  // Method: the FILL color encodes the chosen method (editable).
+  method: { d: METHOD_SIZE, fill: METHOD_FILL, label: METHOD_LABEL },
+} as const;
 
 /**
  * The popover that opens above the toolbar for the Wardley toolbox. Each item
@@ -129,7 +144,7 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
 
   override type = EmptyTool;
 
-  private _createBackground(variant: BgVariant = 'classic') {
+  private _createBackground(variant: WardleyBgVariant = 'classic') {
     const { gfx } = this;
     if (!gfx.surface) return;
 
@@ -155,47 +170,78 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
     this._finish(id);
   }
 
-  private _createNode(kind: 'component' | 'anchor') {
-    const { gfx } = this;
-    if (!gfx.surface) return;
-
-    const { centerX: cx, centerY: cy } = gfx.viewport;
-    const d = NODE_SIZE;
-
-    // Native ellipse — inherits all shape behaviour (editable border, etc.).
-    const nodeId = gfx.surface.addElement({
+  /** Add a native ellipse wardley node centred on (cx, cy). */
+  private _addEllipseNode(
+    surface: Surface,
+    kind: keyof typeof NODE_PRESETS | 'market',
+    cx: number,
+    cy: number,
+    d: number,
+    fillColor: string,
+    strokeWidth = NODE_STROKE_WIDTH
+  ) {
+    return surface.addElement({
       type: 'wardleyNode',
       kind,
       shapeType: 'ellipse',
       filled: true,
-      fillColor: NODE_FILL,
+      fillColor,
       strokeColor: NODE_STROKE,
-      strokeWidth: NODE_STROKE_WIDTH,
+      strokeWidth,
+      shapeStyle: ShapeStyle.General,
+      roughness: 0,
       xywh: new Bound(cx - d / 2, cy - d / 2, d, d).serialize(),
     });
+  }
 
-    // Native free-text label (same Inter family as the axis labels, size 18).
-    const lh = LABEL_FONT_SIZE + 8;
-    const labelId = gfx.surface.addElement({
+  /** Add a native free-text label (same Inter family as the axis labels). */
+  private _addLabel(
+    surface: Surface,
+    text: string,
+    x: number,
+    y: number,
+    textAlign: 'left' | 'center' = 'left'
+  ) {
+    return surface.addElement({
       type: 'text',
-      text: LABEL_DEFAULT[kind],
+      text,
       fontFamily: FontFamily.Inter,
       fontSize: LABEL_FONT_SIZE,
       color: NODE_STROKE,
-      textAlign: 'left',
-      xywh: new Bound(cx + d / 2 + LABEL_GAP, cy - lh / 2, 120, lh).serialize(),
+      textAlign,
+      xywh: new Bound(x, y, 120, LABEL_H).serialize(),
     });
+  }
 
-    // Group node + label so they move together (label follows the node; enter
-    // the group to reposition / edit the label).
-    let selId: string = nodeId;
-    const [, ctx] = this.edgeless.std.command.exec(createGroupCommand, {
-      elements: [nodeId, labelId],
+  /** Group elements; returns the group id (or the first id if grouping failed). */
+  private _group(ids: string[]) {
+    const [, result] = this.edgeless.std.command.exec(createGroupCommand, {
+      elements: ids,
     });
-    const groupId = (ctx as { groupId?: string } | undefined)?.groupId;
-    if (groupId) selId = groupId;
+    return result.groupId || ids[0];
+  }
 
-    this._finish(selId);
+  /**
+   * Create a single-circle node (component / anchor / ecosystem / method):
+   * one connectable native ellipse + a label to its right, grouped so they
+   * move together (enter the group to reposition / edit the label).
+   */
+  private _createNode(kind: keyof typeof NODE_PRESETS) {
+    const surface = this.gfx.surface;
+    if (!surface) return;
+
+    const { d, fill, label } = NODE_PRESETS[kind];
+    const { centerX: cx, centerY: cy } = this.gfx.viewport;
+
+    const nodeId = this._addEllipseNode(surface, kind, cx, cy, d, fill);
+    const labelId = this._addLabel(
+      surface,
+      label,
+      cx + d / 2 + LABEL_GAP,
+      cy - LABEL_H / 2
+    );
+
+    this._finish(this._group([nodeId, labelId]));
   }
 
   private _createInertia() {
@@ -267,37 +313,18 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
       xywh: new Bound(cx - d / 2, top - d / 2, d, d).serialize(),
     });
 
-    // Native free-text label (same Inter family as the axis labels, size 18),
-    // centered horizontally on the pipeline and sitting ABOVE the handle (not
-    // astride the top edge).
-    const lh = LABEL_FONT_SIZE + 8;
-    const labelW = 120;
-    const labelId = gfx.surface.addElement({
-      type: 'text',
-      text: PIPELINE_LABEL,
-      fontFamily: FontFamily.Inter,
-      fontSize: LABEL_FONT_SIZE,
-      color: NODE_STROKE,
-      textAlign: 'center',
-      xywh: new Bound(
-        cx - labelW / 2,
-        top - d / 2 - lh - LABEL_GAP,
-        labelW,
-        lh
-      ).serialize(),
-    });
+    // Label centered horizontally on the pipeline, sitting ABOVE the handle.
+    const labelId = this._addLabel(
+      gfx.surface,
+      PIPELINE_LABEL,
+      cx - 60,
+      top - d / 2 - LABEL_H - LABEL_GAP,
+      'center'
+    );
 
     // Nested groups: (handle + label), then (body + that group).
-    const [, c1] = this.edgeless.std.command.exec(createGroupCommand, {
-      elements: [handleId, labelId],
-    });
-    const innerId = (c1 as { groupId?: string } | undefined)?.groupId;
-    const [, c2] = this.edgeless.std.command.exec(createGroupCommand, {
-      elements: innerId ? [bodyId, innerId] : [bodyId, handleId, labelId],
-    });
-    const outerId = (c2 as { groupId?: string } | undefined)?.groupId;
-
-    this._finish(outerId ?? bodyId);
+    const innerId = this._group([handleId, labelId]);
+    this._finish(this._group([bodyId, innerId]));
   }
 
   /**
@@ -308,28 +335,23 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
    * everything is grouped into one object.
    */
   private _createMarket() {
-    const { gfx } = this;
-    if (!gfx.surface) return;
+    const surface = this.gfx.surface;
+    if (!surface) return;
 
-    const { centerX: cx, centerY: cy } = gfx.viewport;
+    const { centerX: cx, centerY: cy } = this.gfx.viewport;
     const R = MARKET_SIZE / 2;
-    const dr = MARKET_DOT_SIZE / 2;
     const rho = MARKET_DOT_RING;
     const sin60 = Math.sqrt(3) / 2;
 
     // Outer circle = the market node (connectable, center-only).
-    const circleId = gfx.surface.addElement({
-      type: 'wardleyNode',
-      kind: 'market',
-      shapeType: 'ellipse',
-      filled: true,
-      fillColor: NODE_FILL,
-      strokeColor: NODE_STROKE,
-      strokeWidth: NODE_STROKE_WIDTH,
-      shapeStyle: ShapeStyle.General,
-      roughness: 0,
-      xywh: new Bound(cx - R, cy - R, MARKET_SIZE, MARKET_SIZE).serialize(),
-    });
+    const circleId = this._addEllipseNode(
+      surface,
+      'market',
+      cx,
+      cy,
+      MARKET_SIZE,
+      NODE_FILL
+    );
 
     // 3 inner component nodes (thick border, no label) at the triangle vertices.
     const verts = [
@@ -338,23 +360,15 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
       [-rho * sin60, rho / 2],
     ];
     const dotIds = verts.map(([vx, vy]) =>
-      gfx.surface!.addElement({
-        type: 'wardleyNode',
-        kind: 'component',
-        shapeType: 'ellipse',
-        filled: true,
-        fillColor: NODE_FILL,
-        strokeColor: NODE_STROKE,
-        strokeWidth: MARKET_DOT_STROKE_WIDTH,
-        shapeStyle: ShapeStyle.General,
-        roughness: 0,
-        xywh: new Bound(
-          cx + vx - dr,
-          cy + vy - dr,
-          MARKET_DOT_SIZE,
-          MARKET_DOT_SIZE
-        ).serialize(),
-      })
+      this._addEllipseNode(
+        surface,
+        'component',
+        cx + vx,
+        cy + vy,
+        MARKET_DOT_SIZE,
+        NODE_FILL,
+        MARKET_DOT_STROKE_WIDTH
+      )
     );
 
     // Triangle: 3 attached connectors (auto-route center-to-center, clipped).
@@ -363,7 +377,7 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
       [dotIds[1], dotIds[2]],
       [dotIds[2], dotIds[0]],
     ].map(([a, b]) =>
-      gfx.surface!.addElement({
+      surface.addElement({
         type: 'connector',
         mode: ConnectorMode.Straight,
         source: { id: a },
@@ -376,119 +390,14 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
       })
     );
 
-    // Native label to the right of the circle.
-    const lh = LABEL_FONT_SIZE + 8;
-    const labelId = gfx.surface.addElement({
-      type: 'text',
-      text: MARKET_LABEL,
-      fontFamily: FontFamily.Inter,
-      fontSize: LABEL_FONT_SIZE,
-      color: NODE_STROKE,
-      textAlign: 'left',
-      xywh: new Bound(cx + R + LABEL_GAP, cy - lh / 2, 120, lh).serialize(),
-    });
+    const labelId = this._addLabel(
+      surface,
+      MARKET_LABEL,
+      cx + R + LABEL_GAP,
+      cy - LABEL_H / 2
+    );
 
-    let selId: string = circleId;
-    const [, ctx] = this.edgeless.std.command.exec(createGroupCommand, {
-      elements: [circleId, ...dotIds, ...connIds, labelId],
-    });
-    const groupId = (ctx as { groupId?: string } | undefined)?.groupId;
-    if (groupId) selId = groupId;
-
-    this._finish(selId);
-  }
-
-  /**
-   * Create an ecosystem: a single connectable circle rendered as a glyph (double
-   * border + hatched inner donut + hollow center, drawn by the node renderer).
-   * The connection therefore attaches to this outer circle's center. Label to the
-   * right; grouped with it.
-   */
-  private _createEcosystem() {
-    const { gfx } = this;
-    if (!gfx.surface) return;
-
-    const { centerX: cx, centerY: cy } = gfx.viewport;
-    const r = ECOSYSTEM_SIZE / 2;
-
-    const nodeId = gfx.surface.addElement({
-      type: 'wardleyNode',
-      kind: 'ecosystem',
-      shapeType: 'ellipse',
-      filled: true,
-      fillColor: NODE_FILL,
-      strokeColor: NODE_STROKE,
-      strokeWidth: NODE_STROKE_WIDTH,
-      shapeStyle: ShapeStyle.General,
-      roughness: 0,
-      xywh: new Bound(cx - r, cy - r, ECOSYSTEM_SIZE, ECOSYSTEM_SIZE).serialize(),
-    });
-
-    const lh = LABEL_FONT_SIZE + 8;
-    const labelId = gfx.surface.addElement({
-      type: 'text',
-      text: ECOSYSTEM_LABEL,
-      fontFamily: FontFamily.Inter,
-      fontSize: LABEL_FONT_SIZE,
-      color: NODE_STROKE,
-      textAlign: 'left',
-      xywh: new Bound(cx + r + LABEL_GAP, cy - lh / 2, 120, lh).serialize(),
-    });
-
-    let selId: string = nodeId;
-    const [, ctx] = this.edgeless.std.command.exec(createGroupCommand, {
-      elements: [nodeId, labelId],
-    });
-    const groupId = (ctx as { groupId?: string } | undefined)?.groupId;
-    if (groupId) selId = groupId;
-
-    this._finish(selId);
-  }
-
-  /**
-   * Create a "component + method": a single connectable circle whose FILL color
-   * encodes the chosen method (editable), with a white component inscribed at its
-   * center (drawn by the node renderer). Label to the right; grouped.
-   */
-  private _createMethod() {
-    const { gfx } = this;
-    if (!gfx.surface) return;
-
-    const { centerX: cx, centerY: cy } = gfx.viewport;
-    const r = METHOD_SIZE / 2;
-
-    const nodeId = gfx.surface.addElement({
-      type: 'wardleyNode',
-      kind: 'method',
-      shapeType: 'ellipse',
-      filled: true,
-      fillColor: METHOD_FILL,
-      strokeColor: NODE_STROKE,
-      strokeWidth: NODE_STROKE_WIDTH,
-      shapeStyle: ShapeStyle.General,
-      roughness: 0,
-      xywh: new Bound(cx - r, cy - r, METHOD_SIZE, METHOD_SIZE).serialize(),
-    });
-
-    const lh = LABEL_FONT_SIZE + 8;
-    const labelId = gfx.surface.addElement({
-      type: 'text',
-      text: METHOD_LABEL,
-      fontFamily: FontFamily.Inter,
-      fontSize: LABEL_FONT_SIZE,
-      color: NODE_STROKE,
-      textAlign: 'left',
-      xywh: new Bound(cx + r + LABEL_GAP, cy - lh / 2, 120, lh).serialize(),
-    });
-
-    let selId: string = nodeId;
-    const [, ctx] = this.edgeless.std.command.exec(createGroupCommand, {
-      elements: [nodeId, labelId],
-    });
-    const groupId = (ctx as { groupId?: string } | undefined)?.groupId;
-    if (groupId) selId = groupId;
-
-    this._finish(selId);
+    this._finish(this._group([circleId, ...dotIds, ...connIds, labelId]));
   }
 
   /**
@@ -536,55 +445,55 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
         <div class="menu-content">
           <div class="button-group-container">
             <edgeless-tool-icon-button
-              .tooltip=${'Fond de carte Wardley'}
+              .tooltip=${'Wardley map background'}
               @click=${() => this._createBackground('classic')}
             >
               ${wardleyBackgroundIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
-              .tooltip=${'Fond Opportunité (gradient)'}
+              .tooltip=${'Opportunity background (gradient)'}
               @click=${() => this._createBackground('opportunity')}
             >
               ${wardleyOpportunityIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
-              .tooltip=${'Fond Bénéfice / Investissement (gradient)'}
+              .tooltip=${'Benefit / Investment background (gradient)'}
               @click=${() => this._createBackground('benefit')}
             >
               ${wardleyBenefitIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
-              .tooltip=${'Fond Évolution (présentation Wardley)'}
+              .tooltip=${'Evolution background (Wardley presentation)'}
               @click=${() => this._createBackground('evolution-gradient')}
             >
               ${wardleyEvolutionGradientIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
-              .tooltip=${'Composant'}
+              .tooltip=${'Component'}
               @click=${() => this._createNode('component')}
             >
               ${wardleyComponentIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
-              .tooltip=${'Composant + méthode'}
-              @click=${this._createMethod}
+              .tooltip=${'Component + method'}
+              @click=${() => this._createNode('method')}
             >
               ${wardleyMethodIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
-              .tooltip=${'Marché'}
+              .tooltip=${'Market'}
               @click=${this._createMarket}
             >
               ${wardleyMarketIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
-              .tooltip=${'Écosystème'}
-              @click=${this._createEcosystem}
+              .tooltip=${'Ecosystem'}
+              @click=${() => this._createNode('ecosystem')}
             >
               ${wardleyEcosystemIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
-              .tooltip=${'Ancre'}
+              .tooltip=${'Anchor'}
               @click=${() => this._createNode('anchor')}
             >
               ${wardleyAnchorIcon}
@@ -596,19 +505,19 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
               ${wardleyPipelineIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
-              .tooltip=${'Lien'}
+              .tooltip=${'Link'}
               @click=${() => this._activateConnector('link')}
             >
               ${wardleyLinkIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
-              .tooltip=${'Flèche (évolution)'}
+              .tooltip=${'Arrow (evolution)'}
               @click=${() => this._activateConnector('arrow')}
             >
               ${wardleyArrowIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
-              .tooltip=${'Inertie'}
+              .tooltip=${'Inertia'}
               @click=${this._createInertia}
             >
               ${wardleyInertiaIcon}
