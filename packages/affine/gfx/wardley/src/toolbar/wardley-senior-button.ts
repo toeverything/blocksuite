@@ -22,6 +22,12 @@ export class EdgelessWardleySeniorButton extends EdgelessToolbarToolMixin(
       width: 100%;
       height: 100%;
     }
+    /* Make this 96px button the containing block of the popup's clip wrapper
+       (it is appended to our shadow root) so the sub-menu anchors to THIS
+       button — not the whole toolbar — and can be centered over it. */
+    :host {
+      position: relative;
+    }
     .wardley-root {
       width: 100%;
       height: 64px;
@@ -76,6 +82,24 @@ export class EdgelessWardleySeniorButton extends EdgelessToolbarToolMixin(
     this.setEdgelessTool(DefaultTool);
     const menu = this.createPopper('edgeless-wardley-menu', this);
     menu.element.edgeless = this.edgeless;
+
+    // Anchor the sub-menu to THIS button (the clip wrapper is now button-
+    // relative thanks to `:host{position:relative}`): make the menu an in-flow
+    // flex item sized to its content, right-aligned to the button so its right
+    // edge sits at the (right-most) Wardley button and it extends leftwards,
+    // staying fully on-screen. Native sub-menus are untouched.
+    const el = menu.element as HTMLElement;
+    const wrap = el.parentElement;
+    if (wrap) {
+      wrap.style.overflow = 'visible';
+      wrap.style.justifyContent = 'flex-end';
+    }
+    Object.assign(el.style, {
+      position: 'static',
+      width: 'max-content',
+      maxWidth: 'calc(100vw - 16px)',
+      marginLeft: '0',
+    });
   }
 
   override render() {
