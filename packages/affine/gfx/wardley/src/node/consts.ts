@@ -63,3 +63,47 @@ export const LINK_GREY = '#666666';
 /** Inertia bar color + size. */
 export const INERTIA_COLOR = '#1f2328';
 export const INERTIA_SIZE = { w: 8, h: 44 };
+
+/**
+ * Market node (composite): a large thin-bordered circle containing 3 small
+ * thick-bordered component nodes wired into a triangle by native connectors.
+ */
+export const MARKET_SIZE = 30;
+export const MARKET_DOT_SIZE = 8;
+/** Radius of the circle on which the 3 inner node centers sit. */
+export const MARKET_DOT_RING = 8;
+/** Inner nodes have a thicker border than the outer circle. */
+export const MARKET_DOT_STROKE_WIDTH = 2;
+/** Triangle connectors: thin + dark, no arrows. */
+export const MARKET_LINK_WIDTH = 1;
+export const MARKET_LINK_COLOR = NODE_STROKE;
+export const MARKET_LABEL = 'Marché';
+
+/**
+ * Ecosystem node: a single connectable circle drawn as a GLYPH — a double border
+ * at the rim (outer circle + a 2nd inscribed circle with a thin blank band
+ * between them) and diagonal hatching confined to the inner donut (from the 2nd
+ * border down to a hollow central circle; the hatch never reaches the outer
+ * border). Ratios are of R so the glyph scales with the circle.
+ */
+export const ECOSYSTEM_SIZE = 40;
+export const ECOSYSTEM = {
+  secondBorderRatio: 0.88, // 2nd (inscribed) border
+  centerRatio: 0.43, // central hollow circle
+  hatchOuterRatio: 0.86, // hatch stays just inside the 2nd border
+  hatchSpacingRatio: 0.15, // gap between hatch lines
+};
+export const ECOSYSTEM_LABEL = 'Écosystème';
+
+/**
+ * Method node: a component inscribed in a slightly larger outer circle whose
+ * FILL color encodes the chosen method (editable via the toolbar). Glyph = the
+ * outer circle (colored fill + border, the base ellipse) + a white component
+ * circle drawn at its center. Default fill is a neutral grey.
+ */
+export const METHOD_SIZE = 35;
+export const METHOD_FILL = '#d9d9d9';
+export const METHOD = {
+  centerRatio: 0.5, // inner white component radius / R
+};
+export const METHOD_LABEL = 'Composant';

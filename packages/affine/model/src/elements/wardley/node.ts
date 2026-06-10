@@ -2,16 +2,26 @@ import { field } from '@blocksuite/std/gfx';
 
 import { ShapeElementModel } from '../shape/index.js';
 
-export type WardleyNodeKind = 'component' | 'anchor' | 'pipeline' | 'handle';
+export type WardleyNodeKind =
+  | 'component'
+  | 'anchor'
+  | 'pipeline'
+  | 'handle'
+  | 'market'
+  | 'ecosystem'
+  | 'method';
 
 /**
  * A Wardley map node. Extends {@link ShapeElementModel} (a native ellipse) so it
  * inherits ALL shape behaviour — editable stroke width / colors, native resize,
  * center connector anchor, the shape context toolbar — for free. `kind`
  * discriminates the plain `component`, the `anchor` (which the renderer
- * decorates with an inscribed person glyph), and the two pieces of a pipeline:
- * the `pipeline` body (a wide rect) and its square `handle`. The text label is a
- * SEPARATE native text element grouped with the node, not stored here.
+ * decorates with an inscribed person glyph), the two pieces of a pipeline (the
+ * `pipeline` body + its square `handle`), the `market` outer circle, and the
+ * `ecosystem` grey backing disk. Composite nodes (pipeline / market / ecosystem)
+ * are built by grouping several of these + native connectors + a text label. The
+ * text label is a SEPARATE native text element grouped with the node, not stored
+ * here.
  */
 export class WardleyNodeElementModel extends ShapeElementModel {
   override get type() {
@@ -28,9 +38,10 @@ export class WardleyNodeElementModel extends ShapeElementModel {
   }
 
   /**
-   * The pipeline body offers NO connector anchors: a pipeline is connected only
-   * through its handle's center. All other kinds keep the native connectable
-   * behaviour (with center-only anchoring via {@link centerAnchorOnly}).
+   * The pipeline body offers NO connector anchors (a pipeline is connected only
+   * through its handle). All other kinds — including the ecosystem (a single
+   * glyph circle) and the market outer circle — keep the native connectable
+   * behaviour with center-only anchoring via {@link centerAnchorOnly}.
    */
   override get connectable() {
     return this.kind !== 'pipeline';

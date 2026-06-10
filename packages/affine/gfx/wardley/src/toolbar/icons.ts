@@ -73,3 +73,38 @@ export const wardleyPipelineIcon = svg`<svg width="24" height="24" viewBox="0 0 
   <rect x="3.5" y="11" width="17" height="7" rx="1" fill="#fff" stroke="currentColor" stroke-width="1.2"/>
   <rect x="10" y="9" width="4" height="4" rx="0.6" fill="#fff" stroke="currentColor" stroke-width="1.2"/>
 </svg>`;
+
+/** Market (validated MKT-B): thin outer circle + 3 thick-bordered nodes wired in a triangle. */
+export const wardleyMarketIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="12" cy="12" r="9.6" fill="#fff" stroke="currentColor" stroke-width="1.2"/>
+  <path d="M12 6.6 L7.3 14.7 H16.7 Z" fill="none" stroke="currentColor" stroke-width="1.1"/>
+  <circle cx="12" cy="6.6" r="2.3" fill="#fff" stroke="currentColor" stroke-width="2.1"/>
+  <circle cx="7.3" cy="14.7" r="2.3" fill="#fff" stroke="currentColor" stroke-width="2.1"/>
+  <circle cx="16.7" cy="14.7" r="2.3" fill="#fff" stroke="currentColor" stroke-width="2.1"/>
+</svg>`;
+
+/** Ecosystem (validated ECO-A): double border at the rim + hatching confined to the inner donut + hollow center. */
+export const wardleyEcosystemIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs><clipPath id="ecoHatch"><path d="M12 3.8 a8.2 8.2 0 1 0 0.001 0 Z M12 7.8 a4.2 4.2 0 1 1 -0.001 0 Z" clip-rule="evenodd"/></clipPath></defs>
+  <circle cx="12" cy="12" r="9.8" fill="#fff" stroke="currentColor" stroke-width="1.2"/>
+  <g clip-path="url(#ecoHatch)" stroke="currentColor" stroke-width="0.6">
+    <line x1="2" y1="-8" x2="22" y2="12"/>
+    <line x1="2" y1="-6" x2="22" y2="14"/>
+    <line x1="2" y1="-4" x2="22" y2="16"/>
+    <line x1="2" y1="-2" x2="22" y2="18"/>
+    <line x1="2" y1="0" x2="22" y2="20"/>
+    <line x1="2" y1="2" x2="22" y2="22"/>
+    <line x1="2" y1="4" x2="22" y2="24"/>
+    <line x1="2" y1="6" x2="22" y2="26"/>
+    <line x1="2" y1="8" x2="22" y2="28"/>
+    <line x1="2" y1="10" x2="22" y2="30"/>
+  </g>
+  <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="0.8"/>
+  <circle cx="12" cy="12" r="4.2" fill="#fff" stroke="currentColor" stroke-width="1"/>
+</svg>`;
+
+/** Component + method (validated METH-A): component inscribed in a colored outer circle (default grey). */
+export const wardleyMethodIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="12" cy="12" r="9.6" fill="#d9d9d9" stroke="#1f2328" stroke-width="1.2"/>
+  <circle cx="12" cy="12" r="4.6" fill="#fff" stroke="#1f2328" stroke-width="1.2"/>
+</svg>`;

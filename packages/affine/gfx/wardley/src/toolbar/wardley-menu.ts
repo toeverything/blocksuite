@@ -16,6 +16,8 @@ import { css, html, LitElement } from 'lit';
 
 import { REF_WIDTH } from '../consts';
 import {
+  ECOSYSTEM_LABEL,
+  ECOSYSTEM_SIZE,
   HANDLE_SIZE,
   INERTIA_COLOR,
   INERTIA_SIZE,
@@ -24,6 +26,16 @@ import {
   LABEL_GAP,
   LINK_GREY,
   LINK_STROKE_WIDTH,
+  MARKET_DOT_RING,
+  MARKET_DOT_SIZE,
+  MARKET_DOT_STROKE_WIDTH,
+  MARKET_LABEL,
+  MARKET_LINK_COLOR,
+  MARKET_LINK_WIDTH,
+  MARKET_SIZE,
+  METHOD_FILL,
+  METHOD_LABEL,
+  METHOD_SIZE,
   NODE_FILL,
   NODE_SIZE,
   NODE_STROKE,
@@ -39,8 +51,11 @@ import {
   wardleyArrowIcon,
   wardleyBackgroundIcon,
   wardleyComponentIcon,
+  wardleyEcosystemIcon,
   wardleyInertiaIcon,
   wardleyLinkIcon,
+  wardleyMarketIcon,
+  wardleyMethodIcon,
   wardleyPipelineIcon,
 } from './icons';
 
@@ -245,6 +260,197 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
   }
 
   /**
+   * Create a market: a large thin-bordered circle (the connectable market node)
+   * containing 3 small thick-bordered component nodes wired into a triangle by
+   * native attached connectors (thin, dark, no arrows — they auto-route between
+   * the node centers and follow on move/resize). A label sits to the right and
+   * everything is grouped into one object.
+   */
+  private _createMarket() {
+    const { gfx } = this;
+    if (!gfx.surface) return;
+
+    const { centerX: cx, centerY: cy } = gfx.viewport;
+    const R = MARKET_SIZE / 2;
+    const dr = MARKET_DOT_SIZE / 2;
+    const rho = MARKET_DOT_RING;
+    const sin60 = Math.sqrt(3) / 2;
+
+    // Outer circle = the market node (connectable, center-only).
+    const circleId = gfx.surface.addElement({
+      type: 'wardleyNode',
+      kind: 'market',
+      shapeType: 'ellipse',
+      filled: true,
+      fillColor: NODE_FILL,
+      strokeColor: NODE_STROKE,
+      strokeWidth: NODE_STROKE_WIDTH,
+      shapeStyle: ShapeStyle.General,
+      roughness: 0,
+      xywh: new Bound(cx - R, cy - R, MARKET_SIZE, MARKET_SIZE).serialize(),
+    });
+
+    // 3 inner component nodes (thick border, no label) at the triangle vertices.
+    const verts = [
+      [0, -rho],
+      [rho * sin60, rho / 2],
+      [-rho * sin60, rho / 2],
+    ];
+    const dotIds = verts.map(([vx, vy]) =>
+      gfx.surface!.addElement({
+        type: 'wardleyNode',
+        kind: 'component',
+        shapeType: 'ellipse',
+        filled: true,
+        fillColor: NODE_FILL,
+        strokeColor: NODE_STROKE,
+        strokeWidth: MARKET_DOT_STROKE_WIDTH,
+        shapeStyle: ShapeStyle.General,
+        roughness: 0,
+        xywh: new Bound(
+          cx + vx - dr,
+          cy + vy - dr,
+          MARKET_DOT_SIZE,
+          MARKET_DOT_SIZE
+        ).serialize(),
+      })
+    );
+
+    // Triangle: 3 attached connectors (auto-route center-to-center, clipped).
+    const connIds = [
+      [dotIds[0], dotIds[1]],
+      [dotIds[1], dotIds[2]],
+      [dotIds[2], dotIds[0]],
+    ].map(([a, b]) =>
+      gfx.surface!.addElement({
+        type: 'connector',
+        mode: ConnectorMode.Straight,
+        source: { id: a },
+        target: { id: b },
+        stroke: MARKET_LINK_COLOR,
+        strokeStyle: StrokeStyle.Solid,
+        strokeWidth: MARKET_LINK_WIDTH,
+        frontEndpointStyle: PointStyle.None,
+        rearEndpointStyle: PointStyle.None,
+      })
+    );
+
+    // Native label to the right of the circle.
+    const lh = LABEL_FONT_SIZE + 8;
+    const labelId = gfx.surface.addElement({
+      type: 'text',
+      text: MARKET_LABEL,
+      fontFamily: FontFamily.Inter,
+      fontSize: LABEL_FONT_SIZE,
+      color: NODE_STROKE,
+      textAlign: 'left',
+      xywh: new Bound(cx + R + LABEL_GAP, cy - lh / 2, 120, lh).serialize(),
+    });
+
+    let selId: string = circleId;
+    const [, ctx] = this.edgeless.std.command.exec(createGroupCommand, {
+      elements: [circleId, ...dotIds, ...connIds, labelId],
+    });
+    const groupId = (ctx as { groupId?: string } | undefined)?.groupId;
+    if (groupId) selId = groupId;
+
+    this._finish(selId);
+  }
+
+  /**
+   * Create an ecosystem: a single connectable circle rendered as a glyph (double
+   * border + hatched inner donut + hollow center, drawn by the node renderer).
+   * The connection therefore attaches to this outer circle's center. Label to the
+   * right; grouped with it.
+   */
+  private _createEcosystem() {
+    const { gfx } = this;
+    if (!gfx.surface) return;
+
+    const { centerX: cx, centerY: cy } = gfx.viewport;
+    const r = ECOSYSTEM_SIZE / 2;
+
+    const nodeId = gfx.surface.addElement({
+      type: 'wardleyNode',
+      kind: 'ecosystem',
+      shapeType: 'ellipse',
+      filled: true,
+      fillColor: NODE_FILL,
+      strokeColor: NODE_STROKE,
+      strokeWidth: NODE_STROKE_WIDTH,
+      shapeStyle: ShapeStyle.General,
+      roughness: 0,
+      xywh: new Bound(cx - r, cy - r, ECOSYSTEM_SIZE, ECOSYSTEM_SIZE).serialize(),
+    });
+
+    const lh = LABEL_FONT_SIZE + 8;
+    const labelId = gfx.surface.addElement({
+      type: 'text',
+      text: ECOSYSTEM_LABEL,
+      fontFamily: FontFamily.Inter,
+      fontSize: LABEL_FONT_SIZE,
+      color: NODE_STROKE,
+      textAlign: 'left',
+      xywh: new Bound(cx + r + LABEL_GAP, cy - lh / 2, 120, lh).serialize(),
+    });
+
+    let selId: string = nodeId;
+    const [, ctx] = this.edgeless.std.command.exec(createGroupCommand, {
+      elements: [nodeId, labelId],
+    });
+    const groupId = (ctx as { groupId?: string } | undefined)?.groupId;
+    if (groupId) selId = groupId;
+
+    this._finish(selId);
+  }
+
+  /**
+   * Create a "component + method": a single connectable circle whose FILL color
+   * encodes the chosen method (editable), with a white component inscribed at its
+   * center (drawn by the node renderer). Label to the right; grouped.
+   */
+  private _createMethod() {
+    const { gfx } = this;
+    if (!gfx.surface) return;
+
+    const { centerX: cx, centerY: cy } = gfx.viewport;
+    const r = METHOD_SIZE / 2;
+
+    const nodeId = gfx.surface.addElement({
+      type: 'wardleyNode',
+      kind: 'method',
+      shapeType: 'ellipse',
+      filled: true,
+      fillColor: METHOD_FILL,
+      strokeColor: NODE_STROKE,
+      strokeWidth: NODE_STROKE_WIDTH,
+      shapeStyle: ShapeStyle.General,
+      roughness: 0,
+      xywh: new Bound(cx - r, cy - r, METHOD_SIZE, METHOD_SIZE).serialize(),
+    });
+
+    const lh = LABEL_FONT_SIZE + 8;
+    const labelId = gfx.surface.addElement({
+      type: 'text',
+      text: METHOD_LABEL,
+      fontFamily: FontFamily.Inter,
+      fontSize: LABEL_FONT_SIZE,
+      color: NODE_STROKE,
+      textAlign: 'left',
+      xywh: new Bound(cx + r + LABEL_GAP, cy - lh / 2, 120, lh).serialize(),
+    });
+
+    let selId: string = nodeId;
+    const [, ctx] = this.edgeless.std.command.exec(createGroupCommand, {
+      elements: [nodeId, labelId],
+    });
+    const groupId = (ctx as { groupId?: string } | undefined)?.groupId;
+    if (groupId) selId = groupId;
+
+    this._finish(selId);
+  }
+
+  /**
    * Activate the native connector tool, pre-styled for a Wardley link (grey,
    * solid, no arrow) or evolution arrow (red, dashed, FILLED triangle). The
    * user then draws from one node to another (endpoints attach to centers).
@@ -299,10 +505,34 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
               ${wardleyComponentIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
+              .tooltip=${'Composant + méthode'}
+              @click=${this._createMethod}
+            >
+              ${wardleyMethodIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Marché'}
+              @click=${this._createMarket}
+            >
+              ${wardleyMarketIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Écosystème'}
+              @click=${this._createEcosystem}
+            >
+              ${wardleyEcosystemIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
               .tooltip=${'Ancre'}
               @click=${() => this._createNode('anchor')}
             >
               ${wardleyAnchorIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Pipeline'}
+              @click=${this._createPipeline}
+            >
+              ${wardleyPipelineIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Lien'}
@@ -321,12 +551,6 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
               @click=${this._createInertia}
             >
               ${wardleyInertiaIcon}
-            </edgeless-tool-icon-button>
-            <edgeless-tool-icon-button
-              .tooltip=${'Pipeline'}
-              @click=${this._createPipeline}
-            >
-              ${wardleyPipelineIcon}
             </edgeless-tool-icon-button>
           </div>
         </div>
