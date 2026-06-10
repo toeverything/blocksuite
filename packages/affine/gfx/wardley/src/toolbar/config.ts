@@ -1,11 +1,15 @@
 import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
 import { WardleyBackgroundElementModel } from '@blocksuite/affine-model';
 import {
+  type ToolbarContext,
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
 } from '@blocksuite/affine-shared/services';
 import { BlockFlavourIdentifier } from '@blocksuite/std';
-import { html } from 'lit';
+import { html, type TemplateResult } from 'lit';
+
+import { createWardleyLegend } from '../legend';
+import { wardleyLegendIcon } from './icons';
 
 const ResizeIcon = html`<svg
   width="24"
@@ -20,6 +24,157 @@ const ResizeIcon = html`<svg
   <path d="M9 5H5v4M15 19h4v-4" />
   <path d="M5 5l6 6M19 19l-6-6" />
 </svg>`;
+
+/** Gradient swatch — show/hide the variant gradient. */
+const GradientIcon = html`<svg
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <defs>
+    <linearGradient id="wardleyToolbarGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="currentColor" stop-opacity="0.85" />
+      <stop offset="1" stop-color="currentColor" stop-opacity="0.1" />
+    </linearGradient>
+  </defs>
+  <rect
+    x="4"
+    y="5"
+    width="16"
+    height="14"
+    rx="2"
+    fill="url(#wardleyToolbarGrad)"
+    stroke="currentColor"
+    stroke-width="1.4"
+  />
+</svg>`;
+
+/** Horizontal axis with a right-pointing arrow (Evolution / X). */
+const XAxisIcon = html`<svg
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.6"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M3 17h15" />
+  <path d="M15 14l3 3-3 3" />
+</svg>`;
+
+/** Vertical axis with an up-pointing arrow (Value Chain / Y). */
+const YAxisIcon = html`<svg
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.6"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M7 21V6" />
+  <path d="M4 9l3-3 3 3" />
+</svg>`;
+
+/** Dashed vertical column dividers. */
+const ColumnsIcon = html`<svg
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.6"
+  stroke-linecap="round"
+  stroke-dasharray="3 3"
+>
+  <path d="M9 4v16M15 4v16" />
+</svg>`;
+
+/** Column labels (short bars under the columns). */
+const ColumnLabelsIcon = html`<svg
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="currentColor"
+  stroke="none"
+>
+  <rect x="3" y="15" width="4.5" height="3" rx="1" />
+  <rect x="9.75" y="15" width="4.5" height="3" rx="1" />
+  <rect x="16.5" y="15" width="4.5" height="3" rx="1" />
+</svg>`;
+
+/** Corner labels (Uncharted / Industrialized, top corners). */
+const CornerLabelsIcon = html`<svg
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="currentColor"
+  stroke="none"
+>
+  <rect x="3" y="5" width="6" height="3" rx="1" />
+  <rect x="15" y="5" width="6" height="3" rx="1" />
+</svg>`;
+
+/** Visibility labels (Visible / Invisible) — an eye. */
+const VisibilityIcon = html`<svg
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.6"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z" />
+  <circle cx="12" cy="12" r="2.4" />
+</svg>`;
+
+type WardleyToggleProp =
+  | 'showXAxis'
+  | 'showYAxis'
+  | 'showColumnDividers'
+  | 'showColumnLabels'
+  | 'showCornerLabels'
+  | 'showVisibilityLabels';
+
+/**
+ * Build a toolbar toggle that flips a boolean visibility flag on every selected
+ * Wardley background. Mirrors the `toggle-resize` pattern: `active` reflects the
+ * current state, `run` flips it (with an undo checkpoint).
+ */
+function visibilityToggle(
+  id: string,
+  tooltip: string,
+  icon: TemplateResult,
+  prop: WardleyToggleProp
+) {
+  return {
+    id,
+    tooltip,
+    icon,
+    active(ctx: ToolbarContext) {
+      const models = ctx.getSurfaceModelsByType(WardleyBackgroundElementModel);
+      return models.length > 0 && models.every(model => model[prop]);
+    },
+    run(ctx: ToolbarContext) {
+      const models = ctx.getSurfaceModelsByType(WardleyBackgroundElementModel);
+      if (!models.length) return;
+
+      const enable = !models.every(model => model[prop]);
+      ctx.std.store.captureSync();
+      const crud = ctx.std.get(EdgelessCRUDIdentifier);
+      for (const model of models) {
+        crud.updateElement(model.id, { [prop]: enable });
+      }
+    },
+  };
+}
 
 export const wardleyToolbarConfig = {
   actions: [
@@ -41,6 +196,99 @@ export const wardleyToolbarConfig = {
         for (const model of models) {
           crud.updateElement(model.id, { resizeEnabled: enable });
         }
+      },
+    },
+    // Group 1 — evolution (X) side: axis, phase labels, columns, corner
+    // labels, and the gradient toggle.
+    {
+      id: 'b.evolution',
+      actions: [
+        visibilityToggle(
+          'b.1-axis-x',
+          "Axe de l'évolution (X)",
+          XAxisIcon,
+          'showXAxis'
+        ),
+        visibilityToggle(
+          'b.2-column-labels',
+          "Labels des phases d'évolution",
+          ColumnLabelsIcon,
+          'showColumnLabels'
+        ),
+        visibilityToggle(
+          'b.3-columns',
+          'Colonnes (séparateurs)',
+          ColumnsIcon,
+          'showColumnDividers'
+        ),
+        visibilityToggle(
+          'b.4-corner-labels',
+          'Labels Uncharted / Industrialized',
+          CornerLabelsIcon,
+          'showCornerLabels'
+        ),
+        {
+          id: 'b.5-gradient',
+          tooltip: 'Afficher / masquer le gradient',
+          icon: GradientIcon,
+          // Only relevant when the selection has a gradient variant.
+          when(ctx) {
+            const models = ctx.getSurfaceModelsByType(
+              WardleyBackgroundElementModel
+            );
+            return models.some(model => model.variant !== 'classic');
+          },
+          active(ctx) {
+            const models = ctx.getSurfaceModelsByType(
+              WardleyBackgroundElementModel
+            );
+            return models.length > 0 && models.every(model => model.showGradient);
+          },
+          run(ctx) {
+            const models = ctx.getSurfaceModelsByType(
+              WardleyBackgroundElementModel
+            );
+            if (!models.length) return;
+
+            const enable = !models.every(model => model.showGradient);
+            ctx.std.store.captureSync();
+            const crud = ctx.std.get(EdgelessCRUDIdentifier);
+            for (const model of models) {
+              crud.updateElement(model.id, { showGradient: enable });
+            }
+          },
+        },
+      ],
+    },
+    // Group 2 — value-chain (Y) side: axis and Visible/Invisible labels.
+    {
+      id: 'c.value-chain',
+      actions: [
+        visibilityToggle(
+          'c.1-axis-y',
+          'Axe de la chaîne de valeur (Y)',
+          YAxisIcon,
+          'showYAxis'
+        ),
+        visibilityToggle(
+          'c.2-visibility-labels',
+          'Labels Visible / Invisible',
+          VisibilityIcon,
+          'showVisibilityLabels'
+        ),
+      ],
+    },
+    // Generate the auto-legend from the components present inside this
+    // background's perimeter (+ a gradient-meaning block for gradient variants).
+    {
+      id: 'd.legend',
+      tooltip: 'Générer la légende (composants présents)',
+      icon: wardleyLegendIcon,
+      run(ctx) {
+        const models = ctx.getSurfaceModelsByType(WardleyBackgroundElementModel);
+        const bg = models[0];
+        if (!bg) return;
+        createWardleyLegend(ctx.std, bg);
       },
     },
   ],

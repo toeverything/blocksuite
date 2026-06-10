@@ -108,3 +108,41 @@ export const wardleyMethodIcon = svg`<svg width="24" height="24" viewBox="0 0 24
   <circle cx="12" cy="12" r="9.6" fill="#d9d9d9" stroke="#1f2328" stroke-width="1.2"/>
   <circle cx="12" cy="12" r="4.6" fill="#fff" stroke="#1f2328" stroke-width="1.2"/>
 </svg>`;
+
+/** Legend: a bordered box with glyph + line rows. */
+export const wardleyLegendIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.3"/>
+  <circle cx="6.6" cy="8" r="1.4" fill="currentColor"/>
+  <line x1="9.6" y1="8" x2="18" y2="8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+  <circle cx="6.6" cy="12" r="1.4" fill="currentColor"/>
+  <line x1="9.6" y1="12" x2="18" y2="12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+  <circle cx="6.6" cy="16" r="1.4" fill="currentColor"/>
+  <line x1="9.6" y1="16" x2="15" y2="16" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+</svg>`;
+
+/** Opportunity gradient background: axes + green differential hump + red operational bump. */
+export const wardleyOpportunityIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M4 20V4M4 20h16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M5 12 C6 7, 8.5 7, 9.5 11 C11 17, 14 19, 18 20" stroke="#1f9e4d" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+  <path d="M14.5 19.5 C15.5 16.5, 17 16.5, 18 19" stroke="#d6455d" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+</svg>`;
+
+/** Benefit/Investment gradient background: axes + zero line + green J-curve. */
+export const wardleyBenefitIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M4 20V4M4 20h16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+  <line x1="4" y1="14" x2="20" y2="14" stroke="currentColor" stroke-width="0.9" opacity="0.45"/>
+  <path d="M5 17 C6 18.5, 7 18.5, 8 15 C9.5 9, 12 5.5, 13.5 8 C16 12, 18 14, 20 14.5" stroke="#1f9e4d" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+</svg>`;
+
+/** Evolution-gradient background (Wardley's S-curve presentation): grey at both edges fading to white center. */
+export const wardleyEvolutionGradientIcon = svg`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wardleyGreyU" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#9aa0a6"/>
+      <stop offset="0.35" stop-color="#ffffff"/>
+      <stop offset="0.65" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#9aa0a6"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4.5" width="16" height="15" rx="2" fill="url(#wardleyGreyU)" stroke="currentColor" stroke-width="1.2"/>
+</svg>`;

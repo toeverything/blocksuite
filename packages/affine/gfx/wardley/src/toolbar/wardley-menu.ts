@@ -50,14 +50,53 @@ import {
   wardleyAnchorIcon,
   wardleyArrowIcon,
   wardleyBackgroundIcon,
+  wardleyBenefitIcon,
   wardleyComponentIcon,
   wardleyEcosystemIcon,
   wardleyInertiaIcon,
   wardleyLinkIcon,
   wardleyMarketIcon,
   wardleyMethodIcon,
+  wardleyEvolutionGradientIcon,
+  wardleyOpportunityIcon,
   wardleyPipelineIcon,
 } from './icons';
+
+/** Background flavours creatable from the menu. */
+type BgVariant = 'classic' | 'opportunity' | 'benefit' | 'evolution-gradient';
+
+/**
+ * Per-variant default label overrides applied at creation (all remain editable
+ * afterwards via the Slice-B inline editor / toggles). The gradient itself is
+ * driven by `variant` in the renderer.
+ */
+const BACKGROUND_VARIANT_DEFAULTS: Record<BgVariant, Record<string, unknown>> = {
+  classic: {},
+  opportunity: {
+    xAxisTitle: 'Évolution',
+    yAxisTitle: 'Opportunity',
+    phase0: 'Genèse',
+    phase1: 'Sur mesure',
+    phase2: 'Produit (+ location)',
+    phase3: 'Commodité (+ utilitaire)',
+    showVisibilityLabels: false,
+    showCornerLabels: false,
+  },
+  benefit: {
+    xAxisTitle: 'Évolution',
+    yAxisTitle: '',
+    visibilityHigh: 'Benefit',
+    visibilityLow: 'Investment',
+    phase0: 'Genèse',
+    phase1: 'Sur mesure',
+    phase2: 'Produit (+ location)',
+    phase3: 'Commodité (+ utilitaire)',
+    showCornerLabels: false,
+  },
+  // Keeps the classic labels (Value Chain / Uncharted / Industrialized…); only
+  // the grey gradient differs.
+  'evolution-gradient': {},
+};
 
 /**
  * The popover that opens above the toolbar for the Wardley toolbox. Each item
@@ -90,7 +129,7 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
 
   override type = EmptyTool;
 
-  private _createBackground() {
+  private _createBackground(variant: BgVariant = 'classic') {
     const { gfx } = this;
     if (!gfx.surface) return;
 
@@ -104,6 +143,8 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
     const { centerX, centerY } = gfx.viewport;
     const id = gfx.surface.addElement({
       type: 'wardley',
+      variant,
+      ...BACKGROUND_VARIANT_DEFAULTS[variant],
       xywh: new Bound(
         centerX - width / 2,
         centerY - height / 2,
@@ -476,7 +517,8 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
           };
     this.edgeless.std.get(EditPropsStore).recordLastProps('connector', props);
     this.gfx.tool.setTool(ConnectorTool, { mode: ConnectorMode.Straight });
-    this.toolbar?.activePopper?.dispose();
+    // Keep the palette open (native sub-menu behaviour): it only closes on
+    // re-click of the senior button, another senior tool, or Escape.
   }
 
   private _finish(id: string) {
@@ -484,7 +526,8 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
     gfx.doc.captureSync();
     gfx.tool.setTool(DefaultTool);
     gfx.selection.set({ elements: [id], editing: false });
-    this.toolbar?.activePopper?.dispose();
+    // Keep the palette open (native sub-menu behaviour) so several Wardley
+    // objects can be added in a row; the canvas stays selectable meanwhile.
   }
 
   override render() {
@@ -494,9 +537,27 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
           <div class="button-group-container">
             <edgeless-tool-icon-button
               .tooltip=${'Fond de carte Wardley'}
-              @click=${this._createBackground}
+              @click=${() => this._createBackground('classic')}
             >
               ${wardleyBackgroundIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Fond Opportunité (gradient)'}
+              @click=${() => this._createBackground('opportunity')}
+            >
+              ${wardleyOpportunityIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Fond Bénéfice / Investissement (gradient)'}
+              @click=${() => this._createBackground('benefit')}
+            >
+              ${wardleyBenefitIcon}
+            </edgeless-tool-icon-button>
+            <edgeless-tool-icon-button
+              .tooltip=${'Fond Évolution (présentation Wardley)'}
+              @click=${() => this._createBackground('evolution-gradient')}
+            >
+              ${wardleyEvolutionGradientIcon}
             </edgeless-tool-icon-button>
             <edgeless-tool-icon-button
               .tooltip=${'Composant'}

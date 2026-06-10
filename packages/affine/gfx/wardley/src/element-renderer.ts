@@ -6,17 +6,16 @@ import type { WardleyBackgroundElementModel } from '@blocksuite/affine-model';
 
 import {
   ARROW,
-  AXIS_LABELS,
   CARD_RADIUS,
   COLORS,
   EVOLUTION_BOUNDARIES,
-  EVOLUTION_PHASES,
   FONT_FAMILY,
   FONTS,
   LINE,
   MARGIN,
   OFFSETS,
 } from './consts';
+import { BENEFIT_ZERO_FRAC, paintGradientBackground } from './gradient';
 
 function roundRectPath(
   ctx: CanvasRenderingContext2D,
@@ -97,6 +96,21 @@ export const wardley: ElementRenderer<WardleyBackgroundElementModel> = (
   ctx.lineWidth = LINE.card;
   ctx.stroke();
 
+  // ── Curve-driven gradient variants (inscribed in the frame) ─────────
+  // Hidden when `showGradient` is false → plain white background.
+  if (model.variant !== 'classic' && model.showGradient) {
+    paintGradientBackground(ctx, model.variant, px0, px1, py0, py1);
+    if (model.variant === 'benefit') {
+      const zy = py1 - BENEFIT_ZERO_FRAC * ph;
+      ctx.strokeStyle = COLORS.axis;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(px0, zy);
+      ctx.lineTo(px1, zy);
+      ctx.stroke();
+    }
+  }
+
   // ── Optional evolution band tints ───────────────────────────────────
   if (model.banded) {
     const starts = [0, 0.175, 0.4, 0.7];
@@ -108,87 +122,118 @@ export const wardley: ElementRenderer<WardleyBackgroundElementModel> = (
   }
 
   // ── Evolution phase dividers (dashed) ───────────────────────────────
-  ctx.strokeStyle = COLORS.divider;
-  ctx.lineWidth = LINE.divider;
-  ctx.setLineDash([5, 5]);
-  for (const r of EVOLUTION_BOUNDARIES) {
-    line(ex(r), py0, ex(r), py1);
+  if (model.showColumnDividers) {
+    ctx.strokeStyle = COLORS.divider;
+    ctx.lineWidth = LINE.divider;
+    ctx.setLineDash([5, 5]);
+    for (const r of EVOLUTION_BOUNDARIES) {
+      line(ex(r), py0, ex(r), py1);
+    }
+    ctx.setLineDash([]);
   }
-  ctx.setLineDash([]);
 
   // ── Axes (L shape) + arrowheads ─────────────────────────────────────
+  // X and Y axes are independently toggleable. Each line stops at the base of
+  // its arrowhead (1px overlap, hidden under the triangle) so the line never
+  // pokes past the tip on zoom.
   ctx.strokeStyle = COLORS.axis;
   ctx.lineWidth = LINE.axis;
-  // Stop each axis line at the base of its arrowhead (with a 1px overlap, hidden
-  // under the triangle) so the line thickness never pokes past the tip on zoom.
-  line(px0, py1, px1 - ARROW + 1, py1); // X axis (arrow tip at px1)
-  line(px0, py1, px0, py0 + ARROW - 1); // Y axis (arrow tip at py0)
   ctx.fillStyle = COLORS.axis;
-  // X arrow (points right)
-  ctx.beginPath();
-  ctx.moveTo(px1, py1);
-  ctx.lineTo(px1 - ARROW, py1 - ARROW / 2);
-  ctx.lineTo(px1 - ARROW, py1 + ARROW / 2);
-  ctx.closePath();
-  ctx.fill();
-  // Y arrow (points up)
-  ctx.beginPath();
-  ctx.moveTo(px0, py0);
-  ctx.lineTo(px0 - ARROW / 2, py0 + ARROW);
-  ctx.lineTo(px0 + ARROW / 2, py0 + ARROW);
-  ctx.closePath();
-  ctx.fill();
+  if (model.showXAxis) {
+    line(px0, py1, px1 - ARROW + 1, py1); // X axis (arrow tip at px1)
+    ctx.beginPath(); // X arrow (points right)
+    ctx.moveTo(px1, py1);
+    ctx.lineTo(px1 - ARROW, py1 - ARROW / 2);
+    ctx.lineTo(px1 - ARROW, py1 + ARROW / 2);
+    ctx.closePath();
+    ctx.fill();
+  }
+  if (model.showYAxis) {
+    line(px0, py1, px0, py0 + ARROW - 1); // Y axis (arrow tip at py0)
+    ctx.beginPath(); // Y arrow (points up)
+    ctx.moveTo(px0, py0);
+    ctx.lineTo(px0 - ARROW / 2, py0 + ARROW);
+    ctx.lineTo(px0 + ARROW / 2, py0 + ARROW);
+    ctx.closePath();
+    ctx.fill();
+  }
 
   // ── Horizontal labels ───────────────────────────────────────────────
   ctx.textBaseline = 'alphabetic';
-  // Phase labels (left-aligned at each zone start)
-  ctx.font = `${FONTS.phase}px ${FONT_FAMILY}`;
-  ctx.fillStyle = COLORS.label;
-  ctx.textAlign = 'left';
-  for (const [label, start] of EVOLUTION_PHASES) {
-    ctx.fillText(label, ex(start) + OFFSETS.phasePad, py1 + OFFSETS.phaseBaseline);
+  // Phase (column) labels (left-aligned at each zone start)
+  if (model.showColumnLabels) {
+    ctx.font = `${FONTS.phase}px ${FONT_FAMILY}`;
+    ctx.fillStyle = COLORS.label;
+    ctx.textAlign = 'left';
+    const phases: Array<[string, number]> = [
+      [model.phase0, 0],
+      [model.phase1, 0.175],
+      [model.phase2, 0.4],
+      [model.phase3, 0.7],
+    ];
+    for (const [label, start] of phases) {
+      ctx.fillText(
+        label,
+        ex(start) + OFFSETS.phasePad,
+        py1 + OFFSETS.phaseBaseline
+      );
+    }
   }
-  // "Evolution" near the X arrow (right-aligned, same baseline)
-  ctx.font = `${FONTS.axis}px ${FONT_FAMILY}`;
-  ctx.fillStyle = COLORS.axis;
-  ctx.textAlign = 'right';
-  ctx.fillText(
-    AXIS_LABELS.xAxis,
-    px1 - OFFSETS.evolutionPadRight,
-    py1 + OFFSETS.phaseBaseline
-  );
-  // Direction indicators (top corners, inside the plot)
-  ctx.font = `${FONTS.direction}px ${FONT_FAMILY}`;
-  ctx.fillStyle = COLORS.label;
-  ctx.textAlign = 'left';
-  ctx.fillText(
-    AXIS_LABELS.evolutionStart,
-    px0 + OFFSETS.directionPadLeft,
-    py0 + OFFSETS.directionTop
-  );
-  ctx.textAlign = 'right';
-  ctx.fillText(
-    AXIS_LABELS.evolutionEnd,
-    px1 - OFFSETS.directionPadRight,
-    py0 + OFFSETS.directionTop
-  );
+  // "Evolution" title near the X arrow (tied to the X axis)
+  if (model.showXAxis) {
+    ctx.font = `${FONTS.axis}px ${FONT_FAMILY}`;
+    ctx.fillStyle = COLORS.axis;
+    ctx.textAlign = 'right';
+    ctx.fillText(
+      model.xAxisTitle,
+      px1 - OFFSETS.evolutionPadRight,
+      py1 + OFFSETS.phaseBaseline
+    );
+  }
+  // Direction indicators (Uncharted / Industrialized, top corners)
+  if (model.showCornerLabels) {
+    ctx.font = `${FONTS.direction}px ${FONT_FAMILY}`;
+    ctx.fillStyle = COLORS.label;
+    ctx.textAlign = 'left';
+    ctx.fillText(
+      model.evolutionStart,
+      px0 + OFFSETS.directionPadLeft,
+      py0 + OFFSETS.directionTop
+    );
+    ctx.textAlign = 'right';
+    ctx.fillText(
+      model.evolutionEnd,
+      px1 - OFFSETS.directionPadRight,
+      py0 + OFFSETS.directionTop
+    );
+  }
 
   // ── Rotated Y labels (hugging the axis, symmetric with the X labels) ─
-  vtext(AXIS_LABELS.yAxis, px0 - OFFSETS.yHug, (py0 + py1) / 2, FONTS.axis, COLORS.axis);
-  vtext(
-    AXIS_LABELS.visibilityHigh,
-    px0 - OFFSETS.yHug,
-    py0 + OFFSETS.visibleTop,
-    FONTS.visibility,
-    COLORS.label
-  );
-  vtext(
-    AXIS_LABELS.visibilityLow,
-    px0 - OFFSETS.yHug,
-    py1 - OFFSETS.invisibleBottom,
-    FONTS.visibility,
-    COLORS.label
-  );
+  if (model.showYAxis) {
+    vtext(
+      model.yAxisTitle,
+      px0 - OFFSETS.yHug,
+      (py0 + py1) / 2,
+      FONTS.axis,
+      COLORS.axis
+    );
+  }
+  if (model.showVisibilityLabels) {
+    vtext(
+      model.visibilityHigh,
+      px0 - OFFSETS.yHug,
+      py0 + OFFSETS.visibleTop,
+      FONTS.visibility,
+      COLORS.label
+    );
+    vtext(
+      model.visibilityLow,
+      px0 - OFFSETS.yHug,
+      py1 - OFFSETS.invisibleBottom,
+      FONTS.visibility,
+      COLORS.label
+    );
+  }
 };
 
 export const WardleyElementRendererExtension = ElementRendererExtension(

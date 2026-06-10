@@ -1,3 +1,4 @@
+import { DefaultTool } from '@blocksuite/affine-block-surface';
 import { EmptyTool } from '@blocksuite/affine-gfx-pointer';
 import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
 import { SignalWatcher } from '@blocksuite/global/lit';
@@ -58,25 +59,23 @@ export class EdgelessWardleySeniorButton extends EdgelessToolbarToolMixin(
 
   override enableActiveBackground = true;
 
+  // `EmptyTool` is only a sentinel for the mixin's abstract `type`; we never
+  // activate it. The menu opens as a palette over the default (selection) tool
+  // so the canvas stays fully interactive while it is open — mirroring the
+  // native Note/Shape sub-menus.
   override type = EmptyTool;
 
   private _toggleMenu() {
-    if (this.tryDisposePopper()) return;
-    this.setEdgelessTool(EmptyTool);
+    // Toggle on popper presence (not tool-active state): the menu stays open on
+    // click-outside and only closes on re-click, another senior tool, or Escape.
+    if (this.popper) {
+      this.popper.dispose();
+      this.popper = null;
+      return;
+    }
+    this.setEdgelessTool(DefaultTool);
     const menu = this.createPopper('edgeless-wardley-menu', this);
     menu.element.edgeless = this.edgeless;
-  }
-
-  override connectedCallback() {
-    super.connectedCallback();
-    // Close the menu when the user switches to any other tool.
-    this._disposables.add(
-      this.gfx.tool.currentToolName$.subscribe(name => {
-        if (name !== 'empty') {
-          this.popper?.dispose();
-        }
-      })
-    );
   }
 
   override render() {
@@ -84,6 +83,7 @@ export class EdgelessWardleySeniorButton extends EdgelessToolbarToolMixin(
       class="wardley-button"
       .tooltip=${this.popper ? '' : 'Wardley map'}
       .tooltipOffset=${4}
+      .active=${!!this.popper}
       @click=${this._toggleMenu}
     >
       <div class="wardley-root">
