@@ -7,11 +7,7 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "@blocksuite/playground",
-    "@blocksuite/integration-test",
-    "@blocksuite/docs"
-  ],
+  "ignore": ["@blocksuite/playground", "@blocksuite/integration-test"],
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
     "onlyUpdatePeerDependentsWhenOutOfRange": true
   }

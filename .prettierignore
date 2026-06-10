@@ -4,7 +4,6 @@ yarn.lock
 tests/snapshots/
 __snapshots__/
 tsconfig.tsbuildinfo
-**/docs/api/
 .coverage/
 **/test-results/
 packages/

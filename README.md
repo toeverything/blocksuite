@@ -52,9 +52,7 @@ During the development of AFFiNE, it became clear that BlockSuite was advancing 
 
 ## Features
 
-With BlockSuite editors, you can selectively reuse all the editing features in [AFFiNE](https://affine.pro/):
-
-[![affine-demo](./packages/docs/images/affine-demo.jpg)](https://affine.pro)
+With BlockSuite editors, you can selectively reuse all the editing features in [AFFiNE](https://affine.pro/).
 
 And under the hood, the vanilla BlockSuite framework supports:
 

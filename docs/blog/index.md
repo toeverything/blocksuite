@@ -1,4 +1,0 @@
----
-layout: BlogListLayout
-title: Blog
----

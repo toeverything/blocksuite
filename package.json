@@ -7,19 +7,16 @@
   },
   "packageManager": "yarn@4.7.0",
   "workspaces": [
-    "packages/**/*",
-    "docs"
+    "packages/**/*"
   ],
   "scripts": {
     "preview": "yarn workspace @blocksuite/playground preview",
     "dev": "yarn workspace @blocksuite/playground dev",
-    "dev:docs": "yarn workspace @blocksuite/docs dev",
     "lint:format": "prettier . --check",
     "format": "prettier . --write",
     "build": "tsc -b tsconfig.json --verbose",
     "build:packages": "yarn workspace @blocksuite/affine build",
     "build:playground": "yarn workspace @blocksuite/playground build",
-    "build:docs": "yarn workspace @blocksuite/docs build",
     "ci:version": "changeset version && yarn install --no-frozen-lockfile",
     "ci:publish": "yarn build:packages && yarn workspaces foreach -Ap --no-private npm publish --tolerate-republish --access public --tag latest",
     "ci:version:canary": "changeset version --snapshot canary && yarn install --no-frozen-lockfile",
