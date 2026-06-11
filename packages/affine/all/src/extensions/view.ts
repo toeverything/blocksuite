@@ -25,6 +25,7 @@ import { FramePanelViewExtension } from '@blocksuite/affine-fragment-frame-panel
 import { OutlineViewExtension } from '@blocksuite/affine-fragment-outline/view';
 import { BrushViewExtension } from '@blocksuite/affine-gfx-brush/view';
 import { ConnectorViewExtension } from '@blocksuite/affine-gfx-connector/view';
+import { CynefinEstuarineViewExtension } from '@blocksuite/affine-gfx-cynefin-estuarine/view';
 import { EdgyViewExtension } from '@blocksuite/affine-gfx-edgy/view';
 import { GroupViewExtension } from '@blocksuite/affine-gfx-group/view';
 import { LinkViewExtension as GfxLinkViewExtension } from '@blocksuite/affine-gfx-link/view';
@@ -87,6 +88,7 @@ export function getInternalViewExtensions(flags?: BlockFlags) {
     ...(on('link') ? [GfxLinkViewExtension] : []),
     ...(on('wardley') ? [WardleyViewExtension] : []),
     ...(on('edgy') ? [EdgyViewExtension] : []),
+    ...(on('cynefin-estuarine') ? [CynefinEstuarineViewExtension] : []),
 
     // Block
     ...(on('attachment') ? [AttachmentViewExtension] : []),

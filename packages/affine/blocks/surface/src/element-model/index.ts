@@ -1,8 +1,10 @@
 import {
   BrushElementModel,
   ConnectorElementModel,
+  CynefinElementModel,
   EdgyFacetsElementModel,
   EdgyNodeElementModel,
+  EstuarineElementModel,
   GroupElementModel,
   HighlighterElementModel,
   MindmapElementModel,
@@ -26,13 +28,17 @@ export const elementsCtorMap = {
   wardleyNode: WardleyNodeElementModel,
   edgy: EdgyFacetsElementModel,
   edgyNode: EdgyNodeElementModel,
+  cynefin: CynefinElementModel,
+  estuarine: EstuarineElementModel,
 };
 
 export {
   BrushElementModel,
   ConnectorElementModel,
+  CynefinElementModel,
   EdgyFacetsElementModel,
   EdgyNodeElementModel,
+  EstuarineElementModel,
   GroupElementModel,
   HighlighterElementModel,
   MindmapElementModel,
@@ -55,6 +61,8 @@ export enum CanvasElementType {
   WARDLEYNODE = 'wardleyNode',
   EDGY = 'edgy',
   EDGYNODE = 'edgyNode',
+  CYNEFIN = 'cynefin',
+  ESTUARINE = 'estuarine',
 }
 
 export type ElementModelMap = {
@@ -69,6 +77,8 @@ export type ElementModelMap = {
   ['wardleyNode']: WardleyNodeElementModel;
   ['edgy']: EdgyFacetsElementModel;
   ['edgyNode']: EdgyNodeElementModel;
+  ['cynefin']: CynefinElementModel;
+  ['estuarine']: EstuarineElementModel;
 };
 
 export function isCanvasElementType(type: string): type is CanvasElementType {

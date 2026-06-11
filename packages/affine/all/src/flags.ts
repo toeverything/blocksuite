@@ -47,6 +47,7 @@ export const OPTIONAL_BLOCKS = [
   'link',
   'wardley',
   'edgy',
+  'cynefin-estuarine',
 ] as const;
 
 export type OptionalBlock = (typeof OPTIONAL_BLOCKS)[number];

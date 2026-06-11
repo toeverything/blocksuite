@@ -4,18 +4,15 @@ import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-too
 import { SignalWatcher } from '@blocksuite/global/lit';
 import { css, html, LitElement } from 'lit';
 
-import { edgyToolbarIcon } from './icons';
+import { cynefinToolbarIcon } from './icons';
 
-/**
- * Main toolbar button (colored facets glyph) that opens the EDGY toolbox
- * sub-menu above the toolbar. Mirrors the Wardley senior button.
- */
-export class EdgelessEdgySeniorButton extends EdgelessToolbarToolMixin(
+/** Main toolbar button that opens the combined Cynefin / Estuarine sub-menu. */
+export class EdgelessCynefinEstuarineSeniorButton extends EdgelessToolbarToolMixin(
   SignalWatcher(LitElement)
 ) {
   static override styles = css`
     :host,
-    .edgy-button {
+    .ce-button {
       display: block;
       width: 100%;
       height: 100%;
@@ -23,7 +20,7 @@ export class EdgelessEdgySeniorButton extends EdgelessToolbarToolMixin(
     :host {
       position: relative;
     }
-    .edgy-root {
+    .ce-root {
       width: 100%;
       height: 64px;
       position: relative;
@@ -33,7 +30,7 @@ export class EdgelessEdgySeniorButton extends EdgelessToolbarToolMixin(
       align-items: flex-end;
       justify-content: center;
     }
-    .edgy-card {
+    .ce-card {
       --y: -4px;
       --s: 1;
       position: absolute;
@@ -41,18 +38,14 @@ export class EdgelessEdgySeniorButton extends EdgelessToolbarToolMixin(
       width: 54px;
       height: 54px;
       transform: translateY(var(--y)) scale(var(--s));
-      translate: var(--active-x, 0) var(--active-y, 0);
-      rotate: var(--active-r, -2deg);
-      scale: var(--active-s, 1);
-      transition: transform 0.3s ease, translate 0.3s ease, rotate 0.3s ease,
-        scale 0.3s ease;
+      transition: transform 0.3s ease;
     }
-    .edgy-card svg {
+    .ce-card svg {
       display: block;
       width: 100%;
       height: 100%;
     }
-    .edgy-root:hover .edgy-card {
+    .ce-root:hover .ce-card {
       --y: -10px;
       --s: 1.07;
     }
@@ -69,7 +62,7 @@ export class EdgelessEdgySeniorButton extends EdgelessToolbarToolMixin(
       return;
     }
     this.setEdgelessTool(DefaultTool);
-    const menu = this.createPopper('edgeless-edgy-menu', this);
+    const menu = this.createPopper('edgeless-cynefin-estuarine-menu', this);
     menu.element.edgeless = this.edgeless;
 
     const el = menu.element as HTMLElement;
@@ -88,14 +81,14 @@ export class EdgelessEdgySeniorButton extends EdgelessToolbarToolMixin(
 
   override render() {
     return html`<edgeless-toolbar-button
-      class="edgy-button"
-      .tooltip=${this.popper ? '' : 'EDGY'}
+      class="ce-button"
+      .tooltip=${this.popper ? '' : 'Cynefin / Estuarine'}
       .tooltipOffset=${4}
       .active=${!!this.popper}
       @click=${this._toggleMenu}
     >
-      <div class="edgy-root">
-        <div class="edgy-card">${edgyToolbarIcon}</div>
+      <div class="ce-root">
+        <div class="ce-card">${cynefinToolbarIcon}</div>
       </div>
     </edgeless-toolbar-button>`;
   }
