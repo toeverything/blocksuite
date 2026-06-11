@@ -2,8 +2,8 @@ import type {
   AttributeRenderer,
   InlineEditor,
   InlineRange,
-} from '@blocksuite/std/inline';
-import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/store';
+} from '@labre/std/inline';
+import type { BaseTextAttributes, DeltaInsert } from '@labre/store';
 import type * as Y from 'yjs';
 import type { AnyZodObject, KeySchema, ZodEffects, ZodRecord } from 'zod';
 

@@ -4,8 +4,8 @@ import {
   NoteBlockModel,
   NoteBlockSchema,
   ParagraphBlockModel,
-} from '@blocksuite/affine-model';
-import { textConversionConfigs } from '@blocksuite/affine-rich-text';
+} from '@labre/affine-model';
+import { textConversionConfigs } from '@labre/affine-rich-text';
 import {
   focusBlockEnd,
   focusBlockStart,
@@ -13,11 +13,11 @@ import {
   getNextBlockCommand,
   getPrevBlockCommand,
   getTextSelectionCommand,
-} from '@blocksuite/affine-shared/commands';
+} from '@labre/affine-shared/commands';
 import {
   asyncGetBlockComponent,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/utils';
 import {
   type BlockComponent,
   BlockSelection,
@@ -27,8 +27,8 @@ import {
   TextSelection,
   type UIEventHandler,
   type UIEventStateContext,
-} from '@blocksuite/std';
-import type { BaseSelection } from '@blocksuite/store';
+} from '@labre/std';
+import type { BaseSelection } from '@labre/store';
 
 import {
   dedentBlocks,

@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/link-preview';
+export * from '@labre/affine-components/link-preview';

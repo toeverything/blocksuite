@@ -1,13 +1,13 @@
-import type { NoteBlockComponent } from '@blocksuite/affine-block-note';
-import { captureEventTarget } from '@blocksuite/affine-shared/utils';
-import { Point } from '@blocksuite/global/gfx';
+import type { NoteBlockComponent } from '@labre/affine-block-note';
+import { captureEventTarget } from '@labre/affine-shared/utils';
+import { Point } from '@labre/global/gfx';
 import {
   BLOCK_ID_ATTR,
   type BlockComponent,
   type PointerEventState,
   type UIEventHandler,
-} from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import { computed } from '@preact/signals-core';
 import throttle from 'lodash-es/throttle';
 

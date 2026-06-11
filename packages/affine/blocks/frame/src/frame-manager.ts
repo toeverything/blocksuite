@@ -1,15 +1,15 @@
-import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
-import { Overlay } from '@blocksuite/affine-block-surface';
-import type { FrameBlockModel } from '@blocksuite/affine-model';
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import type { SurfaceBlockModel } from '@labre/affine-block-surface';
+import { Overlay } from '@labre/affine-block-surface';
+import type { FrameBlockModel } from '@labre/affine-model';
+import { EditPropsStore } from '@labre/affine-shared/services';
+import { DisposableGroup } from '@labre/global/disposable';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 import {
   Bound,
   deserializeXYWH,
   type IVec,
   type SerializedXYWH,
-} from '@blocksuite/global/gfx';
+} from '@labre/global/gfx';
 import {
   generateKeyBetweenV2,
   getTopElements,
@@ -20,8 +20,8 @@ import {
   type GfxModel,
   isGfxGroupCompatibleModel,
   renderableInEdgeless,
-} from '@blocksuite/std/gfx';
-import { type BlockModel, Text } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import { type BlockModel, Text } from '@labre/store';
 import * as Y from 'yjs';
 
 const FRAME_PADDING = 40;

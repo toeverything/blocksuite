@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-widget-frame-title/view';
+export * from '@labre/affine-widget-frame-title/view';

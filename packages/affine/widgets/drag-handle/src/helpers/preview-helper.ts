@@ -1,18 +1,18 @@
-import { ViewExtensionManagerIdentifier } from '@blocksuite/affine-ext-loader';
+import { ViewExtensionManagerIdentifier } from '@labre/affine-ext-loader';
 import {
   DocModeExtension,
   DocModeProvider,
   EditorSettingExtension,
   EditorSettingProvider,
-} from '@blocksuite/affine-shared/services';
-import { BlockStdScope, BlockViewIdentifier } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { BlockStdScope, BlockViewIdentifier } from '@labre/std';
 import type {
   BlockModel,
   BlockViewType,
   ExtensionType,
   Query,
   SliceSnapshot,
-} from '@blocksuite/store';
+} from '@labre/store';
 import { signal } from '@preact/signals-core';
 import { literal } from 'lit/static-html.js';
 

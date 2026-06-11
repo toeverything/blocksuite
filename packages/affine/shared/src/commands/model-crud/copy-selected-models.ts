@@ -1,5 +1,5 @@
-import type { Command } from '@blocksuite/std';
-import { type BlockModel, type DraftModel, Slice } from '@blocksuite/store';
+import type { Command } from '@labre/std';
+import { type BlockModel, type DraftModel, Slice } from '@labre/store';
 
 export const copySelectedModelsCommand: Command<{
   draftedModels?: Promise<DraftModel<BlockModel<object>>[]>;

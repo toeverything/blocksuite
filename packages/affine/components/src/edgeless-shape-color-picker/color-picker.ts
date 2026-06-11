@@ -7,13 +7,13 @@ import {
   resolveColor,
   type ShapeProps,
   type StrokeStyle,
-} from '@blocksuite/affine-model';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+} from '@labre/affine-model';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
 import {
   type ColorEvent,
   stopPropagation,
-} from '@blocksuite/affine-shared/utils';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/utils';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { batch, signal } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { property, query } from 'lit/decorators.js';

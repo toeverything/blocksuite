@@ -1,7 +1,7 @@
-import type { ServiceIdentifier } from '@blocksuite/global/di';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import type { IBound, IPoint } from '@blocksuite/global/gfx';
+import type { ServiceIdentifier } from '@labre/global/di';
+import { DisposableGroup } from '@labre/global/disposable';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import type { IBound, IPoint } from '@labre/global/gfx';
 import { computed, Signal } from '@preact/signals-core';
 import { Subject, type Subscription } from 'rxjs';
 

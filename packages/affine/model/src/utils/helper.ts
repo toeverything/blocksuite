@@ -1,12 +1,12 @@
-import type { Constructor } from '@blocksuite/global/utils';
-import type { GfxCompatibleProps } from '@blocksuite/std/gfx';
-import { GfxCompatible } from '@blocksuite/std/gfx';
+import type { Constructor } from '@labre/global/utils';
+import type { GfxCompatibleProps } from '@labre/std/gfx';
+import { GfxCompatible } from '@labre/std/gfx';
 import {
   type BaseBlockTransformer,
   type BlockModel,
   defineBlockSchema,
   type InternalPrimitives,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 import type { BlockMeta } from './types';
 

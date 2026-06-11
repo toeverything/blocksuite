@@ -1,8 +1,8 @@
 import {
   createIdentifier,
   type ServiceIdentifier,
-} from '@blocksuite/global/di';
-import type { BaseTextAttributes, ExtensionType } from '@blocksuite/store';
+} from '@labre/global/di';
+import type { BaseTextAttributes, ExtensionType } from '@labre/store';
 
 import type { InlineMarkdownMatch } from './type.js';
 

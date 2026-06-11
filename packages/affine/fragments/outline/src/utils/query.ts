@@ -3,9 +3,9 @@ import {
   NoteDisplayMode,
   ParagraphBlockModel,
   RootBlockModel,
-} from '@blocksuite/affine-model';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import type { BlockModel, Store } from '@blocksuite/store';
+} from '@labre/affine-model';
+import { matchModels } from '@labre/affine-shared/utils';
+import type { BlockModel, Store } from '@labre/store';
 
 import { headingKeys } from '../config.js';
 

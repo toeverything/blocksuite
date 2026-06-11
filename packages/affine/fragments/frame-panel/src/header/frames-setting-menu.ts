@@ -1,10 +1,10 @@
-import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
+import { EdgelessLegacySlotIdentifier } from '@labre/affine-block-surface';
 import {
   DocModeProvider,
   EditPropsStore,
-} from '@blocksuite/affine-shared/services';
-import { WithDisposable } from '@blocksuite/global/lit';
-import type { EditorHost } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { WithDisposable } from '@labre/global/lit';
+import type { EditorHost } from '@labre/std';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { property, state } from 'lit/decorators.js';
 

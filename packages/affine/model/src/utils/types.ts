@@ -1,4 +1,4 @@
-import type { GfxModel } from '@blocksuite/std/gfx';
+import type { GfxModel } from '@labre/std/gfx';
 import { z } from 'zod';
 
 import type {

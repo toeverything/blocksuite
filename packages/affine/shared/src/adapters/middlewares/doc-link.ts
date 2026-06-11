@@ -1,4 +1,4 @@
-import type { TransformerMiddleware } from '@blocksuite/store';
+import type { TransformerMiddleware } from '@labre/store';
 
 const customDocLinkBaseUrlMiddleware = (
   baseUrl: string,

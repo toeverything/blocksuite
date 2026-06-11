@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/linked-doc-title';
+export * from '@labre/affine-components/linked-doc-title';

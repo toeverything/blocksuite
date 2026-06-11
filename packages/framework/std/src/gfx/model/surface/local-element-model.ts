@@ -1,4 +1,4 @@
-import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/gfx';
+import type { IVec, SerializedXYWH, XYWH } from '@labre/global/gfx';
 import {
   Bound,
   deserializeXYWH,
@@ -8,7 +8,7 @@ import {
   polygonGetPointTangent,
   polygonNearestPoint,
   rotatePoints,
-} from '@blocksuite/global/gfx';
+} from '@labre/global/gfx';
 import { mutex } from 'lib0';
 
 import type { EditorHost } from '../../../view/index.js';

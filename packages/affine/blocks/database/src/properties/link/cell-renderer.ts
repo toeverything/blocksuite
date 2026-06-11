@@ -1,15 +1,15 @@
-import { RefNodeSlotsProvider } from '@blocksuite/affine-inline-reference';
-import { ParseDocUrlProvider } from '@blocksuite/affine-shared/services';
+import { RefNodeSlotsProvider } from '@labre/affine-inline-reference';
+import { ParseDocUrlProvider } from '@labre/affine-shared/services';
 import {
   isValidUrl,
   normalizeUrl,
   stopPropagation,
-} from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/utils';
 import {
   BaseCellRenderer,
   createFromBaseCellRenderer,
   createIcon,
-} from '@blocksuite/data-view';
+} from '@labre/data-view';
 import { EditIcon } from '@blocksuite/icons/lit';
 import { computed } from '@preact/signals-core';
 import { html, nothing, type PropertyValues } from 'lit';

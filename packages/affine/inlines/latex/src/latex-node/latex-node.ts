@@ -1,18 +1,18 @@
-import { createLitPortal } from '@blocksuite/affine-components/portal';
-import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { createLitPortal } from '@labre/affine-components/portal';
+import { unsafeCSSVar, unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import {
   type BlockComponent,
   type BlockStdScope,
   ShadowlessElement,
-} from '@blocksuite/std';
+} from '@labre/std';
 import {
   type InlineEditor,
   ZERO_WIDTH_FOR_EMBED_NODE,
   ZERO_WIDTH_FOR_EMPTY_LINE,
-} from '@blocksuite/std/inline';
-import type { DeltaInsert } from '@blocksuite/store';
+} from '@labre/std/inline';
+import type { DeltaInsert } from '@labre/store';
 import { signal } from '@preact/signals-core';
 import katex from 'katex';
 import { css, html, render } from 'lit';

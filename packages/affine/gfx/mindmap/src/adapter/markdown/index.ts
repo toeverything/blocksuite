@@ -1,9 +1,9 @@
-import { ElementToMarkdownAdapterExtension } from '@blocksuite/affine-block-surface';
-import { getShapeText } from '@blocksuite/affine-gfx-shape';
+import { ElementToMarkdownAdapterExtension } from '@labre/affine-block-surface';
+import { getShapeText } from '@labre/affine-gfx-shape';
 import {
   buildMindMapTree,
   type MindMapTreeNode,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 
 export const mindmapToMarkdownAdapterMatcher =
   ElementToMarkdownAdapterExtension({

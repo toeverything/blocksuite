@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/edgeless-shape-color-picker';
+export * from '@labre/affine-components/edgeless-shape-color-picker';

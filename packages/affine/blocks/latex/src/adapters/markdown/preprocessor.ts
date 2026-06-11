@@ -1,7 +1,7 @@
 import {
   type MarkdownAdapterPreprocessor,
   MarkdownPreprocessorExtension,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 
 function escapeBrackets(text: string) {
   const pattern =

@@ -1,13 +1,13 @@
-import { getDocTitleByEditorHost } from '@blocksuite/affine-fragment-doc-title';
-import type { RootBlockModel } from '@blocksuite/affine-model';
+import { getDocTitleByEditorHost } from '@labre/affine-fragment-doc-title';
+import type { RootBlockModel } from '@labre/affine-model';
 import {
   FeatureFlagService,
   isVirtualKeyboardProviderWithAction,
   VirtualKeyboardProvider,
   type VirtualKeyboardProviderWithAction,
-} from '@blocksuite/affine-shared/services';
-import { IS_MOBILE } from '@blocksuite/global/env';
-import { WidgetComponent, WidgetViewExtension } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { IS_MOBILE } from '@labre/global/env';
+import { WidgetComponent, WidgetViewExtension } from '@labre/std';
 import { effect, signal } from '@preact/signals-core';
 import { html, nothing } from 'lit';
 import { literal, unsafeStatic } from 'lit/static-html.js';

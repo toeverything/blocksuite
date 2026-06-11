@@ -1,5 +1,5 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import type { BaseTextAttributes } from '@blocksuite/store';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import type { BaseTextAttributes } from '@labre/store';
 import { html, render } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 import * as Y from 'yjs';

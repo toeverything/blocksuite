@@ -1,16 +1,16 @@
-import { deleteTextCommand } from '@blocksuite/affine-inline-preset';
+import { deleteTextCommand } from '@labre/affine-inline-preset';
 import {
   HtmlAdapter,
   pasteMiddleware,
   PlainTextAdapter,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 import {
   getBlockIndexCommand,
   getBlockSelectionsCommand,
   getTextSelectionCommand,
-} from '@blocksuite/affine-shared/commands';
-import { type Container, createIdentifier } from '@blocksuite/global/di';
-import { DisposableGroup } from '@blocksuite/global/disposable';
+} from '@labre/affine-shared/commands';
+import { type Container, createIdentifier } from '@labre/global/di';
+import { DisposableGroup } from '@labre/global/disposable';
 import {
   type BlockStdScope,
   Clipboard,
@@ -19,8 +19,8 @@ import {
   LifeCycleWatcherIdentifier,
   StdIdentifier,
   type UIEventHandler,
-} from '@blocksuite/std';
-import type { ExtensionType } from '@blocksuite/store';
+} from '@labre/std';
+import type { ExtensionType } from '@labre/store';
 
 export const CodeClipboardAdapterConfigIdentifier =
   createIdentifier<ClipboardAdapterConfig>('code-clipboard-adapter-config');

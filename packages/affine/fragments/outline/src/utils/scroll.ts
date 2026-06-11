@@ -1,10 +1,10 @@
-import { getDocTitleByEditorHost } from '@blocksuite/affine-fragment-doc-title';
-import { NoteDisplayMode } from '@blocksuite/affine-model';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import type { Viewport } from '@blocksuite/affine-shared/types';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { clamp } from '@blocksuite/global/gfx';
-import type { EditorHost } from '@blocksuite/std';
+import { getDocTitleByEditorHost } from '@labre/affine-fragment-doc-title';
+import { NoteDisplayMode } from '@labre/affine-model';
+import { DocModeProvider } from '@labre/affine-shared/services';
+import type { Viewport } from '@labre/affine-shared/types';
+import { DisposableGroup } from '@labre/global/disposable';
+import { clamp } from '@labre/global/gfx';
+import type { EditorHost } from '@labre/std';
 
 import { getHeadingBlocksFromDoc } from './query.js';
 

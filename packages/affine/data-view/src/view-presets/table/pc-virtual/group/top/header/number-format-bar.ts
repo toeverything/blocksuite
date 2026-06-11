@@ -1,4 +1,4 @@
-import { WithDisposable } from '@blocksuite/global/lit';
+import { WithDisposable } from '@labre/global/lit';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, LitElement, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';

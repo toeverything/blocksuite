@@ -1,5 +1,5 @@
-import { EmbedYoutubeBlockSchema } from '@blocksuite/affine-model';
-import { BlockPlainTextAdapterExtension } from '@blocksuite/affine-shared/adapters';
+import { EmbedYoutubeBlockSchema } from '@labre/affine-model';
+import { BlockPlainTextAdapterExtension } from '@labre/affine-shared/adapters';
 
 import { createEmbedBlockPlainTextAdapterMatcher } from '../../common/adapters/plain-text.js';
 

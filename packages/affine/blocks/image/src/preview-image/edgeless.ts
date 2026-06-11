@@ -1,4 +1,4 @@
-import { toGfxBlockComponent } from '@blocksuite/std';
+import { toGfxBlockComponent } from '@labre/std';
 import { css } from 'lit';
 
 import { ImagePlaceholderBlockComponent } from './page.js';

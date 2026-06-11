@@ -2,7 +2,7 @@ import {
   menu,
   popMenu,
   type PopupTarget,
-} from '@blocksuite/affine-components/context-menu';
+} from '@labre/affine-components/context-menu';
 
 import { renderUniLit } from '../utils/index.js';
 import type { SortUtils } from './utils.js';

@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { BlockFlavourIdentifier } from '../identifier.js';
 
@@ -10,7 +10,7 @@ import { BlockFlavourIdentifier } from '../identifier.js';
  *
  * @example
  * ```ts
- * import { FlavourExtension } from '@blocksuite/std';
+ * import { FlavourExtension } from '@labre/std';
  *
  * const MyFlavourExtension = FlavourExtension('my-flavour');
  * ```

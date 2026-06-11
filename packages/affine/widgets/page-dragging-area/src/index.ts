@@ -1,16 +1,16 @@
-import type { RootBlockModel } from '@blocksuite/affine-model';
-import { ViewportElementProvider } from '@blocksuite/affine-shared/services';
+import type { RootBlockModel } from '@labre/affine-model';
+import { ViewportElementProvider } from '@labre/affine-shared/services';
 import {
   autoScroll,
   getScrollContainer,
-} from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/utils';
 import {
   BlockComponent,
   BlockSelection,
   type PointerEventState,
   WidgetComponent,
   WidgetViewExtension,
-} from '@blocksuite/std';
+} from '@labre/std';
 import { html, nothing } from 'lit';
 import { state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

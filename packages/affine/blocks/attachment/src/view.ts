@@ -1,10 +1,10 @@
 import {
   type ViewExtensionContext,
   ViewExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { AttachmentBlockSchema } from '@blocksuite/affine-model';
-import { SlashMenuConfigExtension } from '@blocksuite/affine-widget-slash-menu';
-import { BlockViewExtension, FlavourExtension } from '@blocksuite/std';
+} from '@labre/affine-ext-loader';
+import { AttachmentBlockSchema } from '@labre/affine-model';
+import { SlashMenuConfigExtension } from '@labre/affine-widget-slash-menu';
+import { BlockViewExtension, FlavourExtension } from '@labre/std';
 import { literal } from 'lit/static-html.js';
 
 import { AttachmentBlockInteraction } from './attachment-edgeless-block.js';

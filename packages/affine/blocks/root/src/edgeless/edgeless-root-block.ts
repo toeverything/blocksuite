@@ -1,44 +1,44 @@
-import { NoteConfigExtension } from '@blocksuite/affine-block-note';
+import { NoteConfigExtension } from '@labre/affine-block-note';
 import {
   DefaultTool,
   getBgGridGap,
   normalizeWheelDeltaY,
   type SurfaceBlockComponent,
   type SurfaceBlockModel,
-} from '@blocksuite/affine-block-surface';
-import { isSingleMindMapNode } from '@blocksuite/affine-gfx-mindmap';
-import { PanTool } from '@blocksuite/affine-gfx-pointer';
-import { mountShapeTextEditor } from '@blocksuite/affine-gfx-shape';
+} from '@labre/affine-block-surface';
+import { isSingleMindMapNode } from '@labre/affine-gfx-mindmap';
+import { PanTool } from '@labre/affine-gfx-pointer';
+import { mountShapeTextEditor } from '@labre/affine-gfx-shape';
 import {
   NoteBlockModel,
   type RootBlockModel,
   type ShapeElementModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EditorSettingProvider,
   EditPropsStore,
   FontLoaderService,
   ThemeProvider,
   ViewportElementProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   isTouchPadPinchEvent,
   matchModels,
   requestConnectedFrame,
   requestThrottledConnectedFrame,
-} from '@blocksuite/affine-shared/utils';
-import { IS_WINDOWS } from '@blocksuite/global/env';
-import { Bound, Point, Vec } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/utils';
+import { IS_WINDOWS } from '@labre/global/env';
+import { Bound, Point, Vec } from '@labre/global/gfx';
 import {
   BlockComponent,
   type GfxBlockComponent,
   SurfaceSelection,
   type UIEventHandler,
-} from '@blocksuite/std';
+} from '@labre/std';
 import {
   GfxControllerIdentifier,
   type GfxViewportElement,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import { effect } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';

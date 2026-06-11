@@ -1,14 +1,14 @@
 import {
   type ViewExtensionContext,
   ViewExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { SurfaceRefBlockSchema } from '@blocksuite/affine-model';
-import { ToolbarModuleExtension } from '@blocksuite/affine-shared/services';
+} from '@labre/affine-ext-loader';
+import { SurfaceRefBlockSchema } from '@labre/affine-model';
+import { ToolbarModuleExtension } from '@labre/affine-shared/services';
 import {
   BlockFlavourIdentifier,
   BlockViewExtension,
   FlavourExtension,
-} from '@blocksuite/std';
+} from '@labre/std';
 import { literal } from 'lit/static-html.js';
 
 import { SurfaceRefSlashMenuConfigExtension } from './configs/slash-menu';

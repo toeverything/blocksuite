@@ -1,16 +1,16 @@
-import type { EmbedIframeBlockModel } from '@blocksuite/affine-model';
+import type { EmbedIframeBlockModel } from '@labre/affine-model';
 import {
   EmbedIframeService,
   NotificationProvider,
-} from '@blocksuite/affine-shared/services';
-import { isValidUrl, stopPropagation } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
-import { noop } from '@blocksuite/global/utils';
+} from '@labre/affine-shared/services';
+import { isValidUrl, stopPropagation } from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
+import { noop } from '@labre/global/utils';
 import {
   BlockSelection,
   type BlockStdScope,
   SurfaceSelection,
-} from '@blocksuite/std';
+} from '@labre/std';
 import { LitElement } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 

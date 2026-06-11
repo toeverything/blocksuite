@@ -1,4 +1,4 @@
-import { ElementToPlainTextAdapterExtension } from '@blocksuite/affine-block-surface';
+import { ElementToPlainTextAdapterExtension } from '@labre/affine-block-surface';
 
 import { getMindMapTreeText } from '../utils';
 

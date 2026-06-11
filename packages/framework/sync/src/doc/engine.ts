@@ -1,4 +1,4 @@
-import type { Logger } from '@blocksuite/global/utils';
+import type { Logger } from '@labre/global/utils';
 import { Subject } from 'rxjs';
 import type { Doc } from 'yjs';
 

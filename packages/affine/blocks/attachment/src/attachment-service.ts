@@ -1,12 +1,12 @@
-import { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
-import { FileDropConfigExtension } from '@blocksuite/affine-components/drop-indicator';
-import { AttachmentBlockSchema } from '@blocksuite/affine-model';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
+import { SurfaceBlockModel } from '@labre/affine-block-surface';
+import { FileDropConfigExtension } from '@labre/affine-components/drop-indicator';
+import { AttachmentBlockSchema } from '@labre/affine-model';
+import { TelemetryProvider } from '@labre/affine-shared/services';
 import {
   isInsideEdgelessEditor,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/affine-shared/utils';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 
 import { addAttachments, addSiblingAttachmentBlocks } from './utils.js';
 

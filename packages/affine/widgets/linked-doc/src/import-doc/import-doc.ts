@@ -5,13 +5,13 @@ import {
   HelpIcon,
   NewIcon,
   NotionIcon,
-} from '@blocksuite/affine-components/icons';
+} from '@labre/affine-components/icons';
 import {
   openFilesWith,
   openSingleFileWith,
-} from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
-import type { ExtensionType, Schema, Workspace } from '@blocksuite/store';
+} from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
+import type { ExtensionType, Schema, Workspace } from '@labre/store';
 import { html, LitElement, type PropertyValues } from 'lit';
 import { query, state } from 'lit/decorators.js';
 

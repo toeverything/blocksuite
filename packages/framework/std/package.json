@@ -1,5 +1,5 @@
 {
-  "name": "@blocksuite/std",
+  "name": "@labre/std",
   "description": "Std for blocksuite blocks",
   "type": "module",
   "scripts": {
@@ -13,8 +13,8 @@
     "@atlaskit/pragmatic-drag-and-drop": "^1.4.0",
     "@atlaskit/pragmatic-drag-and-drop-auto-scroll": "^2.1.0",
     "@atlaskit/pragmatic-drag-and-drop-hitbox": "^1.0.3",
-    "@blocksuite/global": "workspace:*",
-    "@blocksuite/store": "workspace:*",
+    "@labre/global": "workspace:*",
+    "@labre/store": "workspace:*",
     "@lit/context": "^1.1.2",
     "@preact/signals-core": "^1.8.0",
     "@types/hast": "^3.0.4",

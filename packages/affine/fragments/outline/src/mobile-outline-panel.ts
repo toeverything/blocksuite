@@ -2,17 +2,17 @@ import {
   NoteDisplayMode,
   ParagraphBlockModel,
   RootBlockModel,
-} from '@blocksuite/affine-model';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-model';
+import { DocModeProvider } from '@labre/affine-shared/services';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { matchModels } from '@labre/affine-shared/utils';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import {
   type EditorHost,
   PropTypes,
   requiredProperties,
-} from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/std';
+import type { BlockModel } from '@labre/store';
 import { signal } from '@preact/signals-core';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';

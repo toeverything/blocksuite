@@ -1,6 +1,6 @@
-import type { BlockStdScope, EditorHost } from '@blocksuite/std';
-import type { GfxModel } from '@blocksuite/std/gfx';
-import type { BlockModel, Store } from '@blocksuite/store';
+import type { BlockStdScope, EditorHost } from '@labre/std';
+import type { GfxModel } from '@labre/std/gfx';
+import type { BlockModel, Store } from '@labre/store';
 
 export abstract class MenuContext {
   abstract get doc(): Store;

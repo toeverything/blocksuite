@@ -2,8 +2,8 @@ import {
   HastUtils,
   type HtmlAST,
   NotionHtmlASTToDeltaExtension,
-} from '@blocksuite/affine-shared/adapters';
-import type { ExtensionType } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import type { ExtensionType } from '@labre/store';
 import { collapseWhiteSpace } from 'collapse-white-space';
 import type { Element, Text } from 'hast';
 

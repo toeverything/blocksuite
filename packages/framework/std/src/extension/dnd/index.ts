@@ -16,7 +16,7 @@ import {
   type Edge,
   extractClosestEdge,
 } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
-import type { ServiceIdentifier } from '@blocksuite/global/di';
+import type { ServiceIdentifier } from '@labre/global/di';
 
 import { LifeCycleWatcherIdentifier } from '../../identifier.js';
 import { LifeCycleWatcher } from '../lifecycle-watcher.js';

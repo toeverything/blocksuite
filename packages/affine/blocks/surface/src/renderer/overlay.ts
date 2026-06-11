@@ -1,10 +1,10 @@
-import { type Container, createIdentifier } from '@blocksuite/global/di';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { type Container, createIdentifier } from '@labre/global/di';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 import {
   type GfxController,
   GfxControllerIdentifier,
-} from '@blocksuite/std/gfx';
-import { Extension } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import { Extension } from '@labre/store';
 
 import type { RoughCanvas } from '../utils/rough/canvas.js';
 import type { CanvasRenderer } from './canvas-renderer.js';

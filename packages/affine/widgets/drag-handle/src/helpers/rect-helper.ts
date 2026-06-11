@@ -1,6 +1,6 @@
-import { getCurrentNativeRange } from '@blocksuite/affine-shared/utils';
-import { Rect } from '@blocksuite/global/gfx';
-import type { BlockComponent } from '@blocksuite/std';
+import { getCurrentNativeRange } from '@labre/affine-shared/utils';
+import { Rect } from '@labre/global/gfx';
+import type { BlockComponent } from '@labre/std';
 
 import {
   DRAG_HANDLE_CONTAINER_WIDTH,

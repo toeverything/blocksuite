@@ -1,4 +1,4 @@
-import type { UniComponent } from '@blocksuite/affine-shared/types';
+import type { UniComponent } from '@labre/affine-shared/types';
 
 import type { TypeInstance, ValueTypeOf } from '../logical/type.js';
 import type { Group } from './trait.js';

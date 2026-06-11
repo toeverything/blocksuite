@@ -1,8 +1,8 @@
-import { insertLinkByQuickSearchCommand } from '@blocksuite/affine-block-bookmark';
-import { menu } from '@blocksuite/affine-components/context-menu';
-import { LinkIcon } from '@blocksuite/affine-components/icons';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import type { DenseMenuBuilder } from '@blocksuite/affine-widget-edgeless-toolbar';
+import { insertLinkByQuickSearchCommand } from '@labre/affine-block-bookmark';
+import { menu } from '@labre/affine-components/context-menu';
+import { LinkIcon } from '@labre/affine-components/icons';
+import { TelemetryProvider } from '@labre/affine-shared/services';
+import type { DenseMenuBuilder } from '@labre/affine-widget-edgeless-toolbar';
 
 export const buildLinkDenseMenu: DenseMenuBuilder = edgeless =>
   menu.action({

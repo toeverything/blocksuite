@@ -1,5 +1,5 @@
-import { ReferenceParamsSchema } from '@blocksuite/affine-model';
-import { BaseSelection, SelectionExtension } from '@blocksuite/store';
+import { ReferenceParamsSchema } from '@labre/affine-model';
+import { BaseSelection, SelectionExtension } from '@labre/store';
 import z from 'zod';
 
 const HighlightSelectionParamsSchema = ReferenceParamsSchema.extend({

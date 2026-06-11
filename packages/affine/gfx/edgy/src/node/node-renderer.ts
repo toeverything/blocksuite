@@ -1,9 +1,9 @@
 import {
   type ElementRenderer,
   ElementRendererExtension,
-} from '@blocksuite/affine-block-surface';
-import { shape as shapeRenderer } from '@blocksuite/affine-gfx-shape';
-import { DefaultTheme, type EdgyNodeElementModel } from '@blocksuite/affine-model';
+} from '@labre/affine-block-surface';
+import { shape as shapeRenderer } from '@labre/affine-gfx-shape';
+import { DefaultTheme, type EdgyNodeElementModel } from '@labre/affine-model';
 
 import { PERSON_GLYPH_PATHS, PERSON_GLYPH_VIEWBOX } from './consts';
 

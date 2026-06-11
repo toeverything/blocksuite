@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/toggle-button';
+export * from '@labre/affine-components/toggle-button';

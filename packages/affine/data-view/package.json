@@ -1,5 +1,5 @@
 {
-  "name": "@blocksuite/data-view",
+  "name": "@labre/data-view",
   "description": "Views of database in affine",
   "type": "module",
   "scripts": {
@@ -10,15 +10,15 @@
   "author": "toeverything",
   "license": "MIT",
   "dependencies": {
-    "@blocksuite/affine-components": "workspace:*",
-    "@blocksuite/affine-shared": "workspace:*",
-    "@blocksuite/global": "workspace:*",
     "@blocksuite/icons": "^2.2.12",
-    "@blocksuite/std": "workspace:*",
-    "@blocksuite/store": "workspace:*",
     "@emotion/css": "^11.13.5",
     "@emotion/hash": "^0.9.2",
     "@floating-ui/dom": "^1.6.13",
+    "@labre/affine-components": "workspace:*",
+    "@labre/affine-shared": "workspace:*",
+    "@labre/global": "workspace:*",
+    "@labre/std": "workspace:*",
+    "@labre/store": "workspace:*",
     "@lit/context": "^1.1.2",
     "@preact/signals-core": "^1.8.0",
     "@toeverything/theme": "^1.1.15",

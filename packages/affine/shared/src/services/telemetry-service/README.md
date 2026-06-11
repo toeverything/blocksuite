@@ -6,10 +6,10 @@ adapter**:
 
 ```ts
 // Standalone (playground, tests, self-hosted without analytics):
-import { NoopTelemetryExtension } from '@blocksuite/affine-shared/services';
+import { NoopTelemetryExtension } from '@labre/affine-shared/services';
 
 // SaaS host (PostHog, GA4…):
-import { TelemetryExtension } from '@blocksuite/affine-shared/services';
+import { TelemetryExtension } from '@labre/affine-shared/services';
 const PostHogTelemetry = TelemetryExtension({
   track: (event, props) => posthog.capture(event, props),
 });

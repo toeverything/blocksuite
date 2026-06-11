@@ -1,14 +1,14 @@
 import {
   type RoughCanvas,
   ToolOverlay,
-} from '@blocksuite/affine-block-surface';
-import { ShapeElementModel, ShapeType } from '@blocksuite/affine-model';
+} from '@labre/affine-block-surface';
+import { ShapeElementModel, ShapeType } from '@labre/affine-model';
 import {
   Bound,
   type BezierCurveParameters,
   getBezierCurveBoundingBox,
-} from '@blocksuite/global/gfx';
-import type { GfxController } from '@blocksuite/std/gfx';
+} from '@labre/global/gfx';
+import type { GfxController } from '@labre/std/gfx';
 
 // ─── Visual constants ───────────────────────────────────────────────────────
 

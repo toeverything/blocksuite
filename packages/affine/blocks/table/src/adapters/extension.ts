@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { TableBlockHtmlAdapterExtension } from './html.js';
 import { TableBlockMarkdownAdapterExtension } from './markdown.js';

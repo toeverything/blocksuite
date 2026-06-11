@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-inline-comment';
+export * from '@labre/affine-inline-comment';

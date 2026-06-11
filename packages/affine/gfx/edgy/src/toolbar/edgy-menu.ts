@@ -1,11 +1,11 @@
-import { DefaultTool } from '@blocksuite/affine-block-surface';
-import { createGroupCommand } from '@blocksuite/affine-gfx-group';
-import { EmptyTool } from '@blocksuite/affine-gfx-pointer';
-import { FontFamily, ShapeStyle } from '@blocksuite/affine-model';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
-import { Bound } from '@blocksuite/global/gfx';
-import type { GfxController } from '@blocksuite/std/gfx';
+import { DefaultTool } from '@labre/affine-block-surface';
+import { createGroupCommand } from '@labre/affine-gfx-group';
+import { EmptyTool } from '@labre/affine-gfx-pointer';
+import { FontFamily, ShapeStyle } from '@labre/affine-model';
+import { TelemetryProvider } from '@labre/affine-shared/services';
+import { EdgelessToolbarToolMixin } from '@labre/affine-widget-edgeless-toolbar';
+import { Bound } from '@labre/global/gfx';
+import type { GfxController } from '@labre/std/gfx';
 import { css, html, LitElement } from 'lit';
 
 import { REF_H, REF_W } from '../consts';

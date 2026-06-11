@@ -1,16 +1,16 @@
-import { changeNoteDisplayMode } from '@blocksuite/affine-block-note';
-import { NoteBlockModel, NoteDisplayMode } from '@blocksuite/affine-model';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import { focusTitle, matchModels } from '@blocksuite/affine-shared/utils';
-import { Bound } from '@blocksuite/global/gfx';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { changeNoteDisplayMode } from '@labre/affine-block-note';
+import { NoteBlockModel, NoteDisplayMode } from '@labre/affine-model';
+import { DocModeProvider } from '@labre/affine-shared/services';
+import { focusTitle, matchModels } from '@labre/affine-shared/utils';
+import { Bound } from '@labre/global/gfx';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import {
   BlockSelection,
   ShadowlessElement,
   SurfaceSelection,
-} from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
+import type { BlockModel } from '@labre/store';
 import { consume } from '@lit/context';
 import {
   batch,

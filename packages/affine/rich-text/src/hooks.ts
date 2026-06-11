@@ -1,10 +1,10 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { isStrictUrl } from '@blocksuite/affine-shared/utils';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { isStrictUrl } from '@labre/affine-shared/utils';
 import type {
   BeforeinputHookCtx,
   CompositionEndHookCtx,
   HookContext,
-} from '@blocksuite/std/inline';
+} from '@labre/std/inline';
 
 const EDGE_IGNORED_ATTRIBUTES = ['code', 'link'] as const;
 const GLOBAL_IGNORED_ATTRIBUTES = [] as const;

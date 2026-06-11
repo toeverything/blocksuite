@@ -2,21 +2,21 @@ import {
   DefaultTheme,
   NoteDisplayMode,
   TableModelFlavour,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   CalloutAdmonitionType,
   CalloutExportStyle,
   calloutMarkdownExportMiddleware,
   embedSyncedDocMiddleware,
   MarkdownAdapter,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 import type {
   BlockSnapshot,
   DocSnapshot,
   SliceSnapshot,
   TransformerMiddleware,
-} from '@blocksuite/store';
-import { AssetsManager, MemoryBlobCRUD } from '@blocksuite/store';
+} from '@labre/store';
+import { AssetsManager, MemoryBlobCRUD } from '@labre/store';
 import { describe, expect, test } from 'vitest';
 
 import { createJob } from '../utils/create-job.js';

@@ -1,10 +1,10 @@
-import { createTextActions } from '@blocksuite/affine-gfx-text';
-import { EdgelessTextBlockModel } from '@blocksuite/affine-model';
+import { createTextActions } from '@labre/affine-gfx-text';
+import { EdgelessTextBlockModel } from '@labre/affine-model';
 import {
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { BlockFlavourIdentifier } from '@labre/std';
 
 export const edgelessTextToolbarConfig = {
   // No need to adjust element bounds, which updates itself using ResizeObserver

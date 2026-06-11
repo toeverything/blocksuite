@@ -1,12 +1,12 @@
-import { DatabaseBlockSchema } from '@blocksuite/affine-model';
+import { DatabaseBlockSchema } from '@labre/affine-model';
 import {
   AdapterTextUtils,
   BlockNotionHtmlAdapterExtension,
   type BlockNotionHtmlAdapterMatcher,
   HastUtils,
-} from '@blocksuite/affine-shared/adapters';
-import { getTagColor } from '@blocksuite/data-view';
-import { type BlockSnapshot, nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import { getTagColor } from '@labre/data-view';
+import { type BlockSnapshot, nanoid } from '@labre/store';
 
 const ColumnClassMap: Record<string, string> = {
   typesSelect: 'select',

@@ -1,7 +1,7 @@
 import {
   type ViewExtensionContext,
   ViewExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
+} from '@labre/affine-ext-loader';
 
 import { ConnectionOverlay } from './connector-manager';
 import { ConnectorTool } from './connector-tool';

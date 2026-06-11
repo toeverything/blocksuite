@@ -1,9 +1,9 @@
-import { ListBlockModel, ParagraphBlockModel } from '@blocksuite/affine-model';
+import { ListBlockModel, ParagraphBlockModel } from '@labre/affine-model';
 import {
   calculateCollapsedSiblings,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import type { Command } from '@blocksuite/std';
+} from '@labre/affine-shared/utils';
+import type { Command } from '@labre/std';
 
 /**
  * @example

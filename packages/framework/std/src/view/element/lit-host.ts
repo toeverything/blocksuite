@@ -2,13 +2,13 @@ import {
   BlockSuiteError,
   ErrorCode,
   handleError,
-} from '@blocksuite/global/exceptions';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/global/exceptions';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import {
   type BlockModel,
   Store,
   type StoreSelectionExtension,
-} from '@blocksuite/store';
+} from '@labre/store';
 import { createContext, provide } from '@lit/context';
 import { css, LitElement, nothing, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';

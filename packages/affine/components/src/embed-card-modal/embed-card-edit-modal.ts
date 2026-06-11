@@ -1,28 +1,28 @@
-import type { AliasInfo, LinkableEmbedModel } from '@blocksuite/affine-model';
+import type { AliasInfo, LinkableEmbedModel } from '@labre/affine-model';
 import {
   EmbedLinkedDocModel,
   EmbedSyncedDocModel,
   isInternalEmbedModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   type LinkEventType,
   type TelemetryEvent,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import { fontSMStyle, fontXSStyle } from '@blocksuite/affine-shared/styles';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+} from '@labre/affine-shared/services';
+import { fontSMStyle, fontXSStyle } from '@labre/affine-shared/styles';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
 import {
   listenClickAway,
   stopPropagation,
-} from '@blocksuite/affine-shared/utils';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { nextTick } from '@blocksuite/global/utils';
+} from '@labre/affine-shared/utils';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import { nextTick } from '@labre/global/utils';
 import {
   type BlockComponent,
   type BlockStdScope,
   type EditorHost,
   EditorLifeCycleExtension,
-} from '@blocksuite/std';
+} from '@labre/std';
 import { autoUpdate, computePosition, flip, offset } from '@floating-ui/dom';
 import { computed, signal } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';

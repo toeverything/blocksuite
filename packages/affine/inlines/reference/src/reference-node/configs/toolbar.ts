@@ -1,17 +1,17 @@
-import { notifyLinkedDocSwitchedToEmbed } from '@blocksuite/affine-components/notification';
+import { notifyLinkedDocSwitchedToEmbed } from '@labre/affine-components/notification';
 import {
   ActionPlacement,
   DocDisplayMetaProvider,
   type ToolbarAction,
   type ToolbarActionGroup,
   type ToolbarModuleConfig,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   cloneReferenceInfoWithoutAliases,
   isInsideBlockByFlavour,
-} from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/utils';
 import { DeleteIcon } from '@blocksuite/icons/lit';
-import { BlockSelection } from '@blocksuite/std';
+import { BlockSelection } from '@labre/std';
 import { signal } from '@preact/signals-core';
 import { html } from 'lit-html';
 import { keyed } from 'lit-html/directives/keyed.js';

@@ -1,9 +1,9 @@
 import {
   DocModeProvider,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/services';
+import { unsafeCSSVar, unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { SignalWatcher } from '@labre/global/lit';
 import { DoneIcon } from '@blocksuite/icons/lit';
 import { css, html } from 'lit';
 

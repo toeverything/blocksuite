@@ -1,4 +1,4 @@
-import type { ServiceIdentifier, ServiceProvider } from '@blocksuite/global/di';
+import type { ServiceIdentifier, ServiceProvider } from '@labre/global/di';
 
 /**
  * Level of preprocessing

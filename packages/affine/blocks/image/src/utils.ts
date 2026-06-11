@@ -1,15 +1,15 @@
-import { autoResizeElementsCommand } from '@blocksuite/affine-block-surface';
-import { toast } from '@blocksuite/affine-components/toast';
+import { autoResizeElementsCommand } from '@labre/affine-block-surface';
+import { toast } from '@labre/affine-components/toast';
 import {
   type AttachmentBlockProps,
   type ImageBlockModel,
   type ImageBlockProps,
   ImageBlockSchema,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   FileSizeLimitProvider,
   NativeClipboardProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   convertToPng,
   formatSize,
@@ -18,11 +18,11 @@ import {
   readImageSize,
   transformModel,
   withTempBlobData,
-} from '@blocksuite/affine-shared/utils';
-import { Bound, type IVec, Vec } from '@blocksuite/global/gfx';
-import { BlockSelection, type BlockStdScope } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/affine-shared/utils';
+import { Bound, type IVec, Vec } from '@labre/global/gfx';
+import { BlockSelection, type BlockStdScope } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
+import type { BlockModel } from '@labre/store';
 
 import {
   SURFACE_IMAGE_CARD_HEIGHT,

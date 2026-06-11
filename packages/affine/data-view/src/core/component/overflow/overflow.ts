@@ -1,5 +1,5 @@
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import { ShadowlessElement } from '@labre/std';
 import { css, html, type PropertyValues, type TemplateResult } from 'lit';
 import { property, query, queryAll, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

@@ -4,10 +4,10 @@ import {
   EmbedGithubModel,
   EmbedLinkedDocModel,
   NoteBlockModel,
-} from '@blocksuite/affine-model';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import type { BlockStdScope } from '@blocksuite/std';
-import type { TransformerMiddleware } from '@blocksuite/store';
+} from '@labre/affine-model';
+import { matchModels } from '@labre/affine-shared/utils';
+import type { BlockStdScope } from '@labre/std';
+import type { TransformerMiddleware } from '@labre/store';
 
 export const cardStyleUpdater =
   (std: BlockStdScope): TransformerMiddleware =>

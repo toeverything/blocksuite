@@ -1,14 +1,14 @@
-import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
-import { stopPropagation } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
+import { EdgelessLegacySlotIdentifier } from '@labre/affine-block-surface';
+import { stopPropagation } from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
 import { MinusIcon, PlusIcon, ViewBarIcon } from '@blocksuite/icons/lit';
-import type { BlockStdScope } from '@blocksuite/std';
+import type { BlockStdScope } from '@labre/std';
 import {
   GfxControllerIdentifier,
   ZOOM_MAX,
   ZOOM_MIN,
   ZOOM_STEP,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import { effect } from '@preact/signals-core';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';

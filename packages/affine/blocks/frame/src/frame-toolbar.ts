@@ -1,9 +1,9 @@
-import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
+import { EdgelessCRUDIdentifier } from '@labre/affine-block-surface';
 import {
   packColor,
   type PickColorEvent,
-} from '@blocksuite/affine-components/color-picker';
-import { toast } from '@blocksuite/affine-components/toast';
+} from '@labre/affine-components/color-picker';
+import { toast } from '@labre/affine-components/toast';
 import {
   DEFAULT_NOTE_HEIGHT,
   DefaultTheme,
@@ -14,27 +14,27 @@ import {
   NoteDisplayMode,
   resolveColor,
   SurfaceRefBlockSchema,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   NotificationProvider,
   type ToolbarContext,
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   getMostCommonResolvedValue,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import { mountFrameTitleEditor } from '@blocksuite/affine-widget-frame-title';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/utils';
+import { mountFrameTitleEditor } from '@labre/affine-widget-frame-title';
+import { Bound } from '@labre/global/gfx';
 import {
   EditIcon,
   InsertIntoPageIcon,
   UngroupIcon,
 } from '@blocksuite/icons/lit';
-import { type BlockComponent, BlockFlavourIdentifier } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
-import type { ExtensionType } from '@blocksuite/store';
+import { type BlockComponent, BlockFlavourIdentifier } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
+import type { ExtensionType } from '@labre/store';
 import { html } from 'lit';
 
 import { EdgelessFrameManagerIdentifier } from './frame-manager';

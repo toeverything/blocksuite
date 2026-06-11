@@ -2,8 +2,8 @@ import {
   getBlockSelectionsCommand,
   getSelectedBlocksCommand,
   getTextSelectionCommand,
-} from '@blocksuite/affine-shared/commands';
-import type { BlockComponent, Command, InitCommandCtx } from '@blocksuite/std';
+} from '@labre/affine-shared/commands';
+import type { BlockComponent, Command, InitCommandCtx } from '@labre/std';
 
 import { isPeekable, peek } from './peekable.js';
 

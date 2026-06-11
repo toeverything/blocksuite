@@ -1,4 +1,4 @@
-import type { TransformerMiddleware } from '@blocksuite/store';
+import type { TransformerMiddleware } from '@labre/store';
 
 export const CODE_BLOCK_WRAP_KEY = 'codeBlockWrap';
 

@@ -1,9 +1,9 @@
-import { ListBlockModel } from '@blocksuite/affine-model';
+import { ListBlockModel } from '@labre/affine-model';
 import {
   getNextContinuousNumberedLists,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import type { BlockModel, Store } from '@blocksuite/store';
+} from '@labre/affine-shared/utils';
+import type { BlockModel, Store } from '@labre/store';
 
 /**
  * correct target is a numbered list, which is divided into two steps:

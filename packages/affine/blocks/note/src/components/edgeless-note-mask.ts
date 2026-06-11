@@ -1,7 +1,7 @@
-import type { NoteBlockModel } from '@blocksuite/affine-model';
-import { almostEqual, Bound } from '@blocksuite/global/gfx';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { type EditorHost, ShadowlessElement } from '@blocksuite/std';
+import type { NoteBlockModel } from '@labre/affine-model';
+import { almostEqual, Bound } from '@labre/global/gfx';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import { type EditorHost, ShadowlessElement } from '@labre/std';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

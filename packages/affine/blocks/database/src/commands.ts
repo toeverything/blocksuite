@@ -1,6 +1,6 @@
-import type { DatabaseBlockModel } from '@blocksuite/affine-model';
-import type { Command } from '@blocksuite/std';
-import type { BlockModel, Store } from '@blocksuite/store';
+import type { DatabaseBlockModel } from '@labre/affine-model';
+import type { Command } from '@labre/std';
+import type { BlockModel, Store } from '@labre/store';
 
 import {
   DatabaseBlockDataSource,

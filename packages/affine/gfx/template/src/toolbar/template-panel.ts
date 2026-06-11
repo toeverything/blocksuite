@@ -1,21 +1,21 @@
-import { DefaultTool } from '@blocksuite/affine-block-surface';
+import { DefaultTool } from '@labre/affine-block-surface';
 import {
   darkToolbarStyles,
   lightToolbarStyles,
-} from '@blocksuite/affine-components/toolbar';
+} from '@labre/affine-components/toolbar';
 import {
   EditPropsStore,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   requestConnectedFrame,
   stopPropagation,
-} from '@blocksuite/affine-shared/utils';
-import { EdgelessDraggableElementController } from '@blocksuite/affine-widget-edgeless-toolbar';
-import type { Bound } from '@blocksuite/global/gfx';
-import { WithDisposable } from '@blocksuite/global/lit';
-import type { BlockComponent } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/affine-shared/utils';
+import { EdgelessDraggableElementController } from '@labre/affine-widget-edgeless-toolbar';
+import type { Bound } from '@labre/global/gfx';
+import { WithDisposable } from '@labre/global/lit';
+import type { BlockComponent } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';
 import { property, state } from 'lit/decorators.js';

@@ -1,14 +1,14 @@
-import { clearMarksOnDiscontinuousInput } from '@blocksuite/affine-rich-text';
-import { getSelectedBlocksCommand } from '@blocksuite/affine-shared/commands';
+import { clearMarksOnDiscontinuousInput } from '@labre/affine-rich-text';
+import { getSelectedBlocksCommand } from '@labre/affine-shared/commands';
 import type {
   AffineTextAttributes,
   AffineTextStyleAttributes,
-} from '@blocksuite/affine-shared/types';
-import type { Command, TextSelection } from '@blocksuite/std';
+} from '@labre/affine-shared/types';
+import type { Command, TextSelection } from '@labre/std';
 import {
   INLINE_ROOT_ATTR,
   type InlineRootElement,
-} from '@blocksuite/std/inline';
+} from '@labre/std/inline';
 
 import { FORMAT_TEXT_SUPPORT_FLAVOURS } from './consts.js';
 

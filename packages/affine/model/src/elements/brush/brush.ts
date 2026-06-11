@@ -15,15 +15,15 @@ import {
   type SerializedXYWH,
   transformPointsToNewBound,
   Vec,
-} from '@blocksuite/global/gfx';
-import type { BaseElementProps, PointTestOptions } from '@blocksuite/std/gfx';
+} from '@labre/global/gfx';
+import type { BaseElementProps, PointTestOptions } from '@labre/std/gfx';
 import {
   convert,
   derive,
   field,
   GfxPrimitiveElementModel,
   watch,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 import { type Color, DefaultTheme } from '../../themes/index';
 

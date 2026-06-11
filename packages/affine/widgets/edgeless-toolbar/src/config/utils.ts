@@ -1,6 +1,6 @@
-import { EditorChevronDown } from '@blocksuite/affine-components/toolbar';
-import type { ToolbarContext } from '@blocksuite/affine-shared/services';
-import type { BlockComponent } from '@blocksuite/std';
+import { EditorChevronDown } from '@labre/affine-components/toolbar';
+import type { ToolbarContext } from '@labre/affine-shared/services';
+import type { BlockComponent } from '@labre/std';
 import { html } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { repeat } from 'lit/directives/repeat.js';

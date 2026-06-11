@@ -1,4 +1,4 @@
-import { type Store, Text } from '@blocksuite/store';
+import { type Store, Text } from '@labre/store';
 
 function addParagraph(doc: Store, noteId: string, content: string) {
   const props = { text: new Text(content) };

@@ -1,5 +1,5 @@
-import type { IVec, IVec3 } from '@blocksuite/global/gfx';
-import { almostEqual } from '@blocksuite/global/gfx';
+import type { IVec, IVec3 } from '@labre/global/gfx';
+import { almostEqual } from '@labre/global/gfx';
 import { describe, expect, it } from 'vitest';
 
 import { AStarRunner } from '../utils/a-star.js';

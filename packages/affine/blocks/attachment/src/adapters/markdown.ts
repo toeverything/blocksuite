@@ -1,7 +1,7 @@
 import {
   AttachmentBlockSchema,
   FootNoteReferenceParamsSchema,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   BlockMarkdownAdapterExtension,
   type BlockMarkdownAdapterMatcher,
@@ -9,8 +9,8 @@ import {
   getFootnoteDefinitionText,
   isFootnoteDefinitionNode,
   type MarkdownAST,
-} from '@blocksuite/affine-shared/adapters';
-import { nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import { nanoid } from '@labre/store';
 
 const isAttachmentFootnoteDefinitionNode = (node: MarkdownAST) => {
   if (!isFootnoteDefinitionNode(node)) return false;

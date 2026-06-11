@@ -5,20 +5,20 @@ import {
   type ShapeName,
   ShapeStyle,
   ShapeType,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EditPropsStore,
   FeatureFlagService,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
-import type { ColorEvent } from '@blocksuite/affine-shared/utils';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/services';
+import type { ColorEvent } from '@labre/affine-shared/utils';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { StyleGeneralIcon, StyleScribbleIcon } from '@blocksuite/icons/lit';
-import type { BlockComponent } from '@blocksuite/std';
+import type { BlockComponent } from '@labre/std';
 import {
   GfxControllerIdentifier,
   type ToolOptionWithType,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import { computed, effect, type Signal, signal } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';

@@ -1,4 +1,4 @@
-import type { BaseTextAttributes } from '@blocksuite/store';
+import type { BaseTextAttributes } from '@labre/store';
 
 import type { InlineEditor } from '../inline-editor.js';
 import type { InlineRange } from '../types.js';

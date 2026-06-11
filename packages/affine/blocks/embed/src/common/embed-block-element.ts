@@ -1,25 +1,25 @@
 import {
   CaptionedBlockComponent,
   SelectedStyle,
-} from '@blocksuite/affine-components/caption';
-import type { EmbedCardStyle, EmbedProps } from '@blocksuite/affine-model';
+} from '@labre/affine-components/caption';
+import type { EmbedCardStyle, EmbedProps } from '@labre/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_MIN_WIDTH,
   EMBED_CARD_WIDTH,
-} from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-shared/consts';
 import {
   BlockCommentManager,
   DocModeProvider,
-} from '@blocksuite/affine-shared/services';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { findAncestorModel } from '@blocksuite/affine-shared/utils';
-import type { BlockService } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { findAncestorModel } from '@labre/affine-shared/utils';
+import type { BlockService } from '@labre/std';
 import {
   GfxViewInteractionExtension,
   type ResizeConstraint,
-} from '@blocksuite/std/gfx';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import type { BlockModel } from '@labre/store';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 import type { TemplateResult } from 'lit';
 import { html } from 'lit';

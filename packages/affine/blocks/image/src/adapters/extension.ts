@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { ImageBlockHtmlAdapterExtension } from './html.js';
 import { ImageBlockMarkdownAdapterExtension } from './markdown.js';

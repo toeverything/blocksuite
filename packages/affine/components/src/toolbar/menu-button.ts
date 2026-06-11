@@ -1,12 +1,12 @@
 import {
   panelBaseStyle,
   scrollbarStyle,
-} from '@blocksuite/affine-shared/styles';
+} from '@labre/affine-shared/styles';
 import {
   type ButtonPopperOptions,
   createButtonPopper,
-} from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
 import {
   css,
   html,

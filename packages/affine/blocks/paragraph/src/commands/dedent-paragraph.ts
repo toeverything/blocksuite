@@ -1,10 +1,10 @@
-import { ParagraphBlockModel } from '@blocksuite/affine-model';
-import type { IndentContext } from '@blocksuite/affine-shared/types';
+import { ParagraphBlockModel } from '@labre/affine-model';
+import type { IndentContext } from '@labre/affine-shared/types';
 import {
   calculateCollapsedSiblings,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import { type Command, TextSelection } from '@blocksuite/std';
+} from '@labre/affine-shared/utils';
+import { type Command, TextSelection } from '@labre/std';
 
 export const canDedentParagraphCommand: Command<
   Partial<Omit<IndentContext, 'flavour' | 'type'>>,

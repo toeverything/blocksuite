@@ -1,5 +1,5 @@
-import { GroupElementModel } from '@blocksuite/affine-model';
-import { InteractivityExtension } from '@blocksuite/std/gfx';
+import { GroupElementModel } from '@labre/affine-model';
+import { InteractivityExtension } from '@labre/std/gfx';
 
 export class GroupInteractionExtension extends InteractivityExtension {
   static override key = 'group-selection';

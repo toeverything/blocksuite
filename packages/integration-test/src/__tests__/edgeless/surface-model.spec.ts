@@ -1,9 +1,9 @@
-import type { SurfaceBlockModel } from '@blocksuite/affine/blocks/surface';
+import type { SurfaceBlockModel } from '@labre/affine/blocks/surface';
 import type {
   BrushElementModel,
   ConnectorElementModel,
   GroupElementModel,
-} from '@blocksuite/affine/model';
+} from '@labre/affine/model';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';

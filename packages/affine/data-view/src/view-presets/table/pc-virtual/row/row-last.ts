@@ -1,6 +1,6 @@
-import { cssVarV2 } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { cssVarV2 } from '@labre/affine-shared/theme';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import { ShadowlessElement } from '@labre/std';
 import { effect } from '@preact/signals-core';
 import { property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';

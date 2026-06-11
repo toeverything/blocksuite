@@ -1,9 +1,9 @@
-import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
-import { createLitPortal } from '@blocksuite/affine-components/portal';
-import { stopPropagation } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
+import { EdgelessLegacySlotIdentifier } from '@labre/affine-block-surface';
+import { createLitPortal } from '@labre/affine-components/portal';
+import { stopPropagation } from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
 import { MoreHorizontalIcon } from '@blocksuite/icons/lit';
-import type { BlockStdScope } from '@blocksuite/std';
+import type { BlockStdScope } from '@labre/std';
 import { offset } from '@floating-ui/dom';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';

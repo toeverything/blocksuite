@@ -1,8 +1,8 @@
 import {
   type ClipboardConfigCreationContext,
   EdgelessClipboardConfig,
-} from '@blocksuite/affine-block-surface';
-import { type BlockSnapshot, fromJSON } from '@blocksuite/store';
+} from '@labre/affine-block-surface';
+import { type BlockSnapshot, fromJSON } from '@labre/store';
 
 export class EdgelessClipboardFrameConfig extends EdgelessClipboardConfig {
   static override readonly key = 'affine:frame';

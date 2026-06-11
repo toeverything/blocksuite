@@ -1,39 +1,39 @@
-import { addAttachments } from '@blocksuite/affine-block-attachment';
-import { EdgelessFrameManagerIdentifier } from '@blocksuite/affine-block-frame';
-import { addImages } from '@blocksuite/affine-block-image';
+import { addAttachments } from '@labre/affine-block-attachment';
+import { EdgelessFrameManagerIdentifier } from '@labre/affine-block-frame';
+import { addImages } from '@labre/affine-block-image';
 import {
   CanvasRenderer,
   DefaultTool,
   EdgelessCRUDIdentifier,
   ExportManager,
   getSurfaceComponent,
-} from '@blocksuite/affine-block-surface';
-import { splitIntoLines } from '@blocksuite/affine-gfx-text';
+} from '@labre/affine-block-surface';
+import { splitIntoLines } from '@labre/affine-gfx-text';
 import type {
   EmbedCardStyle,
   ShapeElementModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   BookmarkStyles,
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
   FrameBlockModel,
   MAX_IMAGE_WIDTH,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   ClipboardAdapter,
   decodeClipboardBlobs,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 import {
   CANVAS_EXPORT_IGNORE_TAGS,
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
-} from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-shared/consts';
 import {
   EmbedOptionProvider,
   ParseDocUrlProvider,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   convertToPng,
   isInsidePageEditor,
@@ -41,29 +41,29 @@ import {
   isUrlInClipboard,
   matchModels,
   referenceToNode,
-} from '@blocksuite/affine-shared/utils';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+} from '@labre/affine-shared/utils';
+import { DisposableGroup } from '@labre/global/disposable';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 import {
   Bound,
   getCommonBound,
   type IBound,
   type IVec,
   Vec,
-} from '@blocksuite/global/gfx';
+} from '@labre/global/gfx';
 import type {
   EditorHost,
   SurfaceSelection,
   UIEventStateContext,
-} from '@blocksuite/std';
+} from '@labre/std';
 import {
   compareLayer,
   type GfxBlockElementModel,
   GfxControllerIdentifier,
   type GfxPrimitiveElementModel,
   type SerializedElement,
-} from '@blocksuite/std/gfx';
-import { type BlockSnapshot, type SliceSnapshot } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import { type BlockSnapshot, type SliceSnapshot } from '@labre/store';
 import * as Y from 'yjs';
 
 import { PageClipboard } from '../../clipboard/index.js';

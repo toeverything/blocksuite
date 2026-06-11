@@ -1,8 +1,8 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { LatexBlockSchemaExtension } from '@blocksuite/affine-model';
+} from '@labre/affine-ext-loader';
+import { LatexBlockSchemaExtension } from '@labre/affine-model';
 
 import { LatexBlockAdapterExtensions } from './adapters/extension';
 import { LatexMarkdownPreprocessorExtension } from './adapters/markdown/preprocessor';

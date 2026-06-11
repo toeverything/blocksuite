@@ -3,13 +3,13 @@ import type {
   ColumnUpdater,
   DatabaseBlockModel,
   ParagraphBlockModel,
-} from '@blocksuite/affine-model';
-import { getSelectedModelsCommand } from '@blocksuite/affine-shared/commands';
-import { FeatureFlagService } from '@blocksuite/affine-shared/services';
+} from '@labre/affine-model';
+import { getSelectedModelsCommand } from '@labre/affine-shared/commands';
+import { FeatureFlagService } from '@labre/affine-shared/services';
 import {
   insertPositionToIndex,
   type InsertToPosition,
-} from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/utils';
 import {
   type DatabaseFlags,
   DataSourceBase,
@@ -19,12 +19,12 @@ import {
   type ViewManager,
   ViewManagerBase,
   type ViewMeta,
-} from '@blocksuite/data-view';
-import { propertyPresets } from '@blocksuite/data-view/property-presets';
-import { IS_MOBILE } from '@blocksuite/global/env';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import type { EditorHost } from '@blocksuite/std';
-import { type BlockModel } from '@blocksuite/store';
+} from '@labre/data-view';
+import { propertyPresets } from '@labre/data-view/property-presets';
+import { IS_MOBILE } from '@labre/global/env';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import type { EditorHost } from '@labre/std';
+import { type BlockModel } from '@labre/store';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 
 import { getIcon } from './block-icons.js';

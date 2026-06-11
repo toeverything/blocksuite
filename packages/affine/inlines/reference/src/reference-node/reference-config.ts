@@ -1,4 +1,4 @@
-import { type BlockStdScope, ConfigExtensionFactory } from '@blocksuite/std';
+import { type BlockStdScope, ConfigExtensionFactory } from '@labre/std';
 import type { TemplateResult } from 'lit';
 
 import type { AffineReference } from './reference-node';

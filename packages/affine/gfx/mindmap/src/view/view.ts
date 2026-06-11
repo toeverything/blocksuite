@@ -4,16 +4,16 @@ import {
   type MindmapElementModel,
   type MindmapNode,
   type MindmapRoot,
-} from '@blocksuite/affine-model';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import { requestThrottledConnectedFrame } from '@blocksuite/affine-shared/utils';
-import { Bound } from '@blocksuite/global/gfx';
-import type { PointerEventState } from '@blocksuite/std';
+} from '@labre/affine-model';
+import { TelemetryProvider } from '@labre/affine-shared/services';
+import { requestThrottledConnectedFrame } from '@labre/affine-shared/utils';
+import { Bound } from '@labre/global/gfx';
+import type { PointerEventState } from '@labre/std';
 import {
   type BoxSelectionContext,
   GfxElementModelView,
   GfxViewInteractionExtension,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 import { handleLayout } from './utils.js';
 

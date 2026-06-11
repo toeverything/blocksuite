@@ -1,23 +1,23 @@
 import '@toeverything/theme/style.css';
 import '@toeverything/theme/fonts.css';
 
-import type { DocMode } from '@blocksuite/affine/model';
-import { AffineSchemas } from '@blocksuite/affine/schemas';
+import type { DocMode } from '@labre/affine/model';
+import { AffineSchemas } from '@labre/affine/schemas';
 import {
   CommunityCanvasTextFonts,
   FeatureFlagService,
   FontConfigExtension,
-} from '@blocksuite/affine/shared/services';
+} from '@labre/affine/shared/services';
 import {
   type ViewportTurboRendererExtension,
   ViewportTurboRendererIdentifier,
-} from '@blocksuite/affine-gfx-turbo-renderer';
-import type { ExtensionType, Store, Transformer } from '@blocksuite/store';
-import { Schema, Text } from '@blocksuite/store';
+} from '@labre/affine-gfx-turbo-renderer';
+import type { ExtensionType, Store, Transformer } from '@labre/store';
+import { Schema, Text } from '@labre/store';
 import {
   createAutoIncrementIdGenerator,
   TestWorkspace,
-} from '@blocksuite/store/test';
+} from '@labre/store/test';
 
 import { effects } from '../../effects.js';
 import { TestAffineEditorContainer } from '../../index.js';

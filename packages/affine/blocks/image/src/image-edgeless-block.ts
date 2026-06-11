@@ -1,16 +1,16 @@
-import type { BlockCaptionEditor } from '@blocksuite/affine-components/caption';
-import { LoadingIcon } from '@blocksuite/affine-components/icons';
-import { Peekable } from '@blocksuite/affine-components/peek';
-import { ResourceController } from '@blocksuite/affine-components/resource';
+import type { BlockCaptionEditor } from '@labre/affine-components/caption';
+import { LoadingIcon } from '@labre/affine-components/icons';
+import { Peekable } from '@labre/affine-components/peek';
+import { ResourceController } from '@labre/affine-components/resource';
 import {
   type ImageBlockModel,
   ImageBlockSchema,
-} from '@blocksuite/affine-model';
-import { cssVarV2, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { formatSize } from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-model';
+import { cssVarV2, unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { formatSize } from '@labre/affine-shared/utils';
 import { BrokenImageIcon, ImageIcon } from '@blocksuite/icons/lit';
-import { GfxBlockComponent } from '@blocksuite/std';
-import { GfxViewInteractionExtension } from '@blocksuite/std/gfx';
+import { GfxBlockComponent } from '@labre/std';
+import { GfxViewInteractionExtension } from '@labre/std/gfx';
 import { computed } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';

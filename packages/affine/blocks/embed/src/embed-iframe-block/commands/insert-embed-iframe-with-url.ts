@@ -2,16 +2,16 @@ import {
   DefaultTool,
   EdgelessCRUDIdentifier,
   SurfaceBlockComponent,
-} from '@blocksuite/affine-block-surface';
-import { EmbedIframeService } from '@blocksuite/affine-shared/services';
-import { Bound, Vec } from '@blocksuite/global/gfx';
+} from '@labre/affine-block-surface';
+import { EmbedIframeService } from '@labre/affine-shared/services';
+import { Bound, Vec } from '@labre/global/gfx';
 import {
   BlockSelection,
   type Command,
   SurfaceSelection,
   TextSelection,
-} from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 
 import {
   EMBED_IFRAME_DEFAULT_HEIGHT_IN_SURFACE,

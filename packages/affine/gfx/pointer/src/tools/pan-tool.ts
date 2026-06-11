@@ -1,7 +1,7 @@
-import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
-import { on } from '@blocksuite/affine-shared/utils';
-import type { PointerEventState } from '@blocksuite/std';
-import { BaseTool, MouseButton, type ToolOptions } from '@blocksuite/std/gfx';
+import { EdgelessLegacySlotIdentifier } from '@labre/affine-block-surface';
+import { on } from '@labre/affine-shared/utils';
+import type { PointerEventState } from '@labre/std';
+import { BaseTool, MouseButton, type ToolOptions } from '@labre/std/gfx';
 import { Signal } from '@preact/signals-core';
 
 interface RestorablePresentToolOptions {

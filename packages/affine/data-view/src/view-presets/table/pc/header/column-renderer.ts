@@ -1,5 +1,5 @@
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import { ShadowlessElement } from '@labre/std';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';

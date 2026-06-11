@@ -1,10 +1,10 @@
 import '@toeverything/theme/style.css';
-import '@blocksuite/affine/gfx/pointer';
+import '@labre/affine/gfx/pointer';
 
-import type { EdgelessRootBlockComponent } from '@blocksuite/affine/blocks/root';
-import { DefaultTool } from '@blocksuite/affine/blocks/surface';
-import { ColorScheme } from '@blocksuite/affine/model';
-import { ThemeProvider } from '@blocksuite/affine/shared/services';
+import type { EdgelessRootBlockComponent } from '@labre/affine/blocks/root';
+import { DefaultTool } from '@labre/affine/blocks/surface';
+import { ColorScheme } from '@labre/affine/model';
+import { ThemeProvider } from '@labre/affine/shared/services';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { getDocRootBlock } from '../utils/edgeless.js';

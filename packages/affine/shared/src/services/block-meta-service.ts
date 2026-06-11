@@ -1,5 +1,5 @@
-import type { BlockMeta } from '@blocksuite/affine-model';
-import { type BlockModel, StoreExtension } from '@blocksuite/store';
+import type { BlockMeta } from '@labre/affine-model';
+import { type BlockModel, StoreExtension } from '@labre/store';
 import { filter, groupBy, mergeMap, throttleTime } from 'rxjs/operators';
 
 import { FeatureFlagService } from './feature-flag-service';

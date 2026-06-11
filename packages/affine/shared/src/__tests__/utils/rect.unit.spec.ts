@@ -1,4 +1,4 @@
-import { Point } from '@blocksuite/global/gfx';
+import { Point } from '@labre/global/gfx';
 import { describe, expect, it } from 'vitest';
 
 describe('Point', () => {

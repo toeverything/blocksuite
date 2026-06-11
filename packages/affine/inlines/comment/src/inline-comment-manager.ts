@@ -1,19 +1,19 @@
-import { getInlineEditorByModel } from '@blocksuite/affine-rich-text';
-import { getSelectedBlocksCommand } from '@blocksuite/affine-shared/commands';
+import { getInlineEditorByModel } from '@labre/affine-rich-text';
+import { getSelectedBlocksCommand } from '@labre/affine-shared/commands';
 import {
   BlockCommentManager,
   type CommentId,
   CommentProviderIdentifier,
   findAllCommentedBlocks,
-} from '@blocksuite/affine-shared/services';
-import type { AffineInlineEditor } from '@blocksuite/affine-shared/types';
-import { DisposableGroup } from '@blocksuite/global/disposable';
+} from '@labre/affine-shared/services';
+import type { AffineInlineEditor } from '@labre/affine-shared/types';
+import { DisposableGroup } from '@labre/global/disposable';
 import {
   LifeCycleWatcher,
   type TextRangePoint,
   TextSelection,
-} from '@blocksuite/std';
-import type { BaseSelection, BlockModel } from '@blocksuite/store';
+} from '@labre/std';
+import type { BaseSelection, BlockModel } from '@labre/store';
 import { signal } from '@preact/signals-core';
 import difference from 'lodash-es/difference';
 

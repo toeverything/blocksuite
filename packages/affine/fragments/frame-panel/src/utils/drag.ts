@@ -1,5 +1,5 @@
-import type { FrameBlockModel } from '@blocksuite/affine-model';
-import { on, once } from '@blocksuite/affine-shared/utils';
+import type { FrameBlockModel } from '@labre/affine-model';
+import { on, once } from '@labre/affine-shared/utils';
 
 import type { FramePanelBody } from '../body/frame-panel-body.js';
 import { FrameCard } from '../card/frame-card.js';

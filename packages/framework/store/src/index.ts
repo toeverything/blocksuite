@@ -21,7 +21,7 @@ const importIdentifier = '__ $BLOCKSUITE_STORE$ __';
 if (env[importIdentifier] === true) {
   // https://github.com/yjs/yjs/issues/438
   console.error(
-    '@blocksuite/store was already imported. This breaks constructor checks and will lead to issues!'
+    '@labre/store was already imported. This breaks constructor checks and will lead to issues!'
   );
 }
 env[importIdentifier] = true;

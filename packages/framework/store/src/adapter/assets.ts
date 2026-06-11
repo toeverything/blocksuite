@@ -1,5 +1,5 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { sha } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { sha } from '@labre/global/utils';
 
 /**
  * @internal just for test

@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { BookmarkBlockMarkdownAdapterExtension } from './markdown.js';
 import { BookmarkBlockMarkdownPreprocessorExtension } from './preprocessor.js';

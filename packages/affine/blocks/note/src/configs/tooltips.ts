@@ -1,4 +1,4 @@
-import type { SlashMenuTooltip } from '@blocksuite/affine-widget-slash-menu';
+import type { SlashMenuTooltip } from '@labre/affine-widget-slash-menu';
 import { html } from 'lit';
 // prettier-ignore
 const TextTooltip = html`<svg width="170" height="68" viewBox="0 0 170 68" fill="none" xmlns="http://www.w3.org/2000/svg">

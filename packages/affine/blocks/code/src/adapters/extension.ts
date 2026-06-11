@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { CodeBlockHtmlAdapterExtension } from './html.js';
 import { CodeBlockMarkdownAdapterExtensions } from './markdown/index.js';

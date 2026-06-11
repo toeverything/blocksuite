@@ -1,5 +1,5 @@
-import type { CanvasElementWithText } from '@blocksuite/affine-block-surface';
-import type { PanTool } from '@blocksuite/affine-gfx-pointer';
+import type { CanvasElementWithText } from '@labre/affine-block-surface';
+import type { PanTool } from '@labre/affine-gfx-pointer';
 import {
   type AttachmentBlockModel,
   type Connectable,
@@ -8,14 +8,14 @@ import {
   type ImageBlockModel,
   ShapeElementModel,
   TextElementModel,
-} from '@blocksuite/affine-model';
-import { isTopLevelBlock } from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-model';
+import { isTopLevelBlock } from '@labre/affine-shared/utils';
 import type {
   GfxModel,
   GfxPrimitiveElementModel,
   ToolOptionWithType,
-} from '@blocksuite/std/gfx';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import type { BlockModel } from '@labre/store';
 
 import { drawingCursor } from './cursors';
 

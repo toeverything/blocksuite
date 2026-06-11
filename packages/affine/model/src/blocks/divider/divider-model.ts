@@ -2,7 +2,7 @@ import {
   BlockModel,
   BlockSchemaExtension,
   defineBlockSchema,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 export const DividerBlockSchema = defineBlockSchema({
   flavour: 'affine:divider',

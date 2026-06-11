@@ -1,4 +1,4 @@
-import { IS_MOBILE } from '@blocksuite/global/env';
+import { IS_MOBILE } from '@labre/global/env';
 import { html } from 'lit';
 
 import { filterTraitKey } from '../../../core/filter/trait.js';

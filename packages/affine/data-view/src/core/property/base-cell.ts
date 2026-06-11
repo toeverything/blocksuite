@@ -1,5 +1,5 @@
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import { ShadowlessElement } from '@labre/std';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 import type { PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';

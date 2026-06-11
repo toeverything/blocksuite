@@ -1,17 +1,17 @@
 import {
   convertToDatabase,
   DATABASE_CONVERT_WHITE_LIST,
-} from '@blocksuite/affine-block-database';
+} from '@labre/affine-block-database';
 import {
   convertSelectedBlocksToLinkedDoc,
   getTitleFromSelectedModels,
   notifyDocCreated,
   promptDocTitle,
-} from '@blocksuite/affine-block-embed';
-import { updateBlockType } from '@blocksuite/affine-block-note';
-import type { HighlightType } from '@blocksuite/affine-components/highlight-dropdown-menu';
-import { toast } from '@blocksuite/affine-components/toast';
-import { EditorChevronDown } from '@blocksuite/affine-components/toolbar';
+} from '@labre/affine-block-embed';
+import { updateBlockType } from '@labre/affine-block-note';
+import type { HighlightType } from '@labre/affine-components/highlight-dropdown-menu';
+import { toast } from '@labre/affine-components/toast';
+import { EditorChevronDown } from '@labre/affine-components/toolbar';
 import {
   deleteTextCommand,
   formatBlockCommand,
@@ -19,12 +19,12 @@ import {
   formatTextCommand,
   isFormatSupported,
   textFormatConfigs,
-} from '@blocksuite/affine-inline-preset';
+} from '@labre/affine-inline-preset';
 import {
   EmbedLinkedDocBlockSchema,
   EmbedSyncedDocBlockSchema,
-} from '@blocksuite/affine-model';
-import { textConversionConfigs } from '@blocksuite/affine-rich-text';
+} from '@labre/affine-model';
+import { textConversionConfigs } from '@labre/affine-rich-text';
 import {
   copySelectedModelsCommand,
   deleteSelectedModelsCommand,
@@ -35,18 +35,18 @@ import {
   getSelectedBlocksCommand,
   getSelectedModelsCommand,
   getTextSelectionCommand,
-} from '@blocksuite/affine-shared/commands';
+} from '@labre/affine-shared/commands';
 import type {
   ToolbarAction,
   ToolbarActionGenerator,
   ToolbarActionGroup,
   ToolbarModuleConfig,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   ActionPlacement,
   blockCommentToolbarButton,
-} from '@blocksuite/affine-shared/services';
-import { tableViewMeta } from '@blocksuite/data-view/view-presets';
+} from '@labre/affine-shared/services';
+import { tableViewMeta } from '@labre/data-view/view-presets';
 import {
   CopyIcon,
   DatabaseTableViewIcon,
@@ -58,8 +58,8 @@ import {
   type BlockComponent,
   BlockSelection,
   BlockViewIdentifier,
-} from '@blocksuite/std';
-import { toDraftModel } from '@blocksuite/store';
+} from '@labre/std';
+import { toDraftModel } from '@labre/store';
 import { html } from 'lit';
 import { repeat } from 'lit/directives/repeat.js';
 

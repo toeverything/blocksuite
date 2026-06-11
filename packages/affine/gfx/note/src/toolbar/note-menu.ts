@@ -1,17 +1,17 @@
-import { addAttachments } from '@blocksuite/affine-block-attachment';
-import { insertLinkByQuickSearchCommand } from '@blocksuite/affine-block-bookmark';
-import { addImages } from '@blocksuite/affine-block-image';
-import { DefaultTool } from '@blocksuite/affine-block-surface';
-import { MAX_IMAGE_WIDTH } from '@blocksuite/affine-model';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import type { NoteChildrenFlavour } from '@blocksuite/affine-shared/types';
+import { addAttachments } from '@labre/affine-block-attachment';
+import { insertLinkByQuickSearchCommand } from '@labre/affine-block-bookmark';
+import { addImages } from '@labre/affine-block-image';
+import { DefaultTool } from '@labre/affine-block-surface';
+import { MAX_IMAGE_WIDTH } from '@labre/affine-model';
+import { TelemetryProvider } from '@labre/affine-shared/services';
+import type { NoteChildrenFlavour } from '@labre/affine-shared/types';
 import {
   getImageFilesFromLocal,
   openSingleFileWith,
-} from '@blocksuite/affine-shared/utils';
-import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
+} from '@labre/affine-shared/utils';
+import { EdgelessToolbarToolMixin } from '@labre/affine-widget-edgeless-toolbar';
 import { AttachmentIcon, ImageIcon, LinkIcon } from '@blocksuite/icons/lit';
-import type { ToolOptions } from '@blocksuite/std/gfx';
+import type { ToolOptions } from '@labre/std/gfx';
 import { effect } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { property, state } from 'lit/decorators.js';

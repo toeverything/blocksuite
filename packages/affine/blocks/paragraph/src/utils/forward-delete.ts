@@ -8,17 +8,17 @@ import {
   ImageBlockModel,
   ListBlockModel,
   ParagraphBlockModel,
-} from '@blocksuite/affine-model';
-import { EMBED_BLOCK_MODEL_LIST } from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-model';
+import { EMBED_BLOCK_MODEL_LIST } from '@labre/affine-shared/consts';
 import {
   getNextContentBlock,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/utils';
 import {
   BlockSelection,
   type BlockStdScope,
   TextSelection,
-} from '@blocksuite/std';
+} from '@labre/std';
 
 export function forwardDelete(std: BlockStdScope) {
   const { store, host } = std;

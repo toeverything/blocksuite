@@ -1,4 +1,4 @@
-import type { EdgyNodeKind } from '@blocksuite/affine-model';
+import type { EdgyNodeKind } from '@labre/affine-model';
 
 /**
  * Visual constants for the four EDGY base-element nodes. Each node is a NATIVE

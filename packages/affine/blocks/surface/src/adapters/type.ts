@@ -1,4 +1,4 @@
-import type { ASTWalkerContext } from '@blocksuite/store';
+import type { ASTWalkerContext } from '@labre/store';
 
 import type { ElementModelMap } from '../element-model/index.js';
 

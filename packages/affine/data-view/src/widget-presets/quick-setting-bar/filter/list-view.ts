@@ -1,14 +1,14 @@
 import {
   type PopupTarget,
   popupTargetFromElement,
-} from '@blocksuite/affine-components/context-menu';
-import { SignalWatcher } from '@blocksuite/global/lit';
+} from '@labre/affine-components/context-menu';
+import { SignalWatcher } from '@labre/global/lit';
 import {
   ArrowDownSmallIcon,
   FilterIcon,
   PlusIcon,
 } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { ShadowlessElement } from '@labre/std';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';

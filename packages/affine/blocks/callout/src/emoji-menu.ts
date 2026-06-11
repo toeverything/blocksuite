@@ -1,4 +1,4 @@
-import { WithDisposable } from '@blocksuite/global/lit';
+import { WithDisposable } from '@labre/global/lit';
 import data from '@emoji-mart/data';
 import { Picker } from 'emoji-mart';
 import { html, LitElement, type PropertyValues } from 'lit';

@@ -1,4 +1,4 @@
-import { propertyType, t } from '@blocksuite/data-view';
+import { propertyType, t } from '@labre/data-view';
 import zod from 'zod';
 export const linkColumnType = propertyType('link');
 export const linkPropertyModelConfig = linkColumnType.modelConfig({

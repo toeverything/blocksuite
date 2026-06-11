@@ -1,4 +1,4 @@
-import type { Disposable } from '@blocksuite/global/disposable';
+import type { Disposable } from '@labre/global/disposable';
 import {
   autoPlacement,
   autoUpdate,

@@ -1,9 +1,9 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import type { Command } from '@blocksuite/std';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import type { Command } from '@labre/std';
 import {
   INLINE_ROOT_ATTR,
   type InlineRootElement,
-} from '@blocksuite/std/inline';
+} from '@labre/std/inline';
 
 import { toggleLinkPopup } from './link-node/link-popup/toggle-link-popup';
 

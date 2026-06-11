@@ -1,4 +1,4 @@
-import type { MarkdownAST } from '@blocksuite/affine-shared/adapters';
+import type { MarkdownAST } from '@labre/affine-shared/adapters';
 
 import {
   ElementModelAdapter,

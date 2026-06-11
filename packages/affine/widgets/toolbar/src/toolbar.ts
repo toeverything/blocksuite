@@ -1,44 +1,44 @@
-import { DatabaseSelection } from '@blocksuite/affine-block-database';
-import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
-import { TableSelection } from '@blocksuite/affine-block-table';
+import { DatabaseSelection } from '@labre/affine-block-database';
+import { EdgelessLegacySlotIdentifier } from '@labre/affine-block-surface';
+import { TableSelection } from '@labre/affine-block-table';
 import {
   darkToolbarStyles,
   type EditorMenuButton,
   EditorToolbar,
   lightToolbarStyles,
-} from '@blocksuite/affine-components/toolbar';
+} from '@labre/affine-components/toolbar';
 import {
   CodeBlockModel,
   ImageBlockModel,
   ListBlockModel,
   ParagraphBlockModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   ToolbarContext,
   ToolbarFlag as Flag,
   ToolbarRegistryIdentifier,
-} from '@blocksuite/affine-shared/services';
-import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { matchModels } from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/services';
+import { unsafeCSSVar, unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { matchModels } from '@labre/affine-shared/utils';
 import {
   Bound,
   getCommonBound,
   getCommonBoundWithRotation,
-} from '@blocksuite/global/gfx';
-import { nextTick } from '@blocksuite/global/utils';
+} from '@labre/global/gfx';
+import { nextTick } from '@labre/global/utils';
 import {
   type BlockComponent,
   BlockSelection,
   TextSelection,
   WidgetComponent,
-} from '@blocksuite/std';
+} from '@labre/std';
 import {
   GfxBlockElementModel,
   type GfxController,
   type GfxModel,
   GfxPrimitiveElementModel,
-} from '@blocksuite/std/gfx';
-import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/std/inline';
+} from '@labre/std/gfx';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@labre/std/inline';
 import type { ReferenceElement, SideObject } from '@floating-ui/dom';
 import { batch, effect, signal } from '@preact/signals-core';
 import { css, unsafeCSS } from 'lit';

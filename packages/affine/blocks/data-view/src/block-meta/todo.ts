@@ -1,4 +1,4 @@
-import { type ListBlockModel, ListBlockSchema } from '@blocksuite/affine-model';
+import { type ListBlockModel, ListBlockSchema } from '@labre/affine-model';
 
 import { createBlockMeta } from './base.js';
 

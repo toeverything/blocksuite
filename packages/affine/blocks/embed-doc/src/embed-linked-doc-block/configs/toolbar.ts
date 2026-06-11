@@ -1,14 +1,14 @@
-import { toast } from '@blocksuite/affine-components/toast';
-import { EditorChevronDown } from '@blocksuite/affine-components/toolbar';
+import { toast } from '@labre/affine-components/toast';
+import { EditorChevronDown } from '@labre/affine-components/toolbar';
 import {
   type EmbedCardStyle,
   EmbedLinkedDocModel,
   EmbedLinkedDocStyles,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
-} from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-shared/consts';
 import {
   ActionPlacement,
   blockCommentToolbarButton,
@@ -21,12 +21,12 @@ import {
   type ToolbarContext,
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   getBlockProps,
   referenceToNode,
-} from '@blocksuite/affine-shared/utils';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/utils';
+import { Bound } from '@labre/global/gfx';
 import {
   CaptionIcon,
   CopyIcon,
@@ -35,8 +35,8 @@ import {
   ExpandFullIcon,
   OpenInNewIcon,
 } from '@blocksuite/icons/lit';
-import { BlockFlavourIdentifier, isGfxBlockComponent } from '@blocksuite/std';
-import { type ExtensionType, Slice } from '@blocksuite/store';
+import { BlockFlavourIdentifier, isGfxBlockComponent } from '@labre/std';
+import { type ExtensionType, Slice } from '@labre/store';
 import { computed, signal } from '@preact/signals-core';
 import { html } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';

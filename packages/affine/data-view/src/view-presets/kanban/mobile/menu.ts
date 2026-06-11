@@ -2,7 +2,7 @@ import {
   menu,
   popFilterableSimpleMenu,
   type PopupTarget,
-} from '@blocksuite/affine-components/context-menu';
+} from '@labre/affine-components/context-menu';
 import {
   ArrowRightBigIcon,
   DeleteIcon,

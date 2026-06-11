@@ -1,4 +1,4 @@
-import type { BlockComponent } from '@blocksuite/std';
+import type { BlockComponent } from '@labre/std';
 
 import { EmbedFigmaBlockComponent } from './embed-figma-block';
 import { EmbedGithubBlockComponent } from './embed-github-block';

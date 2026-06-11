@@ -1,9 +1,9 @@
 import {
   DEFAULT_PAGE_BLOCK_HEIGHT,
   DEFAULT_PAGE_BLOCK_WIDTH,
-} from '@blocksuite/affine-model';
-import type { Workspace } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
+} from '@labre/affine-model';
+import type { Workspace } from '@labre/store';
+import { Text } from '@labre/store';
 
 export function createDefaultDoc(
   collection: Workspace,

@@ -1,11 +1,11 @@
-import { AffineSchemas } from '@blocksuite/affine/schemas';
-import { replaceIdMiddleware } from '@blocksuite/affine/shared/adapters';
+import { AffineSchemas } from '@labre/affine/schemas';
+import { replaceIdMiddleware } from '@labre/affine/shared/adapters';
 import {
   type DocSnapshot,
   Schema,
   Transformer,
   type Workspace,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 export async function importFromSnapshot(
   collection: Workspace,

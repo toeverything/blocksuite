@@ -1,5 +1,5 @@
-import type { UniComponent } from '@blocksuite/affine-shared/types';
-import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
+import type { UniComponent } from '@labre/affine-shared/types';
+import type { InsertToPosition } from '@labre/affine-shared/utils';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import type { TypeInstance } from '../logical/type.js';

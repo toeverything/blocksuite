@@ -1,6 +1,6 @@
 // https://www.w3.org/TR/css-color-4/
 
-import type { ColorScheme, Palette } from '@blocksuite/affine-model';
+import type { ColorScheme, Palette } from '@labre/affine-model';
 
 // Red, green, blue. All in the range [0, 1].
 export type Rgb = {

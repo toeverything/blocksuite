@@ -1,16 +1,16 @@
 import {
   defaultImageProxyMiddleware,
   NotionHtmlAdapter,
-} from '@blocksuite/affine-shared/adapters';
-import { Container } from '@blocksuite/global/di';
-import { sha } from '@blocksuite/global/utils';
+} from '@labre/affine-shared/adapters';
+import { Container } from '@labre/global/di';
+import { sha } from '@labre/global/utils';
 import {
   type ExtensionType,
   extMimeMap,
   type Schema,
   Transformer,
   type Workspace,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 import { Unzip } from './utils.js';
 

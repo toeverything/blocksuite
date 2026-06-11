@@ -1,8 +1,8 @@
-import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { popupTargetFromElement } from '@labre/affine-components/context-menu';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { CenterPeekIcon, MoreHorizontalIcon } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { ShadowlessElement } from '@labre/std';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, unsafeCSS } from 'lit';
 import { property, state } from 'lit/decorators.js';

@@ -1,10 +1,10 @@
 import {
   DocModeProvider,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import type { BlockComponent } from '@blocksuite/std';
-import { InlineMarkdownExtension } from '@blocksuite/std/inline';
+} from '@labre/affine-shared/services';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import type { BlockComponent } from '@labre/std';
+import { InlineMarkdownExtension } from '@labre/std/inline';
 
 export const LatexExtension = InlineMarkdownExtension<AffineTextAttributes>({
   name: 'latex',

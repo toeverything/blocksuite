@@ -1,6 +1,6 @@
-import { panelBaseStyle } from '@blocksuite/affine-shared/styles';
-import { stopPropagation } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
+import { panelBaseStyle } from '@labre/affine-shared/styles';
+import { stopPropagation } from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
 import { css, html, LitElement } from 'lit';
 
 export class EditorToolbar extends WithDisposable(LitElement) {

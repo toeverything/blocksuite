@@ -1,7 +1,7 @@
-import { on, once } from '@blocksuite/affine-shared/utils';
-import { clamp } from '@blocksuite/global/gfx';
-import { WithDisposable } from '@blocksuite/global/lit';
-import { PropTypes, requiredProperties } from '@blocksuite/std';
+import { on, once } from '@labre/affine-shared/utils';
+import { clamp } from '@labre/global/gfx';
+import { WithDisposable } from '@labre/global/lit';
+import { PropTypes, requiredProperties } from '@labre/std';
 import { html, LitElement, nothing, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

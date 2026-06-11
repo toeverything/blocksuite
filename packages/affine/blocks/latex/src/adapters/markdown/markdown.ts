@@ -1,10 +1,10 @@
-import { LatexBlockSchema } from '@blocksuite/affine-model';
+import { LatexBlockSchema } from '@labre/affine-model';
 import {
   BlockMarkdownAdapterExtension,
   type BlockMarkdownAdapterMatcher,
   type MarkdownAST,
-} from '@blocksuite/affine-shared/adapters';
-import { nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import { nanoid } from '@labre/store';
 
 const isLatexNode = (node: MarkdownAST) => node.type === 'math';
 

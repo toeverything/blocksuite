@@ -2,23 +2,23 @@ import {
   BlockRenderer,
   DatabaseSelection,
   NoteRenderer,
-} from '@blocksuite/affine-block-database';
-import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
+} from '@labre/affine-block-database';
+import { CaptionedBlockComponent } from '@labre/affine-components/caption';
 import {
   menu,
   popMenu,
   popupTargetFromElement,
-} from '@blocksuite/affine-components/context-menu';
-import { CopyIcon, DeleteIcon } from '@blocksuite/affine-components/icons';
-import { PeekViewProvider } from '@blocksuite/affine-components/peek';
-import { toast } from '@blocksuite/affine-components/toast';
-import { EDGELESS_TOP_CONTENTEDITABLE_SELECTOR } from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-components/context-menu';
+import { CopyIcon, DeleteIcon } from '@labre/affine-components/icons';
+import { PeekViewProvider } from '@labre/affine-components/peek';
+import { toast } from '@labre/affine-components/toast';
+import { EDGELESS_TOP_CONTENTEDITABLE_SELECTOR } from '@labre/affine-shared/consts';
 import {
   DocModeProvider,
   NotificationProvider,
   type TelemetryEventMap,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   createRecordDetail,
   createUniComponentFromWebComponent,
@@ -32,12 +32,12 @@ import {
   defineUniComponent,
   renderUniLit,
   uniMap,
-} from '@blocksuite/data-view';
-import { widgetPresets } from '@blocksuite/data-view/widget-presets';
+} from '@labre/data-view';
+import { widgetPresets } from '@labre/data-view/widget-presets';
 import { MoreHorizontalIcon } from '@blocksuite/icons/lit';
-import { type BlockComponent } from '@blocksuite/std';
-import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/std/inline';
-import { Slice } from '@blocksuite/store';
+import { type BlockComponent } from '@labre/std';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@labre/std/inline';
+import { Slice } from '@labre/store';
 import { computed, signal } from '@preact/signals-core';
 import { css, nothing, unsafeCSS } from 'lit';
 import { html } from 'lit/static-html.js';

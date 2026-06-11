@@ -2,9 +2,9 @@ import {
   menu,
   popMenu,
   popupTargetFromElement,
-} from '@blocksuite/affine-components/context-menu';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+} from '@labre/affine-components/context-menu';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import { ShadowlessElement } from '@labre/std';
 import { css } from 'lit';
 import { property } from 'lit/decorators.js';
 import { html } from 'lit/static-html.js';

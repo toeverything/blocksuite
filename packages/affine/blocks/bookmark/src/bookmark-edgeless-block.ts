@@ -1,10 +1,10 @@
-import { BookmarkBlockSchema } from '@blocksuite/affine-model';
+import { BookmarkBlockSchema } from '@labre/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
-} from '@blocksuite/affine-shared/consts';
-import { toGfxBlockComponent } from '@blocksuite/std';
-import { GfxViewInteractionExtension } from '@blocksuite/std/gfx';
+} from '@labre/affine-shared/consts';
+import { toGfxBlockComponent } from '@labre/std';
+import { GfxViewInteractionExtension } from '@labre/std/gfx';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';
 
 import { BookmarkBlockComponent } from './bookmark-block.js';

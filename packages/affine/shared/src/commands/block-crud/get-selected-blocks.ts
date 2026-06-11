@@ -3,9 +3,9 @@ import type {
   Command,
   SurfaceSelection,
   TextSelection,
-} from '@blocksuite/std';
-import { BlockComponent } from '@blocksuite/std';
-import type { RoleType } from '@blocksuite/store';
+} from '@labre/std';
+import { BlockComponent } from '@labre/std';
+import type { RoleType } from '@labre/store';
 
 import type { ImageSelection } from '../../selection/index.js';
 

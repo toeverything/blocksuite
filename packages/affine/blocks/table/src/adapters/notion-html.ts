@@ -1,9 +1,9 @@
-import { TableBlockSchema } from '@blocksuite/affine-model';
+import { TableBlockSchema } from '@labre/affine-model';
 import {
   BlockNotionHtmlAdapterExtension,
   type BlockNotionHtmlAdapterMatcher,
   HastUtils,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 
 const TABLE_NODE_TYPES = new Set(['table', 'th', 'tr']);
 

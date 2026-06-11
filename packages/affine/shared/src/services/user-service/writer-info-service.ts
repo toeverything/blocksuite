@@ -1,5 +1,5 @@
-import { createIdentifier } from '@blocksuite/global/di';
-import type { ExtensionType } from '@blocksuite/store';
+import { createIdentifier } from '@labre/global/di';
+import type { ExtensionType } from '@labre/store';
 
 import type { AffineUserInfo } from './types';
 

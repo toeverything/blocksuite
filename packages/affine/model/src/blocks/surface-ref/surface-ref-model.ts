@@ -2,7 +2,7 @@ import {
   BlockModel,
   BlockSchemaExtension,
   defineBlockSchema,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 export type SurfaceRefProps = {
   reference: string;

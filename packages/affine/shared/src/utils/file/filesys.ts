@@ -1,7 +1,7 @@
 // Polyfill for `showOpenFilePicker` API
 // See https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wicg-file-system-access/index.d.ts
 // See also https://caniuse.com/?search=showOpenFilePicker
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 
 interface OpenFilePickerOptions {
   types?:

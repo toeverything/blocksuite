@@ -1,5 +1,5 @@
-import { ImageBlockSchema } from '@blocksuite/affine-model';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { ImageBlockSchema } from '@labre/affine-model';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 import {
   type AssetsManager,
   BaseAdapter,
@@ -17,7 +17,7 @@ import {
   type ToBlockSnapshotPayload,
   type ToDocSnapshotPayload,
   type Transformer,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 import { AdapterFactoryIdentifier } from './types/adapter';
 

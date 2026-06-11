@@ -1,5 +1,5 @@
-import type { BlockStdScope } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+import type { BlockStdScope } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 import type { TemplateResult } from 'lit';
 
 export type SlashMenuContext = {

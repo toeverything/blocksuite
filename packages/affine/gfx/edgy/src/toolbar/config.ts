@@ -1,11 +1,11 @@
-import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
-import { EdgyFacetsElementModel } from '@blocksuite/affine-model';
+import { EdgelessCRUDIdentifier } from '@labre/affine-block-surface';
+import { EdgyFacetsElementModel } from '@labre/affine-model';
 import {
   type ToolbarContext,
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { BlockFlavourIdentifier } from '@labre/std';
 import { html, type TemplateResult } from 'lit';
 
 const ResizeIcon = html`<svg

@@ -1,18 +1,18 @@
-import type { EdgelessRootBlockComponent } from '@blocksuite/affine/blocks/root';
+import type { EdgelessRootBlockComponent } from '@labre/affine/blocks/root';
 import {
   type ConnectorElementModel,
   ConnectorMode,
   type ShapeElementModel,
   ShapeType,
-} from '@blocksuite/affine/model';
-import { EditPropsStore } from '@blocksuite/affine/shared/services';
+} from '@labre/affine/model';
+import { EditPropsStore } from '@labre/affine/shared/services';
 import {
   getAnchors,
   isCenterAnchorEligible,
   isCenterAnchorEnabled,
-} from '@blocksuite/affine-gfx-connector';
-import { Bound, polygonCentroid } from '@blocksuite/global/gfx';
-import type { BlockStdScope } from '@blocksuite/std';
+} from '@labre/affine-gfx-connector';
+import { Bound, polygonCentroid } from '@labre/global/gfx';
+import type { BlockStdScope } from '@labre/std';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';

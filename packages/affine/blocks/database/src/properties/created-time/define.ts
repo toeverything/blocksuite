@@ -1,4 +1,4 @@
-import { propertyType, t } from '@blocksuite/data-view';
+import { propertyType, t } from '@labre/data-view';
 import { format } from 'date-fns/format';
 import zod from 'zod';
 

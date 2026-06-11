@@ -1,12 +1,12 @@
-import { OverlayIdentifier } from '@blocksuite/affine-block-surface';
-import { MindmapElementModel } from '@blocksuite/affine-model';
-import { type Bound } from '@blocksuite/global/gfx';
+import { OverlayIdentifier } from '@labre/affine-block-surface';
+import { MindmapElementModel } from '@labre/affine-model';
+import { type Bound } from '@labre/global/gfx';
 import {
   type DragExtensionInitializeContext,
   type ExtensionDragMoveContext,
   type GfxModel,
   InteractivityExtension,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 import type { SnapOverlay } from './snap-overlay';
 

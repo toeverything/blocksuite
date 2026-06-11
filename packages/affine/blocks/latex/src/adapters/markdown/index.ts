@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { LatexBlockMarkdownAdapterExtension } from './markdown.js';
 import { LatexMarkdownPreprocessorExtension } from './preprocessor.js';

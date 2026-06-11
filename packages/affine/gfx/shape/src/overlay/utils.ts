@@ -1,6 +1,6 @@
-import type { Options } from '@blocksuite/affine-block-surface';
-import { shapeMethods } from '@blocksuite/affine-model';
-import { Bound, type XYWH } from '@blocksuite/global/gfx';
+import type { Options } from '@labre/affine-block-surface';
+import { shapeMethods } from '@labre/affine-model';
+import { Bound, type XYWH } from '@labre/global/gfx';
 
 export const drawGeneralShape = (
   ctx: CanvasRenderingContext2D,

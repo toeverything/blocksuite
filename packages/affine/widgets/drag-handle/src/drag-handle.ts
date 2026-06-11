@@ -1,14 +1,14 @@
-import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
-import type { RootBlockModel } from '@blocksuite/affine-model';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
+import { EdgelessCRUDIdentifier } from '@labre/affine-block-surface';
+import type { RootBlockModel } from '@labre/affine-model';
+import { DocModeProvider } from '@labre/affine-shared/services';
 import {
   isInsideEdgelessEditor,
   isInsidePageEditor,
-} from '@blocksuite/affine-shared/utils';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import type { IVec, Point, Rect } from '@blocksuite/global/gfx';
-import { type BlockComponent, WidgetComponent } from '@blocksuite/std';
-import type { GfxModel } from '@blocksuite/std/gfx';
+} from '@labre/affine-shared/utils';
+import { DisposableGroup } from '@labre/global/disposable';
+import type { IVec, Point, Rect } from '@labre/global/gfx';
+import { type BlockComponent, WidgetComponent } from '@labre/std';
+import type { GfxModel } from '@labre/std/gfx';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 import { html, nothing } from 'lit';
 import { query, state } from 'lit/decorators.js';

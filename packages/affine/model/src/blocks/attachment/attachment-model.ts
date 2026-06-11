@@ -1,13 +1,13 @@
 import type {
   GfxCommonBlockProps,
   GfxElementGeometry,
-} from '@blocksuite/std/gfx';
-import { GfxCompatible } from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
+import { GfxCompatible } from '@labre/std/gfx';
 import {
   BlockModel,
   BlockSchemaExtension,
   defineBlockSchema,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 import type { BlockMeta, EmbedCardStyle } from '../../utils/index.js';
 import { AttachmentBlockTransformer } from './attachment-transformer.js';

@@ -12,8 +12,8 @@ import {
   NumberedListIcon,
   QuoteIcon,
   TextIcon,
-} from '@blocksuite/affine-components/icons';
-import type { NoteChildrenFlavour } from '@blocksuite/affine-shared/types';
+} from '@labre/affine-components/icons';
+import type { NoteChildrenFlavour } from '@labre/affine-shared/types';
 import type { TemplateResult } from 'lit';
 
 export const BUTTON_GROUP_LENGTH = 10;

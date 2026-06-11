@@ -2,8 +2,8 @@ import {
   createIdentifier,
   type ServiceIdentifier,
   type ServiceProvider,
-} from '@blocksuite/global/di';
-import type { DeltaInsert, ExtensionType } from '@blocksuite/store';
+} from '@labre/global/di';
+import type { DeltaInsert, ExtensionType } from '@labre/store';
 
 import type { AffineTextAttributes } from '../../types/index.js';
 import {

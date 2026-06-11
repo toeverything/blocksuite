@@ -16,16 +16,16 @@ import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
 import './left-side-panel.js';
 
-import { PresentTool } from '@blocksuite/affine/blocks/frame';
-import { ExportManager } from '@blocksuite/affine/blocks/surface';
-import { toast } from '@blocksuite/affine/components/toast';
-import { StoreExtensionManagerIdentifier } from '@blocksuite/affine/ext-loader';
+import { PresentTool } from '@labre/affine/blocks/frame';
+import { ExportManager } from '@labre/affine/blocks/surface';
+import { toast } from '@labre/affine/components/toast';
+import { StoreExtensionManagerIdentifier } from '@labre/affine/ext-loader';
 import {
   BlockSuiteError,
   ErrorCode,
-} from '@blocksuite/affine/global/exceptions';
-import type { SerializedXYWH } from '@blocksuite/affine/global/gfx';
-import { ColorScheme, type DocMode } from '@blocksuite/affine/model';
+} from '@labre/affine/global/exceptions';
+import type { SerializedXYWH } from '@labre/affine/global/gfx';
+import { ColorScheme, type DocMode } from '@labre/affine/model';
 import {
   defaultImageProxyMiddleware,
   docLinkBaseURLMiddleware,
@@ -33,29 +33,29 @@ import {
   MarkdownAdapterFactoryIdentifier,
   PlainTextAdapterFactoryIdentifier,
   titleMiddleware,
-} from '@blocksuite/affine/shared/adapters';
+} from '@labre/affine/shared/adapters';
 import {
   DocModeProvider,
   EditPropsStore,
-} from '@blocksuite/affine/shared/services';
+} from '@labre/affine/shared/services';
 import {
   ColorVariables,
   FontFamilyVariables,
   SizeVariables,
   StyleVariables,
-} from '@blocksuite/affine/shared/theme';
+} from '@labre/affine/shared/theme';
 import {
   openFilesWith,
   openSingleFileWith,
   printToPdf,
-} from '@blocksuite/affine/shared/utils';
-import { ShadowlessElement } from '@blocksuite/affine/std';
-import { GfxControllerIdentifier } from '@blocksuite/affine/std/gfx';
+} from '@labre/affine/shared/utils';
+import { ShadowlessElement } from '@labre/affine/std';
+import { GfxControllerIdentifier } from '@labre/affine/std/gfx';
 import {
   type DeltaInsert,
   Text,
   type Workspace,
-} from '@blocksuite/affine/store';
+} from '@labre/affine/store';
 import {
   createAssetsArchive,
   download,
@@ -63,10 +63,10 @@ import {
   MarkdownTransformer,
   NotionHtmlTransformer,
   ZipTransformer,
-} from '@blocksuite/affine/widgets/linked-doc';
-import { NotionHtmlAdapter } from '@blocksuite/affine-shared/adapters';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { TestAffineEditorContainer } from '@blocksuite/integration-test';
+} from '@labre/affine/widgets/linked-doc';
+import { NotionHtmlAdapter } from '@labre/affine-shared/adapters';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { TestAffineEditorContainer } from '@labre/integration-test';
 import type { SlDropdown } from '@shoelace-style/shoelace';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 import { css, html } from 'lit';

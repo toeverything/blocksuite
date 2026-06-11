@@ -11,21 +11,21 @@ import {
   NoteBlockModel,
   ParagraphBlockModel,
   type RootBlockModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   asyncSetInlineRange,
   focusTextModel,
-} from '@blocksuite/affine-rich-text';
-import { EMBED_BLOCK_MODEL_LIST } from '@blocksuite/affine-shared/consts';
-import type { ExtendedModel } from '@blocksuite/affine-shared/types';
+} from '@labre/affine-rich-text';
+import { EMBED_BLOCK_MODEL_LIST } from '@labre/affine-shared/consts';
+import type { ExtendedModel } from '@labre/affine-shared/types';
 import {
   focusTitle,
   getDocTitleInlineEditor,
   getPrevContentBlock,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import { BlockSelection, type EditorHost } from '@blocksuite/std';
-import type { BlockModel, Text } from '@blocksuite/store';
+} from '@labre/affine-shared/utils';
+import { BlockSelection, type EditorHost } from '@labre/std';
+import type { BlockModel, Text } from '@labre/store';
 
 /**
  * Merge the paragraph with prev block

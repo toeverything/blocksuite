@@ -1,11 +1,11 @@
 import {
   type FootNoteReferenceParams,
   FootNoteReferenceParamsSchema,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   type MarkdownAdapterPreprocessor,
   MarkdownPreprocessorExtension,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 
 // Types for footnote parser tokens
 type Token = {

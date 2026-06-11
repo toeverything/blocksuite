@@ -1,6 +1,6 @@
-import type { SurfaceBlockModel } from '@blocksuite/affine/blocks/surface';
-import type { ShapeElementModel } from '@blocksuite/affine/model';
-import { ShapeType } from '@blocksuite/affine/model';
+import type { SurfaceBlockModel } from '@labre/affine/blocks/surface';
+import type { ShapeElementModel } from '@labre/affine/model';
+import { ShapeType } from '@labre/affine/model';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { setupEditor } from '../utils/setup.js';

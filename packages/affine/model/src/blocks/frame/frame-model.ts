@@ -1,4 +1,4 @@
-import { Bound } from '@blocksuite/global/gfx';
+import { Bound } from '@labre/global/gfx';
 import type {
   GfxBlockElementModel,
   GfxCompatibleProps,
@@ -6,7 +6,7 @@ import type {
   GfxGroupCompatibleInterface,
   GfxModel,
   PointTestOptions,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import {
   canSafeAddToContainer,
   descendantElementsImpl,
@@ -14,13 +14,13 @@ import {
   GfxCompatible,
   gfxGroupCompatibleSymbol,
   hasDescendantElementImpl,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import {
   BlockModel,
   BlockSchemaExtension,
   defineBlockSchema,
   type Text,
-} from '@blocksuite/store';
+} from '@labre/store';
 import { z } from 'zod';
 
 import { type Color, ColorSchema, DefaultTheme } from '../../themes/index.js';

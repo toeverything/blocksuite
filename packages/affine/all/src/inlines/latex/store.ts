@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-inline-latex/store';
+export * from '@labre/affine-inline-latex/store';

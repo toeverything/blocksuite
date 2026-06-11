@@ -1,4 +1,4 @@
-import { NoopLogger } from '@blocksuite/global/utils';
+import { NoopLogger } from '@labre/global/utils';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { BlobEngine } from '../blob/engine.js';

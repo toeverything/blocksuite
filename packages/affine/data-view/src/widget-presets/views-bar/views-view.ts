@@ -4,7 +4,7 @@ import {
   popMenu,
   type PopupTarget,
   popupTargetFromElement,
-} from '@blocksuite/affine-components/context-menu';
+} from '@labre/affine-components/context-menu';
 import {
   DeleteIcon,
   DuplicateIcon,

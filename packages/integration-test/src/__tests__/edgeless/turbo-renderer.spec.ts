@@ -1,12 +1,12 @@
 /**
  * Please refer to integration-test/README.md for commands to run tests.
  */
-import { ParagraphLayoutHandlerExtension } from '@blocksuite/affine/blocks/paragraph';
-import { noop } from '@blocksuite/affine/global/utils';
+import { ParagraphLayoutHandlerExtension } from '@labre/affine/blocks/paragraph';
+import { noop } from '@labre/affine/global/utils';
 import {
   TurboRendererConfigFactory,
   ViewportTurboRendererExtension,
-} from '@blocksuite/affine-gfx-turbo-renderer';
+} from '@labre/affine-gfx-turbo-renderer';
 import { firstValueFrom } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 

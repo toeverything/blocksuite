@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { AttachmentBlockMarkdownAdapterExtension } from './markdown.js';
 import { AttachmentBlockNotionHtmlAdapterExtension } from './notion-html.js';

@@ -1,7 +1,7 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { propertyType, t } from '@blocksuite/data-view';
-import type { DeltaInsert } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { propertyType, t } from '@labre/data-view';
+import type { DeltaInsert } from '@labre/store';
+import { Text } from '@labre/store';
 import * as Y from 'yjs';
 import zod from 'zod';
 

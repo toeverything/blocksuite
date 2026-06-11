@@ -1,4 +1,4 @@
-import type { Disposable } from '@blocksuite/global/disposable';
+import type { Disposable } from '@labre/global/disposable';
 import { computed, type Signal, signal } from '@preact/signals-core';
 import { Subject } from 'rxjs';
 import { take } from 'rxjs/operators';

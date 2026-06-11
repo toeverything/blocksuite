@@ -1,11 +1,11 @@
 import {
   type ElementRenderer,
   ElementRendererExtension,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   DefaultTheme,
   type HighlighterElementModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 
 export const highlighter: ElementRenderer<HighlighterElementModel> = (
   model,

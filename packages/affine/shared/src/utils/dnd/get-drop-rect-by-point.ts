@@ -1,7 +1,7 @@
-import { DatabaseBlockModel } from '@blocksuite/affine-model';
-import type { Point } from '@blocksuite/global/gfx';
-import { BLOCK_ID_ATTR } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+import { DatabaseBlockModel } from '@labre/affine-model';
+import type { Point } from '@labre/global/gfx';
+import { BLOCK_ID_ATTR } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 
 import { getRectByBlockComponent } from '../dom/index.js';
 import { matchModels } from '../model/index.js';

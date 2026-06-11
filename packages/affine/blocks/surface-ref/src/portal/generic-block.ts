@@ -9,11 +9,11 @@ import type {
   EmbedSyncedDocModel,
   EmbedYoutubeModel,
   ImageBlockModel,
-} from '@blocksuite/affine-model';
-import { Bound } from '@blocksuite/global/gfx';
-import { WithDisposable } from '@blocksuite/global/lit';
-import { ShadowlessElement } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/affine-model';
+import { Bound } from '@labre/global/gfx';
+import { WithDisposable } from '@labre/global/lit';
+import { ShadowlessElement } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 import { css, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

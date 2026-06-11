@@ -1,16 +1,16 @@
-import type { RootBlockModel } from '@blocksuite/affine-model';
+import type { RootBlockModel } from '@labre/affine-model';
 import {
   type BlockStdScope,
   type EditorHost,
   type TextRangePoint,
   TextSelection,
-} from '@blocksuite/std';
+} from '@labre/std';
 import type {
   BlockSnapshot,
   DraftModel,
   TransformerMiddleware,
   TransformerSlots,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 const isRootDraftModel = (
   model: DraftModel

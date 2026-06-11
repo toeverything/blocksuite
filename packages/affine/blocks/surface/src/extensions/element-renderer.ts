@@ -1,12 +1,12 @@
 import {
   createIdentifier,
   type ServiceIdentifier,
-} from '@blocksuite/global/di';
+} from '@labre/global/di';
 import type {
   GfxLocalElementModel,
   GfxPrimitiveElementModel,
-} from '@blocksuite/std/gfx';
-import type { ExtensionType } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import type { ExtensionType } from '@labre/store';
 
 import type { ElementRenderer } from '../renderer/elements';
 

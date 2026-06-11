@@ -1,4 +1,4 @@
-import { DisposableGroup } from '@blocksuite/global/disposable';
+import { DisposableGroup } from '@labre/global/disposable';
 import {
   Bound,
   deserializeXYWH,
@@ -13,7 +13,7 @@ import {
   rotatePoints,
   type SerializedXYWH,
   type XYWH,
-} from '@blocksuite/global/gfx';
+} from '@labre/global/gfx';
 import { createMutex } from 'lib0/mutex';
 import isEqual from 'lodash-es/isEqual';
 import { Subject } from 'rxjs';

@@ -1,8 +1,8 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { CodeBlockSchemaExtension } from '@blocksuite/affine-model';
+} from '@labre/affine-ext-loader';
+import { CodeBlockSchemaExtension } from '@labre/affine-model';
 
 import { CodeBlockAdapterExtensions } from './adapters/extension';
 import { CodeMarkdownPreprocessorExtension } from './adapters/markdown/preprocessor';

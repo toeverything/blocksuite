@@ -1,6 +1,6 @@
-import { openSingleFileWith } from '@blocksuite/affine-shared/utils';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import type { Bound } from '@blocksuite/global/gfx';
+import { openSingleFileWith } from '@labre/affine-shared/utils';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import type { Bound } from '@labre/global/gfx';
 import c from 'simple-xml-to-json';
 
 type MindMapNode = {

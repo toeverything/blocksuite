@@ -1,22 +1,22 @@
-import { DefaultTool } from '@blocksuite/affine-block-surface';
-import { toast } from '@blocksuite/affine-components/toast';
-import { EmptyTool } from '@blocksuite/affine-gfx-pointer';
-import type { MindmapStyle } from '@blocksuite/affine-model';
+import { DefaultTool } from '@labre/affine-block-surface';
+import { toast } from '@labre/affine-components/toast';
+import { EmptyTool } from '@labre/affine-gfx-pointer';
+import type { MindmapStyle } from '@labre/affine-model';
 import {
   EditPropsStore,
   FeatureFlagService,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   EdgelessDraggableElementController,
   EdgelessToolbarToolMixin,
-} from '@blocksuite/affine-widget-edgeless-toolbar';
-import { ErrorCode } from '@blocksuite/global/exceptions';
-import type { Bound } from '@blocksuite/global/gfx';
-import { SignalWatcher } from '@blocksuite/global/lit';
-import type { BlockStdScope } from '@blocksuite/std';
-import { modelContext, stdContext } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/affine-widget-edgeless-toolbar';
+import { ErrorCode } from '@labre/global/exceptions';
+import type { Bound } from '@labre/global/gfx';
+import { SignalWatcher } from '@labre/global/lit';
+import type { BlockStdScope } from '@labre/std';
+import { modelContext, stdContext } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 import { consume } from '@lit/context';
 import { computed } from '@preact/signals-core';
 import { css, html, LitElement, nothing, type TemplateResult } from 'lit';

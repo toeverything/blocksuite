@@ -1,4 +1,4 @@
-import { ConfigExtensionFactory } from '@blocksuite/std';
+import { ConfigExtensionFactory } from '@labre/std';
 import type { BundledLanguageInfo, ThemeInput } from 'shiki';
 
 export interface CodeBlockConfig {

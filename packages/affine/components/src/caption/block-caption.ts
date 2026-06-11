@@ -1,17 +1,17 @@
-import type { DocMode } from '@blocksuite/affine-model';
-import { stopPropagation } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
-import type { BlockStdScope } from '@blocksuite/std';
+import type { DocMode } from '@labre/affine-model';
+import { stopPropagation } from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
+import type { BlockStdScope } from '@labre/std';
 import {
   modelContext,
   ShadowlessElement,
   stdContext,
   storeContext,
   TextSelection,
-} from '@blocksuite/std';
-import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/std/inline';
-import type { BlockModel, Store } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
+} from '@labre/std';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@labre/std/inline';
+import type { BlockModel, Store } from '@labre/store';
+import { Text } from '@labre/store';
 import { consume } from '@lit/context';
 import { css, html, nothing } from 'lit';
 import { query, state } from 'lit/decorators.js';

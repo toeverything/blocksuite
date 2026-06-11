@@ -1,5 +1,5 @@
-import type { BlockStdScope } from '@blocksuite/std';
-import type { Store } from '@blocksuite/store';
+import type { BlockStdScope } from '@labre/std';
+import type { Store } from '@labre/store';
 
 import type { SurfaceBlockComponent } from '../surface-block';
 import type { SurfaceBlockModel } from '../surface-model';

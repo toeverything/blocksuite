@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { ParagraphBlockHtmlAdapterExtension } from './html.js';
 import { ParagraphBlockMarkdownAdapterExtension } from './markdown.js';

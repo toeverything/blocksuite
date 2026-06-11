@@ -1,6 +1,6 @@
-import type { RootBlockModel } from '@blocksuite/affine-model';
-import { BLOCK_ID_ATTR, type BlockComponent } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+import type { RootBlockModel } from '@labre/affine-model';
+import { BLOCK_ID_ATTR, type BlockComponent } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 
 const ATTR_SELECTOR = `[${BLOCK_ID_ATTR}]`;
 

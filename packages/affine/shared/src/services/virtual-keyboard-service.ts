@@ -1,4 +1,4 @@
-import { createIdentifier } from '@blocksuite/global/di';
+import { createIdentifier } from '@labre/global/di';
 import type { ReadonlySignal } from '@preact/signals-core';
 
 export interface VirtualKeyboardProvider {

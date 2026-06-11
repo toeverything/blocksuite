@@ -1,4 +1,4 @@
-import { ViewExtensionProvider } from '@blocksuite/affine-ext-loader';
+import { ViewExtensionProvider } from '@labre/affine-ext-loader';
 
 import { effects } from './effects';
 

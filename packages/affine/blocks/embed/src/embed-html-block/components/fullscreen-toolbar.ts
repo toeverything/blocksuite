@@ -2,8 +2,8 @@ import {
   menu,
   popMenu,
   popupTargetFromElement,
-} from '@blocksuite/affine-components/context-menu';
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
+} from '@labre/affine-components/context-menu';
+import { EditPropsStore } from '@labre/affine-shared/services';
 import {
   CopyIcon,
   DoneIcon,

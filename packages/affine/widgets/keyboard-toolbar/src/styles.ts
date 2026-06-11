@@ -1,5 +1,5 @@
-import { scrollbarStyle } from '@blocksuite/affine-shared/styles';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { scrollbarStyle } from '@labre/affine-shared/styles';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
 import { css } from 'lit';
 
 export const keyboardToolbarStyles = css`

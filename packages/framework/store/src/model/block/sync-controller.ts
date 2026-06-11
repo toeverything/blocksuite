@@ -1,4 +1,4 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 import { effect, signal } from '@preact/signals-core';
 import { createMutex } from 'lib0/mutex.js';
 import * as Y from 'yjs';

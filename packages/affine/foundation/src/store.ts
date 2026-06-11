@@ -1,7 +1,7 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
+} from '@labre/affine-ext-loader';
 import {
   HtmlAdapterFactoryExtension,
   ImageProxyService,
@@ -10,18 +10,18 @@ import {
   NotionHtmlAdapterFactoryExtension,
   NotionTextAdapterFactoryExtension,
   PlainTextAdapterFactoryExtension,
-} from '@blocksuite/affine-shared/adapters';
-import { HighlightSelectionExtension } from '@blocksuite/affine-shared/selection';
+} from '@labre/affine-shared/adapters';
+import { HighlightSelectionExtension } from '@labre/affine-shared/selection';
 import {
   BlockMetaService,
   FeatureFlagService,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   BlockSelectionExtension,
   CursorSelectionExtension,
   SurfaceSelectionExtension,
   TextSelectionExtension,
-} from '@blocksuite/std';
+} from '@labre/std';
 
 export class FoundationStoreExtension extends StoreExtensionProvider {
   override name = 'foundation';

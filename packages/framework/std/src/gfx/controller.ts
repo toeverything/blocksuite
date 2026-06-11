@@ -1,12 +1,12 @@
-import { DisposableGroup } from '@blocksuite/global/disposable';
+import { DisposableGroup } from '@labre/global/disposable';
 import {
   Bound,
   getCommonBound,
   getCommonBoundWithRotation,
   type IBound,
-} from '@blocksuite/global/gfx';
-import { assertType } from '@blocksuite/global/utils';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/global/gfx';
+import { assertType } from '@labre/global/utils';
+import type { BlockModel } from '@labre/store';
 import { Signal } from '@preact/signals-core';
 import last from 'lodash-es/last';
 

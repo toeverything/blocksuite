@@ -1,6 +1,6 @@
-import type { EditorHost, GfxBlockComponent } from '@blocksuite/std';
-import { type Viewport } from '@blocksuite/std/gfx';
-import type { BlockModel } from '@blocksuite/store';
+import type { EditorHost, GfxBlockComponent } from '@labre/std';
+import { type Viewport } from '@labre/std/gfx';
+import type { BlockModel } from '@labre/store';
 
 import { BlockLayoutHandlersIdentifier } from './layout/block-layout-provider';
 import type {

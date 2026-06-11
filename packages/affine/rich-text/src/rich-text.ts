@@ -1,9 +1,9 @@
 import type {
   AffineInlineEditor,
   AffineTextAttributes,
-} from '@blocksuite/affine-shared/types';
-import { WithDisposable } from '@blocksuite/global/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+} from '@labre/affine-shared/types';
+import { WithDisposable } from '@labre/global/lit';
+import { ShadowlessElement } from '@labre/std';
 import {
   type AttributeRenderer,
   InlineEditor,
@@ -11,9 +11,9 @@ import {
   type InlineRange,
   type InlineRangeProvider,
   type VLine,
-} from '@blocksuite/std/inline';
-import type { DeltaInsert } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
+} from '@labre/std/inline';
+import type { DeltaInsert } from '@labre/store';
+import { Text } from '@labre/store';
 import { effect, signal } from '@preact/signals-core';
 import { css, html, type TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';

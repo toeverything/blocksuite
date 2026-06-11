@@ -1,10 +1,10 @@
-import { ImageBlockSchema } from '@blocksuite/affine-model';
+import { ImageBlockSchema } from '@labre/affine-model';
 import {
   BlockHtmlAdapterExtension,
   type BlockHtmlAdapterMatcher,
   HastUtils,
-} from '@blocksuite/affine-shared/adapters';
-import { getAssetName } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import { getAssetName } from '@labre/store';
 
 import { processImageNodeToBlock } from './utils';
 

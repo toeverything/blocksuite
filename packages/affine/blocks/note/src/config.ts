@@ -1,5 +1,5 @@
-import type { NoteBlockModel } from '@blocksuite/affine-model';
-import { type BlockStdScope, ConfigExtensionFactory } from '@blocksuite/std';
+import type { NoteBlockModel } from '@labre/affine-model';
+import { type BlockStdScope, ConfigExtensionFactory } from '@labre/std';
 import type { TemplateResult } from 'lit';
 
 type NoteBlockContext = {

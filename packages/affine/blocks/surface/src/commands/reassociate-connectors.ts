@@ -1,5 +1,5 @@
-import type { Command } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+import type { Command } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 
 import type { SurfaceBlockModel } from '../surface-model';
 

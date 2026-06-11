@@ -1,7 +1,7 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
+} from '@labre/affine-ext-loader';
 import {
   EmbedFigmaBlockSchemaExtension,
   EmbedGithubBlockSchemaExtension,
@@ -11,8 +11,8 @@ import {
   EmbedLoomBlockSchemaExtension,
   EmbedSyncedDocBlockSchemaExtension,
   EmbedYoutubeBlockSchemaExtension,
-} from '@blocksuite/affine-model';
-import { EmbedIframeService } from '@blocksuite/affine-shared/services';
+} from '@labre/affine-model';
+import { EmbedIframeService } from '@labre/affine-shared/services';
 
 import { EmbedFigmaBlockAdapterExtensions } from './embed-figma-block/adapters/extension';
 import { EmbedGithubBlockAdapterExtensions } from './embed-github-block/adapters/extension';

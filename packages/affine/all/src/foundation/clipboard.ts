@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-foundation/clipboard';
+export * from '@labre/affine-foundation/clipboard';

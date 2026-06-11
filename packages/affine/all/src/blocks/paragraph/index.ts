@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-block-paragraph';
+export * from '@labre/affine-block-paragraph';

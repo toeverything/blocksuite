@@ -1,19 +1,19 @@
-import { toEdgelessEmbedBlock } from '@blocksuite/affine-block-embed';
+import { toEdgelessEmbedBlock } from '@labre/affine-block-embed';
 import {
   EdgelessCRUDIdentifier,
   reassociateConnectorsCommand,
-} from '@blocksuite/affine-block-surface';
-import { type AliasInfo } from '@blocksuite/affine-model';
+} from '@labre/affine-block-surface';
+import { type AliasInfo } from '@labre/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
-} from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-shared/consts';
 import {
   ThemeExtensionIdentifier,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
-import { Bound } from '@blocksuite/global/gfx';
-import { type BlockComponent, BlockStdScope } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { Bound } from '@labre/global/gfx';
+import { type BlockComponent, BlockStdScope } from '@labre/std';
 import { html, nothing } from 'lit';
 import { query } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';

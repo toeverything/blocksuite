@@ -1,7 +1,7 @@
-import type { FootNote } from '@blocksuite/affine-model';
-import { createIdentifier } from '@blocksuite/global/di';
-import { type BlockStdScope, StdIdentifier } from '@blocksuite/std';
-import type { ExtensionType } from '@blocksuite/store';
+import type { FootNote } from '@labre/affine-model';
+import { createIdentifier } from '@labre/global/di';
+import { type BlockStdScope, StdIdentifier } from '@labre/std';
+import type { ExtensionType } from '@labre/store';
 import type { TemplateResult } from 'lit';
 
 type FootNoteNodeRenderer = (

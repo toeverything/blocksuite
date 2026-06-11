@@ -1,8 +1,8 @@
-import { textKeymap } from '@blocksuite/affine-inline-preset';
-import { ListBlockSchema } from '@blocksuite/affine-model';
-import { getSelectedModelsCommand } from '@blocksuite/affine-shared/commands';
-import { IS_MAC } from '@blocksuite/global/env';
-import { KeymapExtension, TextSelection } from '@blocksuite/std';
+import { textKeymap } from '@labre/affine-inline-preset';
+import { ListBlockSchema } from '@labre/affine-model';
+import { getSelectedModelsCommand } from '@labre/affine-shared/commands';
+import { IS_MAC } from '@labre/global/env';
+import { KeymapExtension, TextSelection } from '@labre/std';
 
 import {
   canDedentListCommand,

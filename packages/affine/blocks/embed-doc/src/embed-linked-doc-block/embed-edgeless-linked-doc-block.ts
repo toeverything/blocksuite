@@ -1,22 +1,22 @@
 import {
   createEmbedEdgelessBlockInteraction,
   toEdgelessEmbedBlock,
-} from '@blocksuite/affine-block-embed';
+} from '@labre/affine-block-embed';
 import {
   EdgelessCRUDIdentifier,
   reassociateConnectorsCommand,
-} from '@blocksuite/affine-block-surface';
-import { EmbedLinkedDocBlockSchema } from '@blocksuite/affine-model';
+} from '@labre/affine-block-surface';
+import { EmbedLinkedDocBlockSchema } from '@labre/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
-} from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-shared/consts';
 import {
   cloneReferenceInfoWithoutAliases,
   isNewTabTrigger,
   isNewViewTrigger,
-} from '@blocksuite/affine-shared/utils';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/utils';
+import { Bound } from '@labre/global/gfx';
 
 import { EmbedLinkedDocBlockComponent } from './embed-linked-doc-block.js';
 

@@ -12,7 +12,7 @@ import {
   NumberedListIcon,
   QuoteIcon,
   TextIcon,
-} from '@blocksuite/affine-components/icons';
+} from '@labre/affine-components/icons';
 import type { TemplateResult } from 'lit';
 
 /**

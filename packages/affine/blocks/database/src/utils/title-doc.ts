@@ -1,5 +1,5 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import type { DeltaOperation, Text } from '@blocksuite/store';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import type { DeltaOperation, Text } from '@labre/store';
 
 export const getSingleDocIdFromText = (text?: Text) => {
   const deltas = text?.deltas$.value;

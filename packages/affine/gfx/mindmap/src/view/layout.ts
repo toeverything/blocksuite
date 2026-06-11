@@ -3,9 +3,9 @@ import {
   type MindmapElementModel,
   type MindmapNode,
   type MindmapRoot,
-} from '@blocksuite/affine-model';
-import type { SerializedXYWH } from '@blocksuite/global/gfx';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-model';
+import type { SerializedXYWH } from '@labre/global/gfx';
+import { Bound } from '@labre/global/gfx';
 
 export const NODE_VERTICAL_SPACING = 45;
 export const NODE_HORIZONTAL_SPACING = 110;

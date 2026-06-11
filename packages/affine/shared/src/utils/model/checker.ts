@@ -1,4 +1,4 @@
-import type { BlockModel, Store } from '@blocksuite/store';
+import type { BlockModel, Store } from '@labre/store';
 
 type ConstructorType<U> = { new (): U };
 type ModelList<T> =

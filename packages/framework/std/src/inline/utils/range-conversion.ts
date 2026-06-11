@@ -1,4 +1,4 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 import type * as Y from 'yjs';
 
 import { VElement } from '../components/v-element.js';

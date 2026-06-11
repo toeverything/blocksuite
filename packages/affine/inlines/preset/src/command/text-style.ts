@@ -1,12 +1,12 @@
 import {
   getBlockSelectionsCommand,
   getTextSelectionCommand,
-} from '@blocksuite/affine-shared/commands';
+} from '@labre/affine-shared/commands';
 import type {
   AffineTextAttributes,
   AffineTextStyleAttributes,
-} from '@blocksuite/affine-shared/types';
-import type { Command } from '@blocksuite/std';
+} from '@labre/affine-shared/types';
+import type { Command } from '@labre/std';
 
 import { formatBlockCommand } from './format-block.js';
 import { formatNativeCommand } from './format-native.js';

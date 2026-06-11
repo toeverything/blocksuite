@@ -1,11 +1,11 @@
 import type {
   ConnectorElementModel,
   SurfaceElementModelMap,
-} from '@blocksuite/affine-model';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import type { SurfaceBlockProps } from '@blocksuite/std/gfx';
-import { SurfaceBlockModel as BaseSurfaceModel } from '@blocksuite/std/gfx';
-import { BlockSchemaExtension, defineBlockSchema } from '@blocksuite/store';
+} from '@labre/affine-model';
+import { DisposableGroup } from '@labre/global/disposable';
+import type { SurfaceBlockProps } from '@labre/std/gfx';
+import { SurfaceBlockModel as BaseSurfaceModel } from '@labre/std/gfx';
+import { BlockSchemaExtension, defineBlockSchema } from '@labre/store';
 import * as Y from 'yjs';
 
 import { elementsCtorMap } from './element-model/index.js';

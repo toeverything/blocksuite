@@ -1,9 +1,9 @@
-import { type NoteBlockModel, NoteDisplayMode } from '@blocksuite/affine-model';
-import { createButtonPopper } from '@blocksuite/affine-shared/utils';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { type NoteBlockModel, NoteDisplayMode } from '@labre/affine-model';
+import { createButtonPopper } from '@labre/affine-shared/utils';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { ArrowDownSmallIcon, InvisibleIcon } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+import { ShadowlessElement } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 import { consume, ContextProvider } from '@lit/context';
 import { signal } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';

@@ -1,5 +1,5 @@
-import { openSingleFileWith } from '@blocksuite/affine-shared/utils';
-import { type SlashMenuConfig } from '@blocksuite/affine-widget-slash-menu';
+import { openSingleFileWith } from '@labre/affine-shared/utils';
+import { type SlashMenuConfig } from '@labre/affine-widget-slash-menu';
 import { ExportToPdfIcon, FileIcon } from '@blocksuite/icons/lit';
 
 import { addSiblingAttachmentBlocks } from '../utils';

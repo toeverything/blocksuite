@@ -1,9 +1,9 @@
-import { embedNoteContentStyles } from '@blocksuite/affine-block-embed';
+import { embedNoteContentStyles } from '@labre/affine-block-embed';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
-} from '@blocksuite/affine-shared/consts';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+} from '@labre/affine-shared/consts';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
 import { css, html } from 'lit';
 
 export const blockStyles = css`

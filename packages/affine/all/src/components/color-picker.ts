@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/color-picker';
+export * from '@labre/affine-components/color-picker';

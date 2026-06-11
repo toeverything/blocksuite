@@ -1,5 +1,5 @@
 // corresponding to `formatText` command
-import { TableModelFlavour } from '@blocksuite/affine-model';
+import { TableModelFlavour } from '@labre/affine-model';
 
 export const FORMAT_TEXT_SUPPORT_FLAVOURS = [
   'affine:paragraph',

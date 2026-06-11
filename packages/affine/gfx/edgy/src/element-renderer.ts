@@ -1,8 +1,8 @@
 import {
   type ElementRenderer,
   ElementRendererExtension,
-} from '@blocksuite/affine-block-surface';
-import type { EdgyFacetsElementModel } from '@blocksuite/affine-model';
+} from '@labre/affine-block-surface';
+import type { EdgyFacetsElementModel } from '@labre/affine-model';
 
 import {
   COLORS,

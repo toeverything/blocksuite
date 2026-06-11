@@ -1,8 +1,8 @@
 import {
   type ElementRenderer,
   ElementRendererExtension,
-} from '@blocksuite/affine-block-surface';
-import { type BrushElementModel, DefaultTheme } from '@blocksuite/affine-model';
+} from '@labre/affine-block-surface';
+import { type BrushElementModel, DefaultTheme } from '@labre/affine-model';
 
 export const brush: ElementRenderer<BrushElementModel> = (
   model,

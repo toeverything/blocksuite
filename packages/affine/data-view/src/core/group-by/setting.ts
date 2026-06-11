@@ -4,10 +4,10 @@ import {
   type MenuOptions,
   popMenu,
   type PopupTarget,
-} from '@blocksuite/affine-components/context-menu';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-components/context-menu';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { DeleteIcon } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { ShadowlessElement } from '@labre/std';
 import { computed } from '@preact/signals-core';
 import { css, html, unsafeCSS } from 'lit';
 import { property, query } from 'lit/decorators.js';

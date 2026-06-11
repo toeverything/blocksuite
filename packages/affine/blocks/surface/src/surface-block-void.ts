@@ -1,4 +1,4 @@
-import { BlockComponent } from '@blocksuite/std';
+import { BlockComponent } from '@labre/std';
 import { nothing } from 'lit';
 
 import type { SurfaceBlockModel } from './surface-model.js';

@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-block-callout';
+export * from '@labre/affine-block-callout';

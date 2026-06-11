@@ -1,5 +1,5 @@
-import { DefaultTheme } from '@blocksuite/affine-model';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { DefaultTheme } from '@labre/affine-model';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 import {
   type AssetsManager,
   BaseAdapter,
@@ -13,7 +13,7 @@ import {
   nanoid,
   type SliceSnapshot,
   type Transformer,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 import type { AffineTextAttributes } from '../types';
 import { AdapterFactoryIdentifier } from './types/adapter';

@@ -3,7 +3,7 @@ import {
   BlockSchemaExtension,
   defineBlockSchema,
   type Text,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 import type { BlockMeta } from '../../utils/types';
 

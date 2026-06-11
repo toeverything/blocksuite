@@ -1,7 +1,7 @@
 /**
  * @vitest-environment happy-dom
  */
-import type { TextSelection } from '@blocksuite/std';
+import type { TextSelection } from '@labre/std';
 import { describe, expect, it } from 'vitest';
 
 import { replaceSelectedTextWithBlocksCommand } from '../../../commands/model-crud/replace-selected-text-with-blocks';

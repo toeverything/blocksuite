@@ -1,5 +1,5 @@
-import { LineWidth, StrokeStyle } from '@blocksuite/affine-model';
-import { WithDisposable } from '@blocksuite/global/lit';
+import { LineWidth, StrokeStyle } from '@labre/affine-model';
+import { WithDisposable } from '@labre/global/lit';
 import { BanIcon, DashLineIcon, StraightLineIcon } from '@blocksuite/icons/lit';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';

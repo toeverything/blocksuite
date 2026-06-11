@@ -1,11 +1,11 @@
-import { ImageLayoutHandlerExtension } from '@blocksuite/affine/blocks/image';
-import { ListLayoutHandlerExtension } from '@blocksuite/affine/blocks/list';
-import { ParagraphLayoutHandlerExtension } from '@blocksuite/affine/blocks/paragraph';
+import { ImageLayoutHandlerExtension } from '@labre/affine/blocks/image';
+import { ListLayoutHandlerExtension } from '@labre/affine/blocks/list';
+import { ParagraphLayoutHandlerExtension } from '@labre/affine/blocks/paragraph';
 import {
   TurboRendererConfigFactory,
   ViewportTurboRendererExtension,
   ViewportTurboRendererIdentifier,
-} from '@blocksuite/affine/gfx/turbo-renderer';
+} from '@labre/affine/gfx/turbo-renderer';
 
 import { addSampleNotes } from './doc-generator.js';
 import { createPainterWorker, setupEditor } from './setup.js';

@@ -1,4 +1,4 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 
 import { getRefType } from '../expression/ref/ref.js';
 import type { Variable, VariableRef } from '../expression/types.js';

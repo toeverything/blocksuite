@@ -1,4 +1,4 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 
 import type { VElement, VLine } from '../components/index.js';
 import { INLINE_ROOT_ATTR, ZERO_WIDTH_FOR_EMPTY_LINE } from '../consts.js';

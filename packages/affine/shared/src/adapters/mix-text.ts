@@ -1,5 +1,5 @@
-import { DefaultTheme, NoteDisplayMode } from '@blocksuite/affine-model';
-import type { ServiceProvider } from '@blocksuite/global/di';
+import { DefaultTheme, NoteDisplayMode } from '@labre/affine-model';
+import type { ServiceProvider } from '@labre/global/di';
 import {
   type AssetsManager,
   ASTWalker,
@@ -20,7 +20,7 @@ import {
   type ToBlockSnapshotPayload,
   type ToDocSnapshotPayload,
   type Transformer,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 import { MarkdownAdapter } from './markdown/markdown';
 import { AdapterFactoryIdentifier } from './types/adapter';

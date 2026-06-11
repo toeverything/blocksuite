@@ -1,18 +1,18 @@
-import { HoverController } from '@blocksuite/affine-components/hover';
+import { HoverController } from '@labre/affine-components/hover';
 import type {
   AdvancedMenuItem,
   MenuItemGroup,
-} from '@blocksuite/affine-components/toolbar';
+} from '@labre/affine-components/toolbar';
 import {
   cloneGroups,
   getMoreMenuConfig,
-} from '@blocksuite/affine-components/toolbar';
-import type { CodeBlockModel } from '@blocksuite/affine-model';
+} from '@labre/affine-components/toolbar';
+import type { CodeBlockModel } from '@labre/affine-model';
 import {
   BlockSelection,
   TextSelection,
   WidgetComponent,
-} from '@blocksuite/std';
+} from '@labre/std';
 import { limitShift, shift, size } from '@floating-ui/dom';
 import { html } from 'lit';
 

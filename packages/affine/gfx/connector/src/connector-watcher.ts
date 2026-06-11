@@ -2,15 +2,15 @@ import {
   type SurfaceBlockModel,
   type SurfaceMiddleware,
   surfaceMiddlewareExtension,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   type ConnectorElementModel,
   ShapeElementModel,
   ShapeType,
-} from '@blocksuite/affine-model';
-import { Bound, Vec } from '@blocksuite/global/gfx';
-import type { IVec } from '@blocksuite/global/gfx';
-import type { GfxModel } from '@blocksuite/std/gfx';
+} from '@labre/affine-model';
+import { Bound, Vec } from '@labre/global/gfx';
+import type { IVec } from '@labre/global/gfx';
+import type { GfxModel } from '@labre/std/gfx';
 
 import { ConnectorPathGenerator, getAnchors } from './connector-manager';
 

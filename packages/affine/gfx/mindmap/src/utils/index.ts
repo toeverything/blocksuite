@@ -1,9 +1,9 @@
-import { MindmapElementModel } from '@blocksuite/affine-model';
+import { MindmapElementModel } from '@labre/affine-model';
 import type {
   GfxBlockElementModel,
   GfxModel,
   Viewport,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 export function isMindmapNode(element: GfxBlockElementModel | GfxModel | null) {
   return element?.group instanceof MindmapElementModel;

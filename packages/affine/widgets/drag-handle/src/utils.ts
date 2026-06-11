@@ -1,16 +1,16 @@
-import { type CalloutBlockComponent } from '@blocksuite/affine-block-callout';
+import { type CalloutBlockComponent } from '@labre/affine-block-callout';
 import {
   AFFINE_EDGELESS_NOTE,
   EdgelessNoteBackground,
   EdgelessNoteBlockComponent,
-} from '@blocksuite/affine-block-note';
-import { ParagraphBlockComponent } from '@blocksuite/affine-block-paragraph';
+} from '@labre/affine-block-note';
+import { ParagraphBlockComponent } from '@labre/affine-block-paragraph';
 import {
   DatabaseBlockModel,
   ListBlockModel,
   ParagraphBlockModel,
-} from '@blocksuite/affine-model';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
+} from '@labre/affine-model';
+import { DocModeProvider } from '@labre/affine-shared/services';
 import {
   calcDropTarget,
   type DropTarget,
@@ -18,20 +18,20 @@ import {
   getBlockProps,
   getClosestBlockComponentByPoint,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/utils';
 import {
   Bound,
   Point,
   Rect,
   type SerializedXYWH,
-} from '@blocksuite/global/gfx';
-import type { BlockComponent, EditorHost } from '@blocksuite/std';
+} from '@labre/global/gfx';
+import type { BlockComponent, EditorHost } from '@labre/std';
 import type {
   BaseSelection,
   BlockModel,
   BlockSnapshot,
   SliceSnapshot,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 import {
   DRAG_HANDLE_CONTAINER_HEIGHT,

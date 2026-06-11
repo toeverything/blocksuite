@@ -1,7 +1,7 @@
-import { type Container, createIdentifier } from '@blocksuite/global/di';
-import { BlockSuiteError } from '@blocksuite/global/exceptions';
-import { type BlockStdScope, StdIdentifier } from '@blocksuite/std';
-import { type BlockSnapshot, Extension, type Store } from '@blocksuite/store';
+import { type Container, createIdentifier } from '@labre/global/di';
+import { BlockSuiteError } from '@labre/global/exceptions';
+import { type BlockStdScope, StdIdentifier } from '@labre/std';
+import { type BlockSnapshot, Extension, type Store } from '@labre/store';
 
 import { getSurfaceComponent } from '../utils/get-surface-block';
 import { EdgelessCRUDIdentifier } from './crud-extension';

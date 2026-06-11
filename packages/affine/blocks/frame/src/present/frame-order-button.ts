@@ -1,8 +1,8 @@
-import type { FrameBlockModel } from '@blocksuite/affine-model';
-import { createButtonPopper } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
+import type { FrameBlockModel } from '@labre/affine-model';
+import { createButtonPopper } from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
 import { LayerIcon } from '@blocksuite/icons/lit';
-import type { BlockComponent } from '@blocksuite/std';
+import type { BlockComponent } from '@labre/std';
 import { css, html, LitElement } from 'lit';
 import { property, query } from 'lit/decorators.js';
 

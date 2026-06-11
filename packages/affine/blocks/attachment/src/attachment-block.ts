@@ -1,40 +1,40 @@
 import {
   CaptionedBlockComponent,
   SelectedStyle,
-} from '@blocksuite/affine-components/caption';
+} from '@labre/affine-components/caption';
 import {
   getAttachmentFileIcon,
   LoadingIcon,
-} from '@blocksuite/affine-components/icons';
-import { Peekable } from '@blocksuite/affine-components/peek';
+} from '@labre/affine-components/icons';
+import { Peekable } from '@labre/affine-components/peek';
 import {
   type ResolvedStateInfo,
   ResourceController,
-} from '@blocksuite/affine-components/resource';
-import { toast } from '@blocksuite/affine-components/toast';
+} from '@labre/affine-components/resource';
+import { toast } from '@labre/affine-components/toast';
 import {
   type AttachmentBlockModel,
   AttachmentBlockStyles,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   BlockCommentManager,
   CitationProvider,
   DocModeProvider,
   FileSizeLimitProvider,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   formatSize,
   openSingleFileWith,
-} from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/utils';
 import {
   AttachmentIcon,
   ResetIcon,
   UpgradeIcon,
   WarningIcon,
 } from '@blocksuite/icons/lit';
-import { BlockSelection } from '@blocksuite/std';
-import { nanoid, Slice } from '@blocksuite/store';
+import { BlockSelection } from '@labre/std';
+import { nanoid, Slice } from '@labre/store';
 import { batch, computed, signal } from '@preact/signals-core';
 import { html, type TemplateResult } from 'lit';
 import { choose } from 'lit/directives/choose.js';

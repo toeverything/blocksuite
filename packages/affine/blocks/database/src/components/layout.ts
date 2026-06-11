@@ -1,6 +1,6 @@
-import { createModal } from '@blocksuite/affine-components/context-menu';
+import { createModal } from '@labre/affine-components/context-menu';
 import { CloseIcon } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { ShadowlessElement } from '@labre/std';
 import { css, html, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 

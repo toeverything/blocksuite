@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-shared/commands';
+export * from '@labre/affine-shared/commands';

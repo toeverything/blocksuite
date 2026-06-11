@@ -1,4 +1,4 @@
-import { createIdentifier, type ServiceProvider } from '@blocksuite/global/di';
+import { createIdentifier, type ServiceProvider } from '@labre/global/di';
 import {
   type AssetsManager,
   type ASTWalker,
@@ -8,7 +8,7 @@ import {
   BlockSnapshotSchema,
   type NodeProps,
   type Transformer,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 import type { DeltaASTConverter } from './delta-converter.js';
 

@@ -1,5 +1,5 @@
-import { EmbedFigmaBlockSchema } from '@blocksuite/affine-model';
-import { BlockMarkdownAdapterExtension } from '@blocksuite/affine-shared/adapters';
+import { EmbedFigmaBlockSchema } from '@labre/affine-model';
+import { BlockMarkdownAdapterExtension } from '@labre/affine-shared/adapters';
 
 import { createEmbedBlockMarkdownAdapterMatcher } from '../../common/adapters/markdown.js';
 

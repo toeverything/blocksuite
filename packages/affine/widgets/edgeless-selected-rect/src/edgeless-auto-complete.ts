@@ -7,18 +7,18 @@ import {
   Overlay,
   OverlayIdentifier,
   type RoughCanvas,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   type ConnectionOverlay,
   ConnectorPathGenerator,
-} from '@blocksuite/affine-gfx-connector';
-import { mountShapeTextEditor } from '@blocksuite/affine-gfx-shape';
+} from '@labre/affine-gfx-connector';
+import { mountShapeTextEditor } from '@labre/affine-gfx-shape';
 import type {
   Connection,
   ConnectorElementModel,
   NoteBlockModel,
   ShapeType,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   DEFAULT_NOTE_HEIGHT,
   DefaultTheme,
@@ -26,14 +26,14 @@ import {
   MindmapElementModel,
   ShapeElementModel,
   shapeMethods,
-} from '@blocksuite/affine-model';
-import { ToolbarRegistryIdentifier } from '@blocksuite/affine-shared/services';
-import type { SelectedRect } from '@blocksuite/affine-shared/types';
-import { handleNativeRangeAtPoint } from '@blocksuite/affine-shared/utils';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import type { Bound, IVec } from '@blocksuite/global/gfx';
-import { Vec } from '@blocksuite/global/gfx';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-model';
+import { ToolbarRegistryIdentifier } from '@labre/affine-shared/services';
+import type { SelectedRect } from '@labre/affine-shared/types';
+import { handleNativeRangeAtPoint } from '@labre/affine-shared/utils';
+import { DisposableGroup } from '@labre/global/disposable';
+import type { Bound, IVec } from '@labre/global/gfx';
+import { Vec } from '@labre/global/gfx';
+import { WithDisposable } from '@labre/global/lit';
 import {
   ArrowUpBigIcon,
   PlusIcon,
@@ -44,8 +44,8 @@ import {
   type BlockComponent,
   type BlockStdScope,
   stdContext,
-} from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import { consume } from '@lit/context';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';

@@ -5,10 +5,10 @@ import {
   Heading4Icon,
   Heading5Icon,
   Heading6Icon,
-} from '@blocksuite/affine-components/icons';
-import type { ParagraphBlockModel } from '@blocksuite/affine-model';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+} from '@labre/affine-components/icons';
+import type { ParagraphBlockModel } from '@labre/affine-model';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import { ShadowlessElement } from '@labre/std';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, nothing, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';

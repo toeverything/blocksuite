@@ -1,8 +1,8 @@
-import { GroupElementModel } from '@blocksuite/affine-model';
+import { GroupElementModel } from '@labre/affine-model';
 import {
   GfxElementModelView,
   GfxViewInteractionExtension,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 import { mountGroupTitleEditor } from './text/edgeless-group-title-editor';
 

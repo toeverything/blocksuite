@@ -1,4 +1,4 @@
-import { propertyPresets } from '@blocksuite/data-view/property-presets';
+import { propertyPresets } from '@labre/data-view/property-presets';
 
 import { createdTimeColumnConfig } from './created-time/cell-renderer.js';
 import { linkColumnConfig } from './link/cell-renderer.js';

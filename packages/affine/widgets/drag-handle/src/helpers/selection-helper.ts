@@ -1,10 +1,10 @@
-import { findNoteBlockModel } from '@blocksuite/affine-shared/utils';
+import { findNoteBlockModel } from '@labre/affine-shared/utils';
 import {
   type BlockComponent,
   BlockSelection,
   SurfaceSelection,
   TextSelection,
-} from '@blocksuite/std';
+} from '@labre/std';
 
 import type { AffineDragHandleWidget } from '../drag-handle.js';
 

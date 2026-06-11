@@ -1,19 +1,19 @@
-import { textKeymap } from '@blocksuite/affine-inline-preset';
+import { textKeymap } from '@labre/affine-inline-preset';
 import {
   CalloutBlockModel,
   ParagraphBlockModel,
   ParagraphBlockSchema,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   focusTextModel,
   getInlineEditorByModel,
-} from '@blocksuite/affine-rich-text';
+} from '@labre/affine-rich-text';
 import {
   calculateCollapsedSiblings,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import { IS_MAC } from '@blocksuite/global/env';
-import { KeymapExtension, TextSelection } from '@blocksuite/std';
+} from '@labre/affine-shared/utils';
+import { IS_MAC } from '@labre/global/env';
+import { KeymapExtension, TextSelection } from '@labre/std';
 
 import { addParagraphCommand } from './commands/add-paragraph.js';
 import {

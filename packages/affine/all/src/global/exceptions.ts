@@ -1,1 +1,1 @@
-export * from '@blocksuite/global/exceptions';
+export * from '@labre/global/exceptions';

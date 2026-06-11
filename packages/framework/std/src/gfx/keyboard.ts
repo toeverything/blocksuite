@@ -1,4 +1,4 @@
-import { DisposableGroup } from '@blocksuite/global/disposable';
+import { DisposableGroup } from '@labre/global/disposable';
 import { Signal } from '@preact/signals-core';
 
 import type { BlockStdScope } from '../scope/std-scope.js';

@@ -1,9 +1,9 @@
-import { CodeBlockSchema } from '@blocksuite/affine-model';
+import { CodeBlockSchema } from '@labre/affine-model';
 import {
   BlockPlainTextAdapterExtension,
   type BlockPlainTextAdapterMatcher,
-} from '@blocksuite/affine-shared/adapters';
-import type { DeltaInsert } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import type { DeltaInsert } from '@labre/store';
 
 export const codeBlockPlainTextAdapterMatcher: BlockPlainTextAdapterMatcher = {
   flavour: CodeBlockSchema.model.flavour,

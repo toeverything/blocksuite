@@ -4,14 +4,14 @@ import {
   NOTE_MIN_HEIGHT,
   NOTE_MIN_WIDTH,
   NoteBlockModel,
-} from '@blocksuite/affine-model';
-import { Bound, clamp } from '@blocksuite/global/gfx';
+} from '@labre/affine-model';
+import { Bound, clamp } from '@labre/global/gfx';
 import {
   type GfxGroupCompatibleInterface,
   type GfxModel,
   isGfxGroupCompatibleModel,
-} from '@blocksuite/std/gfx';
-import type { BlockModel, BlockProps } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import type { BlockModel, BlockProps } from '@labre/store';
 
 function updatChildElementsXYWH(
   container: GfxGroupCompatibleInterface,

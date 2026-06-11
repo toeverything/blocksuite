@@ -1,5 +1,5 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import type { DeltaInsert } from '@blocksuite/store';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import type { DeltaInsert } from '@labre/store';
 import { html, LitElement, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

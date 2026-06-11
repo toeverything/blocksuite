@@ -1,7 +1,7 @@
-import { LatexExtension } from '@blocksuite/affine-inline-latex';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { InlineMarkdownExtension } from '@blocksuite/std/inline';
-import type { ExtensionType } from '@blocksuite/store';
+import { LatexExtension } from '@labre/affine-inline-latex';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { InlineMarkdownExtension } from '@labre/std/inline';
+import type { ExtensionType } from '@labre/store';
 
 // inline markdown match rules:
 // covert: ***test*** + space

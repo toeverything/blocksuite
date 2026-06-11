@@ -1,10 +1,10 @@
-import { Overlay } from '@blocksuite/affine-block-surface';
+import { Overlay } from '@labre/affine-block-surface';
 import {
   ConnectorElementModel,
   MindmapElementModel,
-} from '@blocksuite/affine-model';
-import { almostEqual, Bound, type IVec, Point } from '@blocksuite/global/gfx';
-import type { GfxModel } from '@blocksuite/std/gfx';
+} from '@labre/affine-model';
+import { almostEqual, Bound, type IVec, Point } from '@labre/global/gfx';
+import type { GfxModel } from '@labre/std/gfx';
 
 interface Distance {
   horiz?: {

@@ -1,17 +1,17 @@
 import {
   EdgelessCRUDIdentifier,
   getSurfaceBlock,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   EDGELESS_TEXT_BLOCK_MIN_HEIGHT,
   EDGELESS_TEXT_BLOCK_MIN_WIDTH,
   EdgelessTextBlockModel,
-} from '@blocksuite/affine-model';
-import { focusTextModel } from '@blocksuite/affine-rich-text';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import { Bound } from '@blocksuite/global/gfx';
-import type { Command } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/affine-model';
+import { focusTextModel } from '@labre/affine-rich-text';
+import { matchModels } from '@labre/affine-shared/utils';
+import { Bound } from '@labre/global/gfx';
+import type { Command } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 
 export const insertEdgelessTextCommand: Command<
   {

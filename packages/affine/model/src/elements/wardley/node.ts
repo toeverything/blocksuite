@@ -1,4 +1,4 @@
-import { field } from '@blocksuite/std/gfx';
+import { field } from '@labre/std/gfx';
 
 import { ShapeElementModel } from '../shape/index.js';
 

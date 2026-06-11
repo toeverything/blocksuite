@@ -1,11 +1,11 @@
-import type { MenuOptions } from '@blocksuite/affine-components/context-menu';
+import type { MenuOptions } from '@labre/affine-components/context-menu';
 import {
   type ViewExtensionContext,
   ViewExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { DatabaseBlockModel } from '@blocksuite/affine-model';
-import { SlashMenuConfigExtension } from '@blocksuite/affine-widget-slash-menu';
-import { BlockViewExtension, FlavourExtension } from '@blocksuite/std';
+} from '@labre/affine-ext-loader';
+import { DatabaseBlockModel } from '@labre/affine-model';
+import { SlashMenuConfigExtension } from '@labre/affine-widget-slash-menu';
+import { BlockViewExtension, FlavourExtension } from '@labre/std';
 import { literal } from 'lit/static-html.js';
 import { z } from 'zod';
 

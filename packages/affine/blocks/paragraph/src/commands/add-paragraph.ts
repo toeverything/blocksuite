@@ -1,5 +1,5 @@
-import { focusTextModel } from '@blocksuite/affine-rich-text';
-import { type Command, TextSelection } from '@blocksuite/std';
+import { focusTextModel } from '@labre/affine-rich-text';
+import { type Command, TextSelection } from '@labre/std';
 
 /**
  * Add a paragraph next to the current block.

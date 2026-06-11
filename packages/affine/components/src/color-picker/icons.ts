@@ -1,5 +1,5 @@
-import { isTransparent } from '@blocksuite/affine-model';
-import { cssVarV2 } from '@blocksuite/affine-shared/theme';
+import { isTransparent } from '@labre/affine-model';
+import { cssVarV2 } from '@labre/affine-shared/theme';
 import { html, svg, type TemplateResult } from 'lit';
 
 export function TransparentIcon(hollowCircle = false) {

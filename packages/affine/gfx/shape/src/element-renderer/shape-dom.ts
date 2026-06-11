@@ -1,4 +1,4 @@
-import { DomElementRendererExtension } from '@blocksuite/affine-block-surface';
+import { DomElementRendererExtension } from '@labre/affine-block-surface';
 
 import { shapeDomRenderer } from './shape-dom/index.js';
 

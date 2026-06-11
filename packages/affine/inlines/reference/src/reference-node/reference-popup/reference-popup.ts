@@ -1,18 +1,18 @@
-import type { EditorIconButton } from '@blocksuite/affine-components/toolbar';
-import type { ReferenceInfo } from '@blocksuite/affine-model';
-import { REFERENCE_NODE } from '@blocksuite/affine-shared/consts';
+import type { EditorIconButton } from '@labre/affine-components/toolbar';
+import type { ReferenceInfo } from '@labre/affine-model';
+import { REFERENCE_NODE } from '@labre/affine-shared/consts';
 import {
   type LinkEventType,
   type TelemetryEvent,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import { fontXSStyle, panelBaseStyle } from '@blocksuite/affine-shared/styles';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { stopPropagation } from '@blocksuite/affine-shared/utils';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/services';
+import { fontXSStyle, panelBaseStyle } from '@labre/affine-shared/styles';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { stopPropagation } from '@labre/affine-shared/utils';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { DoneIcon, ResetIcon } from '@blocksuite/icons/lit';
-import { type BlockStdScope, ShadowlessElement } from '@blocksuite/std';
-import type { InlineEditor, InlineRange } from '@blocksuite/std/inline';
+import { type BlockStdScope, ShadowlessElement } from '@labre/std';
+import type { InlineEditor, InlineRange } from '@labre/std/inline';
 import { computePosition, inline, offset, shift } from '@floating-ui/dom';
 import { signal } from '@preact/signals-core';
 import { css, html } from 'lit';

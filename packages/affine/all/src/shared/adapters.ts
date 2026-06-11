@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-shared/adapters';
+export * from '@labre/affine-shared/adapters';

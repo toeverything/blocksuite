@@ -1,4 +1,4 @@
-import { RefNodeSlotsProvider } from '@blocksuite/affine/inlines/reference';
+import { RefNodeSlotsProvider } from '@labre/affine/inlines/reference';
 import {
   CommunityCanvasTextFonts,
   DocModeProvider,
@@ -7,10 +7,10 @@ import {
   FontConfigExtension,
   NoopTelemetryExtension,
   ParseDocUrlExtension,
-} from '@blocksuite/affine/shared/services';
-import type { ExtensionType, Store, Workspace } from '@blocksuite/affine/store';
-import { type TestAffineEditorContainer } from '@blocksuite/integration-test';
-import { getTestViewManager } from '@blocksuite/integration-test/view';
+} from '@labre/affine/shared/services';
+import type { ExtensionType, Store, Workspace } from '@labre/affine/store';
+import { type TestAffineEditorContainer } from '@labre/integration-test';
+import { getTestViewManager } from '@labre/integration-test/view';
 
 import {
   mockDocModeService,

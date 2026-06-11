@@ -2,15 +2,15 @@ import {
   ConnectorMode,
   DefaultTheme,
   type LineWidth,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EditPropsStore,
   FeatureFlagService,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
-import type { ColorEvent } from '@blocksuite/affine-shared/utils';
-import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
-import { SignalWatcher } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/services';
+import type { ColorEvent } from '@labre/affine-shared/utils';
+import { EdgelessToolbarToolMixin } from '@labre/affine-widget-edgeless-toolbar';
+import { SignalWatcher } from '@labre/global/lit';
 import {
   ConnectorCIcon,
   ConnectorEIcon,

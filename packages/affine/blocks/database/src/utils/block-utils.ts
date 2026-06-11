@@ -4,13 +4,13 @@ import type {
   ColumnUpdater,
   DatabaseBlockModel,
   ViewBasicDataType,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   arrayMove,
   insertPositionToIndex,
   type InsertToPosition,
-} from '@blocksuite/affine-shared/utils';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/affine-shared/utils';
+import type { BlockModel } from '@labre/store';
 
 export function addProperty(
   model: DatabaseBlockModel,

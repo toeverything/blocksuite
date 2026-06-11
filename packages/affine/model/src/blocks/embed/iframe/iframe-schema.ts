@@ -1,4 +1,4 @@
-import { BlockSchemaExtension, defineBlockSchema } from '@blocksuite/store';
+import { BlockSchemaExtension, defineBlockSchema } from '@labre/store';
 
 import { defaultEmbedIframeProps, EmbedIframeBlockModel } from './iframe-model';
 

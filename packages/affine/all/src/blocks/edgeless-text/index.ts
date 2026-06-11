@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-block-edgeless-text';
+export * from '@labre/affine-block-edgeless-text';

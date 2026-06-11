@@ -1,4 +1,4 @@
-import { AStarRunner, Overlay } from '@blocksuite/affine-block-surface';
+import { AStarRunner, Overlay } from '@labre/affine-block-surface';
 import {
   type BrushElementModel,
   type Connection,
@@ -9,13 +9,13 @@ import {
   type LocalConnectorElementModel,
   ShapeElementModel,
   ShapeType,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EditPropsStore,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
-import { BlockSuiteError } from '@blocksuite/global/exceptions';
-import type { IBound, IVec, IVec3 } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/services';
+import { BlockSuiteError } from '@labre/global/exceptions';
+import type { IBound, IVec, IVec3 } from '@labre/global/gfx';
 import {
   almostEqual,
   Bound,
@@ -33,14 +33,14 @@ import {
   sign,
   toRadian,
   Vec,
-} from '@blocksuite/global/gfx';
-import { assertType } from '@blocksuite/global/utils';
-import type { BlockStdScope } from '@blocksuite/std';
+} from '@labre/global/gfx';
+import { assertType } from '@labre/global/utils';
+import type { BlockStdScope } from '@labre/std';
 import type {
   GfxController,
   GfxLocalElementModel,
   GfxModel,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import { effect } from '@preact/signals-core';
 import last from 'lodash-es/last';
 

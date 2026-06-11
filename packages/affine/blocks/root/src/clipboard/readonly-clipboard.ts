@@ -2,14 +2,14 @@ import {
   copyMiddleware,
   defaultImageProxyMiddleware,
   titleMiddleware,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 import {
   copySelectedModelsCommand,
   draftSelectedModelsCommand,
   getSelectedModelsCommand,
-} from '@blocksuite/affine-shared/commands';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { LifeCycleWatcher, type UIEventHandler } from '@blocksuite/std';
+} from '@labre/affine-shared/commands';
+import { DisposableGroup } from '@labre/global/disposable';
+import { LifeCycleWatcher, type UIEventHandler } from '@labre/std';
 
 /**
  * ReadOnlyClipboard is a class that provides a read-only clipboard for the root block.

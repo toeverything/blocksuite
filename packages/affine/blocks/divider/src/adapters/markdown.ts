@@ -1,10 +1,10 @@
-import { DividerBlockSchema } from '@blocksuite/affine-model';
+import { DividerBlockSchema } from '@labre/affine-model';
 import {
   BlockMarkdownAdapterExtension,
   type BlockMarkdownAdapterMatcher,
   type MarkdownAST,
-} from '@blocksuite/affine-shared/adapters';
-import { nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import { nanoid } from '@labre/store';
 import type { ThematicBreak } from 'mdast';
 
 const isDividerNode = (node: MarkdownAST): node is ThematicBreak =>

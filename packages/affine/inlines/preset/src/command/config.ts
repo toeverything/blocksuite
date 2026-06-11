@@ -5,9 +5,9 @@ import {
   LinkIcon,
   StrikethroughIcon,
   UnderlineIcon,
-} from '@blocksuite/affine-components/icons';
-import { toggleLink } from '@blocksuite/affine-inline-link';
-import { type EditorHost, TextSelection } from '@blocksuite/std';
+} from '@labre/affine-components/icons';
+import { toggleLink } from '@labre/affine-inline-link';
+import { type EditorHost, TextSelection } from '@labre/std';
 import type { TemplateResult } from 'lit';
 
 import {

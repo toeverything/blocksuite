@@ -4,13 +4,13 @@ import type {
   SerializedConnectorElement,
   SerializedGroupElement,
   SerializedMindmapElement,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   ConnectorElementModel,
   GroupElementModel,
   MindmapElementModel,
-} from '@blocksuite/affine-model';
-import type { BlockStdScope } from '@blocksuite/std';
+} from '@labre/affine-model';
+import type { BlockStdScope } from '@labre/std';
 import {
   getTopElements,
   GfxBlockElementModel,
@@ -18,8 +18,8 @@ import {
   type GfxPrimitiveElementModel,
   isGfxGroupCompatibleModel,
   type SerializedElement,
-} from '@blocksuite/std/gfx';
-import type { BlockSnapshot, Transformer } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import type { BlockSnapshot, Transformer } from '@labre/store';
 
 /**
  * return all elements in the tree of the elements

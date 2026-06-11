@@ -1,7 +1,7 @@
-import { DefaultTool } from '@blocksuite/affine-block-surface';
-import { ConnectorTool } from '@blocksuite/affine-gfx-connector';
-import { createGroupCommand } from '@blocksuite/affine-gfx-group';
-import { EmptyTool } from '@blocksuite/affine-gfx-pointer';
+import { DefaultTool } from '@labre/affine-block-surface';
+import { ConnectorTool } from '@labre/affine-gfx-connector';
+import { createGroupCommand } from '@labre/affine-gfx-group';
+import { EmptyTool } from '@labre/affine-gfx-pointer';
 import {
   ConnectorMode,
   FontFamily,
@@ -9,14 +9,14 @@ import {
   ShapeStyle,
   StrokeStyle,
   type WardleyBgVariant,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EditPropsStore,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
-import { Bound } from '@blocksuite/global/gfx';
-import type { GfxController } from '@blocksuite/std/gfx';
+} from '@labre/affine-shared/services';
+import { EdgelessToolbarToolMixin } from '@labre/affine-widget-edgeless-toolbar';
+import { Bound } from '@labre/global/gfx';
+import type { GfxController } from '@labre/std/gfx';
 import { css, html, LitElement } from 'lit';
 
 import { REF_WIDTH } from '../consts';

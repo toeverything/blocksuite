@@ -3,8 +3,8 @@ import {
   type MindmapElementModel,
   type MindmapNode,
   type MindmapRoot,
-} from '@blocksuite/affine-model';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-model';
+import { Bound } from '@labre/global/gfx';
 import last from 'lodash-es/last';
 
 import { NODE_HORIZONTAL_SPACING, NODE_VERTICAL_SPACING } from '../view/layout';

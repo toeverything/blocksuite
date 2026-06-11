@@ -1,19 +1,19 @@
-import type { RoughCanvas } from '@blocksuite/affine-block-surface';
+import type { RoughCanvas } from '@labre/affine-block-surface';
 import {
   type ConnectorElementModel,
   ConnectorMode,
   type LocalConnectorElementModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import type {
   BezierCurveParameters,
   IVec,
   PointLocation,
-} from '@blocksuite/global/gfx';
+} from '@labre/global/gfx';
 import {
   getBezierParameters,
   getBezierTangent,
   Vec,
-} from '@blocksuite/global/gfx';
+} from '@labre/global/gfx';
 
 type ConnectorEnd = 'Front' | 'Rear';
 

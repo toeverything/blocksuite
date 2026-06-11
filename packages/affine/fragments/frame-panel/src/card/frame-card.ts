@@ -1,7 +1,7 @@
-import type { FrameBlockModel } from '@blocksuite/affine-model';
-import { on, once } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
-import { type BlockStdScope, ShadowlessElement } from '@blocksuite/std';
+import type { FrameBlockModel } from '@labre/affine-model';
+import { on, once } from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
+import { type BlockStdScope, ShadowlessElement } from '@labre/std';
 import { css, html, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

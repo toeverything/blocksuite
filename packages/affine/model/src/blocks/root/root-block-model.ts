@@ -1,9 +1,9 @@
-import type { Text } from '@blocksuite/store';
+import type { Text } from '@labre/store';
 import {
   BlockModel,
   BlockSchemaExtension,
   defineBlockSchema,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 export type RootBlockProps = {
   title: Text;

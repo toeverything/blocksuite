@@ -1,4 +1,4 @@
-import type { TransformerMiddleware } from '@blocksuite/store';
+import type { TransformerMiddleware } from '@labre/store';
 import { z } from 'zod';
 
 export const CALLOUT_MARKDOWN_EXPORT_OPTIONS_KEY =

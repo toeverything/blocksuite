@@ -3,7 +3,7 @@ import type {
   Command,
   SurfaceSelection,
   TextSelection,
-} from '@blocksuite/std';
+} from '@labre/std';
 
 import type { ImageSelection } from '../../selection/image';
 

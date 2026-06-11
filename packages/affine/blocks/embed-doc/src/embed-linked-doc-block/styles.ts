@@ -1,5 +1,5 @@
-import { embedNoteContentStyles } from '@blocksuite/affine-block-embed';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { embedNoteContentStyles } from '@labre/affine-block-embed';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
 import { css, html } from 'lit';
 
 export const styles = css`

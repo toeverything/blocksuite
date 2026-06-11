@@ -1,4 +1,4 @@
-import type { DocMeta, TransformerMiddleware } from '@blocksuite/store';
+import type { DocMeta, TransformerMiddleware } from '@labre/store';
 
 export const titleMiddleware =
   (metas: DocMeta[]): TransformerMiddleware =>

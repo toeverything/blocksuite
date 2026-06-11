@@ -1,4 +1,4 @@
-import { LifeCycleWatcher } from '@blocksuite/std';
+import { LifeCycleWatcher } from '@labre/std';
 
 import {
   TelemetryProvider,

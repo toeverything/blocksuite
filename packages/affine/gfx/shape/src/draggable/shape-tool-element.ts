@@ -2,18 +2,18 @@ import {
   CanvasElementType,
   DefaultTool,
   EdgelessCRUDIdentifier,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   getShapeRadius,
   getShapeType,
   type ShapeName,
   type ShapeStyle,
-} from '@blocksuite/affine-model';
-import { Bound } from '@blocksuite/global/gfx';
-import { WithDisposable } from '@blocksuite/global/lit';
-import { sleep } from '@blocksuite/global/utils';
-import type { BlockComponent } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/affine-model';
+import { Bound } from '@labre/global/gfx';
+import { WithDisposable } from '@labre/global/lit';
+import { sleep } from '@labre/global/utils';
+import type { BlockComponent } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import {
   css,
   html,

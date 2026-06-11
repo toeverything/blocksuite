@@ -1,6 +1,6 @@
-import type { Options, RoughCanvas } from '@blocksuite/affine-block-surface';
-import type { ShapeStyle } from '@blocksuite/affine-model';
-import type { XYWH } from '@blocksuite/global/gfx';
+import type { Options, RoughCanvas } from '@labre/affine-block-surface';
+import type { ShapeStyle } from '@labre/affine-model';
+import type { XYWH } from '@labre/global/gfx';
 
 export abstract class Shape {
   options: Options;

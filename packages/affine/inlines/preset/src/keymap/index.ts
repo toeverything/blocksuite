@@ -1,4 +1,4 @@
-import type { BlockStdScope, UIEventHandler } from '@blocksuite/std';
+import type { BlockStdScope, UIEventHandler } from '@labre/std';
 
 import { textCommonKeymap } from './basic.js';
 import { bracketKeymap } from './bracket.js';

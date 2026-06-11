@@ -1,9 +1,9 @@
-import { createIdentifier, type ServiceProvider } from '@blocksuite/global/di';
+import { createIdentifier, type ServiceProvider } from '@labre/global/di';
 import type {
   BaseAdapter,
   ExtensionType,
   Transformer,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 type AdapterConstructor = new (
   job: Transformer,

@@ -1,6 +1,6 @@
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { nextTick } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@labre/global/disposable';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { nextTick } from '@labre/global/utils';
 import { Subject } from 'rxjs';
 
 import {

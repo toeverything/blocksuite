@@ -1,4 +1,4 @@
-import { toast } from '@blocksuite/affine-components/toast';
+import { toast } from '@labre/affine-components/toast';
 import {
   DEFAULT_NOTE_HEIGHT,
   GroupElementModel,
@@ -6,20 +6,20 @@ import {
   NoteBlockSchema,
   NoteDisplayMode,
   SurfaceRefBlockSchema,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import { getRootBlock } from '@blocksuite/affine-widget-edgeless-toolbar';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/services';
+import { matchModels } from '@labre/affine-shared/utils';
+import { getRootBlock } from '@labre/affine-widget-edgeless-toolbar';
+import { Bound } from '@labre/global/gfx';
 import {
   EditIcon,
   InsertIntoPageIcon,
   UngroupIcon,
 } from '@blocksuite/icons/lit';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
+import { BlockFlavourIdentifier } from '@labre/std';
 
 import { ungroupCommand } from '../command';
 import { mountGroupTitleEditor } from '../text/text';

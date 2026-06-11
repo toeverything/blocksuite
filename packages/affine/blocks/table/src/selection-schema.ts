@@ -1,4 +1,4 @@
-import { BaseSelection, SelectionExtension } from '@blocksuite/store';
+import { BaseSelection, SelectionExtension } from '@labre/store';
 import { z } from 'zod';
 
 const TableAreaSelectionSchema = z.object({

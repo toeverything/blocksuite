@@ -3,16 +3,16 @@ import type {
   IVec,
   PointLocation,
   SerializedXYWH,
-} from '@blocksuite/global/gfx';
-import { Bound, getBoundWithRotation } from '@blocksuite/global/gfx';
-import type { BaseElementProps, PointTestOptions } from '@blocksuite/std/gfx';
+} from '@labre/global/gfx';
+import { Bound, getBoundWithRotation } from '@labre/global/gfx';
+import type { BaseElementProps, PointTestOptions } from '@labre/std/gfx';
 import {
   field,
   GfxLocalElementModel,
   GfxPrimitiveElementModel,
   local,
   prop,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import * as Y from 'yjs';
 
 import {

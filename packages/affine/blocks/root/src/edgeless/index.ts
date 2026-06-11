@@ -6,4 +6,4 @@ export { EdgelessRootService } from './edgeless-root-service.js';
 export * from './utils/clipboard-utils.js';
 export { sortEdgelessElements } from './utils/clone-utils.js';
 export { isCanvasElement } from './utils/query.js';
-export { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/affine-shared/consts';
+export { EDGELESS_BLOCK_CHILD_PADDING } from '@labre/affine-shared/consts';

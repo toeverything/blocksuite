@@ -1,16 +1,16 @@
 import {
   DatabaseBlockDataSource,
   databaseBlockProperties,
-} from '@blocksuite/affine/blocks/database';
+} from '@labre/affine/blocks/database';
 import {
   type DatabaseBlockModel,
   type ListType,
   type ParagraphType,
-} from '@blocksuite/affine/model';
-import { Text, type Workspace } from '@blocksuite/affine/store';
-import { groupTraitKey } from '@blocksuite/data-view';
-import { propertyPresets } from '@blocksuite/data-view/property-presets';
-import { viewPresets } from '@blocksuite/data-view/view-presets';
+} from '@labre/affine/model';
+import { Text, type Workspace } from '@labre/affine/store';
+import { groupTraitKey } from '@labre/data-view';
+import { propertyPresets } from '@labre/data-view/property-presets';
+import { viewPresets } from '@labre/data-view/view-presets';
 
 import type { InitFn } from './utils.js';
 

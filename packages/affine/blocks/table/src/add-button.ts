@@ -1,6 +1,6 @@
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { PlusIcon } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { ShadowlessElement } from '@labre/std';
 import {
   autoPlacement,
   autoUpdate,

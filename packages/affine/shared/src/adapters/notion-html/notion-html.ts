@@ -1,6 +1,6 @@
-import { DefaultTheme, NoteDisplayMode } from '@blocksuite/affine-model';
-import type { ServiceProvider } from '@blocksuite/global/di';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { DefaultTheme, NoteDisplayMode } from '@labre/affine-model';
+import type { ServiceProvider } from '@labre/global/di';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 import {
   type AssetsManager,
   ASTWalker,
@@ -17,7 +17,7 @@ import {
   nanoid,
   type SliceSnapshot,
   type Transformer,
-} from '@blocksuite/store';
+} from '@labre/store';
 import rehypeParse from 'rehype-parse';
 import { unified } from 'unified';
 

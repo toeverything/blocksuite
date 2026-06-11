@@ -1,9 +1,9 @@
-import { mountShapeTextEditor } from '@blocksuite/affine-gfx-shape';
+import { mountShapeTextEditor } from '@labre/affine-gfx-shape';
 import {
   type EdgyNodeElementModel,
   ShapeElementModel,
-} from '@blocksuite/affine-model';
-import { GfxElementModelView } from '@blocksuite/std/gfx';
+} from '@labre/affine-model';
+import { GfxElementModelView } from '@labre/std/gfx';
 
 /**
  * View for an EDGY base-element node. Registering it ensures `gfx.view.get(model)`

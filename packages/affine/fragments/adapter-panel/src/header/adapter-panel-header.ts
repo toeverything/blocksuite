@@ -1,5 +1,5 @@
-import { createLitPortal } from '@blocksuite/affine-components/portal';
-import { SignalWatcher } from '@blocksuite/global/lit';
+import { createLitPortal } from '@labre/affine-components/portal';
+import { SignalWatcher } from '@labre/global/lit';
 import { ArrowDownSmallIcon, FlipDirectionIcon } from '@blocksuite/icons/lit';
 import { flip, offset } from '@floating-ui/dom';
 import { consume } from '@lit/context';

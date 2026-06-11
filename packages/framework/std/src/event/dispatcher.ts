@@ -1,5 +1,5 @@
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { DisposableGroup } from '@labre/global/disposable';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 import { signal } from '@preact/signals-core';
 
 import { LifeCycleWatcher } from '../extension/index.js';

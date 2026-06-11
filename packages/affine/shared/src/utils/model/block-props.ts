@@ -1,4 +1,4 @@
-import type { BlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@labre/store';
 
 export function getBlockProps(model: BlockModel): Record<string, unknown> {
   const keys = model.keys as (keyof typeof model.props)[];

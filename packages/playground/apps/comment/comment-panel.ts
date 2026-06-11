@@ -1,6 +1,6 @@
-import { WithDisposable } from '@blocksuite/affine/global/lit';
-import { ShadowlessElement, TextSelection } from '@blocksuite/affine/std';
-import type { TestAffineEditorContainer } from '@blocksuite/integration-test';
+import { WithDisposable } from '@labre/affine/global/lit';
+import { ShadowlessElement, TextSelection } from '@labre/affine/std';
+import type { TestAffineEditorContainer } from '@labre/integration-test';
 import { css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';
 

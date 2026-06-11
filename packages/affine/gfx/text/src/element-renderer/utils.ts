@@ -1,16 +1,16 @@
-import { TextUtils } from '@blocksuite/affine-block-surface';
+import { TextUtils } from '@labre/affine-block-surface';
 import type {
   FontFamily,
   FontStyle,
   FontWeight,
   TextElementModel,
-} from '@blocksuite/affine-model';
-import type { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-model';
+import type { Bound } from '@labre/global/gfx';
 import {
   getPointsFromBoundWithRotation,
   rotatePoints,
-} from '@blocksuite/global/gfx';
-import { deltaInsertsToChunks } from '@blocksuite/std/inline';
+} from '@labre/global/gfx';
+import { deltaInsertsToChunks } from '@labre/std/inline';
 import type * as Y from 'yjs';
 
 const { getFontFacesByFontFamily, wrapFontFamily } = TextUtils;

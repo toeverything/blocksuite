@@ -1,8 +1,8 @@
-import { ConnectorElementModel } from '@blocksuite/affine-model';
+import { ConnectorElementModel } from '@labre/affine-model';
 import {
   type DragExtensionInitializeContext,
   InteractivityExtension,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 export class ConnectorFilter extends InteractivityExtension {
   static override key = 'connector-filter';

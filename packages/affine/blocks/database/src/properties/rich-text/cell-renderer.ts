@@ -1,25 +1,25 @@
-import { DefaultInlineManagerExtension } from '@blocksuite/affine-inline-preset';
-import type { RichText } from '@blocksuite/affine-rich-text';
+import { DefaultInlineManagerExtension } from '@labre/affine-inline-preset';
+import type { RichText } from '@labre/affine-rich-text';
 import {
   ParseDocUrlProvider,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import type {
   AffineInlineEditor,
   AffineTextAttributes,
-} from '@blocksuite/affine-shared/types';
+} from '@labre/affine-shared/types';
 import {
   getViewportElement,
   isValidUrl,
-} from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/utils';
 import {
   BaseCellRenderer,
   createFromBaseCellRenderer,
   createIcon,
-} from '@blocksuite/data-view';
-import { IS_MAC } from '@blocksuite/global/env';
-import type { BlockSnapshot, DeltaInsert } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
+} from '@labre/data-view';
+import { IS_MAC } from '@labre/global/env';
+import type { BlockSnapshot, DeltaInsert } from '@labre/store';
+import { Text } from '@labre/store';
 import { computed, effect, signal } from '@preact/signals-core';
 import { ref } from 'lit/directives/ref.js';
 import { html } from 'lit/static-html.js';

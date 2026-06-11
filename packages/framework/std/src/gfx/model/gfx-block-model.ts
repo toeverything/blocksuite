@@ -1,5 +1,5 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/gfx';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import type { IVec, SerializedXYWH, XYWH } from '@labre/global/gfx';
 import {
   Bound,
   deserializeXYWH,
@@ -10,9 +10,9 @@ import {
   polygonGetPointTangent,
   polygonNearestPoint,
   rotatePoints,
-} from '@blocksuite/global/gfx';
-import type { Constructor } from '@blocksuite/global/utils';
-import { BlockModel } from '@blocksuite/store';
+} from '@labre/global/gfx';
+import type { Constructor } from '@labre/global/utils';
+import { BlockModel } from '@labre/store';
 
 import {
   isLockedByAncestorImpl,

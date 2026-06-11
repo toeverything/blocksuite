@@ -1,8 +1,8 @@
-import { ColorSchema } from '@blocksuite/affine-model';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import type { DeepPartial } from '@blocksuite/global/utils';
-import { type BlockStdScope, LifeCycleWatcher } from '@blocksuite/std';
+import { ColorSchema } from '@labre/affine-model';
+import { DisposableGroup } from '@labre/global/disposable';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import type { DeepPartial } from '@labre/global/utils';
+import { type BlockStdScope, LifeCycleWatcher } from '@labre/std';
 import { computed, type Signal, signal } from '@preact/signals-core';
 import clonedeep from 'lodash-es/cloneDeep';
 import mergeWith from 'lodash-es/mergeWith';

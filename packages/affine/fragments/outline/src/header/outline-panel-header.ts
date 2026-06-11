@@ -1,7 +1,7 @@
-import { createButtonPopper } from '@blocksuite/affine-shared/utils';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { createButtonPopper } from '@labre/affine-shared/utils';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { SettingsIcon, SortIcon } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { ShadowlessElement } from '@labre/std';
 import { consume } from '@lit/context';
 import { signal } from '@preact/signals-core';
 import { html } from 'lit';

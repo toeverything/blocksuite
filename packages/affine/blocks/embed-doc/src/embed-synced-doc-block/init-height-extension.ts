@@ -1,6 +1,6 @@
-import { EmbedSyncedDocBlockSchema } from '@blocksuite/affine-model';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { LifeCycleWatcher } from '@blocksuite/std';
+import { EmbedSyncedDocBlockSchema } from '@labre/affine-model';
+import { DisposableGroup } from '@labre/global/disposable';
+import { LifeCycleWatcher } from '@labre/std';
 
 import { EmbedEdgelessSyncedDocBlockComponent } from './embed-edgeless-synced-doc-block';
 import { calcSyncedDocFullHeight } from './utils';

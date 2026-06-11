@@ -1,15 +1,15 @@
-import { NoteBlockModel } from '@blocksuite/affine-model';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
+import { NoteBlockModel } from '@labre/affine-model';
+import { DocModeProvider } from '@labre/affine-shared/services';
 import {
   isInsideEdgelessEditor,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import type { Constructor } from '@blocksuite/global/utils';
+} from '@labre/affine-shared/utils';
+import type { Constructor } from '@labre/global/utils';
 import {
   GfxBlockElementModel,
   GfxControllerIdentifier,
-} from '@blocksuite/std/gfx';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import type { BlockModel } from '@labre/store';
 import type { LitElement, TemplateResult } from 'lit';
 
 import { PeekableController } from './controller.js';

@@ -1,5 +1,5 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { NoopLogger } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { NoopLogger } from '@labre/global/utils';
 import {
   AwarenessEngine,
   type AwarenessSource,
@@ -9,7 +9,7 @@ import {
   type DocSource,
   MemoryBlobSource,
   NoopDocSource,
-} from '@blocksuite/sync';
+} from '@labre/sync';
 import { Subject } from 'rxjs';
 import { Awareness } from 'y-protocols/awareness.js';
 import * as Y from 'yjs';

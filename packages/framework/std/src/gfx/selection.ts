@@ -1,9 +1,9 @@
-import { DisposableGroup } from '@blocksuite/global/disposable';
+import { DisposableGroup } from '@labre/global/disposable';
 import {
   getCommonBoundWithRotation,
   type IPoint,
-} from '@blocksuite/global/gfx';
-import { assertType } from '@blocksuite/global/utils';
+} from '@labre/global/gfx';
+import { assertType } from '@labre/global/utils';
 import groupBy from 'lodash-es/groupBy';
 import { Subject } from 'rxjs';
 

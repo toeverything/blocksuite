@@ -2,7 +2,7 @@ import {
   createPopper,
   type MenuPopper,
   QuickToolMixin,
-} from '@blocksuite/affine-widget-edgeless-toolbar';
+} from '@labre/affine-widget-edgeless-toolbar';
 import { PageIcon } from '@blocksuite/icons/lit';
 import { effect } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';

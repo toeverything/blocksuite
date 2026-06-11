@@ -1,11 +1,11 @@
-import type { DomRenderer } from '@blocksuite/affine-block-surface';
+import type { DomRenderer } from '@labre/affine-block-surface';
 import {
   type ConnectorElementModel,
   ConnectorMode,
   DefaultTheme,
   type PointStyle,
-} from '@blocksuite/affine-model';
-import { PointLocation, SVGPathBuilder } from '@blocksuite/global/gfx';
+} from '@labre/affine-model';
+import { PointLocation, SVGPathBuilder } from '@labre/global/gfx';
 
 import { isConnectorWithLabel } from '../../connector-manager.js';
 import { DEFAULT_ARROW_SIZE } from '../utils.js';

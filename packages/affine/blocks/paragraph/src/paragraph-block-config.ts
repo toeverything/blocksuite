@@ -1,5 +1,5 @@
-import type { ParagraphBlockModel } from '@blocksuite/affine-model';
-import { ConfigExtensionFactory } from '@blocksuite/std';
+import type { ParagraphBlockModel } from '@labre/affine-model';
+import { ConfigExtensionFactory } from '@labre/std';
 
 export interface ParagraphBlockConfig {
   getPlaceholder: (model: ParagraphBlockModel) => string;

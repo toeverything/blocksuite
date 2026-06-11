@@ -2,23 +2,23 @@ import {
   CanvasElementType,
   DefaultTool,
   EdgelessCRUDIdentifier,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   getShapeRadius,
   getShapeType,
   ShapeType,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EditPropsStore,
   TelemetryProvider,
   ThemeProvider,
   ViewportElementProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   EdgelessDraggableElementController,
   EdgelessToolbarToolMixin,
-} from '@blocksuite/affine-widget-edgeless-toolbar';
-import { SignalWatcher } from '@blocksuite/global/lit';
+} from '@labre/affine-widget-edgeless-toolbar';
+import { SignalWatcher } from '@labre/global/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

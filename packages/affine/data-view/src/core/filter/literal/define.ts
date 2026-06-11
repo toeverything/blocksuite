@@ -1,5 +1,5 @@
-import { menu } from '@blocksuite/affine-components/context-menu';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { menu } from '@labre/affine-components/context-menu';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
 import { CheckBoxCheckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';
 import { html } from 'lit';
 

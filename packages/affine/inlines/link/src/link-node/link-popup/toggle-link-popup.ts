@@ -1,6 +1,6 @@
-import type { AffineInlineEditor } from '@blocksuite/affine-shared/types';
-import type { BlockStdScope } from '@blocksuite/std';
-import type { InlineRange } from '@blocksuite/std/inline';
+import type { AffineInlineEditor } from '@labre/affine-shared/types';
+import type { BlockStdScope } from '@labre/std';
+import type { InlineRange } from '@labre/std/inline';
 
 import { LinkPopup } from './link-popup';
 

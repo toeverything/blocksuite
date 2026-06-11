@@ -1,5 +1,5 @@
-import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
-import type { GeneralServiceIdentifier } from '@blocksuite/global/di';
+import type { InsertToPosition } from '@labre/affine-shared/utils';
+import type { GeneralServiceIdentifier } from '@labre/global/di';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 
 import type { Variable } from '../expression/types.js';

@@ -1,9 +1,9 @@
-import { toast } from '@blocksuite/affine-components/toast';
+import { toast } from '@labre/affine-components/toast';
 import type {
   ListBlockModel,
   ParagraphBlockModel,
-} from '@blocksuite/affine-model';
-import { insertContent } from '@blocksuite/affine-rich-text';
+} from '@labre/affine-model';
+import { insertContent } from '@labre/affine-rich-text';
 import {
   ArrowDownBigIcon,
   ArrowUpBigIcon,
@@ -15,7 +15,7 @@ import {
   TomorrowIcon,
   YesterdayIcon,
 } from '@blocksuite/icons/lit';
-import { type DeltaInsert, Slice, Text } from '@blocksuite/store';
+import { type DeltaInsert, Slice, Text } from '@labre/store';
 
 import { slashMenuToolTips } from './tooltips';
 import type { SlashMenuConfig } from './types';

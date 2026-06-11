@@ -2,29 +2,29 @@
 import {
   DefaultTool,
   EdgelessLegacySlotIdentifier,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   type MenuHandler,
   popMenu,
   popupTargetFromElement,
-} from '@blocksuite/affine-components/context-menu';
+} from '@labre/affine-components/context-menu';
 import {
   darkToolbarStyles,
   lightToolbarStyles,
-} from '@blocksuite/affine-components/toolbar';
-import { ColorScheme, type RootBlockModel } from '@blocksuite/affine-model';
+} from '@labre/affine-components/toolbar';
+import { ColorScheme, type RootBlockModel } from '@labre/affine-model';
 import {
   EditPropsStore,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
-import { stopPropagation } from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/services';
+import { stopPropagation } from '@labre/affine-shared/utils';
 import {
   ArrowLeftSmallIcon,
   ArrowRightSmallIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
-import { WidgetComponent, WidgetViewExtension } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+import { WidgetComponent, WidgetViewExtension } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import { autoPlacement, offset } from '@floating-ui/dom';
 import { ContextProvider } from '@lit/context';
 import { computed } from '@preact/signals-core';

@@ -1,4 +1,4 @@
-import type { UniComponent } from '@blocksuite/affine-shared/types';
+import type { UniComponent } from '@labre/affine-shared/types';
 
 export const uniMap = <T, R, P extends NonNullable<unknown>>(
   component: UniComponent<T, P>,

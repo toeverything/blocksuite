@@ -1,6 +1,6 @@
-import { EmbedLinkedDocBlockSchema } from '@blocksuite/affine-model';
-import { BlockViewExtension } from '@blocksuite/std';
-import type { ExtensionType } from '@blocksuite/store';
+import { EmbedLinkedDocBlockSchema } from '@labre/affine-model';
+import { BlockViewExtension } from '@labre/std';
+import type { ExtensionType } from '@labre/store';
 import { literal } from 'lit/static-html.js';
 
 import { LinkedDocSlashMenuConfigExtension } from './configs/slash-menu';

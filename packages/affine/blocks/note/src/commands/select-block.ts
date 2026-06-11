@@ -2,7 +2,7 @@ import {
   type BlockComponent,
   BlockSelection,
   type Command,
-} from '@blocksuite/std';
+} from '@labre/std';
 
 export const selectBlock: Command<{
   focusBlock?: BlockComponent;

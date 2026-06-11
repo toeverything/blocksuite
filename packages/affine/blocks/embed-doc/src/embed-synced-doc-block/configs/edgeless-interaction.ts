@@ -2,9 +2,9 @@ import {
   EmbedSyncedDocBlockSchema,
   SYNCED_MIN_HEIGHT,
   SYNCED_MIN_WIDTH,
-} from '@blocksuite/affine-model';
-import { clamp } from '@blocksuite/global/gfx';
-import { GfxViewInteractionExtension } from '@blocksuite/std/gfx';
+} from '@labre/affine-model';
+import { clamp } from '@labre/global/gfx';
+import { GfxViewInteractionExtension } from '@labre/std/gfx';
 
 import type { EmbedEdgelessSyncedDocBlockComponent } from '../embed-edgeless-synced-doc-block';
 import { calcSyncedDocFullHeight } from '../utils';

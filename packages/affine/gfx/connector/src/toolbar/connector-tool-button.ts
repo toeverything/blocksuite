@@ -1,7 +1,7 @@
-import { ConnectorMode, getConnectorModeName } from '@blocksuite/affine-model';
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { QuickToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
-import { SignalWatcher } from '@blocksuite/global/lit';
+import { ConnectorMode, getConnectorModeName } from '@labre/affine-model';
+import { EditPropsStore } from '@labre/affine-shared/services';
+import { QuickToolMixin } from '@labre/affine-widget-edgeless-toolbar';
+import { SignalWatcher } from '@labre/global/lit';
 import {
   ConnectorCIcon,
   ConnectorEIcon,

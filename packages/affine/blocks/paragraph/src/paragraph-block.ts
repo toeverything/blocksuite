@@ -1,28 +1,28 @@
-import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
-import { TOGGLE_BUTTON_PARENT_CLASS } from '@blocksuite/affine-components/toggle-button';
-import { DefaultInlineManagerExtension } from '@blocksuite/affine-inline-preset';
-import type { ParagraphBlockModel } from '@blocksuite/affine-model';
-import type { RichText } from '@blocksuite/affine-rich-text';
+import { CaptionedBlockComponent } from '@labre/affine-components/caption';
+import { TOGGLE_BUTTON_PARENT_CLASS } from '@labre/affine-components/toggle-button';
+import { DefaultInlineManagerExtension } from '@labre/affine-inline-preset';
+import type { ParagraphBlockModel } from '@labre/affine-model';
+import type { RichText } from '@labre/affine-rich-text';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   EDGELESS_TOP_CONTENTEDITABLE_SELECTOR,
-} from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-shared/consts';
 import {
   BlockCommentManager,
   CitationProvider,
   DocModeProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   calculateCollapsedSiblings,
   getNearestHeadingBefore,
   getViewportElement,
-} from '@blocksuite/affine-shared/utils';
-import type { BlockComponent } from '@blocksuite/std';
-import { TextSelection } from '@blocksuite/std';
+} from '@labre/affine-shared/utils';
+import type { BlockComponent } from '@labre/std';
+import { TextSelection } from '@labre/std';
 import {
   getInlineRangeProvider,
   type InlineRangeProvider,
-} from '@blocksuite/std/inline';
+} from '@labre/std/inline';
 import { computed, effect, signal } from '@preact/signals-core';
 import { html, nothing, type TemplateResult } from 'lit';
 import { query, state } from 'lit/decorators.js';

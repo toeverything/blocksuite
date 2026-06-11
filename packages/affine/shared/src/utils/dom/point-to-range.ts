@@ -1,4 +1,4 @@
-import { IS_FIREFOX } from '@blocksuite/global/env';
+import { IS_FIREFOX } from '@labre/global/env';
 
 declare global {
   interface Document {

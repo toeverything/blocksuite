@@ -2,23 +2,23 @@ import {
   type Color,
   ColorScheme,
   type ShapeElementModel,
-} from '@blocksuite/affine-model';
-import { FeatureFlagService } from '@blocksuite/affine-shared/services';
-import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
-import { DisposableGroup } from '@blocksuite/global/disposable';
+} from '@labre/affine-model';
+import { FeatureFlagService } from '@labre/affine-shared/services';
+import { requestConnectedFrame } from '@labre/affine-shared/utils';
+import { DisposableGroup } from '@labre/global/disposable';
 import {
   type Bound,
   getBoundWithRotation,
   intersects,
-} from '@blocksuite/global/gfx';
-import type { BlockStdScope } from '@blocksuite/std';
+} from '@labre/global/gfx';
+import type { BlockStdScope } from '@labre/std';
 import type {
   GfxCompatibleInterface,
   GridManager,
   LayerManager,
   SurfaceBlockModel,
   Viewport,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import { Subject } from 'rxjs';
 
 import type { SurfaceElementModel } from '../element-model/base.js';
@@ -116,7 +116,7 @@ function getOpacity(elementModel: SurfaceElementModel) {
  *
  * 2.  **Create the Renderer Extension**:
  *     Create a new file (e.g., `my-custom-element-dom-renderer.extension.ts`).
- *     Import `DomElementRendererExtension` (e.g., from `@blocksuite/affine-block-surface` or its source location
+ *     Import `DomElementRendererExtension` (e.g., from `@labre/affine-block-surface` or its source location
  *     `blocksuite/affine/blocks/surface/src/extensions/dom-element-renderer.ts`).
  *     Import your renderer function (from step 1).
  *     Use the factory to create your extension:
@@ -136,12 +136,12 @@ function getOpacity(elementModel: SurfaceElementModel) {
  *     -   `DomElementRendererIdentifier` (function): Creates unique service identifiers for DI,
  *         used by `DomRenderer` to look up specific renderers. Defined in the same file.
  *     -   `DomElementRendererExtension` (factory): A helper to create extension objects for easy registration.
- *         (e.g., from `@blocksuite/affine-block-surface` or its source).
+ *         (e.g., from `@labre/affine-block-surface` or its source).
  *     -   `DomRenderer._renderElement()`: This method automatically looks up the registered renderer using
  *         `DomElementRendererIdentifier(elementType)` and calls it if found.
  *
  * 5.  **Ensure Exports**:
- *     -   The `DomRenderer` class itself should be accessible (e.g., exported from `@blocksuite/affine/blocks/surface`).
+ *     -   The `DomRenderer` class itself should be accessible (e.g., exported from `@labre/affine/blocks/surface`).
  *     -   The `DomElementRendererExtension` factory should be accessible.
  *
  * By following these steps, `DomRenderer` will automatically pick up and use your custom rendering logic

@@ -1,6 +1,6 @@
-import { FeatureFlagService } from '@blocksuite/affine-shared/services';
-import { isInsideBlockByFlavour } from '@blocksuite/affine-shared/utils';
-import { type SlashMenuConfig } from '@blocksuite/affine-widget-slash-menu';
+import { FeatureFlagService } from '@labre/affine-shared/services';
+import { isInsideBlockByFlavour } from '@labre/affine-shared/utils';
+import { type SlashMenuConfig } from '@labre/affine-widget-slash-menu';
 import { DatabaseTableViewIcon } from '@blocksuite/icons/lit';
 
 import type { DataViewBlockComponent } from '../data-view-block';

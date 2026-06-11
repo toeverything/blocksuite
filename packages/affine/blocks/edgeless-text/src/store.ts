@@ -1,8 +1,8 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { EdgelessTextBlockSchemaExtension } from '@blocksuite/affine-model';
+} from '@labre/affine-ext-loader';
+import { EdgelessTextBlockSchemaExtension } from '@labre/affine-model';
 
 export class EdgelessTextStoreExtension extends StoreExtensionProvider {
   override name = 'affine-edgeless-text-block';

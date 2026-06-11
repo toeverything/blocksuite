@@ -1,4 +1,4 @@
-import { DomElementRendererExtension } from '@blocksuite/affine-block-surface';
+import { DomElementRendererExtension } from '@labre/affine-block-surface';
 
 import { connectorDomRenderer } from './connector-dom/index.js';
 

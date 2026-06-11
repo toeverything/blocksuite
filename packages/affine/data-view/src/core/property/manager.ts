@@ -1,4 +1,4 @@
-import type { UniComponent } from '@blocksuite/affine-shared/types';
+import type { UniComponent } from '@labre/affine-shared/types';
 import type { ReadonlySignal } from '@preact/signals-core';
 
 import type { Cell } from '../view-manager/cell.js';

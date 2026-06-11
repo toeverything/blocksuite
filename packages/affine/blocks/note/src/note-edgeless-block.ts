@@ -1,19 +1,19 @@
-import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
-import type { DocTitle } from '@blocksuite/affine-fragment-doc-title';
-import { NoteBlockSchema, NoteDisplayMode } from '@blocksuite/affine-model';
-import { focusTextModel } from '@blocksuite/affine-rich-text';
-import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/affine-shared/consts';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
+import { EdgelessLegacySlotIdentifier } from '@labre/affine-block-surface';
+import type { DocTitle } from '@labre/affine-fragment-doc-title';
+import { NoteBlockSchema, NoteDisplayMode } from '@labre/affine-model';
+import { focusTextModel } from '@labre/affine-rich-text';
+import { EDGELESS_BLOCK_CHILD_PADDING } from '@labre/affine-shared/consts';
+import { TelemetryProvider } from '@labre/affine-shared/services';
 import {
   handleNativeRangeAtPoint,
   stopPropagation,
-} from '@blocksuite/affine-shared/utils';
-import { Bound } from '@blocksuite/global/gfx';
-import { toGfxBlockComponent } from '@blocksuite/std';
+} from '@labre/affine-shared/utils';
+import { Bound } from '@labre/global/gfx';
+import { toGfxBlockComponent } from '@labre/std';
 import {
   type BoxSelectionContext,
   GfxViewInteractionExtension,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import { html, nothing, type PropertyValues } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

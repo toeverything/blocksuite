@@ -1,7 +1,7 @@
-import { type Container, createIdentifier } from '@blocksuite/global/di';
-import { type BlockStdScope, StdIdentifier } from '@blocksuite/std';
-import type { GfxModel } from '@blocksuite/std/gfx';
-import { Extension, type ExtensionType } from '@blocksuite/store';
+import { type Container, createIdentifier } from '@labre/global/di';
+import { type BlockStdScope, StdIdentifier } from '@labre/std';
+import type { GfxModel } from '@labre/std/gfx';
+import { Extension, type ExtensionType } from '@labre/store';
 import { signal } from '@preact/signals-core';
 
 import type { ToolbarPlacement } from './config';

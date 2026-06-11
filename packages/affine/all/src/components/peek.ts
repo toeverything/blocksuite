@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/peek';
+export * from '@labre/affine-components/peek';

@@ -1,9 +1,9 @@
 import type {
   EmbedGithubBlockUrlData,
   EmbedGithubModel,
-} from '@blocksuite/affine-model';
-import type { LinkPreviewProvider } from '@blocksuite/affine-shared/services';
-import { isAbortError } from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-model';
+import type { LinkPreviewProvider } from '@labre/affine-shared/services';
+import { isAbortError } from '@labre/affine-shared/utils';
 import { nothing } from 'lit';
 
 import type { EmbedGithubBlockComponent } from './embed-github-block.js';

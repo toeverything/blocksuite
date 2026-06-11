@@ -1,4 +1,4 @@
-import type { BlockComponent, EditorHost } from '@blocksuite/std';
+import type { BlockComponent, EditorHost } from '@labre/std';
 import { html } from 'lit';
 
 import { htmlToElement } from './html-to-element.js';

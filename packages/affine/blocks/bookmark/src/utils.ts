@@ -1,5 +1,5 @@
-import { LinkPreviewServiceIdentifier } from '@blocksuite/affine-shared/services';
-import { isAbortError } from '@blocksuite/affine-shared/utils';
+import { LinkPreviewServiceIdentifier } from '@labre/affine-shared/services';
+import { isAbortError } from '@labre/affine-shared/utils';
 
 import type { BookmarkBlockComponent } from './bookmark-block.js';
 

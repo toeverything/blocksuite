@@ -1,10 +1,10 @@
-import { defaultImageProxyMiddleware } from '@blocksuite/affine-shared/adapters';
+import { defaultImageProxyMiddleware } from '@labre/affine-shared/adapters';
 import {
   Schema,
   Transformer,
   type TransformerMiddleware,
-} from '@blocksuite/store';
-import { TestWorkspace } from '@blocksuite/store/test';
+} from '@labre/store';
+import { TestWorkspace } from '@labre/store/test';
 
 import { AffineSchemas } from '../../schemas.js';
 import { testStoreExtensions } from './store.js';

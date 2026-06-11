@@ -1,6 +1,6 @@
-import type { EditorHost } from '@blocksuite/affine/block-std';
-import type { TestAffineEditorContainer } from '@blocksuite/integration-test';
-import type { BlockSchema, Blocks, Workspace, Transformer } from '@blocksuite/affine/store';
+import type { EditorHost } from '@labre/affine/block-std';
+import type { TestAffineEditorContainer } from '@labre/integration-test';
+import type { BlockSchema, Blocks, Workspace, Transformer } from '@labre/affine/store';
 import type { z } from 'zod';
 import type * as Y from 'yjs';
 

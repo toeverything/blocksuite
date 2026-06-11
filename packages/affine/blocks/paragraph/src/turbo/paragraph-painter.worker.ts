@@ -3,11 +3,11 @@ import type {
   BlockLayoutPainter,
   TextRect,
   WorkerToHostMessage,
-} from '@blocksuite/affine-gfx-turbo-renderer';
+} from '@labre/affine-gfx-turbo-renderer';
 import {
   BlockLayoutPainterExtension,
   getBaseline,
-} from '@blocksuite/affine-gfx-turbo-renderer/painter';
+} from '@labre/affine-gfx-turbo-renderer/painter';
 
 interface SentenceLayout {
   text: string;

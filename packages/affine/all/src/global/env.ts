@@ -1,1 +1,1 @@
-export * from '@blocksuite/global/env';
+export * from '@labre/global/env';

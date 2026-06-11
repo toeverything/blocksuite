@@ -1,5 +1,5 @@
-import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
-import { nanoid } from '@blocksuite/store';
+import type { InsertToPosition } from '@labre/affine-shared/utils';
+import { nanoid } from '@labre/store';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 
 import type { DataSource } from '../data-source/base.js';

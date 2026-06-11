@@ -1,11 +1,11 @@
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { DocModeProvider } from '@labre/affine-shared/services';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import {
   type EditorHost,
   PropTypes,
   requiredProperties,
   ShadowlessElement,
-} from '@blocksuite/std';
+} from '@labre/std';
 import { provide } from '@lit/context';
 import { effect, signal } from '@preact/signals-core';
 import { html, type PropertyValues } from 'lit';

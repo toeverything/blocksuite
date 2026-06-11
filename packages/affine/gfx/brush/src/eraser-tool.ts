@@ -2,17 +2,17 @@ import {
   EdgelessCRUDIdentifier,
   Overlay,
   type SurfaceBlockComponent,
-} from '@blocksuite/affine-block-surface';
-import { isTopLevelBlock } from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-block-surface';
+import { isTopLevelBlock } from '@labre/affine-shared/utils';
 import {
   Bound,
   getStroke,
   getSvgPathFromStroke,
   type IVec,
   linePolygonIntersects,
-} from '@blocksuite/global/gfx';
-import type { PointerEventState } from '@blocksuite/std';
-import { BaseTool, type GfxModel } from '@blocksuite/std/gfx';
+} from '@labre/global/gfx';
+import type { PointerEventState } from '@labre/std';
+import { BaseTool, type GfxModel } from '@labre/std/gfx';
 
 class EraserOverlay extends Overlay {
   d = '';

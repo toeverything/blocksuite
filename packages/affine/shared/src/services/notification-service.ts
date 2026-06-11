@@ -1,6 +1,6 @@
-import { createIdentifier, type ServiceProvider } from '@blocksuite/global/di';
-import { EditorLifeCycleExtension } from '@blocksuite/std';
-import { type ExtensionType, StoreIdentifier } from '@blocksuite/store';
+import { createIdentifier, type ServiceProvider } from '@labre/global/di';
+import { EditorLifeCycleExtension } from '@labre/std';
+import { type ExtensionType, StoreIdentifier } from '@labre/store';
 import type { TemplateResult } from 'lit';
 
 export interface NotificationService {

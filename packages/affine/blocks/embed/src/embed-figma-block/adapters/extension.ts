@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { EmbedFigmaBlockHtmlAdapterExtension } from './html.js';
 import { EmbedFigmaMarkdownAdapterExtension } from './markdown.js';

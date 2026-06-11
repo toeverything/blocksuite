@@ -1,7 +1,7 @@
 import {
   EmbedLinkedDocBlockSchema,
   FootNoteReferenceParamsSchema,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   AdapterTextUtils,
   BlockMarkdownAdapterExtension,
@@ -10,8 +10,8 @@ import {
   getFootnoteDefinitionText,
   isFootnoteDefinitionNode,
   type MarkdownAST,
-} from '@blocksuite/affine-shared/adapters';
-import { nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import { nanoid } from '@labre/store';
 
 const isLinkedDocFootnoteDefinitionNode = (node: MarkdownAST) => {
   if (!isFootnoteDefinitionNode(node)) return false;

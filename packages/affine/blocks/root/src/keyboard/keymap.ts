@@ -1,4 +1,4 @@
-import { KeymapExtension } from '@blocksuite/std';
+import { KeymapExtension } from '@labre/std';
 
 export const fallbackKeymap = KeymapExtension(() => {
   return {

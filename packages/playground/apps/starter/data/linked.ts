@@ -1,4 +1,4 @@
-import { Text, type Workspace } from '@blocksuite/affine/store';
+import { Text, type Workspace } from '@labre/affine/store';
 
 import type { InitFn } from './utils.js';
 

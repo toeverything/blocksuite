@@ -1,8 +1,8 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { DatabaseBlockSchemaExtension } from '@blocksuite/affine-model';
+} from '@labre/affine-ext-loader';
+import { DatabaseBlockSchemaExtension } from '@labre/affine-model';
 
 import { DatabaseBlockAdapterExtensions } from './adapters/extension';
 import { DatabaseSelectionExtension } from './selection';

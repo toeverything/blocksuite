@@ -1,8 +1,8 @@
 import {
   type ElementRenderer,
   ElementRendererExtension,
-} from '@blocksuite/affine-block-surface';
-import type { CynefinElementModel } from '@blocksuite/affine-model';
+} from '@labre/affine-block-surface';
+import type { CynefinElementModel } from '@labre/affine-model';
 
 import { FONT_FAMILY, refScale } from '../utils';
 import {

@@ -1,8 +1,8 @@
 import {
   type MarkdownAdapterPreprocessor,
   MarkdownPreprocessorExtension,
-} from '@blocksuite/affine-shared/adapters';
-import { isValidUrl } from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/adapters';
+import { isValidUrl } from '@labre/affine-shared/utils';
 
 const codePreprocessor: MarkdownAdapterPreprocessor = {
   name: 'code',

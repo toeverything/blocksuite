@@ -1,9 +1,9 @@
-import { OpenIcon } from '@blocksuite/affine-components/icons';
+import { OpenIcon } from '@labre/affine-components/icons';
 import type {
   EmbedFigmaModel,
   EmbedFigmaStyles,
-} from '@blocksuite/affine-model';
-import { BlockSelection } from '@blocksuite/std';
+} from '@labre/affine-model';
+import { BlockSelection } from '@labre/std';
 import { html, nothing } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 

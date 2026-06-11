@@ -3,24 +3,24 @@ import {
   getBgGridGap,
   type SurfaceBlockComponent,
   type SurfaceBlockModel,
-} from '@blocksuite/affine-block-surface';
-import type { RootBlockModel } from '@blocksuite/affine-model';
+} from '@labre/affine-block-surface';
+import type { RootBlockModel } from '@labre/affine-model';
 import {
   EditorSettingProvider,
   FontLoaderService,
   ThemeProvider,
   ViewportElementProvider,
-} from '@blocksuite/affine-shared/services';
-import { requestThrottledConnectedFrame } from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/services';
+import { requestThrottledConnectedFrame } from '@labre/affine-shared/utils';
 import {
   BlockComponent,
   type GfxBlockComponent,
   SurfaceSelection,
-} from '@blocksuite/std';
+} from '@labre/std';
 import {
   GfxControllerIdentifier,
   type GfxViewportElement,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import { css, html } from 'lit';
 import { query, state } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';

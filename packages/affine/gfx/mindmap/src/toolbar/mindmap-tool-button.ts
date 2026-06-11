@@ -1,24 +1,24 @@
 import {
   DefaultTool,
   EdgelessCRUDIdentifier,
-} from '@blocksuite/affine-block-surface';
-import { EmptyTool } from '@blocksuite/affine-gfx-pointer';
-import { TextTool } from '@blocksuite/affine-gfx-text';
+} from '@labre/affine-block-surface';
+import { EmptyTool } from '@labre/affine-gfx-pointer';
+import { TextTool } from '@labre/affine-gfx-text';
 import type {
   MindmapElementModel,
   MindmapStyle,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EditPropsStore,
   ThemeProvider,
   ViewportElementProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   EdgelessDraggableElementController,
   EdgelessToolbarToolMixin,
-} from '@blocksuite/affine-widget-edgeless-toolbar';
-import type { Bound } from '@blocksuite/global/gfx';
-import { SignalWatcher } from '@blocksuite/global/lit';
+} from '@labre/affine-widget-edgeless-toolbar';
+import type { Bound } from '@labre/global/gfx';
+import { SignalWatcher } from '@labre/global/lit';
 import { computed } from '@preact/signals-core';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';

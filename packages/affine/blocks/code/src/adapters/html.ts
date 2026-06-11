@@ -1,12 +1,12 @@
-import { CodeBlockSchema } from '@blocksuite/affine-model';
+import { CodeBlockSchema } from '@labre/affine-model';
 import {
   BlockHtmlAdapterExtension,
   type BlockHtmlAdapterMatcher,
   CODE_BLOCK_WRAP_KEY,
   HastUtils,
-} from '@blocksuite/affine-shared/adapters';
-import type { DeltaInsert } from '@blocksuite/store';
-import { nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import type { DeltaInsert } from '@labre/store';
+import { nanoid } from '@labre/store';
 
 export const codeBlockHtmlAdapterMatcher: BlockHtmlAdapterMatcher = {
   flavour: CodeBlockSchema.model.flavour,

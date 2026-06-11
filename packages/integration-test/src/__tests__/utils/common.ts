@@ -1,4 +1,4 @@
-import type { Point } from '@blocksuite/global/gfx';
+import type { Point } from '@labre/global/gfx';
 
 export function wait(time: number = 0) {
   return new Promise(resolve => {

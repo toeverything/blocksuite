@@ -1,4 +1,4 @@
-import { TextSelection } from '@blocksuite/std';
+import { TextSelection } from '@labre/std';
 
 import type { GetSelectionCommand } from './types';
 

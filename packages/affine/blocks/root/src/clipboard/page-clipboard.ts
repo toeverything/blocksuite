@@ -1,10 +1,10 @@
-import { deleteTextCommand } from '@blocksuite/affine-inline-preset';
+import { deleteTextCommand } from '@labre/affine-inline-preset';
 import {
   pasteMiddleware,
   replaceIdMiddleware,
   surfaceRefToEmbed,
   uploadMiddleware,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 import {
   clearAndSelectFirstModelCommand,
   deleteSelectedModelsCommand,
@@ -14,10 +14,10 @@ import {
   getSelectedModelsCommand,
   getTextSelectionCommand,
   retainFirstModelCommand,
-} from '@blocksuite/affine-shared/commands';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import type { UIEventHandler } from '@blocksuite/std';
-import type { BlockSnapshot, Store } from '@blocksuite/store';
+} from '@labre/affine-shared/commands';
+import { DisposableGroup } from '@labre/global/disposable';
+import type { UIEventHandler } from '@labre/std';
+import type { BlockSnapshot, Store } from '@labre/store';
 
 import { ReadOnlyClipboard } from './readonly-clipboard';
 

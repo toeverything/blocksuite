@@ -1,6 +1,6 @@
-import { ToolbarModuleExtension } from '@blocksuite/affine-shared/services';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
-import type { ExtensionType } from '@blocksuite/store';
+import { ToolbarModuleExtension } from '@labre/affine-shared/services';
+import { BlockFlavourIdentifier } from '@labre/std';
+import type { ExtensionType } from '@labre/store';
 
 import { builtinLockedToolbarConfig, builtinMiscToolbarConfig } from './misc';
 

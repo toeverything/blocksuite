@@ -12,7 +12,7 @@ import {
   TextElementModel,
   WardleyBackgroundElementModel,
   WardleyNodeElementModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 
 import { SurfaceElementModel } from './base.js';
 

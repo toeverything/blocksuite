@@ -1,4 +1,4 @@
-import { appendParagraphCommand } from '@blocksuite/affine-block-paragraph';
+import { appendParagraphCommand } from '@labre/affine-block-paragraph';
 import {
   CodeBlockModel,
   ListBlockModel,
@@ -6,23 +6,23 @@ import {
   NoteDisplayMode,
   ParagraphBlockModel,
   type RootBlockModel,
-} from '@blocksuite/affine-model';
-import { focusTextModel } from '@blocksuite/affine-rich-text';
+} from '@labre/affine-model';
+import { focusTextModel } from '@labre/affine-rich-text';
 import {
   PageViewportService,
   ViewportElementProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   focusTitle,
   getClosestBlockComponentByPoint,
   getDocTitleInlineEditor,
   getScrollContainer,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import { Point } from '@blocksuite/global/gfx';
-import type { PointerEventState } from '@blocksuite/std';
-import { BlockComponent, BlockSelection, TextSelection } from '@blocksuite/std';
-import type { BlockModel, Text } from '@blocksuite/store';
+} from '@labre/affine-shared/utils';
+import { Point } from '@labre/global/gfx';
+import type { PointerEventState } from '@labre/std';
+import { BlockComponent, BlockSelection, TextSelection } from '@labre/std';
+import type { BlockModel, Text } from '@labre/store';
 import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

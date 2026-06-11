@@ -1,8 +1,8 @@
-import type { IBound } from '@blocksuite/global/gfx';
+import type { IBound } from '@labre/global/gfx';
 import type {
   GfxLocalElementModel,
   GfxPrimitiveElementModel,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 import type { RoughCanvas } from '../../index.js';
 import type { CanvasRenderer } from '../canvas-renderer.js';

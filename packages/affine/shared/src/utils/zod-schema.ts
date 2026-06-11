@@ -27,7 +27,7 @@ import {
   TextAlign,
   TextAlignSchema,
   TextVerticalAlign,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   z,
   ZodDefault,

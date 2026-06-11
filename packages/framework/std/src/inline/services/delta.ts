@@ -1,4 +1,4 @@
-import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/store';
+import type { BaseTextAttributes, DeltaInsert } from '@labre/store';
 
 import type { InlineEditor } from '../inline-editor.js';
 import type { DeltaEntry, InlineRange } from '../types.js';

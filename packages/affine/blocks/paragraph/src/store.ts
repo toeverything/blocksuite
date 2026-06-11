@@ -1,8 +1,8 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { ParagraphBlockSchemaExtension } from '@blocksuite/affine-model';
+} from '@labre/affine-ext-loader';
+import { ParagraphBlockSchemaExtension } from '@labre/affine-model';
 
 import { ParagraphBlockAdapterExtensions } from './adapters/extension';
 

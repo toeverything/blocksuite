@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import type { EventOptions, UIEventHandler } from '../event/index.js';
 import { KeymapIdentifier } from '../identifier.js';
@@ -20,7 +20,7 @@ let id = 1;
  *
  * @example
  * ```ts
- * import { KeymapExtension } from '@blocksuite/std';
+ * import { KeymapExtension } from '@labre/std';
  *
  * const MyKeymapExtension = KeymapExtension(std => {
  *   return {

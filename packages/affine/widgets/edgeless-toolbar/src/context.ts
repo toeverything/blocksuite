@@ -1,4 +1,4 @@
-import type { ColorScheme } from '@blocksuite/affine-model';
+import type { ColorScheme } from '@labre/affine-model';
 import { createContext } from '@lit/context';
 import type { Subject } from 'rxjs';
 

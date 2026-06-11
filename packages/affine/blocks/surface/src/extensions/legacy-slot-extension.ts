@@ -1,6 +1,6 @@
-import type { FrameBlockModel } from '@blocksuite/affine-model';
-import { createIdentifier } from '@blocksuite/global/di';
-import type { ExtensionType } from '@blocksuite/store';
+import type { FrameBlockModel } from '@labre/affine-model';
+import { createIdentifier } from '@labre/global/di';
+import type { ExtensionType } from '@labre/store';
 import { Subject } from 'rxjs';
 export const EdgelessLegacySlotIdentifier = createIdentifier<{
   readonlyUpdated: Subject<boolean>;

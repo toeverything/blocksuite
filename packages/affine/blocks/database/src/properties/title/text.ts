@@ -1,17 +1,17 @@
-import { DefaultInlineManagerExtension } from '@blocksuite/affine-inline-preset';
-import type { RichText } from '@blocksuite/affine-rich-text';
+import { DefaultInlineManagerExtension } from '@labre/affine-inline-preset';
+import type { RichText } from '@labre/affine-rich-text';
 import {
   ParseDocUrlProvider,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   getViewportElement,
   isValidUrl,
-} from '@blocksuite/affine-shared/utils';
-import { BaseCellRenderer } from '@blocksuite/data-view';
-import { IS_MAC } from '@blocksuite/global/env';
+} from '@labre/affine-shared/utils';
+import { BaseCellRenderer } from '@labre/data-view';
+import { IS_MAC } from '@labre/global/env';
 import { LinkedPageIcon } from '@blocksuite/icons/lit';
-import type { BlockSnapshot, DeltaInsert, Text } from '@blocksuite/store';
+import type { BlockSnapshot, DeltaInsert, Text } from '@labre/store';
 import { computed, signal } from '@preact/signals-core';
 import { property } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';

@@ -1,5 +1,5 @@
-import { clamp } from '@blocksuite/global/gfx';
-import { WithDisposable } from '@blocksuite/global/lit';
+import { clamp } from '@labre/global/gfx';
+import { WithDisposable } from '@labre/global/lit';
 import { isSameDay, isSameMonth, isToday } from 'date-fns';
 import {
   html,

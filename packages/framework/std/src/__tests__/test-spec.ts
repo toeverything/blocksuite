@@ -1,6 +1,6 @@
 import './test-block.js';
 
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 import { literal } from 'lit/static-html.js';
 
 import { BlockViewExtension } from '../extension/index.js';

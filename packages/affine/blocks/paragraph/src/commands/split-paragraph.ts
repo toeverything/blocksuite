@@ -1,10 +1,10 @@
-import { ParagraphBlockModel } from '@blocksuite/affine-model';
+import { ParagraphBlockModel } from '@labre/affine-model';
 import {
   focusTextModel,
   getInlineEditorByModel,
-} from '@blocksuite/affine-rich-text';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import { type Command, TextSelection } from '@blocksuite/std';
+} from '@labre/affine-rich-text';
+import { matchModels } from '@labre/affine-shared/utils';
+import { type Command, TextSelection } from '@labre/std';
 
 export const splitParagraphCommand: Command<
   {

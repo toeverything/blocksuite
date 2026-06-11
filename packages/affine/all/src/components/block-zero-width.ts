@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/block-zero-width';
+export * from '@labre/affine-components/block-zero-width';

@@ -3,7 +3,7 @@ import {
   type ElementRenderer,
   ElementRendererExtension,
   type RoughCanvas,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   getFontString,
   getLineHeight,
@@ -11,19 +11,19 @@ import {
   isRTL,
   type TextDelta,
   wrapTextDeltas,
-} from '@blocksuite/affine-gfx-text';
+} from '@labre/affine-gfx-text';
 import {
   type ConnectorElementModel,
   ConnectorMode,
   DefaultTheme,
   type LocalConnectorElementModel,
   type PointStyle,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   getBezierParameters,
   type PointLocation,
-} from '@blocksuite/global/gfx';
-import { deltaInsertsToChunks } from '@blocksuite/std/inline';
+} from '@labre/global/gfx';
+import { deltaInsertsToChunks } from '@labre/std/inline';
 
 import { isConnectorWithLabel } from '../connector-manager.js';
 import {

@@ -1,8 +1,8 @@
-import { EdgelessCRUDExtension } from '@blocksuite/affine-block-surface';
-import { type SurfaceRefProps } from '@blocksuite/affine-model';
-import type { Command } from '@blocksuite/std';
-import { GfxPrimitiveElementModel } from '@blocksuite/std/gfx';
-import type { BlockModel } from '@blocksuite/store';
+import { EdgelessCRUDExtension } from '@labre/affine-block-surface';
+import { type SurfaceRefProps } from '@labre/affine-model';
+import type { Command } from '@labre/std';
+import { GfxPrimitiveElementModel } from '@labre/std/gfx';
+import type { BlockModel } from '@labre/store';
 
 export const insertSurfaceRefBlockCommand: Command<
   {

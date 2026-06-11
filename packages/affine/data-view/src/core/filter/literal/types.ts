@@ -1,4 +1,4 @@
-import type { MenuConfig } from '@blocksuite/affine-components/context-menu';
+import type { MenuConfig } from '@labre/affine-components/context-menu';
 import type { ReadonlySignal } from '@preact/signals-core';
 
 import type { TypeInstance, ValueTypeOf } from '../../logical/type.js';

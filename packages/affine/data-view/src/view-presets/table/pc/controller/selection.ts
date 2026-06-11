@@ -1,5 +1,5 @@
-import { WithDisposable } from '@blocksuite/global/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { WithDisposable } from '@labre/global/lit';
+import { ShadowlessElement } from '@labre/std';
 import { computed, effect } from '@preact/signals-core';
 import type { ReactiveController } from 'lit';
 import { css, html } from 'lit';

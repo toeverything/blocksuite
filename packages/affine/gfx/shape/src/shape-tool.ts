@@ -3,23 +3,23 @@ import {
   DefaultTool,
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
   type SurfaceBlockComponent,
-} from '@blocksuite/affine-block-surface';
-import type { ShapeElementModel, ShapeName } from '@blocksuite/affine-model';
+} from '@labre/affine-block-surface';
+import type { ShapeElementModel, ShapeName } from '@labre/affine-model';
 import {
   DefaultTheme,
   getShapeType,
   ShapeType,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EditPropsStore,
   TelemetryProvider,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
-import { hasClassNameInList } from '@blocksuite/affine-shared/utils';
-import type { IBound } from '@blocksuite/global/gfx';
-import { Bound } from '@blocksuite/global/gfx';
-import type { PointerEventState } from '@blocksuite/std';
-import { BaseTool, type GfxController } from '@blocksuite/std/gfx';
+} from '@labre/affine-shared/services';
+import { hasClassNameInList } from '@labre/affine-shared/utils';
+import type { IBound } from '@labre/global/gfx';
+import { Bound } from '@labre/global/gfx';
+import type { PointerEventState } from '@labre/std';
+import { BaseTool, type GfxController } from '@labre/std/gfx';
 import { effect } from '@preact/signals-core';
 
 import {

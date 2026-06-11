@@ -1,10 +1,10 @@
-import { keepColor } from '@blocksuite/affine-components/color-picker';
+import { keepColor } from '@labre/affine-components/color-picker';
 import {
   EditPropsStore,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
-import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
-import { SignalWatcher } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/services';
+import { EdgelessToolbarToolMixin } from '@labre/affine-widget-edgeless-toolbar';
+import { SignalWatcher } from '@labre/global/lit';
 import { computed, signal } from '@preact/signals-core';
 import { css, html, LitElement, nothing } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';

@@ -1,5 +1,5 @@
-import type { Command } from '@blocksuite/std';
-import { type BlockModel, Slice } from '@blocksuite/store';
+import type { Command } from '@labre/std';
+import { type BlockModel, Slice } from '@labre/store';
 
 import { draftSelectedModelsCommand } from './draft-selected-models';
 

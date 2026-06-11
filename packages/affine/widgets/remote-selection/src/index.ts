@@ -1,4 +1,4 @@
-import { WidgetViewExtension } from '@blocksuite/std';
+import { WidgetViewExtension } from '@labre/std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { AFFINE_DOC_REMOTE_SELECTION_WIDGET } from './doc';

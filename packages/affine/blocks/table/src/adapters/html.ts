@@ -2,14 +2,14 @@ import {
   type TableBlockPropsSerialized,
   TableBlockSchema,
   TableModelFlavour,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   BlockHtmlAdapterExtension,
   type BlockHtmlAdapterMatcher,
   HastUtils,
   type InlineHtmlAST,
-} from '@blocksuite/affine-shared/adapters';
-import { nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import { nanoid } from '@labre/store';
 import type { Element } from 'hast';
 
 import { DefaultColumnWidth } from '../consts';

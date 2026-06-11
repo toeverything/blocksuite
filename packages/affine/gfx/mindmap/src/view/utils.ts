@@ -1,4 +1,4 @@
-import { fitContent } from '@blocksuite/affine-gfx-shape';
+import { fitContent } from '@labre/affine-gfx-shape';
 import {
   applyNodeStyle,
   LayoutType,
@@ -9,13 +9,13 @@ import {
   type NodeDetail,
   type NodeType,
   type ShapeElementModel,
-} from '@blocksuite/affine-model';
-import type { IVec } from '@blocksuite/global/gfx';
-import { assertType } from '@blocksuite/global/utils';
+} from '@labre/affine-model';
+import type { IVec } from '@labre/global/gfx';
+import { assertType } from '@labre/global/utils';
 import {
   generateKeyBetween,
   type SurfaceBlockModel,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import isEqual from 'lodash-es/isEqual';
 import last from 'lodash-es/last';
 import * as Y from 'yjs';

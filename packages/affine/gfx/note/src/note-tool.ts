@@ -5,31 +5,31 @@ import {
   EdgelessCRUDIdentifier,
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
   type SurfaceBlockComponent,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
   NOTE_MIN_HEIGHT,
   type NoteBlockModel,
   NoteDisplayMode,
-} from '@blocksuite/affine-model';
-import { focusTextModel } from '@blocksuite/affine-rich-text';
+} from '@labre/affine-model';
+import { focusTextModel } from '@labre/affine-rich-text';
 import {
   EditPropsStore,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import type { NoteChildrenFlavour } from '@blocksuite/affine-shared/types';
+} from '@labre/affine-shared/services';
+import type { NoteChildrenFlavour } from '@labre/affine-shared/types';
 import {
   handleNativeRangeAtPoint,
   hasClassNameInList,
-} from '@blocksuite/affine-shared/utils';
-import { type IPoint, Point, serializeXYWH } from '@blocksuite/global/gfx';
-import type { BlockStdScope, PointerEventState } from '@blocksuite/std';
+} from '@labre/affine-shared/utils';
+import { type IPoint, Point, serializeXYWH } from '@labre/global/gfx';
+import type { BlockStdScope, PointerEventState } from '@labre/std';
 import {
   BaseTool,
   type GfxBlockElementModel,
   GfxControllerIdentifier,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import { effect } from '@preact/signals-core';
 
 import { DraggingNoteOverlay, NoteOverlay } from './overlay';

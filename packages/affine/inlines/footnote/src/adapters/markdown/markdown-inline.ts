@@ -1,8 +1,8 @@
-import { FootNoteReferenceParamsSchema } from '@blocksuite/affine-model';
+import { FootNoteReferenceParamsSchema } from '@labre/affine-model';
 import {
   FOOTNOTE_DEFINITION_PREFIX,
   MarkdownASTToDeltaExtension,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 
 export const markdownFootnoteReferenceToDeltaMatcher =
   MarkdownASTToDeltaExtension({

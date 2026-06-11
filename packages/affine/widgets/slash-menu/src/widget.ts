@@ -1,9 +1,9 @@
-import { getInlineEditorByModel } from '@blocksuite/affine-rich-text';
-import type { AffineInlineEditor } from '@blocksuite/affine-shared/types';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import type { UIEventStateContext } from '@blocksuite/std';
-import { TextSelection, WidgetComponent } from '@blocksuite/std';
-import { InlineEditor } from '@blocksuite/std/inline';
+import { getInlineEditorByModel } from '@labre/affine-rich-text';
+import type { AffineInlineEditor } from '@labre/affine-shared/types';
+import { DisposableGroup } from '@labre/global/disposable';
+import type { UIEventStateContext } from '@labre/std';
+import { TextSelection, WidgetComponent } from '@labre/std';
+import { InlineEditor } from '@labre/std/inline';
 import debounce from 'lodash-es/debounce';
 
 import { AFFINE_SLASH_MENU_TRIGGER_KEY } from './consts';

@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-gfx-mindmap/view';
+export * from '@labre/affine-gfx-mindmap/view';

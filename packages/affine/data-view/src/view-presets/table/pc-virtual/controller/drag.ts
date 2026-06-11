@@ -1,6 +1,6 @@
 // related component
 
-import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
+import type { InsertToPosition } from '@labre/affine-shared/utils';
 import type { ReactiveController } from 'lit';
 
 import type { VirtualTableViewUILogic } from '../table-view-ui-logic';

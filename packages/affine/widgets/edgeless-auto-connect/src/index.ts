@@ -2,28 +2,28 @@ import {
   EdgelessCRUDIdentifier,
   EdgelessLegacySlotIdentifier,
   isNoteBlock,
-} from '@blocksuite/affine-block-surface';
-import { SmallDocIcon } from '@blocksuite/affine-components/icons';
+} from '@labre/affine-block-surface';
+import { SmallDocIcon } from '@labre/affine-components/icons';
 import {
   FrameBlockModel,
   NoteBlockModel,
   NoteDisplayMode,
   type RootBlockModel,
   SurfaceRefBlockModel,
-} from '@blocksuite/affine-model';
-import { FeatureFlagService } from '@blocksuite/affine-shared/services';
-import { matchModels, stopPropagation } from '@blocksuite/affine-shared/utils';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-model';
+import { FeatureFlagService } from '@labre/affine-shared/services';
+import { matchModels, stopPropagation } from '@labre/affine-shared/utils';
+import { Bound } from '@labre/global/gfx';
 import {
   ArrowLeftSmallIcon,
   ArrowRightSmallIcon,
   InvisibleIcon,
 } from '@blocksuite/icons/lit';
-import { WidgetComponent, WidgetViewExtension } from '@blocksuite/std';
+import { WidgetComponent, WidgetViewExtension } from '@labre/std';
 import {
   type GfxController,
   GfxControllerIdentifier,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import { css, html, nothing, type TemplateResult } from 'lit';
 import { state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

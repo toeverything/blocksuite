@@ -1,4 +1,4 @@
-import { ShapeStyle } from '@blocksuite/affine-model';
+import { ShapeStyle } from '@labre/affine-model';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

@@ -1,4 +1,4 @@
-import { DomRenderer } from '@blocksuite/affine-block-surface';
+import { DomRenderer } from '@labre/affine-block-surface';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';

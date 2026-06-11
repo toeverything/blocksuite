@@ -1,4 +1,4 @@
-import { SeniorToolExtension } from '@blocksuite/affine-widget-edgeless-toolbar';
+import { SeniorToolExtension } from '@labre/affine-widget-edgeless-toolbar';
 import { html } from 'lit';
 
 /** A single senior tool hosting both the Cynefin and Estuarine frameworks. */

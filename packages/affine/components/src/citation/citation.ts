@@ -1,5 +1,5 @@
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { baseTheme } from '@toeverything/theme';
 import {
   css,

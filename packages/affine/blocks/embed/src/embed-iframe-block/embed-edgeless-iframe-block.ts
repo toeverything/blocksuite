@@ -1,8 +1,8 @@
-import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
-import { EmbedIframeBlockSchema } from '@blocksuite/affine-model';
-import { Bound, clamp } from '@blocksuite/global/gfx';
-import { toGfxBlockComponent } from '@blocksuite/std';
-import { GfxViewInteractionExtension } from '@blocksuite/std/gfx';
+import { EdgelessLegacySlotIdentifier } from '@labre/affine-block-surface';
+import { EmbedIframeBlockSchema } from '@labre/affine-model';
+import { Bound, clamp } from '@labre/global/gfx';
+import { toGfxBlockComponent } from '@labre/std';
+import { GfxViewInteractionExtension } from '@labre/std/gfx';
 import { styleMap } from 'lit/directives/style-map.js';
 import { html } from 'lit/static-html.js';
 

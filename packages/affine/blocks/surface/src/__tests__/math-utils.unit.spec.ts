@@ -13,7 +13,7 @@ import {
   rotatePoints,
   toDegree,
   toRadian,
-} from '@blocksuite/global/gfx';
+} from '@labre/global/gfx';
 import { describe, expect, it } from 'vitest';
 
 describe('Line', () => {

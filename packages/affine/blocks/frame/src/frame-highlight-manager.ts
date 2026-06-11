@@ -1,11 +1,11 @@
-import { OverlayIdentifier } from '@blocksuite/affine-block-surface';
-import { FrameBlockModel, MindmapElementModel } from '@blocksuite/affine-model';
+import { OverlayIdentifier } from '@labre/affine-block-surface';
+import { FrameBlockModel, MindmapElementModel } from '@labre/affine-model';
 import {
   type DragExtensionInitializeContext,
   getTopElements,
   GfxExtensionIdentifier,
   InteractivityExtension,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 import {
   type EdgelessFrameManager,

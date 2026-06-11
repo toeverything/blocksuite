@@ -1,5 +1,5 @@
 {
-  "name": "blocksuite",
+  "name": "blocksuite-labre",
   "private": true,
   "type": "commonjs",
   "engines": {
@@ -10,15 +10,15 @@
     "packages/**/*"
   ],
   "scripts": {
-    "preview": "yarn workspace @blocksuite/playground preview",
-    "dev": "yarn workspace @blocksuite/playground dev",
+    "preview": "yarn workspace @labre/playground preview",
+    "dev": "yarn workspace @labre/playground dev",
     "test:unit": "vitest run --coverage.enabled=false",
-    "test:integration": "yarn workspace @blocksuite/integration-test test:unit --no-file-parallelism",
+    "test:integration": "yarn workspace @labre/integration-test test:unit --no-file-parallelism",
     "lint:format": "prettier . --check",
     "format": "prettier . --write",
     "build": "tsc -b tsconfig.json --verbose",
-    "build:packages": "yarn workspace @blocksuite/affine build",
-    "build:playground": "yarn workspace @blocksuite/playground build",
+    "build:packages": "yarn workspace @labre/affine build",
+    "build:playground": "yarn workspace @labre/playground build",
     "ci:version": "changeset version && yarn install --no-frozen-lockfile",
     "ci:publish": "yarn build:packages && yarn workspaces foreach -Ap --no-private npm publish --tolerate-republish --access public --tag latest",
     "ci:version:canary": "changeset version --snapshot canary && yarn install --no-frozen-lockfile",

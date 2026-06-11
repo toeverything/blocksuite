@@ -1,6 +1,6 @@
-import { createIdentifier } from '@blocksuite/global/di';
+import { createIdentifier } from '@labre/global/di';
 import { CenterPeekIcon, ExpandFullIcon } from '@blocksuite/icons/lit';
-import { type ExtensionType } from '@blocksuite/store';
+import { type ExtensionType } from '@labre/store';
 import type { TemplateResult } from 'lit';
 
 export type OpenDocMode =

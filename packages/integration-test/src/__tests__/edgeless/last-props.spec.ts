@@ -1,5 +1,5 @@
-import type { EdgelessRootBlockComponent } from '@blocksuite/affine/blocks/root';
-import { getSurfaceBlock } from '@blocksuite/affine/blocks/surface';
+import type { EdgelessRootBlockComponent } from '@labre/affine/blocks/root';
+import { getSurfaceBlock } from '@labre/affine/blocks/surface';
 import {
   type BrushElementModel,
   type ConnectorElementModel,
@@ -16,9 +16,9 @@ import {
   type ShapeElementModel,
   ShapeType,
   type TextElementModel,
-} from '@blocksuite/affine/model';
-import { EditPropsStore } from '@blocksuite/affine/shared/services';
-import type { BlockStdScope } from '@blocksuite/std';
+} from '@labre/affine/model';
+import { EditPropsStore } from '@labre/affine/shared/services';
+import type { BlockStdScope } from '@labre/std';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { getDocRootBlock } from '../utils/edgeless.js';

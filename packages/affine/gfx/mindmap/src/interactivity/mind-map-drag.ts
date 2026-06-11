@@ -2,14 +2,14 @@ import {
   CanvasRenderer,
   OverlayIdentifier,
   type SurfaceBlockComponent,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   type LayoutType,
   type LocalConnectorElementModel,
   MindmapElementModel,
   type MindmapNode,
-} from '@blocksuite/affine-model';
-import type { Bound, IVec } from '@blocksuite/global/gfx';
+} from '@labre/affine-model';
+import type { Bound, IVec } from '@labre/global/gfx';
 import {
   type DragExtensionInitializeContext,
   type ExtensionDragEndContext,
@@ -19,7 +19,7 @@ import {
   type GfxPrimitiveElementModel,
   InteractivityExtension,
   isGfxGroupCompatibleModel,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 import type { MindMapIndicatorOverlay } from '../indicator-overlay';
 import { isMindmapNode, isSingleMindMapNode } from '../utils';

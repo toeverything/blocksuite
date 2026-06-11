@@ -1,12 +1,12 @@
-import { DatabaseBlockModel } from '@blocksuite/affine-model';
+import { DatabaseBlockModel } from '@labre/affine-model';
 import {
   asyncGetBlockComponent,
   getCurrentNativeRange,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import { type BlockStdScope, TextSelection } from '@blocksuite/std';
-import type { InlineEditor, InlineRange } from '@blocksuite/std/inline';
-import { BlockModel } from '@blocksuite/store';
+} from '@labre/affine-shared/utils';
+import { type BlockStdScope, TextSelection } from '@labre/std';
+import type { InlineEditor, InlineRange } from '@labre/std/inline';
+import { BlockModel } from '@labre/store';
 
 import type { RichText } from './rich-text.js';
 

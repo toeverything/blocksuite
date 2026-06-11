@@ -1,28 +1,28 @@
-import { type FrameOverlay } from '@blocksuite/affine-block-frame';
+import { type FrameOverlay } from '@labre/affine-block-frame';
 import {
   EdgelessLegacySlotIdentifier,
   OverlayIdentifier,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   ConnectorElementModel,
   type RootBlockModel,
-} from '@blocksuite/affine-model';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import type { SelectedRect } from '@blocksuite/affine-shared/types';
+} from '@labre/affine-model';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import type { SelectedRect } from '@labre/affine-shared/types';
 import {
   getSelectedRect,
   requestThrottledConnectedFrame,
   stopPropagation,
-} from '@blocksuite/affine-shared/utils';
-import { deserializeXYWH } from '@blocksuite/global/gfx';
-import { WidgetComponent } from '@blocksuite/std';
+} from '@labre/affine-shared/utils';
+import { deserializeXYWH } from '@labre/global/gfx';
+import { WidgetComponent } from '@labre/std';
 import {
   type CursorType,
   GfxControllerIdentifier,
   type GfxModel,
   InteractivityIdentifier,
   type ResizeHandle,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import { css, html, nothing } from 'lit';
 import { state } from 'lit/decorators.js';
 import { ifDefined } from 'lit/directives/if-defined.js';

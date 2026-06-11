@@ -1,5 +1,5 @@
-import type { GfxCompatibleProps } from '@blocksuite/std/gfx';
-import { BlockModel } from '@blocksuite/store';
+import type { GfxCompatibleProps } from '@labre/std/gfx';
+import { BlockModel } from '@labre/store';
 
 import type { ReferenceInfo } from '../../../consts/doc.js';
 import type { EmbedCardStyle } from '../../../utils/index.js';

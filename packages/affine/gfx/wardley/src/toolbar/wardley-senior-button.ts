@@ -1,7 +1,7 @@
-import { DefaultTool } from '@blocksuite/affine-block-surface';
-import { EmptyTool } from '@blocksuite/affine-gfx-pointer';
-import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
-import { SignalWatcher } from '@blocksuite/global/lit';
+import { DefaultTool } from '@labre/affine-block-surface';
+import { EmptyTool } from '@labre/affine-gfx-pointer';
+import { EdgelessToolbarToolMixin } from '@labre/affine-widget-edgeless-toolbar';
+import { SignalWatcher } from '@labre/global/lit';
 import { css, html, LitElement } from 'lit';
 
 import { wardleyToolbarIcon } from './icons';

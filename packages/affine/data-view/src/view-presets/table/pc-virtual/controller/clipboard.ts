@@ -1,5 +1,5 @@
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import type { UIEventStateContext } from '@blocksuite/std';
+import { DisposableGroup } from '@labre/global/disposable';
+import type { UIEventStateContext } from '@labre/std';
 import type { ReactiveController } from 'lit';
 
 import type { Cell } from '../../../../core/view-manager/cell.js';

@@ -1,7 +1,7 @@
-import type { DomRenderer } from '@blocksuite/affine-block-surface';
-import type { ShapeElementModel } from '@blocksuite/affine-model';
-import { DefaultTheme } from '@blocksuite/affine-model';
-import { SVGShapeBuilder } from '@blocksuite/global/gfx';
+import type { DomRenderer } from '@labre/affine-block-surface';
+import type { ShapeElementModel } from '@labre/affine-model';
+import { DefaultTheme } from '@labre/affine-model';
+import { SVGShapeBuilder } from '@labre/global/gfx';
 
 import { manageClassNames, setStyles } from './utils';
 

@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/block-selection';
+export * from '@labre/affine-components/block-selection';

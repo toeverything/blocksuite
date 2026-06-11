@@ -1,6 +1,6 @@
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { Bound } from '@blocksuite/global/gfx';
-import { assertType } from '@blocksuite/global/utils';
+import { DisposableGroup } from '@labre/global/disposable';
+import { Bound } from '@labre/global/gfx';
+import { assertType } from '@labre/global/utils';
 import { generateKeyBetween } from 'fractional-indexing';
 import last from 'lodash-es/last';
 import { Subject } from 'rxjs';

@@ -2,8 +2,8 @@ import {
   createIdentifier,
   type ServiceIdentifier,
   type ServiceProvider,
-} from '@blocksuite/global/di';
-import type { BaseTextAttributes, ExtensionType } from '@blocksuite/store';
+} from '@labre/global/di';
+import type { BaseTextAttributes, ExtensionType } from '@labre/store';
 
 import type { InlineSpecs } from './type.js';
 

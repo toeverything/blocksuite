@@ -1,6 +1,6 @@
-import { richTextColumnConfig } from '@blocksuite/affine-block-database';
-import type { PropertyMetaConfig } from '@blocksuite/data-view';
-import { propertyPresets } from '@blocksuite/data-view/property-presets';
+import { richTextColumnConfig } from '@labre/affine-block-database';
+import type { PropertyMetaConfig } from '@labre/data-view';
+import { propertyPresets } from '@labre/data-view/property-presets';
 
 export const queryBlockColumns = [
   propertyPresets.datePropertyConfig,

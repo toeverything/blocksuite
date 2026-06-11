@@ -1,6 +1,6 @@
-import { type Container, createIdentifier } from '@blocksuite/global/di';
-import { type BlockStdScope, StdIdentifier } from '@blocksuite/std';
-import { type BlockModel, Extension } from '@blocksuite/store';
+import { type Container, createIdentifier } from '@labre/global/di';
+import { type BlockStdScope, StdIdentifier } from '@labre/std';
+import { type BlockModel, Extension } from '@labre/store';
 
 import { DocModeProvider } from '../doc-mode-service';
 import type {

@@ -1,9 +1,9 @@
-import { insertInlineLatex } from '@blocksuite/affine-inline-latex';
+import { insertInlineLatex } from '@labre/affine-inline-latex';
 import {
   getSelectedModelsCommand,
   getTextSelectionCommand,
-} from '@blocksuite/affine-shared/commands';
-import { type SlashMenuConfig } from '@blocksuite/affine-widget-slash-menu';
+} from '@labre/affine-shared/commands';
+import { type SlashMenuConfig } from '@labre/affine-widget-slash-menu';
 import { TeXIcon } from '@blocksuite/icons/lit';
 
 import { insertLatexBlockCommand } from '../commands';

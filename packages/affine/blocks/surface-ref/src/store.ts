@@ -1,8 +1,8 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { SurfaceRefBlockSchemaExtension } from '@blocksuite/affine-model';
+} from '@labre/affine-ext-loader';
+import { SurfaceRefBlockSchemaExtension } from '@labre/affine-model';
 
 export class SurfaceRefStoreExtension extends StoreExtensionProvider {
   override name = 'affine-surface-ref-block';

@@ -1,6 +1,6 @@
-import type { Connectable, NoteBlockModel } from '@blocksuite/affine-model';
-import type { GfxModel } from '@blocksuite/std/gfx';
-import type { BlockModel } from '@blocksuite/store';
+import type { Connectable, NoteBlockModel } from '@labre/affine-model';
+import type { GfxModel } from '@labre/std/gfx';
+import type { BlockModel } from '@labre/store';
 
 export function isConnectable(
   element: GfxModel | null

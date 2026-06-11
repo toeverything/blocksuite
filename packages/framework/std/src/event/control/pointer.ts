@@ -1,6 +1,6 @@
-import { IS_IPAD } from '@blocksuite/global/env';
-import { Vec } from '@blocksuite/global/gfx';
-import { nextTick } from '@blocksuite/global/utils';
+import { IS_IPAD } from '@labre/global/env';
+import { Vec } from '@labre/global/gfx';
+import { nextTick } from '@labre/global/utils';
 
 import { UIEventState, UIEventStateContext } from '../base.js';
 import type { UIEventDispatcher } from '../dispatcher.js';

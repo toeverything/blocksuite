@@ -1,5 +1,5 @@
 import * as icons from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { ShadowlessElement } from '@labre/std';
 import { css, html, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 

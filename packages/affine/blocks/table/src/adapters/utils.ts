@@ -3,15 +3,15 @@ import type {
   TableCellSerialized,
   TableColumn,
   TableRow,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   type HtmlAST,
   type MarkdownAST,
-} from '@blocksuite/affine-shared/adapters';
-import { HastUtils } from '@blocksuite/affine-shared/adapters';
-import { generateFractionalIndexingKeyBetween } from '@blocksuite/affine-shared/utils';
-import type { DeltaInsert } from '@blocksuite/store';
-import { nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import { HastUtils } from '@labre/affine-shared/adapters';
+import { generateFractionalIndexingKeyBetween } from '@labre/affine-shared/utils';
+import type { DeltaInsert } from '@labre/store';
+import { nanoid } from '@labre/store';
 import type { Element } from 'hast';
 import type { Table as MarkdownTable } from 'mdast';
 

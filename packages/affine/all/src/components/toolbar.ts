@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/toolbar';
+export * from '@labre/affine-components/toolbar';

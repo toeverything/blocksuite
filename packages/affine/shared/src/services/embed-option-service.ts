@@ -1,8 +1,8 @@
-import type { EmbedCardStyle } from '@blocksuite/affine-model';
-import type { Container } from '@blocksuite/global/di';
-import { createIdentifier } from '@blocksuite/global/di';
-import { type BlockStdScope, StdIdentifier } from '@blocksuite/std';
-import { Extension, type ExtensionType } from '@blocksuite/store';
+import type { EmbedCardStyle } from '@labre/affine-model';
+import type { Container } from '@labre/global/di';
+import { createIdentifier } from '@labre/global/di';
+import { type BlockStdScope, StdIdentifier } from '@labre/std';
+import { Extension, type ExtensionType } from '@labre/store';
 
 export type EmbedOptions = {
   flavour: string;

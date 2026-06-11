@@ -3,7 +3,7 @@ import {
   type ElementRenderer,
   ElementRendererExtension,
   type RoughCanvas,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   getFontMetrics,
   getFontString,
@@ -11,16 +11,16 @@ import {
   isRTL,
   measureTextInDOM,
   wrapTextDeltas,
-} from '@blocksuite/affine-gfx-text';
+} from '@labre/affine-gfx-text';
 import type {
   LocalShapeElementModel,
   ShapeElementModel,
   ShapeType,
-} from '@blocksuite/affine-model';
-import { DefaultTheme, TextAlign } from '@blocksuite/affine-model';
-import type { IBound } from '@blocksuite/global/gfx';
-import { Bound } from '@blocksuite/global/gfx';
-import { deltaInsertsToChunks } from '@blocksuite/std/inline';
+} from '@labre/affine-model';
+import { DefaultTheme, TextAlign } from '@labre/affine-model';
+import type { IBound } from '@labre/global/gfx';
+import { Bound } from '@labre/global/gfx';
+import { deltaInsertsToChunks } from '@labre/std/inline';
 
 import { diamond } from './diamond.js';
 import { ellipse } from './ellipse.js';

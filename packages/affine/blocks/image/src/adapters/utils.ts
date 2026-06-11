@@ -1,17 +1,17 @@
-import { ImageBlockSchema } from '@blocksuite/affine-model';
+import { ImageBlockSchema } from '@labre/affine-model';
 import {
   FetchUtils,
   FULL_FILE_PATH_KEY,
   getImageFullPath,
-} from '@blocksuite/affine-shared/adapters';
-import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/utils';
-import { sha } from '@blocksuite/global/utils';
+} from '@labre/affine-shared/adapters';
+import { getFilenameFromContentDisposition } from '@labre/affine-shared/utils';
+import { sha } from '@labre/global/utils';
 import {
   type AssetsManager,
   type ASTWalkerContext,
   type BlockSnapshot,
   nanoid,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 export async function processImageNodeToBlock(
   imageURL: string,

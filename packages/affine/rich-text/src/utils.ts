@@ -1,7 +1,7 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import type { BlockStdScope } from '@blocksuite/std';
-import type { InlineEditor } from '@blocksuite/std/inline';
-import type { BlockModel } from '@blocksuite/store';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import type { BlockStdScope } from '@labre/std';
+import type { InlineEditor } from '@labre/std/inline';
+import type { BlockModel } from '@labre/store';
 import { effect } from '@preact/signals-core';
 
 import { getInlineEditorByModel } from './dom';

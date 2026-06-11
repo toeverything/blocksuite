@@ -1,17 +1,17 @@
 import {
   DefaultTool,
   OverlayIdentifier,
-} from '@blocksuite/affine-block-surface';
-import type { FrameBlockModel } from '@blocksuite/affine-model';
+} from '@labre/affine-block-surface';
+import type { FrameBlockModel } from '@labre/affine-model';
 import {
   EditPropsStore,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import type { IPoint, IVec } from '@blocksuite/global/gfx';
-import { Bound, Vec } from '@blocksuite/global/gfx';
-import type { PointerEventState } from '@blocksuite/std';
-import { BaseTool, getTopElements } from '@blocksuite/std/gfx';
-import { Text } from '@blocksuite/store';
+} from '@labre/affine-shared/services';
+import type { IPoint, IVec } from '@labre/global/gfx';
+import { Bound, Vec } from '@labre/global/gfx';
+import type { PointerEventState } from '@labre/std';
+import { BaseTool, getTopElements } from '@labre/std/gfx';
+import { Text } from '@labre/store';
 import * as Y from 'yjs';
 
 import {

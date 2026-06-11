@@ -1,9 +1,9 @@
-import type { DeltaInsert, Text } from '@blocksuite/store';
+import type { DeltaInsert, Text } from '@labre/store';
 import {
   BlockModel,
   BlockSchemaExtension,
   defineBlockSchema,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 import type { BlockMeta } from '../../utils/types';
 

@@ -1,14 +1,14 @@
-import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
+import { CaptionedBlockComponent } from '@labre/affine-components/caption';
 import {
   menu,
   popMenu,
   popupTargetFromElement,
-} from '@blocksuite/affine-components/context-menu';
-import { DropIndicator } from '@blocksuite/affine-components/drop-indicator';
-import { PeekViewProvider } from '@blocksuite/affine-components/peek';
-import { toast } from '@blocksuite/affine-components/toast';
-import type { DatabaseBlockModel } from '@blocksuite/affine-model';
-import { EDGELESS_TOP_CONTENTEDITABLE_SELECTOR } from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-components/context-menu';
+import { DropIndicator } from '@labre/affine-components/drop-indicator';
+import { PeekViewProvider } from '@labre/affine-components/peek';
+import { toast } from '@labre/affine-components/toast';
+import type { DatabaseBlockModel } from '@labre/affine-model';
+import { EDGELESS_TOP_CONTENTEDITABLE_SELECTOR } from '@labre/affine-shared/consts';
 import {
   BlockCommentManager,
   CommentProviderIdentifier,
@@ -16,8 +16,8 @@ import {
   NotificationProvider,
   type TelemetryEventMap,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import { getDropResult } from '@blocksuite/affine-widget-drag-handle';
+} from '@labre/affine-shared/services';
+import { getDropResult } from '@labre/affine-widget-drag-handle';
 import {
   createRecordDetail,
   createUniComponentFromWebComponent,
@@ -32,18 +32,18 @@ import {
   renderUniLit,
   type SingleView,
   uniMap,
-} from '@blocksuite/data-view';
-import { widgetPresets } from '@blocksuite/data-view/widget-presets';
-import { Rect } from '@blocksuite/global/gfx';
+} from '@labre/data-view';
+import { widgetPresets } from '@labre/data-view/widget-presets';
+import { Rect } from '@labre/global/gfx';
 import {
   CommentIcon,
   CopyIcon,
   DeleteIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
-import { type BlockComponent, BlockSelection } from '@blocksuite/std';
-import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/std/inline';
-import { Slice } from '@blocksuite/store';
+import { type BlockComponent, BlockSelection } from '@labre/std';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@labre/std/inline';
+import { Slice } from '@labre/store';
 import { autoUpdate } from '@floating-ui/dom';
 import { computed, signal } from '@preact/signals-core';
 import { html, nothing } from 'lit';

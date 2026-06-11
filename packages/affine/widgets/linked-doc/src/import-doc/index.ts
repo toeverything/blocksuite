@@ -1,4 +1,4 @@
-import type { ExtensionType, Schema, Workspace } from '@blocksuite/store';
+import type { ExtensionType, Schema, Workspace } from '@labre/store';
 
 import {
   ImportDoc,

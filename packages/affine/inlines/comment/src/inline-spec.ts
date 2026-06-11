@@ -1,6 +1,6 @@
-import { type CommentId } from '@blocksuite/affine-shared/services';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { dynamicSchema, InlineSpecExtension } from '@blocksuite/std/inline';
+import { type CommentId } from '@labre/affine-shared/services';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { dynamicSchema, InlineSpecExtension } from '@labre/std/inline';
 import { html, nothing } from 'lit-html';
 import { when } from 'lit-html/directives/when.js';
 import { z } from 'zod';

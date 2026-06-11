@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-widget-page-dragging-area/view';
+export * from '@labre/affine-widget-page-dragging-area/view';

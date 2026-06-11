@@ -1,5 +1,5 @@
-import { BlockSuiteError } from '@blocksuite/global/exceptions';
-import type { ExtensionType } from '@blocksuite/store';
+import { BlockSuiteError } from '@labre/global/exceptions';
+import type { ExtensionType } from '@labre/store';
 
 import type { BaseExtensionProvider, Context, Empty } from './base-provider';
 

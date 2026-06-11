@@ -2,13 +2,13 @@ import {
   type TableBlockPropsSerialized,
   TableBlockSchema,
   TableModelFlavour,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   BlockPlainTextAdapterExtension,
   type BlockPlainTextAdapterMatcher,
-} from '@blocksuite/affine-shared/adapters';
-import type { DeltaInsert } from '@blocksuite/store';
-import { nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import type { DeltaInsert } from '@labre/store';
+import { nanoid } from '@labre/store';
 
 import { createTableProps, formatTable, processTable } from './utils.js';
 

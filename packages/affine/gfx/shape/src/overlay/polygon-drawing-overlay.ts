@@ -1,9 +1,9 @@
 import {
   type RoughCanvas,
   ToolOverlay,
-} from '@blocksuite/affine-block-surface';
-import type { StrokeStyle } from '@blocksuite/affine-model';
-import type { GfxController } from '@blocksuite/std/gfx';
+} from '@labre/affine-block-surface';
+import type { StrokeStyle } from '@labre/affine-model';
+import type { GfxController } from '@labre/std/gfx';
 
 /**
  * Radius of the vertex indicator circles drawn at each placed vertex.

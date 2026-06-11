@@ -1,4 +1,4 @@
-import { SignalWatcher } from '@blocksuite/global/lit';
+import { SignalWatcher } from '@labre/global/lit';
 import { consume } from '@lit/context';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';

@@ -1,8 +1,8 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { TableBlockSchemaExtension } from '@blocksuite/affine-model';
+} from '@labre/affine-ext-loader';
+import { TableBlockSchemaExtension } from '@labre/affine-model';
 
 import { TableBlockAdapterExtensions } from './adapters/extension';
 import { TableSelectionExtension } from './selection-schema';

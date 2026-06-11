@@ -1,8 +1,8 @@
 import {
   DocModeProvider,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+} from '@labre/affine-shared/services';
+import { unsafeCSSVar, unsafeCSSVarV2 } from '@labre/affine-shared/theme';
 import { CloseIcon } from '@blocksuite/icons/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, nothing, unsafeCSS } from 'lit';

@@ -1,4 +1,4 @@
-import type { UIEventStateContext } from '@blocksuite/std';
+import type { UIEventStateContext } from '@labre/std';
 import type { ReactiveController } from 'lit';
 
 import type { Cell } from '../../../../core/view-manager/cell.js';

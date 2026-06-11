@@ -1,22 +1,22 @@
-import { whenHover } from '@blocksuite/affine-components/hover';
-import { RefNodeSlotsProvider } from '@blocksuite/affine-inline-reference';
-import type { ReferenceInfo } from '@blocksuite/affine-model';
+import { whenHover } from '@labre/affine-components/hover';
+import { RefNodeSlotsProvider } from '@labre/affine-inline-reference';
+import type { ReferenceInfo } from '@labre/affine-model';
 import {
   ParseDocUrlProvider,
   ToolbarRegistryIdentifier,
-} from '@blocksuite/affine-shared/services';
-import { affineTextStyles } from '@blocksuite/affine-shared/styles';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { normalizeUrl } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
-import type { BlockComponent, BlockStdScope } from '@blocksuite/std';
-import { BLOCK_ID_ATTR, ShadowlessElement } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { affineTextStyles } from '@labre/affine-shared/styles';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { normalizeUrl } from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
+import type { BlockComponent, BlockStdScope } from '@labre/std';
+import { BLOCK_ID_ATTR, ShadowlessElement } from '@labre/std';
 import {
   INLINE_ROOT_ATTR,
   type InlineRootElement,
   ZERO_WIDTH_FOR_EMPTY_LINE,
-} from '@blocksuite/std/inline';
-import type { DeltaInsert } from '@blocksuite/store';
+} from '@labre/std/inline';
+import type { DeltaInsert } from '@labre/store';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { type StyleInfo, styleMap } from 'lit/directives/style-map.js';

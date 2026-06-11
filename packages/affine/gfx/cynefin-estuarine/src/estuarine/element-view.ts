@@ -1,8 +1,8 @@
-import type { EstuarineElementModel } from '@blocksuite/affine-model';
+import type { EstuarineElementModel } from '@labre/affine-model';
 import {
   GfxElementModelView,
   GfxViewInteractionExtension,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 /**
  * View for the Estuarine background. Registering it ensures `gfx.view.get(model)`

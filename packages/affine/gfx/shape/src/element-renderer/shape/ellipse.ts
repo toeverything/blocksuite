@@ -1,11 +1,11 @@
 import type {
   CanvasRenderer,
   RoughCanvas,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import type {
   LocalShapeElementModel,
   ShapeElementModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 
 import { type Colors, drawGeneralShape } from './utils.js';
 

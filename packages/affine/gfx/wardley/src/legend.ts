@@ -1,4 +1,4 @@
-import { createGroupCommand } from '@blocksuite/affine-gfx-group';
+import { createGroupCommand } from '@labre/affine-gfx-group';
 import {
   ConnectorElementModel,
   ConnectorMode,
@@ -9,10 +9,10 @@ import {
   StrokeStyle,
   type WardleyBackgroundElementModel,
   WardleyNodeElementModel,
-} from '@blocksuite/affine-model';
-import { Bound } from '@blocksuite/global/gfx';
-import type { BlockStdScope } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/affine-model';
+import { Bound } from '@labre/global/gfx';
+import type { BlockStdScope } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 
 import { GRADIENT_GREEN, GRADIENT_RED } from './gradient';
 import {

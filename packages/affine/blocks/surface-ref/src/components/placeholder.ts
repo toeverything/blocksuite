@@ -1,9 +1,9 @@
-import { ColorScheme } from '@blocksuite/affine-model';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { ColorScheme } from '@labre/affine-model';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { DeleteIcon } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
-import { type GfxModel } from '@blocksuite/std/gfx';
+import { ShadowlessElement } from '@labre/std';
+import { type GfxModel } from '@labre/std/gfx';
 import { css, html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

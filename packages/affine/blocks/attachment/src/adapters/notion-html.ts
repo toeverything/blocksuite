@@ -1,13 +1,13 @@
-import { AttachmentBlockSchema } from '@blocksuite/affine-model';
+import { AttachmentBlockSchema } from '@labre/affine-model';
 import {
   BlockNotionHtmlAdapterExtension,
   type BlockNotionHtmlAdapterMatcher,
   FetchUtils,
   HastUtils,
-} from '@blocksuite/affine-shared/adapters';
-import { getFilenameFromContentDisposition } from '@blocksuite/affine-shared/utils';
-import { sha } from '@blocksuite/global/utils';
-import { getAssetName, nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import { getFilenameFromContentDisposition } from '@labre/affine-shared/utils';
+import { sha } from '@labre/global/utils';
+import { getAssetName, nanoid } from '@labre/store';
 
 export const attachmentBlockNotionHtmlAdapterMatcher: BlockNotionHtmlAdapterMatcher =
   {

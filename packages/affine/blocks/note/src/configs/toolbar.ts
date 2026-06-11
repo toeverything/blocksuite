@@ -1,5 +1,5 @@
-import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
-import { NoteBlockModel, NoteDisplayMode } from '@blocksuite/affine-model';
+import { EdgelessLegacySlotIdentifier } from '@labre/affine-block-surface';
+import { NoteBlockModel, NoteDisplayMode } from '@labre/affine-model';
 import {
   NotificationProvider,
   SidebarExtensionIdentifier,
@@ -7,16 +7,16 @@ import {
   type ToolbarContext,
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/services';
+import { Bound } from '@labre/global/gfx';
 import {
   AutoHeightIcon,
   CustomizedHeightIcon,
   InsertIntoPageIcon,
   ScissorsIcon,
 } from '@blocksuite/icons/lit';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
-import type { ExtensionType } from '@blocksuite/store';
+import { BlockFlavourIdentifier } from '@labre/std';
+import type { ExtensionType } from '@labre/store';
 import { computed } from '@preact/signals-core';
 import { html } from 'lit';
 

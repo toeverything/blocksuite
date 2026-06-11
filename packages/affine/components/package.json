@@ -1,5 +1,5 @@
 {
-  "name": "@blocksuite/affine-components",
+  "name": "@labre/affine-components",
   "description": "Default BlockSuite editable blocks.",
   "type": "module",
   "scripts": {
@@ -10,14 +10,14 @@
   "author": "toeverything",
   "license": "MIT",
   "dependencies": {
-    "@blocksuite/affine-model": "workspace:*",
-    "@blocksuite/affine-shared": "workspace:*",
-    "@blocksuite/global": "workspace:*",
     "@blocksuite/icons": "^2.2.12",
-    "@blocksuite/std": "workspace:*",
-    "@blocksuite/store": "workspace:*",
-    "@blocksuite/sync": "workspace:*",
     "@floating-ui/dom": "^1.6.13",
+    "@labre/affine-model": "workspace:*",
+    "@labre/affine-shared": "workspace:*",
+    "@labre/global": "workspace:*",
+    "@labre/std": "workspace:*",
+    "@labre/store": "workspace:*",
+    "@labre/sync": "workspace:*",
     "@lit/context": "^1.1.2",
     "@lottiefiles/dotlottie-wc": "^0.5.0",
     "@preact/signals-core": "^1.8.0",

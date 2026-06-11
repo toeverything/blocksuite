@@ -1,5 +1,5 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { InlineMarkdownExtension } from '@blocksuite/std/inline';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { InlineMarkdownExtension } from '@labre/std/inline';
 
 export const LinkExtension = InlineMarkdownExtension<AffineTextAttributes>({
   name: 'link',

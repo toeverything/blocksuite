@@ -1,8 +1,8 @@
-import { getMindMapNodeMap } from '@blocksuite/affine-model';
+import { getMindMapNodeMap } from '@labre/affine-model';
 import {
   BlockPlainTextAdapterExtension,
   type BlockPlainTextAdapterMatcher,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 
 import { PlainTextElementModelAdapter } from './element-adapter/index.js';
 import { ElementToPlainTextAdapterMatcherIdentifier } from './element-adapter/type.js';

@@ -1,5 +1,5 @@
-import type { ServiceIdentifier } from '@blocksuite/global/di';
-import type { ExtensionType } from '@blocksuite/store';
+import type { ServiceIdentifier } from '@labre/global/di';
+import type { ExtensionType } from '@labre/store';
 
 import { ConfigIdentifier } from '../identifier.js';
 
@@ -20,7 +20,7 @@ export interface ConfigFactory<Config extends Record<string, any>> {
  *
  * @example
  * ```ts
- * import { ConfigExtensionFactory } from '@blocksuite/std';
+ * import { ConfigExtensionFactory } from '@labre/std';
  * const MyConfigExtensionFactory = ConfigExtensionFactory<ConfigType>('my-flavour');
  * const MyConfigExtension = MyConfigExtensionFactory({
  *   option1: 'value1',

@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/open-doc-dropdown-menu';
+export * from '@labre/affine-components/open-doc-dropdown-menu';

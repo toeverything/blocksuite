@@ -2,12 +2,12 @@ import {
   type ColumnDataType,
   DatabaseBlockSchema,
   type SerializedCells,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   BlockHtmlAdapterExtension,
   type BlockHtmlAdapterMatcher,
   type InlineHtmlAST,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 import type { Element } from 'hast';
 
 import { processTable } from './utils';

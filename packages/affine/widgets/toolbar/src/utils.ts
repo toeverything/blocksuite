@@ -2,15 +2,15 @@ import {
   type EditorMenuButton,
   type EditorToolbar,
   renderToolbarSeparator,
-} from '@blocksuite/affine-components/toolbar';
+} from '@labre/affine-components/toolbar';
 import {
   ActionPlacement,
   type ToolbarAction,
   type ToolbarActions,
   type ToolbarContext,
   type ToolbarPlacement,
-} from '@blocksuite/affine-shared/services';
-import { nextTick } from '@blocksuite/global/utils';
+} from '@labre/affine-shared/services';
+import { nextTick } from '@labre/global/utils';
 import { MoreVerticalIcon } from '@blocksuite/icons/lit';
 import type {
   AutoUpdateOptions,

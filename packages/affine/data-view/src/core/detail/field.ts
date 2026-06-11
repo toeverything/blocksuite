@@ -2,15 +2,15 @@ import {
   menu,
   popMenu,
   popupTargetFromElement,
-} from '@blocksuite/affine-components/context-menu';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-components/context-menu';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import {
   DeleteIcon,
   DuplicateIcon,
   MoveLeftIcon,
   MoveRightIcon,
 } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { ShadowlessElement } from '@labre/std';
 import { computed, signal } from '@preact/signals-core';
 import { css } from 'lit';
 import { property } from 'lit/decorators.js';

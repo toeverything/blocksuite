@@ -1,4 +1,4 @@
-import { createIdentifier } from '@blocksuite/global/di';
+import { createIdentifier } from '@labre/global/di';
 
 import type { Command } from './command/index.js';
 import type { EventOptions, UIEventHandler } from './event/index.js';

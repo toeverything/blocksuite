@@ -1,4 +1,4 @@
-import type { IBound, IVec } from '@blocksuite/global/gfx';
+import type { IBound, IVec } from '@labre/global/gfx';
 import {
   Bound,
   type BezierCurveParameters,
@@ -12,8 +12,8 @@ import {
   polygonNearestPoint,
   polygonNearestPointAndTangent,
   rotatePoints,
-} from '@blocksuite/global/gfx';
-import type { PointTestOptions } from '@blocksuite/std/gfx';
+} from '@labre/global/gfx';
+import type { PointTestOptions } from '@labre/std/gfx';
 import type { ShapeElementModel } from '../shape.js';
 
 /**

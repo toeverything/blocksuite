@@ -1,11 +1,11 @@
-import { insertLinkByQuickSearchCommand } from '@blocksuite/affine-block-bookmark';
-import { insertEmbedCard } from '@blocksuite/affine-block-embed';
-import { DefaultTool } from '@blocksuite/affine-block-surface';
-import { toggleEmbedCardCreateModal } from '@blocksuite/affine-components/embed-card-modal';
-import { LinkIcon } from '@blocksuite/affine-components/icons';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import { QuickToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+import { insertLinkByQuickSearchCommand } from '@labre/affine-block-bookmark';
+import { insertEmbedCard } from '@labre/affine-block-embed';
+import { DefaultTool } from '@labre/affine-block-surface';
+import { toggleEmbedCardCreateModal } from '@labre/affine-components/embed-card-modal';
+import { LinkIcon } from '@labre/affine-components/icons';
+import { TelemetryProvider } from '@labre/affine-shared/services';
+import { QuickToolMixin } from '@labre/affine-widget-edgeless-toolbar';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import { css, html, LitElement } from 'lit';
 
 export class EdgelessLinkToolButton extends QuickToolMixin(LitElement) {

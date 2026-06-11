@@ -1,5 +1,5 @@
-import type { GfxModel } from '@blocksuite/std/gfx';
-import type { BlockModel } from '@blocksuite/store';
+import type { GfxModel } from '@labre/std/gfx';
+import type { BlockModel } from '@labre/store';
 
 import type { BookmarkBlockModel } from '../bookmark';
 import { EmbedFigmaModel } from './figma';

@@ -1,6 +1,6 @@
-import { getImageFilesFromLocal } from '@blocksuite/affine-shared/utils';
-import type { Command } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+import { getImageFilesFromLocal } from '@labre/affine-shared/utils';
+import type { Command } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 
 import { addSiblingImageBlocks } from '../utils';
 

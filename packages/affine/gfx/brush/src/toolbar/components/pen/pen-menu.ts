@@ -1,16 +1,16 @@
-import { adjustColorAlpha } from '@blocksuite/affine-components/color-picker';
+import { adjustColorAlpha } from '@labre/affine-components/color-picker';
 import {
   BRUSH_LINE_WIDTHS,
   DefaultTheme,
   HIGHLIGHTER_LINE_WIDTHS,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   FeatureFlagService,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
-import type { ColorEvent } from '@blocksuite/affine-shared/utils';
-import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
-import { SignalWatcher } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/services';
+import type { ColorEvent } from '@labre/affine-shared/utils';
+import { EdgelessToolbarToolMixin } from '@labre/affine-widget-edgeless-toolbar';
+import { SignalWatcher } from '@labre/global/lit';
 import {
   computed,
   type ReadonlySignal,

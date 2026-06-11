@@ -1,37 +1,37 @@
-import { insertLinkByQuickSearchCommand } from '@blocksuite/affine-block-bookmark';
-import { EdgelessTextBlockComponent } from '@blocksuite/affine-block-edgeless-text';
+import { insertLinkByQuickSearchCommand } from '@labre/affine-block-bookmark';
+import { EdgelessTextBlockComponent } from '@labre/affine-block-edgeless-text';
 import {
   FrameTool,
   type PresentToolOption,
-} from '@blocksuite/affine-block-frame';
+} from '@labre/affine-block-frame';
 import {
   DefaultTool,
   EdgelessLegacySlotIdentifier,
   isNoteBlock,
-} from '@blocksuite/affine-block-surface';
-import { toast } from '@blocksuite/affine-components/toast';
+} from '@labre/affine-block-surface';
+import { toast } from '@labre/affine-components/toast';
 import {
   BrushTool,
   EraserTool,
   HighlighterTool,
-} from '@blocksuite/affine-gfx-brush';
+} from '@labre/affine-gfx-brush';
 import {
   ConnectorTool,
   mountConnectorLabelEditor,
-} from '@blocksuite/affine-gfx-connector';
+} from '@labre/affine-gfx-connector';
 import {
   createGroupFromSelectedCommand,
   ungroupCommand,
-} from '@blocksuite/affine-gfx-group';
+} from '@labre/affine-gfx-group';
 import {
   getNearestTranslation,
   isElementOutsideViewport,
   isSingleMindMapNode,
-} from '@blocksuite/affine-gfx-mindmap';
-import { NoteTool } from '@blocksuite/affine-gfx-note';
-import { PanTool } from '@blocksuite/affine-gfx-pointer';
-import { mountShapeTextEditor, ShapeTool } from '@blocksuite/affine-gfx-shape';
-import { TextTool } from '@blocksuite/affine-gfx-text';
+} from '@labre/affine-gfx-mindmap';
+import { NoteTool } from '@labre/affine-gfx-note';
+import { PanTool } from '@labre/affine-gfx-pointer';
+import { mountShapeTextEditor, ShapeTool } from '@labre/affine-gfx-shape';
+import { TextTool } from '@labre/affine-gfx-text';
 import {
   ConnectorElementModel,
   type ConnectorMode,
@@ -42,15 +42,15 @@ import {
   NoteBlockModel,
   NoteDisplayMode,
   type ShapeElementModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EditPropsStore,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import { IS_MAC } from '@blocksuite/global/env';
-import { Bound, getCommonBound } from '@blocksuite/global/gfx';
-import { SurfaceSelection, TextSelection } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { matchModels } from '@labre/affine-shared/utils';
+import { IS_MAC } from '@labre/global/env';
+import { Bound, getCommonBound } from '@labre/global/gfx';
+import { SurfaceSelection, TextSelection } from '@labre/std';
 import {
   type BaseTool,
   GfxBlockElementModel,
@@ -59,7 +59,7 @@ import {
   isGfxGroupCompatibleModel,
   type ToolOptions,
   type ToolType,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 import { PageKeyboardManager } from '../keyboard/keyboard-manager.js';
 import type { EdgelessRootBlockComponent } from './edgeless-root-block.js';

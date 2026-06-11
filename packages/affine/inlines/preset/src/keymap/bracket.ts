@@ -1,14 +1,14 @@
-import { insertLinkedNode } from '@blocksuite/affine-inline-reference';
-import { CodeBlockModel } from '@blocksuite/affine-model';
-import { getInlineEditorByModel } from '@blocksuite/affine-rich-text';
-import { BRACKET_PAIRS } from '@blocksuite/affine-shared/consts';
-import { createDefaultDoc, matchModels } from '@blocksuite/affine-shared/utils';
+import { insertLinkedNode } from '@labre/affine-inline-reference';
+import { CodeBlockModel } from '@labre/affine-model';
+import { getInlineEditorByModel } from '@labre/affine-rich-text';
+import { BRACKET_PAIRS } from '@labre/affine-shared/consts';
+import { createDefaultDoc, matchModels } from '@labre/affine-shared/utils';
 import {
   type BlockStdScope,
   TextSelection,
   type UIEventHandler,
-} from '@blocksuite/std';
-import type { InlineEditor } from '@blocksuite/std/inline';
+} from '@labre/std';
+import type { InlineEditor } from '@labre/std/inline';
 
 export const bracketKeymap = (
   std: BlockStdScope

@@ -1,5 +1,5 @@
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { IS_MOBILE } from '@blocksuite/global/env';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { IS_MOBILE } from '@labre/global/env';
 import { html, type TemplateResult } from 'lit';
 
 import type { MenuConfig } from './menu.js';

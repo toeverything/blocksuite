@@ -1,8 +1,8 @@
-import { isFrameBlock } from '@blocksuite/affine-block-frame';
+import { isFrameBlock } from '@labre/affine-block-frame';
 import {
   getSurfaceComponent,
   isNoteBlock,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import type {
   EdgelessTextBlockModel,
   EmbedSyncedDocModel,
@@ -10,11 +10,11 @@ import type {
   ImageBlockModel,
   NoteBlockModel,
   ShapeElementModel,
-} from '@blocksuite/affine-model';
-import { getElementsWithoutGroup } from '@blocksuite/affine-shared/utils';
-import { getCommonBoundWithRotation } from '@blocksuite/global/gfx';
-import type { BlockComponent } from '@blocksuite/std';
-import { GfxControllerIdentifier, type GfxModel } from '@blocksuite/std/gfx';
+} from '@labre/affine-model';
+import { getElementsWithoutGroup } from '@labre/affine-shared/utils';
+import { getCommonBoundWithRotation } from '@labre/global/gfx';
+import type { BlockComponent } from '@labre/std';
+import { GfxControllerIdentifier, type GfxModel } from '@labre/std/gfx';
 import groupBy from 'lodash-es/groupBy';
 
 import { createElementsFromClipboardDataCommand } from '../clipboard/command.js';

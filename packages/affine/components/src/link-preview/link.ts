@@ -1,5 +1,5 @@
-import { getHostName } from '@blocksuite/affine-shared/utils';
-import { PropTypes, requiredProperties } from '@blocksuite/std';
+import { getHostName } from '@labre/affine-shared/utils';
+import { PropTypes, requiredProperties } from '@labre/std';
 import { css, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { html } from 'lit-html';

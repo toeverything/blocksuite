@@ -1,6 +1,6 @@
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { noop } from '@blocksuite/global/utils';
-import type { GfxController } from '@blocksuite/std/gfx';
+import { DisposableGroup } from '@labre/global/disposable';
+import { noop } from '@labre/global/utils';
+import type { GfxController } from '@labre/std/gfx';
 import { startWith } from 'rxjs';
 
 import type { RoughCanvas } from '../utils/rough/canvas';

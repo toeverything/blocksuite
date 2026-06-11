@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-widget-slash-menu/view';
+export * from '@labre/affine-widget-slash-menu/view';

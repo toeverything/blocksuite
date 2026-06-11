@@ -1,4 +1,4 @@
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
 import katex from 'katex';
 import { html } from 'lit';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';

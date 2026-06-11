@@ -1,5 +1,5 @@
-import type { ViewMeta } from '@blocksuite/data-view';
-import { viewPresets } from '@blocksuite/data-view/view-presets';
+import type { ViewMeta } from '@labre/data-view';
+import { viewPresets } from '@labre/data-view/view-presets';
 
 export const blockQueryViews: ViewMeta[] = [
   viewPresets.tableViewMeta,

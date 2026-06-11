@@ -6,7 +6,7 @@ import {
   getCell,
   getProperty,
   updateCell,
-} from '@blocksuite/affine-block-database';
+} from '@labre/affine-block-database';
 import {
   type CellDataType,
   type ColumnDataType,
@@ -15,14 +15,14 @@ import {
   NoteBlockSchemaExtension,
   ParagraphBlockSchemaExtension,
   RootBlockSchemaExtension,
-} from '@blocksuite/affine-model';
-import { propertyModelPresets } from '@blocksuite/data-view/property-pure-presets';
-import type { BlockModel, Store } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
+} from '@labre/affine-model';
+import { propertyModelPresets } from '@labre/data-view/property-pure-presets';
+import type { BlockModel, Store } from '@labre/store';
+import { Text } from '@labre/store';
 import {
   createAutoIncrementIdGenerator,
   TestWorkspace,
-} from '@blocksuite/store/test';
+} from '@labre/store/test';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 const extensions = [

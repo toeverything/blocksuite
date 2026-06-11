@@ -1,5 +1,5 @@
-import type { Palette } from '@blocksuite/affine-model';
-import { IS_IOS, IS_MAC } from '@blocksuite/global/env';
+import type { Palette } from '@labre/affine-model';
+import { IS_IOS, IS_MAC } from '@labre/global/env';
 
 export function isTouchPadPinchEvent(e: WheelEvent) {
   // two finger pinches on touch pad, ctrlKey is always true.

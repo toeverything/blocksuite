@@ -1,12 +1,12 @@
-import { Overlay } from '@blocksuite/affine-block-surface';
-import { PathGenerator } from '@blocksuite/affine-gfx-connector';
+import { Overlay } from '@labre/affine-block-surface';
+import { PathGenerator } from '@labre/affine-gfx-connector';
 import {
   ConnectorMode,
   LayoutType,
   type MindmapElementModel,
   type MindmapNode,
-} from '@blocksuite/affine-model';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
+} from '@labre/affine-model';
+import { ThemeProvider } from '@labre/affine-shared/services';
 import {
   type Bound,
   isVecZero,
@@ -14,7 +14,7 @@ import {
   PointLocation,
   toRadian,
   Vec,
-} from '@blocksuite/global/gfx';
+} from '@labre/global/gfx';
 import last from 'lodash-es/last';
 
 import { NODE_HORIZONTAL_SPACING, NODE_VERTICAL_SPACING } from '../view/layout';

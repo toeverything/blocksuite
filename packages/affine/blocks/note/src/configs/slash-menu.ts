@@ -2,20 +2,20 @@ import {
   formatBlockCommand,
   type TextFormatConfig,
   textFormatConfigs,
-} from '@blocksuite/affine-inline-preset';
+} from '@labre/affine-inline-preset';
 import {
   type TextConversionConfig,
   textConversionConfigs,
-} from '@blocksuite/affine-rich-text';
-import { isInsideBlockByFlavour } from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-rich-text';
+import { isInsideBlockByFlavour } from '@labre/affine-shared/utils';
 import {
   type SlashMenuActionItem,
   type SlashMenuConfig,
   SlashMenuConfigExtension,
   type SlashMenuItem,
-} from '@blocksuite/affine-widget-slash-menu';
+} from '@labre/affine-widget-slash-menu';
 import { HeadingsIcon } from '@blocksuite/icons/lit';
-import { BlockSelection } from '@blocksuite/std';
+import { BlockSelection } from '@labre/std';
 
 import { updateBlockType } from '../commands';
 import { tooltips } from './tooltips';

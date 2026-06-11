@@ -1,9 +1,9 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
 import {
   type InlineRootElement,
   InlineSpecExtension,
-} from '@blocksuite/std/inline';
-import type { ExtensionType } from '@blocksuite/store';
+} from '@labre/std/inline';
+import type { ExtensionType } from '@labre/store';
 import { html } from 'lit';
 import { z } from 'zod';
 

@@ -1,13 +1,13 @@
-import { ParagraphBlockSchema } from '@blocksuite/affine-model';
+import { ParagraphBlockSchema } from '@labre/affine-model';
 import {
   BlockMarkdownAdapterExtension,
   type BlockMarkdownAdapterMatcher,
   IN_PARAGRAPH_NODE_CONTEXT_KEY,
   isCalloutNode,
   type MarkdownAST,
-} from '@blocksuite/affine-shared/adapters';
-import type { DeltaInsert } from '@blocksuite/store';
-import { nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import type { DeltaInsert } from '@labre/store';
+import { nanoid } from '@labre/store';
 import type { Heading } from 'mdast';
 
 /**

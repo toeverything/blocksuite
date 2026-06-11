@@ -1,25 +1,25 @@
-import type { CanvasRenderer } from '@blocksuite/affine-block-surface';
-import { ViewExtensionManagerIdentifier } from '@blocksuite/affine-ext-loader';
-import type { NoteBlockModel } from '@blocksuite/affine-model';
+import type { CanvasRenderer } from '@labre/affine-block-surface';
+import { ViewExtensionManagerIdentifier } from '@labre/affine-ext-loader';
+import type { NoteBlockModel } from '@labre/affine-model';
 import {
   DefaultTheme,
   NoteDisplayMode,
   NoteShadow,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EDGELESS_BLOCK_CHILD_BORDER_WIDTH,
   EDGELESS_BLOCK_CHILD_PADDING,
-} from '@blocksuite/affine-shared/consts';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { deserializeXYWH } from '@blocksuite/global/gfx';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/consts';
+import { ThemeProvider } from '@labre/affine-shared/services';
+import { deserializeXYWH } from '@labre/global/gfx';
+import { WithDisposable } from '@labre/global/lit';
 import {
   BlockStdScope,
   type EditorHost,
   ShadowlessElement,
-} from '@blocksuite/std';
-import { RANGE_QUERY_EXCLUDE_ATTR } from '@blocksuite/std/inline';
-import { type BlockModel, type Query } from '@blocksuite/store';
+} from '@labre/std';
+import { RANGE_QUERY_EXCLUDE_ATTR } from '@labre/std/inline';
+import { type BlockModel, type Query } from '@labre/store';
 import { css, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

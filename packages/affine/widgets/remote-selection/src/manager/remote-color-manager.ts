@@ -1,5 +1,5 @@
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import type { BlockStdScope } from '@blocksuite/std';
+import { EditPropsStore } from '@labre/affine-shared/services';
+import type { BlockStdScope } from '@labre/std';
 
 import { multiPlayersColor } from './color-picker';
 

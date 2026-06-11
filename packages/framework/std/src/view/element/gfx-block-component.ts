@@ -1,5 +1,5 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Bound } from '@blocksuite/global/gfx';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { Bound } from '@labre/global/gfx';
 import { computed, effect, signal } from '@preact/signals-core';
 import { nothing } from 'lit';
 

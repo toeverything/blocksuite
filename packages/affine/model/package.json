@@ -1,5 +1,5 @@
 {
-  "name": "@blocksuite/affine-model",
+  "name": "@labre/affine-model",
   "description": "Models for BlockSuite in Affine.",
   "type": "module",
   "scripts": {
@@ -10,9 +10,9 @@
   "author": "toeverything",
   "license": "MIT",
   "dependencies": {
-    "@blocksuite/global": "workspace:*",
-    "@blocksuite/std": "workspace:*",
-    "@blocksuite/store": "workspace:*",
+    "@labre/global": "workspace:*",
+    "@labre/std": "workspace:*",
+    "@labre/store": "workspace:*",
     "@toeverything/theme": "^1.1.15",
     "@types/lodash-es": "^4.17.12",
     "fractional-indexing": "^3.2.0",

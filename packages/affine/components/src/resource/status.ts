@@ -1,15 +1,15 @@
 import {
   fontBaseStyle,
   panelBaseColorsStyle,
-} from '@blocksuite/affine-shared/styles';
-import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+} from '@labre/affine-shared/styles';
+import { unsafeCSSVar, unsafeCSSVarV2 } from '@labre/affine-shared/theme';
 import {
   createButtonPopper,
   stopPropagation,
-} from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
 import { InformationIcon } from '@blocksuite/icons/lit';
-import { PropTypes, requiredProperties } from '@blocksuite/std';
+import { PropTypes, requiredProperties } from '@labre/std';
 import { css, html, LitElement } from 'lit';
 import { property, query } from 'lit/decorators.js';
 

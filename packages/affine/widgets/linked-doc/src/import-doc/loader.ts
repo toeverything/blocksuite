@@ -1,5 +1,5 @@
-import { BLOCK_ID_ATTR } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+import { BLOCK_ID_ATTR } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 

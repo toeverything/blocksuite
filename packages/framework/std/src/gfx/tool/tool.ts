@@ -1,7 +1,7 @@
-import { type Container, createIdentifier } from '@blocksuite/global/di';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Extension } from '@blocksuite/store';
+import { type Container, createIdentifier } from '@labre/global/di';
+import { DisposableGroup } from '@labre/global/disposable';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { Extension } from '@labre/store';
 
 import type { PointerEventState } from '../../event/index.js';
 import type { GfxController } from '../controller.js';

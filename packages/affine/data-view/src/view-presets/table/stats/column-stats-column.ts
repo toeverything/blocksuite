@@ -3,11 +3,11 @@ import {
   type MenuConfig,
   popMenu,
   popupTargetFromElement,
-} from '@blocksuite/affine-components/context-menu';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-components/context-menu';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { ArrowDownSmallIcon } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
-import { Text } from '@blocksuite/store';
+import { ShadowlessElement } from '@labre/std';
+import { Text } from '@labre/store';
 import { autoPlacement, offset } from '@floating-ui/dom';
 import { computed, signal } from '@preact/signals-core';
 import { css, html } from 'lit';

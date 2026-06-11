@@ -1,5 +1,5 @@
-import type { AffineTextStyleAttributes } from '@blocksuite/affine-shared/types';
-import { PropTypes, requiredProperties } from '@blocksuite/std';
+import type { AffineTextStyleAttributes } from '@labre/affine-shared/types';
+import { PropTypes, requiredProperties } from '@labre/std';
 import { LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

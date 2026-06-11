@@ -1,10 +1,10 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 import type {
   BlockSnapshot,
   Slice,
   Store,
   TransformerMiddleware,
-} from '@blocksuite/store';
+} from '@labre/store';
 import DOMPurify from 'dompurify';
 import * as lz from 'lz-string';
 import rehypeParse from 'rehype-parse';

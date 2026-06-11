@@ -1,9 +1,9 @@
-import { shapeToolbarConfig } from '@blocksuite/affine-gfx-shape';
+import { shapeToolbarConfig } from '@labre/affine-gfx-shape';
 import {
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { BlockFlavourIdentifier } from '@labre/std';
 
 /**
  * Wardley nodes are {@link ShapeElementModel} subclasses, so the shape toolbar's

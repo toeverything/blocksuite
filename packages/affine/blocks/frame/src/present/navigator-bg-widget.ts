@@ -1,9 +1,9 @@
-import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
-import type { FrameBlockModel, RootBlockModel } from '@blocksuite/affine-model';
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { Bound } from '@blocksuite/global/gfx';
-import { WidgetComponent, WidgetViewExtension } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+import { EdgelessLegacySlotIdentifier } from '@labre/affine-block-surface';
+import type { FrameBlockModel, RootBlockModel } from '@labre/affine-model';
+import { EditPropsStore } from '@labre/affine-shared/services';
+import { Bound } from '@labre/global/gfx';
+import { WidgetComponent, WidgetViewExtension } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import { effect } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { state } from 'lit/decorators.js';

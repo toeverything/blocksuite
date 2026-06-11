@@ -1,4 +1,4 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 import * as Y from 'yjs';
 
 import { ReactiveFlatYMap } from '../../reactive/flat-native-y/index.js';

@@ -1,11 +1,11 @@
 import {
   FeatureFlagService,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   type GfxInteractivityContext,
   InteractivityExtension,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 import { insertEdgelessTextCommand } from './commands';
 import { addText } from './edgeless-text-editor';

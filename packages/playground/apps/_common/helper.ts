@@ -1,5 +1,5 @@
-import { TestWorkspace } from '@blocksuite/affine/store/test';
-import { getTestStoreManager } from '@blocksuite/integration-test/store';
+import { TestWorkspace } from '@labre/affine/store/test';
+import { getTestStoreManager } from '@labre/integration-test/store';
 
 export function createEmptyDoc() {
   const collection = new TestWorkspace();

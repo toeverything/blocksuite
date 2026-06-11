@@ -1,9 +1,9 @@
-import { getShapeName, type ShapeProps } from '@blocksuite/affine-model';
+import { getShapeName, type ShapeProps } from '@labre/affine-model';
 import type {
   LastProps,
   LastPropsKey,
-} from '@blocksuite/affine-shared/services';
-import { NodePropsSchema } from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/services';
+import { NodePropsSchema } from '@labre/affine-shared/utils';
 
 const LastPropsSchema = NodePropsSchema;
 

@@ -1,7 +1,7 @@
-import { EmbedFigmaBlockSchema } from '@blocksuite/affine-model';
-import { SlashMenuConfigExtension } from '@blocksuite/affine-widget-slash-menu';
-import { BlockViewExtension, FlavourExtension } from '@blocksuite/std';
-import type { ExtensionType } from '@blocksuite/store';
+import { EmbedFigmaBlockSchema } from '@labre/affine-model';
+import { SlashMenuConfigExtension } from '@labre/affine-widget-slash-menu';
+import { BlockViewExtension, FlavourExtension } from '@labre/std';
+import type { ExtensionType } from '@labre/store';
 import { literal } from 'lit/static-html.js';
 
 import { createBuiltinToolbarConfigExtension } from '../configs/toolbar';

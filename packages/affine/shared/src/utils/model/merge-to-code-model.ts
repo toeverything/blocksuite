@@ -1,5 +1,5 @@
-import type { BlockModel } from '@blocksuite/store';
-import { Text } from '@blocksuite/store';
+import type { BlockModel } from '@labre/store';
+import { Text } from '@labre/store';
 
 export function mergeToCodeModel(models: BlockModel[]) {
   if (models.length === 0) {

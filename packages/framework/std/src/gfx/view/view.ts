@@ -1,8 +1,8 @@
-import { type Container, createIdentifier } from '@blocksuite/global/di';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { type Bound, type IVec } from '@blocksuite/global/gfx';
-import type { Extension } from '@blocksuite/store';
+import { type Container, createIdentifier } from '@labre/global/di';
+import { DisposableGroup } from '@labre/global/disposable';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { type Bound, type IVec } from '@labre/global/gfx';
+import type { Extension } from '@labre/store';
 
 import type { PointerEventState } from '../../event/index.js';
 import type { EditorHost } from '../../view/index.js';

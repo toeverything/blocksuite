@@ -2,12 +2,12 @@ import {
   type GfxCommonBlockProps,
   GfxCompatible,
   type GfxElementGeometry,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import {
   BlockModel,
   BlockSchemaExtension,
   defineBlockSchema,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 export type LatexProps = {
   latex: string;

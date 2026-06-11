@@ -1,4 +1,4 @@
-import type { IBound, IVec } from '@blocksuite/global/gfx';
+import type { IBound, IVec } from '@labre/global/gfx';
 import {
   Bound,
   getCenterAreaBounds,
@@ -10,8 +10,8 @@ import {
   polygonGetPointTangent,
   polygonNearestPoint,
   rotatePoints,
-} from '@blocksuite/global/gfx';
-import type { PointTestOptions } from '@blocksuite/std/gfx';
+} from '@labre/global/gfx';
+import type { PointTestOptions } from '@labre/std/gfx';
 
 import { DEFAULT_CENTRAL_AREA_RATIO } from '../../../consts/index.js';
 import type { ShapeElementModel } from '../shape.js';

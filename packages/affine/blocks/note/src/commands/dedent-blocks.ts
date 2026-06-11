@@ -1,9 +1,9 @@
-import { ParagraphBlockModel } from '@blocksuite/affine-model';
+import { ParagraphBlockModel } from '@labre/affine-model';
 import {
   calculateCollapsedSiblings,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import { type Command, TextSelection } from '@blocksuite/std';
+} from '@labre/affine-shared/utils';
+import { type Command, TextSelection } from '@labre/std';
 
 import { dedentBlock } from './dedent-block';
 

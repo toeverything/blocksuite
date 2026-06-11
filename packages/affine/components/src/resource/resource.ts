@@ -1,5 +1,5 @@
-import type { Disposable } from '@blocksuite/global/disposable';
-import type { BlobEngine, BlobState } from '@blocksuite/sync';
+import type { Disposable } from '@labre/global/disposable';
+import type { BlobEngine, BlobState } from '@labre/sync';
 import {
   computed,
   effect,

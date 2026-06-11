@@ -5,12 +5,12 @@ import {
   NoteDisplayMode,
   ParagraphBlockModel,
   type RootBlockModel,
-} from '@blocksuite/affine-model';
-import { focusTextModel, type RichText } from '@blocksuite/affine-rich-text';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
-import { ShadowlessElement } from '@blocksuite/std';
-import type { Store } from '@blocksuite/store';
+} from '@labre/affine-model';
+import { focusTextModel, type RichText } from '@labre/affine-rich-text';
+import { matchModels } from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
+import { ShadowlessElement } from '@labre/std';
+import type { Store } from '@labre/store';
 import { effect } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property, query, state } from 'lit/decorators.js';

@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-widget-edgeless-auto-connect/view';
+export * from '@labre/affine-widget-edgeless-auto-connect/view';

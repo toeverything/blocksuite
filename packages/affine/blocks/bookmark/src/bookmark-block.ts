@@ -1,20 +1,20 @@
 import {
   CaptionedBlockComponent,
   SelectedStyle,
-} from '@blocksuite/affine-components/caption';
+} from '@labre/affine-components/caption';
 import type {
   BookmarkBlockModel,
   LinkPreviewData,
-} from '@blocksuite/affine-model';
-import { ImageProxyService } from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-model';
+import { ImageProxyService } from '@labre/affine-shared/adapters';
 import {
   BlockCommentManager,
   CitationProvider,
   DocModeProvider,
   LinkPreviewServiceIdentifier,
-} from '@blocksuite/affine-shared/services';
-import { normalizeUrl } from '@blocksuite/affine-shared/utils';
-import { BlockSelection } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { normalizeUrl } from '@labre/affine-shared/utils';
+import { BlockSelection } from '@labre/std';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 import { html } from 'lit';
 import { property, query } from 'lit/decorators.js';

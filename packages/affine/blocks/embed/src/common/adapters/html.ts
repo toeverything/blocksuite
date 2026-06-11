@@ -1,4 +1,4 @@
-import type { BlockHtmlAdapterMatcher } from '@blocksuite/affine-shared/adapters';
+import type { BlockHtmlAdapterMatcher } from '@labre/affine-shared/adapters';
 
 export function createEmbedBlockHtmlAdapterMatcher(
   flavour: string,

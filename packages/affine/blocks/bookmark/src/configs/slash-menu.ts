@@ -1,13 +1,13 @@
-import { DefaultTool } from '@blocksuite/affine-block-surface';
-import { toggleEmbedCardCreateModal } from '@blocksuite/affine-components/embed-card-modal';
-import { BookmarkBlockSchema } from '@blocksuite/affine-model';
+import { DefaultTool } from '@labre/affine-block-surface';
+import { toggleEmbedCardCreateModal } from '@labre/affine-components/embed-card-modal';
+import { BookmarkBlockSchema } from '@labre/affine-model';
 import {
   type SlashMenuConfig,
   SlashMenuConfigIdentifier,
-} from '@blocksuite/affine-widget-slash-menu';
+} from '@labre/affine-widget-slash-menu';
 import { LinkIcon } from '@blocksuite/icons/lit';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
-import type { ExtensionType } from '@blocksuite/store';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
+import type { ExtensionType } from '@labre/store';
 
 import { LinkTooltip } from './tooltips';
 

@@ -1,1 +1,1 @@
-export * from '@blocksuite/std';
+export * from '@labre/std';

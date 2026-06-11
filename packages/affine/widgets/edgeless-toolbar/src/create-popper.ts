@@ -1,4 +1,4 @@
-import { BlockSuiteError } from '@blocksuite/global/exceptions';
+import { BlockSuiteError } from '@labre/global/exceptions';
 
 // more than 100% due to the shadow
 const leaveToPercent = `calc(100% + 10px)`;

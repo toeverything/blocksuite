@@ -1,4 +1,4 @@
-import type { DeltaInsert } from '@blocksuite/store';
+import type { DeltaInsert } from '@labre/store';
 import { expect, type Page } from '@playwright/test';
 
 import type { InlineEditor, InlineRange } from '../../inline/index.js';

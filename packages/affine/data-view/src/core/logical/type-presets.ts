@@ -1,7 +1,7 @@
 import type {
   UserListService,
   UserService,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import * as zod from 'zod';
 import Zod from 'zod';
 

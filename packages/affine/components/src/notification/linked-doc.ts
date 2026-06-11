@@ -1,5 +1,5 @@
-import { NotificationProvider } from '@blocksuite/affine-shared/services';
-import { type BlockStdScope } from '@blocksuite/std';
+import { NotificationProvider } from '@labre/affine-shared/services';
+import { type BlockStdScope } from '@labre/std';
 
 import { toast } from '../toast/toast.js';
 

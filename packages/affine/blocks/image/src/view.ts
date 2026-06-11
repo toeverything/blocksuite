@@ -1,7 +1,7 @@
 import {
   type ViewExtensionContext,
   ViewExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
+} from '@labre/affine-ext-loader';
 
 import { EdgelessClipboardImageConfig } from './edgeless-clipboard-config';
 import { effects } from './effects';

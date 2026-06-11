@@ -1,5 +1,5 @@
-import { ShadowlessElement } from '@blocksuite/std';
-import { type Text } from '@blocksuite/store';
+import { ShadowlessElement } from '@labre/std';
+import { type Text } from '@labre/store';
 import { css, html } from 'lit';
 import { state } from 'lit/decorators.js';
 import { createRef, ref } from 'lit/directives/ref.js';

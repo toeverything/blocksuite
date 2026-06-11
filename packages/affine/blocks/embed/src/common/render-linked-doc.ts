@@ -1,14 +1,14 @@
-import { getSurfaceBlock } from '@blocksuite/affine-block-surface';
+import { getSurfaceBlock } from '@labre/affine-block-surface';
 import {
   type DocMode,
   ListBlockModel,
   NoteBlockModel,
   NoteDisplayMode,
   ParagraphBlockModel,
-} from '@blocksuite/affine-model';
-import { NotificationProvider } from '@blocksuite/affine-shared/services';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import type { BlockStdScope } from '@blocksuite/std';
+} from '@labre/affine-model';
+import { NotificationProvider } from '@labre/affine-shared/services';
+import { matchModels } from '@labre/affine-shared/utils';
+import type { BlockStdScope } from '@labre/std';
 import {
   type BlockModel,
   type BlockSnapshot,
@@ -16,7 +16,7 @@ import {
   Slice,
   type Store,
   Text,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 // Throttle delay for block updates to reduce unnecessary re-renders
 // - Prevents rapid-fire updates when multiple blocks are updated in quick succession

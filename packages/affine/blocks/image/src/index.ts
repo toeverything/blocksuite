@@ -8,4 +8,4 @@ export * from './image-spec';
 export * from './turbo/image-layout-handler';
 export * from './turbo/image-painter.worker';
 export { addImages, addSiblingImageBlocks, downloadImageBlob } from './utils';
-export { ImageSelection } from '@blocksuite/affine-shared/selection';
+export { ImageSelection } from '@labre/affine-shared/selection';

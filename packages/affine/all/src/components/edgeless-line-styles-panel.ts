@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/edgeless-line-styles-panel';
+export * from '@labre/affine-components/edgeless-line-styles-panel';

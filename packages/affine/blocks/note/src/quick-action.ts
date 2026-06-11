@@ -3,13 +3,13 @@ import {
   getTitleFromSelectedModels,
   notifyDocCreated,
   promptDocTitle,
-} from '@blocksuite/affine-block-embed';
+} from '@labre/affine-block-embed';
 import {
   draftSelectedModelsCommand,
   getSelectedModelsCommand,
-} from '@blocksuite/affine-shared/commands';
-import type { BlockStdScope } from '@blocksuite/std';
-import { toDraftModel } from '@blocksuite/store';
+} from '@labre/affine-shared/commands';
+import type { BlockStdScope } from '@labre/std';
+import { toDraftModel } from '@labre/store';
 
 export interface QuickActionConfig {
   id: string;

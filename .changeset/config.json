@@ -2,12 +2,12 @@
   "$schema": "https://unpkg.com/@changesets/config@3.0.2/schema.json",
   "changelog": false,
   "commit": false,
-  "fixed": [["@blocksuite/*"]],
+  "fixed": [["@labre/*"]],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@blocksuite/playground", "@blocksuite/integration-test"],
+  "ignore": ["@labre/playground", "@labre/integration-test"],
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
     "onlyUpdatePeerDependentsWhenOutOfRange": true
   }

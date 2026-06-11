@@ -1,6 +1,6 @@
-import { Text, type Workspace } from '@blocksuite/affine/store';
-import { MarkdownTransformer } from '@blocksuite/affine/widgets/linked-doc';
-import { getTestStoreManager } from '@blocksuite/integration-test/store';
+import { Text, type Workspace } from '@labre/affine/store';
+import { MarkdownTransformer } from '@labre/affine/widgets/linked-doc';
+import { getTestStoreManager } from '@labre/integration-test/store';
 
 import type { InitFn } from './utils.js';
 

@@ -1,4 +1,4 @@
-# `@blocksuite/sync`
+# `@labre/sync`
 
 BlockSuite data synchronization engine.
 

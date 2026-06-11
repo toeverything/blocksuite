@@ -2,12 +2,12 @@ import {
   type ColumnDataType,
   DatabaseBlockSchema,
   type SerializedCells,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   BlockMarkdownAdapterExtension,
   type BlockMarkdownAdapterMatcher,
   type MarkdownAST,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 import type { TableRow } from 'mdast';
 
 import { processTable } from './utils';

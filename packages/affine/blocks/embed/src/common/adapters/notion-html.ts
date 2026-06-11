@@ -1,8 +1,8 @@
 import {
   type BlockNotionHtmlAdapterMatcher,
   HastUtils,
-} from '@blocksuite/affine-shared/adapters';
-import { nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import { nanoid } from '@labre/store';
 
 export function createEmbedBlockNotionHtmlAdapterMatcher(
   flavour: string,

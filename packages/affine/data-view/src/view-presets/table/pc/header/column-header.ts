@@ -1,7 +1,7 @@
-import { getScrollContainer } from '@blocksuite/affine-shared/utils';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { getScrollContainer } from '@labre/affine-shared/utils';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { PlusIcon } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { ShadowlessElement } from '@labre/std';
 import { autoUpdate } from '@floating-ui/dom';
 import { nothing, type TemplateResult } from 'lit';
 import { property, query } from 'lit/decorators.js';

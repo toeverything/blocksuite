@@ -1,12 +1,12 @@
-import { DefaultTool } from '@blocksuite/affine-block-surface';
-import type { TextElementModel } from '@blocksuite/affine-model';
+import { DefaultTool } from '@labre/affine-block-surface';
+import type { TextElementModel } from '@labre/affine-model';
 import {
   FeatureFlagService,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import { Bound } from '@blocksuite/global/gfx';
-import type { PointerEventState } from '@blocksuite/std';
-import { BaseTool, type GfxController } from '@blocksuite/std/gfx';
+} from '@labre/affine-shared/services';
+import { Bound } from '@labre/global/gfx';
+import type { PointerEventState } from '@labre/std';
+import { BaseTool, type GfxController } from '@labre/std/gfx';
 import * as Y from 'yjs';
 
 import { insertEdgelessTextCommand } from './commands/insert-edgeless-text';

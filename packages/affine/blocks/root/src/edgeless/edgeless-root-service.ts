@@ -1,23 +1,23 @@
-import { EdgelessFrameManagerIdentifier } from '@blocksuite/affine-block-frame';
+import { EdgelessFrameManagerIdentifier } from '@labre/affine-block-frame';
 import {
   EdgelessCRUDIdentifier,
   EdgelessLegacySlotIdentifier,
   getSurfaceBlock,
   type SurfaceBlockModel,
   type SurfaceContext,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   type ConnectorElementModel,
   RootBlockSchema,
-} from '@blocksuite/affine-model';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { BlockService, type BlockStdScope } from '@blocksuite/std';
+} from '@labre/affine-model';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { BlockService, type BlockStdScope } from '@labre/std';
 import type {
   GfxController,
   GfxModel,
   LayerManager,
   ReorderingDirection,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import {
   GfxBlockElementModel,
   GfxControllerIdentifier,
@@ -25,7 +25,7 @@ import {
   ZOOM_MAX,
   ZOOM_MIN,
   ZOOM_STEP,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import { effect } from '@preact/signals-core';
 import clamp from 'lodash-es/clamp';
 

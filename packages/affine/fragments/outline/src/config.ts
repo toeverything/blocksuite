@@ -1,4 +1,4 @@
-import type { ParagraphBlockModel } from '@blocksuite/affine-model';
+import type { ParagraphBlockModel } from '@labre/affine-model';
 import {
   AttachmentIcon,
   BlockIcon,
@@ -19,7 +19,7 @@ import {
   QuoteIcon,
   TextIcon,
 } from '@blocksuite/icons/lit';
-import type { EditorHost } from '@blocksuite/std';
+import type { EditorHost } from '@labre/std';
 import { createContext } from '@lit/context';
 import type { Signal } from '@preact/signals-core';
 import type { TemplateResult } from 'lit';

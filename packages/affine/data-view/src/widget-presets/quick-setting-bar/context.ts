@@ -1,4 +1,4 @@
-import { createIdentifier } from '@blocksuite/global/di';
+import { createIdentifier } from '@labre/global/di';
 import { type Signal, signal } from '@preact/signals-core';
 
 export const ShowQuickSettingBarKey = createIdentifier<

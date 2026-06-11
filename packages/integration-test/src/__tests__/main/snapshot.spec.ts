@@ -1,8 +1,8 @@
-import type { SurfaceBlockModel } from '@blocksuite/affine/blocks/surface';
-import { AffineSchemas } from '@blocksuite/affine/schemas';
-import { ZipTransformer } from '@blocksuite/affine/widgets/linked-doc';
-import type { PointLocation } from '@blocksuite/global/gfx';
-import { Schema } from '@blocksuite/store';
+import type { SurfaceBlockModel } from '@labre/affine/blocks/surface';
+import { AffineSchemas } from '@labre/affine/schemas';
+import { ZipTransformer } from '@labre/affine/widgets/linked-doc';
+import type { PointLocation } from '@labre/global/gfx';
+import { Schema } from '@labre/store';
 import { beforeEach, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';

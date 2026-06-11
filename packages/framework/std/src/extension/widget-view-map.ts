@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { WidgetViewIdentifier } from '../identifier.js';
 import type { WidgetViewType } from '../spec/type.js';
@@ -15,7 +15,7 @@ import type { WidgetViewType } from '../spec/type.js';
  *
  * @example
  * ```ts
- * import { WidgetViewExtension } from '@blocksuite/std';
+ * import { WidgetViewExtension } from '@labre/std';
  *
  * const MyWidgetViewExtension = WidgetViewExtension('my-flavour', 'my-widget', literal`my-widget-view`);
  */

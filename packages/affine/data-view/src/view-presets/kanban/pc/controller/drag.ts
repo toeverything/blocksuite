@@ -1,5 +1,5 @@
-import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
-import { Point, Rect } from '@blocksuite/global/gfx';
+import type { InsertToPosition } from '@labre/affine-shared/utils';
+import { Point, Rect } from '@labre/global/gfx';
 import { computed } from '@preact/signals-core';
 import type { ReactiveController } from 'lit';
 

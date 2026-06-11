@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-fragment-doc-title/view';
+export * from '@labre/affine-fragment-doc-title/view';

@@ -1,14 +1,14 @@
-import { DefaultTheme, NoteDisplayMode } from '@blocksuite/affine-model';
+import { DefaultTheme, NoteDisplayMode } from '@labre/affine-model';
 import {
   embedSyncedDocMiddleware,
   HtmlAdapter,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 import type {
   BlockSnapshot,
   DocSnapshot,
   TransformerMiddleware,
-} from '@blocksuite/store';
-import { AssetsManager, MemoryBlobCRUD } from '@blocksuite/store';
+} from '@labre/store';
+import { AssetsManager, MemoryBlobCRUD } from '@labre/store';
 import { describe, expect, test } from 'vitest';
 
 import { createJob } from '../utils/create-job.js';

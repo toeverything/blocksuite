@@ -1,12 +1,12 @@
-import { SignalWatcher, WithDisposable } from '@blocksuite/affine/global/lit';
-import type { DocMode } from '@blocksuite/affine/model';
-import { ThemeProvider } from '@blocksuite/affine/shared/services';
-import { BlockStdScope, ShadowlessElement } from '@blocksuite/affine/std';
+import { SignalWatcher, WithDisposable } from '@labre/affine/global/lit';
+import type { DocMode } from '@labre/affine/model';
+import { ThemeProvider } from '@labre/affine/shared/services';
+import { BlockStdScope, ShadowlessElement } from '@labre/affine/std';
 import {
   type BlockModel,
   type ExtensionType,
   type Store,
-} from '@blocksuite/affine/store';
+} from '@labre/affine/store';
 import { computed, signal } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';

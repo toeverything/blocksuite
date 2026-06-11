@@ -5,13 +5,13 @@ import {
   DeleteIcon,
   DuplicateIcon,
   WrapIcon,
-} from '@blocksuite/affine-components/icons';
-import type { MenuItemGroup } from '@blocksuite/affine-components/toolbar';
-import { CommentProviderIdentifier } from '@blocksuite/affine-shared/services';
-import { isInsidePageEditor } from '@blocksuite/affine-shared/utils';
-import { noop, sleep } from '@blocksuite/global/utils';
+} from '@labre/affine-components/icons';
+import type { MenuItemGroup } from '@labre/affine-components/toolbar';
+import { CommentProviderIdentifier } from '@labre/affine-shared/services';
+import { isInsidePageEditor } from '@labre/affine-shared/utils';
+import { noop, sleep } from '@labre/global/utils';
 import { CommentIcon, NumberedListIcon } from '@blocksuite/icons/lit';
-import { BlockSelection } from '@blocksuite/std';
+import { BlockSelection } from '@labre/std';
 import { html } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';
 

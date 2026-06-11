@@ -3,16 +3,16 @@ import {
   GroupElementModel,
   MindmapElementModel,
   ShapeElementModel,
-} from '@blocksuite/affine-model';
-import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+} from '@labre/affine-model';
+import { unsafeCSSVar, unsafeCSSVarV2 } from '@labre/affine-shared/theme';
 import {
   EdgelessIcon,
   FrameIcon,
   GroupIcon,
   MindmapIcon,
 } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
-import type { GfxModel } from '@blocksuite/std/gfx';
+import { ShadowlessElement } from '@labre/std';
+import type { GfxModel } from '@labre/std/gfx';
 import { css, html, type TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 

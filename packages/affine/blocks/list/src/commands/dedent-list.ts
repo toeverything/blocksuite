@@ -1,7 +1,7 @@
-import { ListBlockModel } from '@blocksuite/affine-model';
-import type { IndentContext } from '@blocksuite/affine-shared/types';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import { type Command, TextSelection } from '@blocksuite/std';
+import { ListBlockModel } from '@labre/affine-model';
+import type { IndentContext } from '@labre/affine-shared/types';
+import { matchModels } from '@labre/affine-shared/utils';
+import { type Command, TextSelection } from '@labre/std';
 
 import { correctNumberedListsOrderToPrev } from './utils.js';
 

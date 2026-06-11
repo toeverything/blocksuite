@@ -1,5 +1,5 @@
-import { REFERENCE_NODE } from '@blocksuite/affine-shared/consts';
-import type { AffineInlineEditor } from '@blocksuite/affine-shared/types';
+import { REFERENCE_NODE } from '@labre/affine-shared/consts';
+import type { AffineInlineEditor } from '@labre/affine-shared/types';
 
 export function insertLinkedNode({
   inlineEditor,

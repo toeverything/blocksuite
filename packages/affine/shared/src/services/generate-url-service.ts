@@ -1,6 +1,6 @@
-import type { ReferenceParams } from '@blocksuite/affine-model';
-import { createIdentifier } from '@blocksuite/global/di';
-import type { ExtensionType } from '@blocksuite/store';
+import type { ReferenceParams } from '@labre/affine-model';
+import { createIdentifier } from '@labre/global/di';
+import type { ExtensionType } from '@labre/store';
 
 export interface GenerateDocUrlService {
   generateDocUrl: (docId: string, params?: ReferenceParams) => string | void;

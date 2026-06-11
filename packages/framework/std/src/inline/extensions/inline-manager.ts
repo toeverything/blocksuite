@@ -1,13 +1,13 @@
 import {
   createIdentifier,
   type ServiceIdentifier,
-} from '@blocksuite/global/di';
+} from '@labre/global/di';
 import {
   type BaseTextAttributes,
   baseTextAttributes,
   type DeltaInsert,
   type ExtensionType,
-} from '@blocksuite/store';
+} from '@labre/store';
 import { z } from 'zod';
 
 import { StdIdentifier } from '../../identifier.js';

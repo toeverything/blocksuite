@@ -1,4 +1,4 @@
-import { clamp } from '@blocksuite/global/gfx';
+import { clamp } from '@labre/global/gfx';
 
 import { createPropertyConvert } from '../core/index.js';
 import { multiSelectPropertyModelConfig } from './multi-select/define.js';

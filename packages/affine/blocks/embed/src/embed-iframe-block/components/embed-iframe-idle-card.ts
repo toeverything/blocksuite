@@ -1,5 +1,5 @@
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { WithDisposable } from '@blocksuite/global/lit';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { WithDisposable } from '@labre/global/lit';
 import { EmbedIcon } from '@blocksuite/icons/lit';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, unsafeCSS } from 'lit';

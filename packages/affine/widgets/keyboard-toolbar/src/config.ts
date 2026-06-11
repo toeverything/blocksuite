@@ -1,27 +1,27 @@
-import { addSiblingAttachmentBlocks } from '@blocksuite/affine-block-attachment';
-import { insertDatabaseBlockCommand } from '@blocksuite/affine-block-database';
-import { insertEmptyEmbedIframeCommand } from '@blocksuite/affine-block-embed';
-import { insertImagesCommand } from '@blocksuite/affine-block-image';
-import { insertLatexBlockCommand } from '@blocksuite/affine-block-latex';
+import { addSiblingAttachmentBlocks } from '@labre/affine-block-attachment';
+import { insertDatabaseBlockCommand } from '@labre/affine-block-database';
+import { insertEmptyEmbedIframeCommand } from '@labre/affine-block-embed';
+import { insertImagesCommand } from '@labre/affine-block-image';
+import { insertLatexBlockCommand } from '@labre/affine-block-latex';
 import {
   canDedentListCommand,
   canIndentListCommand,
   dedentListCommand,
   indentListCommand,
-} from '@blocksuite/affine-block-list';
-import { updateBlockType } from '@blocksuite/affine-block-note';
+} from '@labre/affine-block-list';
+import { updateBlockType } from '@labre/affine-block-note';
 import {
   canDedentParagraphCommand,
   canIndentParagraphCommand,
   dedentParagraphCommand,
   indentParagraphCommand,
-} from '@blocksuite/affine-block-paragraph';
-import { DefaultTool, getSurfaceBlock } from '@blocksuite/affine-block-surface';
-import { insertSurfaceRefBlockCommand } from '@blocksuite/affine-block-surface-ref';
-import { toggleEmbedCardCreateModal } from '@blocksuite/affine-components/embed-card-modal';
-import { toast } from '@blocksuite/affine-components/toast';
-import { insertInlineLatex } from '@blocksuite/affine-inline-latex';
-import { toggleLink } from '@blocksuite/affine-inline-link';
+} from '@labre/affine-block-paragraph';
+import { DefaultTool, getSurfaceBlock } from '@labre/affine-block-surface';
+import { insertSurfaceRefBlockCommand } from '@labre/affine-block-surface-ref';
+import { toggleEmbedCardCreateModal } from '@labre/affine-components/embed-card-modal';
+import { toast } from '@labre/affine-components/toast';
+import { insertInlineLatex } from '@labre/affine-inline-latex';
+import { toggleLink } from '@labre/affine-inline-link';
 import {
   formatBlockCommand,
   formatNativeCommand,
@@ -32,9 +32,9 @@ import {
   toggleItalic,
   toggleStrike,
   toggleUnderline,
-} from '@blocksuite/affine-inline-preset';
-import type { FrameBlockModel } from '@blocksuite/affine-model';
-import { insertContent } from '@blocksuite/affine-rich-text';
+} from '@labre/affine-inline-preset';
+import type { FrameBlockModel } from '@labre/affine-model';
+import { insertContent } from '@labre/affine-rich-text';
 import {
   copySelectedModelsCommand,
   deleteSelectedModelsCommand,
@@ -43,17 +43,17 @@ import {
   getBlockSelectionsCommand,
   getSelectedModelsCommand,
   getTextSelectionCommand,
-} from '@blocksuite/affine-shared/commands';
-import { REFERENCE_NODE } from '@blocksuite/affine-shared/consts';
-import type { AffineTextStyleAttributes } from '@blocksuite/affine-shared/types';
+} from '@labre/affine-shared/commands';
+import { REFERENCE_NODE } from '@labre/affine-shared/consts';
+import type { AffineTextStyleAttributes } from '@labre/affine-shared/types';
 import {
   createDefaultDoc,
   openSingleFileWith,
   type Signal,
-} from '@blocksuite/affine-shared/utils';
-import type { AffineLinkedDocWidget } from '@blocksuite/affine-widget-linked-doc';
-import { viewPresets } from '@blocksuite/data-view/view-presets';
-import { assertType } from '@blocksuite/global/utils';
+} from '@labre/affine-shared/utils';
+import type { AffineLinkedDocWidget } from '@labre/affine-widget-linked-doc';
+import { viewPresets } from '@labre/data-view/view-presets';
+import { assertType } from '@labre/global/utils';
 import {
   AttachmentIcon,
   BoldIcon,
@@ -100,8 +100,8 @@ import {
   type BlockComponent,
   type BlockStdScope,
   ConfigExtensionFactory,
-} from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import { computed } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import type { TemplateResult } from 'lit';

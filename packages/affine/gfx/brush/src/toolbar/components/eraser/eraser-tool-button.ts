@@ -1,6 +1,6 @@
-import { DefaultTool } from '@blocksuite/affine-block-surface';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
+import { DefaultTool } from '@labre/affine-block-surface';
+import { ThemeProvider } from '@labre/affine-shared/services';
+import { EdgelessToolbarToolMixin } from '@labre/affine-widget-edgeless-toolbar';
 import { css, html, LitElement } from 'lit';
 
 import { EraserTool } from '../../../eraser-tool';

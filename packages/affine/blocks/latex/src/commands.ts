@@ -1,10 +1,10 @@
-import type { LatexProps } from '@blocksuite/affine-model';
+import type { LatexProps } from '@labre/affine-model';
 import {
   DocModeProvider,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import type { Command } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/affine-shared/services';
+import type { Command } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 
 import { LatexBlockComponent } from './latex-block.js';
 

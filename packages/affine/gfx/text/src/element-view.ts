@@ -1,8 +1,8 @@
-import type { TextElementModel } from '@blocksuite/affine-model';
+import type { TextElementModel } from '@labre/affine-model';
 import {
   GfxElementModelView,
   GfxViewInteractionExtension,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 import { mountTextElementEditor } from './edgeless-text-editor';
 import { normalizeTextBound } from './element-renderer';

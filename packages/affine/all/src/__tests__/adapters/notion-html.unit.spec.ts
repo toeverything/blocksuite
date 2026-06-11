@@ -1,11 +1,11 @@
-import { DefaultTheme, NoteDisplayMode } from '@blocksuite/affine-model';
-import { NotionHtmlAdapter } from '@blocksuite/affine-shared/adapters';
-import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '@blocksuite/affine-shared/consts';
+import { DefaultTheme, NoteDisplayMode } from '@labre/affine-model';
+import { NotionHtmlAdapter } from '@labre/affine-shared/adapters';
+import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '@labre/affine-shared/consts';
 import {
   AssetsManager,
   type BlockSnapshot,
   MemoryBlobCRUD,
-} from '@blocksuite/store';
+} from '@labre/store';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';

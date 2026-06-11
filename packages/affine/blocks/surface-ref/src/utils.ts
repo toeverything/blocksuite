@@ -1,16 +1,16 @@
-import { isFrameBlock } from '@blocksuite/affine-block-frame';
+import { isFrameBlock } from '@labre/affine-block-frame';
 import {
   GroupElementModel,
   MindmapElementModel,
   ShapeElementModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EdgelessIcon,
   FrameIcon,
   GroupIcon,
   MindmapIcon,
 } from '@blocksuite/icons/lit';
-import { type GfxModel } from '@blocksuite/std/gfx';
+import { type GfxModel } from '@labre/std/gfx';
 import { html, type TemplateResult } from 'lit';
 
 export const noContentPlaceholder = html`

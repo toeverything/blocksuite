@@ -5,17 +5,17 @@ import {
   filePathMiddleware,
   MarkdownAdapter,
   titleMiddleware,
-} from '@blocksuite/affine-shared/adapters';
-import { Container } from '@blocksuite/global/di';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { sha } from '@blocksuite/global/utils';
+} from '@labre/affine-shared/adapters';
+import { Container } from '@labre/global/di';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { sha } from '@labre/global/utils';
 import type {
   ExtensionType,
   Schema,
   Store,
   Workspace,
-} from '@blocksuite/store';
-import { extMimeMap, Transformer } from '@blocksuite/store';
+} from '@labre/store';
+import { extMimeMap, Transformer } from '@labre/store';
 
 import type { AssetMap, ImportedFileEntry, PathBlobIdMap } from './type.js';
 import { createAssetsArchive, download, Unzip } from './utils.js';

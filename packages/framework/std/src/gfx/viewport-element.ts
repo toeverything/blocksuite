@@ -1,4 +1,4 @@
-import { WithDisposable } from '@blocksuite/global/lit';
+import { WithDisposable } from '@labre/global/lit';
 import { batch } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';

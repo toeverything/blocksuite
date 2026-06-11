@@ -1,5 +1,5 @@
-import type { ServiceProvider } from '@blocksuite/global/di';
-import { BlockSuiteError } from '@blocksuite/global/exceptions';
+import type { ServiceProvider } from '@labre/global/di';
+import { BlockSuiteError } from '@labre/global/exceptions';
 
 import {
   BlockModel,

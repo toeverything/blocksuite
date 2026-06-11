@@ -5,17 +5,17 @@ import {
   DatabaseBlockModel,
   ImageBlockModel,
   SurfaceRefBlockModel,
-} from '@blocksuite/affine-model';
-import { getSelectionRectsCommand } from '@blocksuite/affine-shared/commands';
-import { EMBED_BLOCK_MODEL_LIST } from '@blocksuite/affine-shared/consts';
-import { matchModels } from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-model';
+import { getSelectionRectsCommand } from '@labre/affine-shared/commands';
+import { EMBED_BLOCK_MODEL_LIST } from '@labre/affine-shared/consts';
+import { matchModels } from '@labre/affine-shared/utils';
 import {
   BlockSelection,
   TextSelection,
   WidgetComponent,
-} from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
-import type { BaseSelection, UserInfo } from '@blocksuite/store';
+} from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
+import type { BaseSelection, UserInfo } from '@labre/store';
 import { computed, effect } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { state } from 'lit/decorators.js';

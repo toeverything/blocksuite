@@ -1,5 +1,5 @@
-import { type FrameBlockModel } from '@blocksuite/affine-model';
-import { WidgetComponent, WidgetViewExtension } from '@blocksuite/std';
+import { type FrameBlockModel } from '@labre/affine-model';
+import { WidgetComponent, WidgetViewExtension } from '@labre/std';
 import { html } from 'lit';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 

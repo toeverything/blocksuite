@@ -1,4 +1,4 @@
-import type { InlineRange, InlineRangeProvider } from '@blocksuite/std/inline';
+import type { InlineRange, InlineRangeProvider } from '@labre/std/inline';
 import { signal } from '@preact/signals-core';
 
 import { TextSelection } from '../../selection/index.js';

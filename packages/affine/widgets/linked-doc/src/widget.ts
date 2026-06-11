@@ -1,23 +1,23 @@
-import type { RootBlockModel } from '@blocksuite/affine-model';
+import type { RootBlockModel } from '@labre/affine-model';
 import {
   getRangeRects,
   type SelectionRect,
-} from '@blocksuite/affine-shared/commands';
-import { FeatureFlagService } from '@blocksuite/affine-shared/services';
-import { getViewportElement } from '@blocksuite/affine-shared/utils';
-import { IS_MOBILE } from '@blocksuite/global/env';
-import type { BlockComponent } from '@blocksuite/std';
+} from '@labre/affine-shared/commands';
+import { FeatureFlagService } from '@labre/affine-shared/services';
+import { getViewportElement } from '@labre/affine-shared/utils';
+import { IS_MOBILE } from '@labre/global/env';
+import type { BlockComponent } from '@labre/std';
 import {
   BLOCK_ID_ATTR,
   WidgetComponent,
   WidgetViewExtension,
-} from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import {
   INLINE_ROOT_ATTR,
   type InlineEditor,
   type InlineRootElement,
-} from '@blocksuite/std/inline';
+} from '@labre/std/inline';
 import { signal } from '@preact/signals-core';
 import { html, nothing } from 'lit';
 import { choose } from 'lit/directives/choose.js';

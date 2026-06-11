@@ -1,6 +1,6 @@
-import type { Container } from '@blocksuite/global/di';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Extension } from '@blocksuite/store';
+import type { Container } from '@labre/global/di';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { Extension } from '@labre/store';
 
 import { LifeCycleWatcherIdentifier, StdIdentifier } from '../identifier.js';
 import type { BlockStdScope } from '../scope/index.js';

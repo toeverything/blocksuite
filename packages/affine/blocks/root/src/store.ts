@@ -1,8 +1,8 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { RootBlockSchemaExtension } from '@blocksuite/affine-model';
+} from '@labre/affine-ext-loader';
+import { RootBlockSchemaExtension } from '@labre/affine-model';
 
 import { RootBlockAdapterExtensions } from './adapters/extension';
 

@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-rich-text/effects';
+export * from '@labre/affine-rich-text/effects';

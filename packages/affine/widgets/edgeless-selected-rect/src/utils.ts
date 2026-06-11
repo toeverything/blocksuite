@@ -3,8 +3,8 @@ import {
   type Options,
   Overlay,
   type RoughCanvas,
-} from '@blocksuite/affine-block-surface';
-import { type Shape, ShapeFactory } from '@blocksuite/affine-gfx-shape';
+} from '@labre/affine-block-surface';
+import { type Shape, ShapeFactory } from '@labre/affine-gfx-shape';
 import {
   type Connection,
   getShapeRadius,
@@ -14,18 +14,18 @@ import {
   ShapeElementModel,
   type ShapeName,
   type ShapeStyle,
-} from '@blocksuite/affine-model';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Bound, normalizeDegAngle, type XYWH } from '@blocksuite/global/gfx';
-import { assertType } from '@blocksuite/global/utils';
-import type { BlockComponent } from '@blocksuite/std';
+} from '@labre/affine-model';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { Bound, normalizeDegAngle, type XYWH } from '@labre/global/gfx';
+import { assertType } from '@labre/global/utils';
+import type { BlockComponent } from '@labre/std';
 import type {
   CursorType,
   GfxController,
   GfxModel,
   ResizeHandle,
   StandardCursor,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import * as Y from 'yjs';
 
 export enum Direction {

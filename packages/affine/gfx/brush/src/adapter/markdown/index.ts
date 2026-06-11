@@ -1,4 +1,4 @@
-import { ElementToMarkdownAdapterExtension } from '@blocksuite/affine-block-surface';
+import { ElementToMarkdownAdapterExtension } from '@labre/affine-block-surface';
 
 export const brushToMarkdownAdapterMatcher = ElementToMarkdownAdapterExtension({
   name: 'brush',

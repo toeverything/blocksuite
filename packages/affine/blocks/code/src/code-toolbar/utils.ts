@@ -1,4 +1,4 @@
-import type { CodeBlockModel } from '@blocksuite/affine-model';
+import type { CodeBlockModel } from '@labre/affine-model';
 
 export const duplicateCodeBlock = (model: CodeBlockModel) => {
   const keys = model.keys as (keyof (typeof model)['props'])[];

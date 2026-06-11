@@ -1,4 +1,4 @@
-import type { ToolbarContext } from '@blocksuite/affine-shared/services';
+import type { ToolbarContext } from '@labre/affine-shared/services';
 
 import { EdgelessRootBlockComponent } from '../..';
 

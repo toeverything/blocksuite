@@ -1,4 +1,4 @@
-import { IS_MAC } from '@blocksuite/global/env';
+import { IS_MAC } from '@labre/global/env';
 import { html } from 'lit';
 import { query } from 'lit/decorators.js';
 

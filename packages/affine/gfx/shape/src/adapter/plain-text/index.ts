@@ -1,5 +1,5 @@
-import { ElementToPlainTextAdapterExtension } from '@blocksuite/affine-block-surface';
-import type { MindMapTreeNode } from '@blocksuite/affine-model';
+import { ElementToPlainTextAdapterExtension } from '@labre/affine-block-surface';
+import type { MindMapTreeNode } from '@labre/affine-model';
 
 import { getShapeText, getShapeType } from '../utils';
 

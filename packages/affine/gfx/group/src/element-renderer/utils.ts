@@ -3,10 +3,10 @@ import {
   getLineHeight,
   getLineWidth,
   truncateTextByWidth,
-} from '@blocksuite/affine-gfx-text';
-import type { GroupElementModel } from '@blocksuite/affine-model';
-import { FontWeight } from '@blocksuite/affine-model';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-gfx-text';
+import type { GroupElementModel } from '@labre/affine-model';
+import { FontWeight } from '@labre/affine-model';
+import { Bound } from '@labre/global/gfx';
 
 import {
   GROUP_TITLE_FONT,

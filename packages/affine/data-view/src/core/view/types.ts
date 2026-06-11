@@ -1,10 +1,10 @@
 import type {
   DatabaseAllViewEvents,
   EventTraceFn,
-} from '@blocksuite/affine-shared/services';
-import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
-import type { Disposable } from '@blocksuite/global/disposable';
-import type { EventName, UIEventHandler } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import type { InsertToPosition } from '@labre/affine-shared/utils';
+import type { Disposable } from '@labre/global/disposable';
+import type { EventName, UIEventHandler } from '@labre/std';
 import type { ReadonlySignal } from '@preact/signals-core';
 
 import type { DataViewSelection } from '../types.js';

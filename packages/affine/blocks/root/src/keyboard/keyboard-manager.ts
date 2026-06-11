@@ -3,21 +3,21 @@ import {
   getTitleFromSelectedModels,
   notifyDocCreated,
   promptDocTitle,
-} from '@blocksuite/affine-block-embed';
-import { ParagraphBlockComponent } from '@blocksuite/affine-block-paragraph';
-import { NoteBlockModel, ParagraphBlockModel } from '@blocksuite/affine-model';
+} from '@labre/affine-block-embed';
+import { ParagraphBlockComponent } from '@labre/affine-block-paragraph';
+import { NoteBlockModel, ParagraphBlockModel } from '@labre/affine-model';
 import {
   draftSelectedModelsCommand,
   getSelectedModelsCommand,
-} from '@blocksuite/affine-shared/commands';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import { IS_MAC, IS_WINDOWS } from '@blocksuite/global/env';
+} from '@labre/affine-shared/commands';
+import { matchModels } from '@labre/affine-shared/utils';
+import { IS_MAC, IS_WINDOWS } from '@labre/global/env';
 import {
   type BlockComponent,
   BlockSelection,
   type UIEventHandler,
-} from '@blocksuite/std';
-import { toDraftModel } from '@blocksuite/store';
+} from '@labre/std';
+import { toDraftModel } from '@labre/store';
 
 export class PageKeyboardManager {
   private readonly _handleDelete: UIEventHandler = ctx => {

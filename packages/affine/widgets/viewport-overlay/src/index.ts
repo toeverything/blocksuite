@@ -1,5 +1,5 @@
-import type { RootBlockModel } from '@blocksuite/affine-model';
-import { WidgetComponent, WidgetViewExtension } from '@blocksuite/std';
+import type { RootBlockModel } from '@labre/affine-model';
+import { WidgetComponent, WidgetViewExtension } from '@labre/std';
 import { css, html } from 'lit';
 import { state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

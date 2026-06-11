@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-block-surface/view';
+export * from '@labre/affine-block-surface/view';

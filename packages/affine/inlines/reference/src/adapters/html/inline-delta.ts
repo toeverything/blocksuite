@@ -1,8 +1,8 @@
-import type { InlineHtmlAST } from '@blocksuite/affine-shared/adapters';
+import type { InlineHtmlAST } from '@labre/affine-shared/adapters';
 import {
   AdapterTextUtils,
   InlineDeltaToHtmlAdapterExtension,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 
 export const referenceDeltaToHtmlAdapterMatcher =
   InlineDeltaToHtmlAdapterExtension({

@@ -1,4 +1,4 @@
-import type { BlockStdScope } from '@blocksuite/std';
+import type { BlockStdScope } from '@labre/std';
 import { html, nothing } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { join } from 'lit/directives/join.js';

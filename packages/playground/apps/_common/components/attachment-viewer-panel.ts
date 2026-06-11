@@ -1,7 +1,7 @@
-import { getAttachmentFileIcon } from '@blocksuite/affine/components/icons';
-import { SignalWatcher, WithDisposable } from '@blocksuite/affine/global/lit';
-import type { AttachmentBlockModel } from '@blocksuite/affine-model';
-import { formatSize } from '@blocksuite/affine-shared/utils';
+import { getAttachmentFileIcon } from '@labre/affine/components/icons';
+import { SignalWatcher, WithDisposable } from '@labre/affine/global/lit';
+import type { AttachmentBlockModel } from '@labre/affine-model';
+import { formatSize } from '@labre/affine-shared/utils';
 import {
   ArrowDownBigIcon,
   ArrowUpBigIcon,

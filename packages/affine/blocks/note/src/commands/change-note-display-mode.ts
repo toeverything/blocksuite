@@ -1,6 +1,6 @@
-import { NoteBlockModel, NoteDisplayMode } from '@blocksuite/affine-model';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import type { Command } from '@blocksuite/std';
+import { NoteBlockModel, NoteDisplayMode } from '@labre/affine-model';
+import { matchModels } from '@labre/affine-shared/utils';
+import type { Command } from '@labre/std';
 
 export const changeNoteDisplayMode: Command<{
   noteId: string;

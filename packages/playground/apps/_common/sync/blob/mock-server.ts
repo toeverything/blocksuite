@@ -1,4 +1,4 @@
-import type { BlobSource, BlobState } from '@blocksuite/sync';
+import type { BlobSource, BlobState } from '@labre/sync';
 import { BehaviorSubject, ReplaySubject, share, throttleTime } from 'rxjs';
 
 /**

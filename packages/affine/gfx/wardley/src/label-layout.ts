@@ -1,4 +1,4 @@
-import type { WardleyBackgroundElementModel } from '@blocksuite/affine-model';
+import type { WardleyBackgroundElementModel } from '@labre/affine-model';
 
 import { FONTS, MARGIN, OFFSETS } from './consts';
 

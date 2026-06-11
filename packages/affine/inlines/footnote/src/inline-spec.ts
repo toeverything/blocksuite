@@ -1,7 +1,7 @@
-import { FootNoteSchema } from '@blocksuite/affine-model';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { StdIdentifier } from '@blocksuite/std';
-import { InlineSpecExtension } from '@blocksuite/std/inline';
+import { FootNoteSchema } from '@labre/affine-model';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { StdIdentifier } from '@labre/std';
+import { InlineSpecExtension } from '@labre/std/inline';
 import { html } from 'lit';
 import z from 'zod';
 

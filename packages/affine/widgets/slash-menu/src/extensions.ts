@@ -1,10 +1,10 @@
-import { type Container, createIdentifier } from '@blocksuite/global/di';
+import { type Container, createIdentifier } from '@labre/global/di';
 import {
   type BlockStdScope,
   StdIdentifier,
   WidgetViewExtension,
-} from '@blocksuite/std';
-import { Extension, type ExtensionType } from '@blocksuite/store';
+} from '@labre/std';
+import { Extension, type ExtensionType } from '@labre/store';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { defaultSlashMenuConfig } from './config';

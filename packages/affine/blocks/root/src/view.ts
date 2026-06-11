@@ -1,17 +1,17 @@
 import {
   type ViewExtensionContext,
   ViewExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { NoteBlockSchema } from '@blocksuite/affine-model';
+} from '@labre/affine-ext-loader';
+import { NoteBlockSchema } from '@labre/affine-model';
 import {
   ToolbarModuleExtension,
   ViewportElementExtension,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   BlockFlavourIdentifier,
   BlockViewExtension,
   FlavourExtension,
-} from '@blocksuite/std';
+} from '@labre/std';
 import { literal } from 'lit/static-html.js';
 
 import { PageClipboard, ReadOnlyClipboard } from './clipboard';

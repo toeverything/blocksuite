@@ -1,7 +1,7 @@
 import {
   createAutoIncrementIdGenerator,
   TestWorkspace,
-} from '@blocksuite/store/test';
+} from '@labre/store/test';
 import { describe, expect, test } from 'vitest';
 
 import { effects } from '../effects.js';

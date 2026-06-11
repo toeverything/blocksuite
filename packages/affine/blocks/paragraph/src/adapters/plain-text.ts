@@ -1,9 +1,9 @@
-import { ParagraphBlockSchema } from '@blocksuite/affine-model';
+import { ParagraphBlockSchema } from '@labre/affine-model';
 import {
   BlockPlainTextAdapterExtension,
   type BlockPlainTextAdapterMatcher,
-} from '@blocksuite/affine-shared/adapters';
-import type { DeltaInsert } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import type { DeltaInsert } from '@labre/store';
 
 export const paragraphBlockPlainTextAdapterMatcher: BlockPlainTextAdapterMatcher =
   {

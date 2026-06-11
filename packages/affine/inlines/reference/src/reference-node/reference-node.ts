@@ -1,31 +1,31 @@
-import { whenHover } from '@blocksuite/affine-components/hover';
-import { Peekable } from '@blocksuite/affine-components/peek';
-import type { ReferenceInfo } from '@blocksuite/affine-model';
+import { whenHover } from '@labre/affine-components/hover';
+import { Peekable } from '@labre/affine-components/peek';
+import type { ReferenceInfo } from '@labre/affine-model';
 import {
   DEFAULT_DOC_NAME,
   REFERENCE_NODE,
-} from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-shared/consts';
 import {
   DocDisplayMetaProvider,
   ToolbarRegistryIdentifier,
-} from '@blocksuite/affine-shared/services';
-import { affineTextStyles } from '@blocksuite/affine-shared/styles';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
+} from '@labre/affine-shared/services';
+import { affineTextStyles } from '@labre/affine-shared/styles';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
 import {
   cloneReferenceInfo,
   referenceToNode,
-} from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
 import { LinkedPageIcon } from '@blocksuite/icons/lit';
-import type { BlockComponent, BlockStdScope } from '@blocksuite/std';
-import { BLOCK_ID_ATTR, ShadowlessElement } from '@blocksuite/std';
+import type { BlockComponent, BlockStdScope } from '@labre/std';
+import { BLOCK_ID_ATTR, ShadowlessElement } from '@labre/std';
 import {
   INLINE_ROOT_ATTR,
   type InlineRootElement,
   ZERO_WIDTH_FOR_EMBED_NODE,
   ZERO_WIDTH_FOR_EMPTY_LINE,
-} from '@blocksuite/std/inline';
-import type { DeltaInsert, DocMeta, Store } from '@blocksuite/store';
+} from '@labre/std/inline';
+import type { DeltaInsert, DocMeta, Store } from '@labre/store';
 import { css, html, nothing } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';

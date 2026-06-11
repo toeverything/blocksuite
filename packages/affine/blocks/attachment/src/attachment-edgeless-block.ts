@@ -1,14 +1,14 @@
-import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
+import { EdgelessLegacySlotIdentifier } from '@labre/affine-block-surface';
 import {
   AttachmentBlockSchema,
   AttachmentBlockStyles,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
-} from '@blocksuite/affine-shared/consts';
-import { toGfxBlockComponent } from '@blocksuite/std';
-import { GfxViewInteractionExtension } from '@blocksuite/std/gfx';
+} from '@labre/affine-shared/consts';
+import { toGfxBlockComponent } from '@labre/std';
+import { GfxViewInteractionExtension } from '@labre/std/gfx';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { AttachmentBlockComponent } from './attachment-block.js';

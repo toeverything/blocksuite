@@ -5,9 +5,9 @@ import {
   ImageAdapter,
   MixTextAdapter,
   NotionTextAdapter,
-} from '@blocksuite/affine-shared/adapters';
-import { ClipboardAdapterConfigExtension } from '@blocksuite/std';
-import type { ExtensionType } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import { ClipboardAdapterConfigExtension } from '@labre/std';
+import type { ExtensionType } from '@labre/store';
 
 const SnapshotClipboardConfig = ClipboardAdapterConfigExtension({
   mimeType: ClipboardAdapter.MIME,

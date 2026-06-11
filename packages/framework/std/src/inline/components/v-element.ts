@@ -1,7 +1,7 @@
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { SignalWatcher } from '@blocksuite/global/lit';
-import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/store';
+import { DisposableGroup } from '@labre/global/disposable';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { SignalWatcher } from '@labre/global/lit';
+import type { BaseTextAttributes, DeltaInsert } from '@labre/store';
 import { effect, signal } from '@preact/signals-core';
 import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';

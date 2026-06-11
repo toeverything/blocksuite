@@ -1,5 +1,5 @@
-import { CommandManager, type EditorHost } from '@blocksuite/std';
-import type { Block, Store } from '@blocksuite/store';
+import { CommandManager, type EditorHost } from '@labre/std';
+import type { Block, Store } from '@labre/store';
 import { Subject } from 'rxjs';
 
 interface MockBlockComponent {

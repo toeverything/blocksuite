@@ -1,5 +1,5 @@
 {
-  "name": "@blocksuite/affine-rich-text",
+  "name": "@labre/affine-rich-text",
   "description": "Inline rich text for BlockSuite.",
   "type": "module",
   "scripts": {
@@ -10,14 +10,14 @@
   "author": "toeverything",
   "license": "MIT",
   "dependencies": {
-    "@blocksuite/affine-components": "workspace:*",
-    "@blocksuite/affine-model": "workspace:*",
-    "@blocksuite/affine-shared": "workspace:*",
-    "@blocksuite/global": "workspace:*",
     "@blocksuite/icons": "^2.2.12",
-    "@blocksuite/std": "workspace:*",
-    "@blocksuite/store": "workspace:*",
     "@floating-ui/dom": "^1.6.13",
+    "@labre/affine-components": "workspace:*",
+    "@labre/affine-model": "workspace:*",
+    "@labre/affine-shared": "workspace:*",
+    "@labre/global": "workspace:*",
+    "@labre/std": "workspace:*",
+    "@labre/store": "workspace:*",
     "@lit/context": "^1.1.2",
     "@preact/signals-core": "^1.8.0",
     "@toeverything/theme": "^1.1.15",

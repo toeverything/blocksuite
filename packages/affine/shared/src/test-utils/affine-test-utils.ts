@@ -1,4 +1,4 @@
-import type { BlockModel, Store } from '@blocksuite/store';
+import type { BlockModel, Store } from '@labre/store';
 import { expect } from 'vitest';
 
 declare module 'vitest' {

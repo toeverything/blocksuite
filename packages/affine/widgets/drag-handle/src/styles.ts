@@ -1,4 +1,4 @@
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
 import { css } from 'lit';
 
 import { DRAG_HANDLE_CONTAINER_WIDTH } from './config.js';

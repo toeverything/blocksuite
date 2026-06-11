@@ -3,21 +3,21 @@ import {
   DefaultTool,
   EXCLUDING_MOUSE_OUT_CLASS_LIST,
   type SurfaceBlockComponent,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   DefaultTheme,
   ShapeType,
   type StrokeStyle,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EditPropsStore,
   TelemetryProvider,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
-import { hasClassNameInList } from '@blocksuite/affine-shared/utils';
-import { Bound } from '@blocksuite/global/gfx';
-import type { PointerEventState } from '@blocksuite/std';
-import { BaseTool, type GfxController } from '@blocksuite/std/gfx';
+} from '@labre/affine-shared/services';
+import { hasClassNameInList } from '@labre/affine-shared/utils';
+import { Bound } from '@labre/global/gfx';
+import type { PointerEventState } from '@labre/std';
+import { BaseTool, type GfxController } from '@labre/std/gfx';
 
 import { PolygonDrawingOverlay } from './overlay/polygon-drawing-overlay.js';
 

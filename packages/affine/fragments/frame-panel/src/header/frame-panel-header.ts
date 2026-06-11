@@ -1,18 +1,18 @@
 import {
   type NavigatorMode,
   PresentTool,
-} from '@blocksuite/affine-block-frame';
-import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-frame';
+import { EdgelessLegacySlotIdentifier } from '@labre/affine-block-surface';
 import {
   DocModeProvider,
   EditPropsStore,
-} from '@blocksuite/affine-shared/services';
-import { createButtonPopper } from '@blocksuite/affine-shared/utils';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/services';
+import { createButtonPopper } from '@labre/affine-shared/utils';
+import { DisposableGroup } from '@labre/global/disposable';
+import { WithDisposable } from '@labre/global/lit';
 import { PresentationIcon, SettingsIcon } from '@blocksuite/icons/lit';
-import type { EditorHost } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+import type { EditorHost } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 

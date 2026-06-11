@@ -1,17 +1,17 @@
 import {
   DefaultTool,
   EdgelessLegacySlotIdentifier,
-} from '@blocksuite/affine-block-surface';
-import { toast } from '@blocksuite/affine-components/toast';
-import { PanTool } from '@blocksuite/affine-gfx-pointer';
-import type { FrameBlockModel } from '@blocksuite/affine-model';
+} from '@labre/affine-block-surface';
+import { toast } from '@labre/affine-components/toast';
+import { PanTool } from '@labre/affine-gfx-pointer';
+import type { FrameBlockModel } from '@labre/affine-model';
 import {
   EditPropsStore,
   ViewportElementProvider,
-} from '@blocksuite/affine-shared/services';
-import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
-import { Bound, clamp } from '@blocksuite/global/gfx';
-import { SignalWatcher } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/services';
+import { EdgelessToolbarToolMixin } from '@labre/affine-widget-edgeless-toolbar';
+import { Bound, clamp } from '@labre/global/gfx';
+import { SignalWatcher } from '@labre/global/lit';
 import {
   EndPointArrowIcon,
   ExpandCloseIcon,
@@ -19,8 +19,8 @@ import {
   StartPointArrowIcon,
   StopAiIcon,
 } from '@blocksuite/icons/lit';
-import type { BlockComponent } from '@blocksuite/std';
-import type { ToolOptions } from '@blocksuite/std/gfx';
+import type { BlockComponent } from '@labre/std';
+import type { ToolOptions } from '@labre/std/gfx';
 import { effect } from '@preact/signals-core';
 import { cssVar } from '@toeverything/theme';
 import { css, html, LitElement, nothing, type PropertyValues } from 'lit';

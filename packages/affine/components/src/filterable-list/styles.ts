@@ -1,7 +1,7 @@
 import {
   panelBaseStyle,
   scrollbarStyle,
-} from '@blocksuite/affine-shared/styles';
+} from '@labre/affine-shared/styles';
 import { css } from 'lit';
 
 export const filterableListStyles = css`

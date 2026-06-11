@@ -1,5 +1,5 @@
-import { DefaultTool } from '@blocksuite/affine-block-surface';
-import { QuickToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
+import { DefaultTool } from '@labre/affine-block-surface';
+import { QuickToolMixin } from '@labre/affine-widget-edgeless-toolbar';
 import { HandIcon, SelectIcon } from '@blocksuite/icons/lit';
 import { effect } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';

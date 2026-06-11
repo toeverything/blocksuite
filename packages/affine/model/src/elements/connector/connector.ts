@@ -1,4 +1,4 @@
-import type { IVec, SerializedXYWH, XYWH } from '@blocksuite/global/gfx';
+import type { IVec, SerializedXYWH, XYWH } from '@labre/global/gfx';
 import {
   Bound,
   curveIntersects,
@@ -11,18 +11,18 @@ import {
   Polyline,
   polyLineNearestPoint,
   Vec,
-} from '@blocksuite/global/gfx';
+} from '@labre/global/gfx';
 import type {
   BaseElementProps,
   PointTestOptions,
   SerializedElement,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import {
   derive,
   field,
   GfxPrimitiveElementModel,
   local,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import * as Y from 'yjs';
 
 import {

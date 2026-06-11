@@ -1,12 +1,12 @@
-import type { Container } from '@blocksuite/global/di';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { ConfigExtensionFactory } from '@blocksuite/std';
+import type { Container } from '@labre/global/di';
+import { DisposableGroup } from '@labre/global/disposable';
+import { ConfigExtensionFactory } from '@labre/std';
 import {
   type GfxController,
   GfxExtension,
   GfxExtensionIdentifier,
   type GfxViewportElement,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import {
   BehaviorSubject,
   distinctUntilChanged,
@@ -53,7 +53,7 @@ export const TurboRendererConfigFactory =
  * To add Turbo Rendering support for a new block type (e.g., 'affine:my-block'):
  *
  * 1.  **In the block's package (e.g., `blocksuite/affine/blocks/my-block`):**
- *   a.  Add `@blocksuite/affine/gfx/turbo-renderer` as a dependency in `package.json` and create a `src/turbo` directory.
+ *   a.  Add `@labre/affine/gfx/turbo-renderer` as a dependency in `package.json` and create a `src/turbo` directory.
  *   b.  Implement the Layout Handler (e.g., `MyBlockLayoutHandlerExtension`) and Painter Worker (e.g., `MyBlockLayoutPainterExtension`). Refer to `ParagraphLayoutHandlerExtension` and `ParagraphLayoutPainterExtension` in `blocksuite/affine/blocks/block-paragraph` for implementation examples.
  *   c.  Export the Layout Handler and Painter Worker extensions from the block package's main `src/index.ts` by adding these two explicit export statements:
  *       ```typescript

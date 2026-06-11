@@ -1,21 +1,21 @@
 import {
   EdgelessLegacySlotIdentifier,
   OverlayIdentifier,
-} from '@blocksuite/affine-block-surface';
-import { ConnectorMode } from '@blocksuite/affine-model';
-import type { ConnectorElementModel } from '@blocksuite/affine-model';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import type { IVec } from '@blocksuite/global/gfx';
-import { getBezierParameters, getBezierPoint, Vec } from '@blocksuite/global/gfx';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-block-surface';
+import { ConnectorMode } from '@labre/affine-model';
+import type { ConnectorElementModel } from '@labre/affine-model';
+import { DisposableGroup } from '@labre/global/disposable';
+import type { IVec } from '@labre/global/gfx';
+import { getBezierParameters, getBezierPoint, Vec } from '@labre/global/gfx';
+import { WithDisposable } from '@labre/global/lit';
 import {
   type BlockComponent,
   type BlockStdScope,
   stdContext,
   storeContext,
-} from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
-import type { Store } from '@blocksuite/store';
+} from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
+import type { Store } from '@labre/store';
 import { consume } from '@lit/context';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';

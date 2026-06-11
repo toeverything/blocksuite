@@ -1,9 +1,9 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { ImageBlockSchemaExtension } from '@blocksuite/affine-model';
-import { ImageSelectionExtension } from '@blocksuite/affine-shared/selection';
+} from '@labre/affine-ext-loader';
+import { ImageBlockSchemaExtension } from '@labre/affine-model';
+import { ImageSelectionExtension } from '@labre/affine-shared/selection';
 
 import { ImageBlockAdapterExtensions } from './adapters/extension';
 

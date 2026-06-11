@@ -1,11 +1,11 @@
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import type { IBound } from '@blocksuite/global/gfx';
+import { DisposableGroup } from '@labre/global/disposable';
+import type { IBound } from '@labre/global/gfx';
 import {
   Bound,
   getBoundWithRotation,
   intersects,
-} from '@blocksuite/global/gfx';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/global/gfx';
+import type { BlockModel } from '@labre/store';
 
 import { compare } from '../utils/layer.js';
 import { GfxExtension } from './extension.js';

@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { EmbedYoutubeBlockHtmlAdapterExtension } from './html.js';
 import { EmbedYoutubeMarkdownAdapterExtension } from './markdown.js';

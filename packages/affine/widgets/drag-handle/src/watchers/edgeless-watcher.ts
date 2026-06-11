@@ -1,10 +1,10 @@
-import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
-import { getSelectedRect } from '@blocksuite/affine-shared/utils';
-import { type IVec, Rect } from '@blocksuite/global/gfx';
+import { EdgelessLegacySlotIdentifier } from '@labre/affine-block-surface';
+import { getSelectedRect } from '@labre/affine-shared/utils';
+import { type IVec, Rect } from '@labre/global/gfx';
 import {
   GfxControllerIdentifier,
   type ToolOptionWithType,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import { effect } from '@preact/signals-core';
 
 import {

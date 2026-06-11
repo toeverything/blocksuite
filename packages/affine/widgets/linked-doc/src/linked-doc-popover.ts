@@ -1,19 +1,19 @@
-import type { IconButton } from '@blocksuite/affine-components/icon-button';
-import { LoadingIcon } from '@blocksuite/affine-components/icons';
+import type { IconButton } from '@labre/affine-components/icon-button';
+import { LoadingIcon } from '@labre/affine-components/icons';
 import {
   cleanSpecifiedTail,
   getTextContentFromInlineRange,
-} from '@blocksuite/affine-rich-text';
-import { unsafeCSSVar } from '@blocksuite/affine-shared/theme';
+} from '@labre/affine-rich-text';
+import { unsafeCSSVar } from '@labre/affine-shared/theme';
 import {
   createKeydownObserver,
   getPopperPosition,
   getViewportElement,
-} from '@blocksuite/affine-shared/utils';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/utils';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { MoreHorizontalIcon } from '@blocksuite/icons/lit';
-import { PropTypes, requiredProperties } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+import { PropTypes, requiredProperties } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import { effect } from '@preact/signals-core';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, queryAll, state } from 'lit/decorators.js';

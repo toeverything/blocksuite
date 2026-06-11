@@ -1,8 +1,8 @@
-import type { CynefinElementModel } from '@blocksuite/affine-model';
+import type { CynefinElementModel } from '@labre/affine-model';
 import {
   GfxElementModelView,
   GfxViewInteractionExtension,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 /**
  * View for the Cynefin background. Registering it ensures `gfx.view.get(model)`

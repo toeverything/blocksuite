@@ -1,10 +1,10 @@
-import { sha } from '@blocksuite/global/utils';
-import type { BlockStdScope } from '@blocksuite/std';
+import { sha } from '@labre/global/utils';
+import type { BlockStdScope } from '@labre/std';
 import type {
   BlockModel,
   BlockProps,
   TransformerMiddleware,
-} from '@blocksuite/store';
+} from '@labre/store';
 import { filter, from, map, mergeMap } from 'rxjs';
 
 const ALLOWED_FLAVOURS = new Set(['affine:attachment', 'affine:image']);

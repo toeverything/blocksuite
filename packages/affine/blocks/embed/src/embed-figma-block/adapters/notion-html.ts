@@ -1,5 +1,5 @@
-import { EmbedFigmaBlockSchema } from '@blocksuite/affine-model';
-import { BlockNotionHtmlAdapterExtension } from '@blocksuite/affine-shared/adapters';
+import { EmbedFigmaBlockSchema } from '@labre/affine-model';
+import { BlockNotionHtmlAdapterExtension } from '@labre/affine-shared/adapters';
 
 import { createEmbedBlockNotionHtmlAdapterMatcher } from '../../common/adapters/notion-html.js';
 import { figmaUrlRegex } from '../embed-figma-model.js';

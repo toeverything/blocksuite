@@ -1,9 +1,9 @@
-import type { Command } from '@blocksuite/std';
+import type { Command } from '@labre/std';
 import {
   type BlockModel,
   type DraftModel,
   toDraftModel,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 export const draftSelectedModelsCommand: Command<
   {

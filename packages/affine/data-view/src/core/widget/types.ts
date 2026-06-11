@@ -1,4 +1,4 @@
-import type { UniComponent } from '@blocksuite/affine-shared/types';
+import type { UniComponent } from '@labre/affine-shared/types';
 
 import type { DataViewUILogicBase } from '../view/data-view-base.js';
 

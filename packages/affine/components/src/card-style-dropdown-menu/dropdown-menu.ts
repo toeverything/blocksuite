@@ -1,11 +1,11 @@
-import type { ColorScheme } from '@blocksuite/affine-model';
+import type { ColorScheme } from '@labre/affine-model';
 import {
   type ToolbarAction,
   ToolbarContext,
-} from '@blocksuite/affine-shared/services';
-import { SignalWatcher } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/services';
+import { SignalWatcher } from '@labre/global/lit';
 import { PaletteIcon } from '@blocksuite/icons/lit';
-import { PropTypes, requiredProperties } from '@blocksuite/std';
+import { PropTypes, requiredProperties } from '@labre/std';
 import {
   computed,
   type ReadonlySignal,

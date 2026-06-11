@@ -1,5 +1,5 @@
-import { TextUtils } from '@blocksuite/affine-block-surface';
-import { formatBlockCommand } from '@blocksuite/affine-inline-preset';
+import { TextUtils } from '@labre/affine-block-surface';
+import { formatBlockCommand } from '@labre/affine-inline-preset';
 import {
   DefaultTheme,
   EDGELESS_TEXT_BLOCK_MIN_HEIGHT,
@@ -8,21 +8,21 @@ import {
   EdgelessTextBlockSchema,
   ListBlockModel,
   ParagraphBlockModel,
-} from '@blocksuite/affine-model';
-import { focusTextModel } from '@blocksuite/affine-rich-text';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
+} from '@labre/affine-model';
+import { focusTextModel } from '@labre/affine-rich-text';
+import { ThemeProvider } from '@labre/affine-shared/services';
 import {
   handleNativeRangeAtPoint,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import { Bound, clamp } from '@blocksuite/global/gfx';
-import type { BlockComponent } from '@blocksuite/std';
+} from '@labre/affine-shared/utils';
+import { Bound, clamp } from '@labre/global/gfx';
+import type { BlockComponent } from '@labre/std';
 import {
   BlockSelection,
   GfxBlockComponent,
   TextSelection,
-} from '@blocksuite/std';
-import { GfxViewInteractionExtension } from '@blocksuite/std/gfx';
+} from '@labre/std';
+import { GfxViewInteractionExtension } from '@labre/std/gfx';
 import { computed } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { query, state } from 'lit/decorators.js';

@@ -1,6 +1,6 @@
-import { createIdentifier } from '@blocksuite/global/di';
-import type { DisposableMember } from '@blocksuite/global/disposable';
-import type { BaseSelection, ExtensionType } from '@blocksuite/store';
+import { createIdentifier } from '@labre/global/di';
+import type { DisposableMember } from '@labre/global/disposable';
+import type { BaseSelection, ExtensionType } from '@labre/store';
 
 export type CommentId = string;
 

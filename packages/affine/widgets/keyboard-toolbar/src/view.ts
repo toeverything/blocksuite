@@ -1,8 +1,8 @@
 import {
   type ViewExtensionContext,
   ViewExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { IS_MOBILE } from '@blocksuite/global/env';
+} from '@labre/affine-ext-loader';
+import { IS_MOBILE } from '@labre/global/env';
 
 import { effects } from './effects';
 import { keyboardToolbarWidget } from './widget';

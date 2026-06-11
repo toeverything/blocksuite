@@ -1,9 +1,9 @@
 import {
   EMBED_IFRAME_DEFAULT_HEIGHT_IN_SURFACE,
   EMBED_IFRAME_DEFAULT_WIDTH_IN_SURFACE,
-} from '@blocksuite/affine-block-embed';
-import { ParagraphBlockComponent } from '@blocksuite/affine-block-paragraph';
-import { DropIndicator } from '@blocksuite/affine-components/drop-indicator';
+} from '@labre/affine-block-embed';
+import { ParagraphBlockComponent } from '@labre/affine-block-paragraph';
+import { DropIndicator } from '@labre/affine-components/drop-indicator';
 import {
   AttachmentBlockModel,
   BookmarkBlockModel,
@@ -14,19 +14,19 @@ import {
   ListBlockModel,
   NoteBlockModel,
   RootBlockModel,
-} from '@blocksuite/affine-model';
-import { surfaceRefToEmbed } from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-model';
+import { surfaceRefToEmbed } from '@labre/affine-shared/adapters';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
-} from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-shared/consts';
 import {
   DndApiExtensionIdentifier,
   DocModeProvider,
   EmbedIframeService,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   captureEventTarget,
   type DropTarget as DropResult,
@@ -35,22 +35,22 @@ import {
   getRectByBlockComponent,
   getScrollContainer,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/utils';
 import {
   Bound,
   type IVec,
   Point,
   Rect,
   type SerializedXYWH,
-} from '@blocksuite/global/gfx';
-import { assertType } from '@blocksuite/global/utils';
+} from '@labre/global/gfx';
+import { assertType } from '@labre/global/utils';
 import {
   BlockComponent,
   type BlockStdScope,
   type DragFromBlockSuite,
   type DragPayload,
   type DropPayload,
-} from '@blocksuite/std';
+} from '@labre/std';
 import {
   GfxBlockElementModel,
   GfxControllerIdentifier,
@@ -61,7 +61,7 @@ import {
   isPrimitiveModel,
   SURFACE_YMAP_UNIQ_IDENTIFIER,
   SurfaceBlockModel,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import {
   type BlockModel,
   type BlockSnapshot,
@@ -69,7 +69,7 @@ import {
   Slice,
   type SliceSnapshot,
   toDraftModel,
-} from '@blocksuite/store';
+} from '@labre/store';
 import groupBy from 'lodash-es/groupBy';
 import last from 'lodash-es/last';
 
@@ -100,7 +100,7 @@ export type DragBlockEntity = {
 
 export type DragBlockPayload = DragPayload<DragBlockEntity, DragFromBlockSuite>;
 
-declare module '@blocksuite/std' {
+declare module '@labre/std' {
   interface DNDEntity {
     blocks: DragBlockPayload;
   }

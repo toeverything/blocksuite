@@ -1,8 +1,8 @@
 import {
   createIdentifier,
   type ServiceIdentifier,
-} from '@blocksuite/global/di';
-import type { ExtensionType } from '@blocksuite/store';
+} from '@labre/global/di';
+import type { ExtensionType } from '@labre/store';
 
 import type { BlockAdapterMatcher, TextBuffer } from '../types/adapter.js';
 

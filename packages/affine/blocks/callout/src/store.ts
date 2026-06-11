@@ -1,8 +1,8 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { CalloutBlockSchemaExtension } from '@blocksuite/affine-model';
+} from '@labre/affine-ext-loader';
+import { CalloutBlockSchemaExtension } from '@labre/affine-model';
 
 import { CalloutBlockMarkdownAdapterExtension } from './adapters/markdown';
 

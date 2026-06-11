@@ -4,16 +4,16 @@ import {
   NoteBlockModel,
   ParagraphBlockModel,
   StrokeStyle,
-} from '@blocksuite/affine-model';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
+} from '@labre/affine-model';
+import { ThemeProvider } from '@labre/affine-shared/services';
 import {
   getClosestBlockComponentByPoint,
   handleNativeRangeAtPoint,
   matchModels,
   stopPropagation,
-} from '@blocksuite/affine-shared/utils';
-import { clamp, Point } from '@blocksuite/global/gfx';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/utils';
+import { clamp, Point } from '@labre/global/gfx';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import {
   type BlockComponent,
   type BlockStdScope,
@@ -22,9 +22,9 @@ import {
   ShadowlessElement,
   stdContext,
   TextSelection,
-} from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
+import type { BlockModel } from '@labre/store';
 import { consume } from '@lit/context';
 import { computed, effect } from '@preact/signals-core';
 import { nothing } from 'lit';

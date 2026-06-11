@@ -1,8 +1,8 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { AttachmentBlockSchemaExtension } from '@blocksuite/affine-model';
+} from '@labre/affine-ext-loader';
+import { AttachmentBlockSchemaExtension } from '@labre/affine-model';
 
 import { AttachmentBlockAdapterExtensions } from './adapters/extension';
 

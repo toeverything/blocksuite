@@ -1,8 +1,8 @@
-import { getSelectedModelsCommand } from '@blocksuite/affine-shared/commands';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import { isInsideBlockByFlavour } from '@blocksuite/affine-shared/utils';
-import { type SlashMenuConfig } from '@blocksuite/affine-widget-slash-menu';
-import { viewPresets } from '@blocksuite/data-view/view-presets';
+import { getSelectedModelsCommand } from '@labre/affine-shared/commands';
+import { TelemetryProvider } from '@labre/affine-shared/services';
+import { isInsideBlockByFlavour } from '@labre/affine-shared/utils';
+import { type SlashMenuConfig } from '@labre/affine-widget-slash-menu';
+import { viewPresets } from '@labre/data-view/view-presets';
 import {
   DatabaseKanbanViewIcon,
   DatabaseTableViewIcon,

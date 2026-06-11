@@ -1,7 +1,7 @@
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { assertType, type Constructor } from '@blocksuite/global/utils';
-import type { Boxed } from '@blocksuite/store';
-import { BlockModel, nanoid } from '@blocksuite/store';
+import { DisposableGroup } from '@labre/global/disposable';
+import { assertType, type Constructor } from '@labre/global/utils';
+import type { Boxed } from '@labre/store';
+import { BlockModel, nanoid } from '@labre/store';
 import { signal } from '@preact/signals-core';
 import { Subject } from 'rxjs';
 import * as Y from 'yjs';

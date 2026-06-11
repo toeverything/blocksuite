@@ -1,6 +1,6 @@
-import { EmbedSyncedDocBlockSchema } from '@blocksuite/affine-model';
-import { BlockViewExtension, FlavourExtension } from '@blocksuite/std';
-import type { ExtensionType } from '@blocksuite/store';
+import { EmbedSyncedDocBlockSchema } from '@labre/affine-model';
+import { BlockViewExtension, FlavourExtension } from '@labre/std';
+import type { ExtensionType } from '@labre/store';
 import { literal } from 'lit/static-html.js';
 
 import { createBuiltinToolbarConfigExtension } from './configs/toolbar';

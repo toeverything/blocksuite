@@ -1,1 +1,1 @@
-export * from '@blocksuite/std/gfx';
+export * from '@labre/std/gfx';

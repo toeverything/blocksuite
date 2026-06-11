@@ -1,6 +1,6 @@
-import { type ShapeName, ShapeType } from '@blocksuite/affine-model';
-import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
-import { SignalWatcher } from '@blocksuite/global/lit';
+import { type ShapeName, ShapeType } from '@labre/affine-model';
+import { EdgelessToolbarToolMixin } from '@labre/affine-widget-edgeless-toolbar';
+import { SignalWatcher } from '@labre/global/lit';
 import { css, html, LitElement } from 'lit';
 
 import { PolygonTool } from '../polygon-tool.js';

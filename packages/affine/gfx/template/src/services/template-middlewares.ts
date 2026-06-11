@@ -1,8 +1,8 @@
-import { generateElementId, sortIndex } from '@blocksuite/affine-block-surface';
-import type { ConnectorElementModel } from '@blocksuite/affine-model';
-import { Bound } from '@blocksuite/global/gfx';
-import { assertType } from '@blocksuite/global/utils';
-import type { BlockSnapshot, SnapshotNode } from '@blocksuite/store';
+import { generateElementId, sortIndex } from '@labre/affine-block-surface';
+import type { ConnectorElementModel } from '@labre/affine-model';
+import { Bound } from '@labre/global/gfx';
+import { assertType } from '@labre/global/utils';
+import type { BlockSnapshot, SnapshotNode } from '@labre/store';
 
 import type { SlotBlockPayload, TemplateJob } from './template.js';
 

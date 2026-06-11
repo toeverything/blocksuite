@@ -3,8 +3,8 @@ import type {
   FromSnapshotPayload,
   SnapshotNode,
   ToSnapshotPayload,
-} from '@blocksuite/store';
-import { BaseBlockTransformer } from '@blocksuite/store';
+} from '@labre/store';
+import { BaseBlockTransformer } from '@labre/store';
 
 import type { ImageBlockProps } from './image-model.js';
 

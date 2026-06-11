@@ -1,7 +1,7 @@
-import type { CommentId } from '@blocksuite/affine-shared/services';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { TextSelection } from '@blocksuite/std';
-import type { DeltaInsert, Store } from '@blocksuite/store';
+import type { CommentId } from '@labre/affine-shared/services';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { TextSelection } from '@labre/std';
+import type { DeltaInsert, Store } from '@labre/store';
 
 export function findAllCommentedTexts(
   store: Store

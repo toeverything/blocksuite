@@ -1,16 +1,16 @@
-import { createEmbedBlockMarkdownAdapterMatcher } from '@blocksuite/affine-block-embed';
+import { createEmbedBlockMarkdownAdapterMatcher } from '@labre/affine-block-embed';
 import {
   BookmarkBlockSchema,
   FootNoteReferenceParamsSchema,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   BlockMarkdownAdapterExtension,
   FOOTNOTE_DEFINITION_PREFIX,
   getFootnoteDefinitionText,
   isFootnoteDefinitionNode,
   type MarkdownAST,
-} from '@blocksuite/affine-shared/adapters';
-import { nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import { nanoid } from '@labre/store';
 
 const isUrlFootnoteDefinitionNode = (node: MarkdownAST) => {
   if (!isFootnoteDefinitionNode(node)) return false;

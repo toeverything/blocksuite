@@ -1,7 +1,7 @@
-import type { ReferenceInfo } from '@blocksuite/affine-model';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import type { BlockStdScope } from '@blocksuite/std';
-import type { InlineEditor, InlineRange } from '@blocksuite/std/inline';
+import type { ReferenceInfo } from '@labre/affine-model';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import type { BlockStdScope } from '@labre/std';
+import type { InlineEditor, InlineRange } from '@labre/std/inline';
 
 import { ReferencePopup } from './reference-popup';
 

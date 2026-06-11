@@ -1,5 +1,5 @@
-import { getCommonBoundWithRotation } from '@blocksuite/global/gfx';
-import { type GfxModel, InteractivityExtension } from '@blocksuite/std/gfx';
+import { getCommonBoundWithRotation } from '@labre/global/gfx';
+import { type GfxModel, InteractivityExtension } from '@labre/std/gfx';
 
 import { createElementsFromClipboardDataCommand } from '../clipboard/command.js';
 import { prepareCloneData } from '../utils/clone-utils.js';

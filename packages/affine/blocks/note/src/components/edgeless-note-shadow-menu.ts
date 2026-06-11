@@ -1,5 +1,5 @@
-import { ColorScheme, NoteShadow } from '@blocksuite/affine-model';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { ColorScheme, NoteShadow } from '@labre/affine-model';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

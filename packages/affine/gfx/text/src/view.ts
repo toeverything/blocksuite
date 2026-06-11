@@ -1,7 +1,7 @@
 import {
   type ViewExtensionContext,
   ViewExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
+} from '@labre/affine-ext-loader';
 
 import { DblClickAddEdgelessText } from './dblclick-add-edgeless-text';
 import { effects } from './effects';

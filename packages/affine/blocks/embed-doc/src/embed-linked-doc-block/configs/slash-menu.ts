@@ -1,13 +1,13 @@
-import { EmbedLinkedDocBlockSchema } from '@blocksuite/affine-model';
-import { insertContent } from '@blocksuite/affine-rich-text';
-import { REFERENCE_NODE } from '@blocksuite/affine-shared/consts';
-import { createDefaultDoc } from '@blocksuite/affine-shared/utils';
+import { EmbedLinkedDocBlockSchema } from '@labre/affine-model';
+import { insertContent } from '@labre/affine-rich-text';
+import { REFERENCE_NODE } from '@labre/affine-shared/consts';
+import { createDefaultDoc } from '@labre/affine-shared/utils';
 import {
   type SlashMenuConfig,
   SlashMenuConfigIdentifier,
-} from '@blocksuite/affine-widget-slash-menu';
+} from '@labre/affine-widget-slash-menu';
 import { LinkedPageIcon, PlusIcon } from '@blocksuite/icons/lit';
-import { type ExtensionType } from '@blocksuite/store';
+import { type ExtensionType } from '@labre/store';
 
 import { LinkDocTooltip, NewDocTooltip } from './tooltips';
 

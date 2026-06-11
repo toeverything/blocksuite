@@ -1,5 +1,5 @@
-import { LifeCycleWatcher } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+import { LifeCycleWatcher } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 
 export class EdgelessLocker extends LifeCycleWatcher {
   static override key = 'edgeless-locker';

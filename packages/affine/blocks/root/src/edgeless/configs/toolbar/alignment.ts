@@ -3,15 +3,15 @@ import {
   autoResizeElementsCommand,
   EdgelessCRUDIdentifier,
   updateXYWH,
-} from '@blocksuite/affine-block-surface';
-import { EditorChevronDown } from '@blocksuite/affine-components/toolbar';
-import type { ToolbarContext } from '@blocksuite/affine-shared/services';
+} from '@labre/affine-block-surface';
+import { EditorChevronDown } from '@labre/affine-components/toolbar';
+import type { ToolbarContext } from '@labre/affine-shared/services';
 import type {
   Menu,
   MenuItem,
-} from '@blocksuite/affine-widget-edgeless-toolbar';
-import { renderMenuItems } from '@blocksuite/affine-widget-edgeless-toolbar';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-widget-edgeless-toolbar';
+import { renderMenuItems } from '@labre/affine-widget-edgeless-toolbar';
+import { Bound } from '@labre/global/gfx';
 import {
   AlignBottomIcon,
   AlignHorizontalCenterIcon,
@@ -24,7 +24,7 @@ import {
   DistributeVerticalIcon,
   ResizeTidyUpIcon,
 } from '@blocksuite/icons/lit';
-import type { GfxModel } from '@blocksuite/std/gfx';
+import type { GfxModel } from '@labre/std/gfx';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 

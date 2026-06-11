@@ -1,5 +1,5 @@
-import { type Container, createIdentifier } from '@blocksuite/global/di';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { type Container, createIdentifier } from '@labre/global/di';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 
 import type { Store } from '../model/store';
 import { StoreIdentifier } from '../model/store/identifier';

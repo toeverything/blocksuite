@@ -1,13 +1,13 @@
-import { resetNativeSelection } from '@blocksuite/affine-shared/utils';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import type { IVec } from '@blocksuite/global/gfx';
-import type { PointerEventState } from '@blocksuite/std';
+import { resetNativeSelection } from '@labre/affine-shared/utils';
+import { DisposableGroup } from '@labre/global/disposable';
+import type { IVec } from '@labre/global/gfx';
+import type { PointerEventState } from '@labre/std';
 import {
   BaseTool,
   type GfxModel,
   InteractivityIdentifier,
   isGfxGroupCompatibleModel,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import { effect } from '@preact/signals-core';
 
 import { calPanDelta } from './panning-utils.js';

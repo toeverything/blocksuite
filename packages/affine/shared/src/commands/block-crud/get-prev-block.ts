@@ -1,4 +1,4 @@
-import type { BlockComponent, BlockStdScope, Command } from '@blocksuite/std';
+import type { BlockComponent, BlockStdScope, Command } from '@labre/std';
 
 import { getPrevContentBlock } from '../../utils/index.js';
 

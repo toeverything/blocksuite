@@ -1,5 +1,5 @@
-import type { FontFamily } from '@blocksuite/affine-model';
-import { IS_FIREFOX } from '@blocksuite/global/env';
+import type { FontFamily } from '@labre/affine-model';
+import { IS_FIREFOX } from '@labre/global/env';
 
 export function wrapFontFamily(fontFamily: FontFamily | string): string {
   return `"${fontFamily}"`;

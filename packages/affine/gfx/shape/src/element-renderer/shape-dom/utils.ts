@@ -1,4 +1,4 @@
-import type { ShapeElementModel } from '@blocksuite/affine-model';
+import type { ShapeElementModel } from '@labre/affine-model';
 
 /**
  * Utility to manage a class on an element, tracking the previous class via dataset.

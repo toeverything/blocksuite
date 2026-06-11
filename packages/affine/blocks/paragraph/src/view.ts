@@ -1,9 +1,9 @@
 import {
   type ViewExtensionContext,
   ViewExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { ParagraphBlockModel } from '@blocksuite/affine-model';
-import { BlockViewExtension, FlavourExtension } from '@blocksuite/std';
+} from '@labre/affine-ext-loader';
+import { ParagraphBlockModel } from '@labre/affine-model';
+import { BlockViewExtension, FlavourExtension } from '@labre/std';
 import { literal } from 'lit/static-html.js';
 import { z } from 'zod';
 

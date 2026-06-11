@@ -1,7 +1,7 @@
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { WithDisposable } from '@blocksuite/global/lit';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { WithDisposable } from '@labre/global/lit';
 import { ToggleDownIcon, ToggleRightIcon } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { ShadowlessElement } from '@labre/std';
 import { css, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';
 import { html } from 'lit-html';

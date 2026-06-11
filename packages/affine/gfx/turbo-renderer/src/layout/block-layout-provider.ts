@@ -1,8 +1,8 @@
-import { createIdentifier } from '@blocksuite/global/di';
-import type { EditorHost } from '@blocksuite/std';
-import type { ViewportRecord } from '@blocksuite/std/gfx';
-import type { BlockModel } from '@blocksuite/store';
-import { Extension } from '@blocksuite/store';
+import { createIdentifier } from '@labre/global/di';
+import type { EditorHost } from '@labre/std';
+import type { ViewportRecord } from '@labre/std/gfx';
+import type { BlockModel } from '@labre/store';
+import { Extension } from '@labre/store';
 
 import type { BlockLayout, Rect } from '../types';
 

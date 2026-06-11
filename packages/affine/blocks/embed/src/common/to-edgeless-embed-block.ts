@@ -1,14 +1,14 @@
-import { EdgelessLegacySlotIdentifier } from '@blocksuite/affine-block-surface';
-import type { EmbedProps } from '@blocksuite/affine-model';
-import { Bound } from '@blocksuite/global/gfx';
+import { EdgelessLegacySlotIdentifier } from '@labre/affine-block-surface';
+import type { EmbedProps } from '@labre/affine-model';
+import { Bound } from '@labre/global/gfx';
 import {
   blockComponentSymbol,
   type BlockService,
   type GfxBlockComponent,
   GfxElementSymbol,
   toGfxBlockComponent,
-} from '@blocksuite/std';
-import type { GfxBlockElementModel } from '@blocksuite/std/gfx';
+} from '@labre/std';
+import type { GfxBlockElementModel } from '@labre/std/gfx';
 import type { StyleInfo } from 'lit/directives/style-map.js';
 
 import type { EmbedBlockComponent } from './embed-block-element.js';

@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-widget-remote-selection';
+export * from '@labre/affine-widget-remote-selection';

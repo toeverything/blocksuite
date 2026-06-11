@@ -1,4 +1,4 @@
-import type { Store } from '@blocksuite/store';
+import type { Store } from '@labre/store';
 
 import type { Layer } from '../gfx/layer.js';
 import {

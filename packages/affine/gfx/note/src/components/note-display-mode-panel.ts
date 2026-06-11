@@ -1,6 +1,6 @@
-import { NoteDisplayMode } from '@blocksuite/affine-model';
-import { stopPropagation } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
+import { NoteDisplayMode } from '@labre/affine-model';
+import { stopPropagation } from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
 import { EdgelessIcon, PageIcon } from '@blocksuite/icons/lit';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';

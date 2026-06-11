@@ -1,5 +1,5 @@
-import { BRUSH_LINE_WIDTHS, LineWidth } from '@blocksuite/affine-model';
-import { WithDisposable } from '@blocksuite/global/lit';
+import { BRUSH_LINE_WIDTHS, LineWidth } from '@labre/affine-model';
+import { WithDisposable } from '@labre/global/lit';
 import { html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 

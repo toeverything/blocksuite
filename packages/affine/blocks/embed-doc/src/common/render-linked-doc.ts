@@ -1,14 +1,14 @@
-import { getNotesFromDoc } from '@blocksuite/affine-block-embed';
-import { ViewExtensionManagerIdentifier } from '@blocksuite/affine-ext-loader';
+import { getNotesFromDoc } from '@labre/affine-block-embed';
+import { ViewExtensionManagerIdentifier } from '@labre/affine-ext-loader';
 import {
   ImageBlockModel,
   ListBlockModel,
   ParagraphBlockModel,
-} from '@blocksuite/affine-model';
-import { EMBED_CARD_HEIGHT } from '@blocksuite/affine-shared/consts';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import { BlockStdScope } from '@blocksuite/std';
-import type { BlockModel, Query } from '@blocksuite/store';
+} from '@labre/affine-model';
+import { EMBED_CARD_HEIGHT } from '@labre/affine-shared/consts';
+import { matchModels } from '@labre/affine-shared/utils';
+import { BlockStdScope } from '@labre/std';
+import type { BlockModel, Query } from '@labre/store';
 import { render, type TemplateResult } from 'lit';
 
 import type { EmbedLinkedDocBlockComponent } from '../embed-linked-doc-block';

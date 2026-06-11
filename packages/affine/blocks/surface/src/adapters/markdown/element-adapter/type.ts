@@ -1,9 +1,9 @@
-import type { ExtensionType } from '@blocksuite/affine/store';
-import type { MarkdownAST } from '@blocksuite/affine-shared/adapters';
+import type { ExtensionType } from '@labre/affine/store';
+import type { MarkdownAST } from '@labre/affine-shared/adapters';
 import {
   createIdentifier,
   type ServiceIdentifier,
-} from '@blocksuite/global/di';
+} from '@labre/global/di';
 
 import type { ElementModelMatcher } from '../../type.js';
 

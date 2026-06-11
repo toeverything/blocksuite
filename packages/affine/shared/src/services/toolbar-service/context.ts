@@ -1,20 +1,20 @@
-import { nextTick } from '@blocksuite/global/utils';
+import { nextTick } from '@labre/global/utils';
 import {
   BlockComponent,
   BlockSelection,
   type BlockStdScope,
   SurfaceSelection,
-} from '@blocksuite/std';
+} from '@labre/std';
 import {
   GfxControllerIdentifier,
   type GfxElementModelView,
   type GfxModel,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import type {
   BaseSelection,
   BlockModel,
   SelectionConstructor,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 import { DocModeProvider } from '../doc-mode-service';
 import { EditPropsStore } from '../edit-props-store';

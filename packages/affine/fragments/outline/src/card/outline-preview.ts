@@ -7,14 +7,14 @@ import type {
   ListBlockModel,
   ParagraphBlockModel,
   RootBlockModel,
-} from '@blocksuite/affine-model';
-import { DocDisplayMetaProvider } from '@blocksuite/affine-shared/services';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { noop } from '@blocksuite/global/utils';
+} from '@labre/affine-model';
+import { DocDisplayMetaProvider } from '@labre/affine-shared/services';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import { noop } from '@labre/global/utils';
 import { LinkedPageIcon } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
-import type { BlockModel, DeltaInsert } from '@blocksuite/store';
+import { ShadowlessElement } from '@labre/std';
+import type { BlockModel, DeltaInsert } from '@labre/store';
 import { consume } from '@lit/context';
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';

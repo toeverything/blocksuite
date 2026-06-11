@@ -1,22 +1,22 @@
-import { NoteBlockModel } from '@blocksuite/affine-model';
+import { NoteBlockModel } from '@labre/affine-model';
 import {
   calcDropTarget,
   type DropTarget,
   getClosestBlockComponentByPoint,
   isInsidePageEditor,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import { createIdentifier } from '@blocksuite/global/di';
-import type { IVec } from '@blocksuite/global/gfx';
-import { Point } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/utils';
+import { createIdentifier } from '@labre/global/di';
+import type { IVec } from '@labre/global/gfx';
+import { Point } from '@labre/global/gfx';
 import {
   type BlockComponent,
   type BlockStdScope,
   type EditorHost,
   LifeCycleWatcher,
-} from '@blocksuite/std';
-import { SurfaceBlockModel } from '@blocksuite/std/gfx';
-import type { BlockModel, ExtensionType } from '@blocksuite/store';
+} from '@labre/std';
+import { SurfaceBlockModel } from '@labre/std/gfx';
+import type { BlockModel, ExtensionType } from '@labre/store';
 import { computed, signal } from '@preact/signals-core';
 import throttle from 'lodash-es/throttle';
 

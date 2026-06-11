@@ -1,6 +1,6 @@
 import { CommentIcon } from '@blocksuite/icons/lit';
-import { BlockSelection } from '@blocksuite/std';
-import type { BlockModel, Store } from '@blocksuite/store';
+import { BlockSelection } from '@labre/std';
+import type { BlockModel, Store } from '@labre/store';
 
 import type { ToolbarAction } from '../toolbar-service';
 import { type CommentId, CommentProviderIdentifier } from './comment-provider';

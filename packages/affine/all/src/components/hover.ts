@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/hover';
+export * from '@labre/affine-components/hover';

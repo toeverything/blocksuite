@@ -1,6 +1,6 @@
-import type { FootNote, ReferenceInfo } from '@blocksuite/affine-model';
-import type { InlineEditor } from '@blocksuite/std/inline';
-import type { BlockModel } from '@blocksuite/store';
+import type { FootNote, ReferenceInfo } from '@labre/affine-model';
+import type { InlineEditor } from '@labre/std/inline';
+import type { BlockModel } from '@labre/store';
 export * from './uni-component';
 
 export type NoteChildrenFlavour =

@@ -1,4 +1,4 @@
-import type { Workspace } from '@blocksuite/affine/store';
+import type { Workspace } from '@labre/affine/store';
 
 export interface InitFn {
   (collection: Workspace, docId: string): Promise<void> | void;

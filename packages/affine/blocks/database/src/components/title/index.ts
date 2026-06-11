@@ -1,9 +1,9 @@
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { stopPropagation } from '@blocksuite/affine-shared/utils';
-import type { DataViewUILogicBase } from '@blocksuite/data-view';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { ShadowlessElement } from '@blocksuite/std';
-import type { Text } from '@blocksuite/store';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { stopPropagation } from '@labre/affine-shared/utils';
+import type { DataViewUILogicBase } from '@labre/data-view';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import { ShadowlessElement } from '@labre/std';
+import type { Text } from '@labre/store';
 import { signal } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property, query } from 'lit/decorators.js';

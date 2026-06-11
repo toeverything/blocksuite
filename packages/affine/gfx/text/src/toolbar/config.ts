@@ -1,11 +1,11 @@
-import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
-import { TextElementModel } from '@blocksuite/affine-model';
+import { EdgelessCRUDIdentifier } from '@labre/affine-block-surface';
+import { TextElementModel } from '@labre/affine-model';
 import {
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
-import { Bound } from '@blocksuite/global/gfx';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { Bound } from '@labre/global/gfx';
+import { BlockFlavourIdentifier } from '@labre/std';
 
 import { normalizeTextBound } from '../element-renderer/utils';
 import { createTextActions } from './actions';

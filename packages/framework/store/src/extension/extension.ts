@@ -1,4 +1,4 @@
-import type { Container } from '@blocksuite/global/di';
+import type { Container } from '@labre/global/di';
 
 /**
  * # Understanding Extensions
@@ -33,7 +33,7 @@ import type { Container } from '@blocksuite/global/di';
  * ## Step 2: Create a service identifier
  *
  * ```ts
- * import { createIdentifier } from '@blocksuite/global/di';
+ * import { createIdentifier } from '@labre/global/di';
  *
  * const FruitProcessorProvider = createIdentifier<FruitProcessor>('fruit-processor-provider');
  * ```
@@ -81,7 +81,7 @@ import type { Container } from '@blocksuite/global/di';
  * ## Step 6: Use the extensions
  *
  * ```ts
- * import { Container } from '@blocksuite/global/di';
+ * import { Container } from '@labre/global/di';
  *
  * class FruitProcessingSystem {
  *   provider: ServiceProvider;

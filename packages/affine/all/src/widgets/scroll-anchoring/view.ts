@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-widget-scroll-anchoring/view';
+export * from '@labre/affine-widget-scroll-anchoring/view';

@@ -1,28 +1,28 @@
-import { EdgelessFrameManagerIdentifier } from '@blocksuite/affine-block-frame';
+import { EdgelessFrameManagerIdentifier } from '@labre/affine-block-frame';
 import {
   EdgelessCRUDIdentifier,
   getSurfaceComponent,
-} from '@blocksuite/affine-block-surface';
-import { ConnectorTool } from '@blocksuite/affine-gfx-connector';
+} from '@labre/affine-block-surface';
+import { ConnectorTool } from '@labre/affine-gfx-connector';
 import {
   createGroupCommand,
   createGroupFromSelectedCommand,
   ungroupCommand,
-} from '@blocksuite/affine-gfx-group';
+} from '@labre/affine-gfx-group';
 import {
   ConnectorElementModel,
   DEFAULT_CONNECTOR_MODE,
   GroupElementModel,
   MindmapElementModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   ActionPlacement,
   type ElementLockEvent,
   type ToolbarAction,
   type ToolbarContext,
   type ToolbarModuleConfig,
-} from '@blocksuite/affine-shared/services';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/services';
+import { Bound } from '@labre/global/gfx';
 import {
   AlignLeftIcon,
   ConnectorCIcon,
@@ -32,7 +32,7 @@ import {
   ReleaseFromGroupIcon,
   UnlockIcon,
 } from '@blocksuite/icons/lit';
-import type { GfxModel } from '@blocksuite/std/gfx';
+import type { GfxModel } from '@labre/std/gfx';
 import { html } from 'lit';
 
 import { renderAlignmentMenu } from './alignment';

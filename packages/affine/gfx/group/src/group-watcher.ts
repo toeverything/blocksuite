@@ -3,7 +3,7 @@ import {
   SurfaceGroupLikeModel,
   type SurfaceMiddleware,
   surfaceMiddlewareExtension,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 
 const groupRelationWatcher: SurfaceMiddleware = (
   surface: SurfaceBlockModel

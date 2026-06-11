@@ -1,6 +1,6 @@
-import { ColorScheme } from '@blocksuite/affine-model';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { LifeCycleWatcher } from '@blocksuite/std';
+import { ColorScheme } from '@labre/affine-model';
+import { ThemeProvider } from '@labre/affine-shared/services';
+import { LifeCycleWatcher } from '@labre/std';
 import { type Signal, signal } from '@preact/signals-core';
 import {
   createHighlighterCore,

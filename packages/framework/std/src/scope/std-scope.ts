@@ -1,10 +1,10 @@
-import { Container, type ServiceProvider } from '@blocksuite/global/di';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { Container, type ServiceProvider } from '@labre/global/di';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 import {
   type ExtensionType,
   type Store,
   StoreSelectionExtension,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 import { Clipboard } from '../clipboard/index.js';
 import { CommandManager } from '../command/index.js';

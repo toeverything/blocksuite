@@ -1,4 +1,4 @@
-import { BlockSuiteError } from '@blocksuite/global/exceptions';
+import { BlockSuiteError } from '@labre/global/exceptions';
 import { describe, expect, test } from 'vitest';
 
 import { getAssetName } from '../adapter/assets.js';

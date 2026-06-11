@@ -1,4 +1,4 @@
-# `@blocksuite/integration-test`
+# `@labre/integration-test`
 
 Integration test for BlockSuite.
 

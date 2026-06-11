@@ -1,11 +1,11 @@
-import { getEmbedCardIcons } from '@blocksuite/affine-block-embed';
-import { LoadingIcon, WebIcon16 } from '@blocksuite/affine-components/icons';
-import { ImageProxyService } from '@blocksuite/affine-shared/adapters';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { getHostName } from '@blocksuite/affine-shared/utils';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { getEmbedCardIcons } from '@labre/affine-block-embed';
+import { LoadingIcon, WebIcon16 } from '@labre/affine-components/icons';
+import { ImageProxyService } from '@labre/affine-shared/adapters';
+import { ThemeProvider } from '@labre/affine-shared/services';
+import { getHostName } from '@labre/affine-shared/utils';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { OpenInNewIcon } from '@blocksuite/icons/lit';
-import { isGfxBlockComponent, ShadowlessElement } from '@blocksuite/std';
+import { isGfxBlockComponent, ShadowlessElement } from '@labre/std';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

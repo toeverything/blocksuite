@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/icon-button';
+export * from '@labre/affine-components/icon-button';

@@ -1,13 +1,13 @@
-import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
+import { EdgelessCRUDIdentifier } from '@labre/affine-block-surface';
 import {
   packColor,
   type PickColorEvent,
-} from '@blocksuite/affine-components/color-picker';
-import type { LineDetailType } from '@blocksuite/affine-components/edgeless-line-styles-panel';
+} from '@labre/affine-components/color-picker';
+import type { LineDetailType } from '@labre/affine-components/edgeless-line-styles-panel';
 import {
   createTextActions,
   normalizeTextBound,
-} from '@blocksuite/affine-gfx-text';
+} from '@labre/affine-gfx-text';
 import {
   ConnectorElementModel,
   type ConnectorElementProps,
@@ -20,24 +20,24 @@ import {
   PointStyle,
   resolveColor,
   StrokeStyle,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   type ToolbarContext,
   type ToolbarGenericAction,
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   getMostCommonResolvedValue,
   getMostCommonValue,
-} from '@blocksuite/affine-shared/utils';
-import type { MenuItem } from '@blocksuite/affine-widget-edgeless-toolbar';
+} from '@labre/affine-shared/utils';
+import type { MenuItem } from '@labre/affine-widget-edgeless-toolbar';
 import {
   getRootBlock,
   LINE_STYLE_LIST,
   renderMenu,
-} from '@blocksuite/affine-widget-edgeless-toolbar';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-widget-edgeless-toolbar';
+import { Bound } from '@labre/global/gfx';
 import {
   AddTextIcon,
   ConnectorCIcon,
@@ -54,7 +54,7 @@ import {
   StartPointIcon,
   StartPointTriangleIcon,
 } from '@blocksuite/icons/lit';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
+import { BlockFlavourIdentifier } from '@labre/std';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 

@@ -1,10 +1,10 @@
-import { CalloutBlockModel } from '@blocksuite/affine-model';
-import { matchModels } from '@blocksuite/affine-shared/utils';
+import { CalloutBlockModel } from '@labre/affine-model';
+import { matchModels } from '@labre/affine-shared/utils';
 import {
   BlockSelection,
   KeymapExtension,
   TextSelection,
-} from '@blocksuite/std';
+} from '@labre/std';
 
 export const CalloutKeymapExtension = KeymapExtension(std => {
   return {

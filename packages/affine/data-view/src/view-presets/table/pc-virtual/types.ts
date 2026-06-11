@@ -1,4 +1,4 @@
-import type { Signal } from '@blocksuite/affine-shared/utils';
+import type { Signal } from '@labre/affine-shared/utils';
 import type { ReadonlySignal } from '@preact/signals-core';
 
 import type {

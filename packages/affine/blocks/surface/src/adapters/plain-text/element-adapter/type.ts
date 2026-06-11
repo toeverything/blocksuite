@@ -1,9 +1,9 @@
-import type { TextBuffer } from '@blocksuite/affine-shared/adapters';
+import type { TextBuffer } from '@labre/affine-shared/adapters';
 import {
   createIdentifier,
   type ServiceIdentifier,
-} from '@blocksuite/global/di';
-import type { ExtensionType } from '@blocksuite/store';
+} from '@labre/global/di';
+import type { ExtensionType } from '@labre/store';
 
 import type { ElementModelMatcher } from '../../type.js';
 

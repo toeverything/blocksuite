@@ -1,4 +1,4 @@
-import { Container } from '@blocksuite/global/di';
+import { Container } from '@labre/global/di';
 
 import { testStoreExtensions } from './store';
 

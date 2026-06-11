@@ -1,7 +1,7 @@
 import {
   EdgelessToolbarToolMixin,
   QuickToolMixin,
-} from '@blocksuite/affine-widget-edgeless-toolbar';
+} from '@labre/affine-widget-edgeless-toolbar';
 import { PresentationIcon } from '@blocksuite/icons/lit';
 import { css, html, LitElement } from 'lit';
 

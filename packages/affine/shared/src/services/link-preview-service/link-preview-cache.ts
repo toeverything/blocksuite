@@ -1,6 +1,6 @@
-import type { LinkPreviewData } from '@blocksuite/affine-model';
-import { type Container, createIdentifier } from '@blocksuite/global/di';
-import { Extension, type ExtensionType } from '@blocksuite/store';
+import type { LinkPreviewData } from '@labre/affine-model';
+import { type Container, createIdentifier } from '@labre/global/di';
+import { Extension, type ExtensionType } from '@labre/store';
 import debounce from 'lodash-es/debounce';
 import QuickLRU from 'quick-lru';
 import { z } from 'zod';

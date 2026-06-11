@@ -1,12 +1,12 @@
-import { ListBlockSchema } from '@blocksuite/affine-model';
+import { ListBlockSchema } from '@labre/affine-model';
 import {
   AdapterTextUtils,
   BlockMarkdownAdapterExtension,
   type BlockMarkdownAdapterMatcher,
   type MarkdownAST,
-} from '@blocksuite/affine-shared/adapters';
-import type { DeltaInsert } from '@blocksuite/store';
-import { nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import type { DeltaInsert } from '@labre/store';
+import { nanoid } from '@labre/store';
 import type { List } from 'mdast';
 
 const LIST_MDAST_TYPE = new Set(['list', 'listItem']);

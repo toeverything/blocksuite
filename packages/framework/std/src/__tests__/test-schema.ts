@@ -1,9 +1,9 @@
-import type { SerializedXYWH } from '@blocksuite/global/gfx';
+import type { SerializedXYWH } from '@labre/global/gfx';
 import {
   BlockModel,
   BlockSchemaExtension,
   defineBlockSchema,
-} from '@blocksuite/store';
+} from '@labre/store';
 import * as Y from 'yjs';
 
 import { SurfaceBlockModel as BaseSurfaceModel } from '../gfx/index.js';

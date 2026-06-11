@@ -1,7 +1,7 @@
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { ShadowlessElement } from '@blocksuite/std';
-import { ZERO_WIDTH_FOR_EMPTY_LINE } from '@blocksuite/std/inline';
-import type { DeltaInsert } from '@blocksuite/store';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { ShadowlessElement } from '@labre/std';
+import { ZERO_WIDTH_FOR_EMPTY_LINE } from '@labre/std/inline';
+import type { DeltaInsert } from '@labre/store';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

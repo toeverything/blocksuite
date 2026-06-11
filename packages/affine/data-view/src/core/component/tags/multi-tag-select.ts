@@ -4,18 +4,18 @@ import {
   popMenu,
   type PopupTarget,
   popupTargetFromElement,
-} from '@blocksuite/affine-components/context-menu';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { rangeWrap } from '@blocksuite/affine-shared/utils';
-import { IS_MOBILE } from '@blocksuite/global/env';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-components/context-menu';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { rangeWrap } from '@labre/affine-shared/utils';
+import { IS_MOBILE } from '@labre/global/env';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import {
   CloseIcon,
   DeleteIcon,
   MoreHorizontalIcon,
 } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
-import { nanoid } from '@blocksuite/store';
+import { ShadowlessElement } from '@labre/std';
+import { nanoid } from '@labre/store';
 import { autoPlacement, offset, shift } from '@floating-ui/dom';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';

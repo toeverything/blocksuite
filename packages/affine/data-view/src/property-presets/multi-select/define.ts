@@ -1,4 +1,4 @@
-import { nanoid } from '@blocksuite/store';
+import { nanoid } from '@labre/store';
 import zod from 'zod';
 
 import { getTagColor } from '../../core/component/tags/colors.js';

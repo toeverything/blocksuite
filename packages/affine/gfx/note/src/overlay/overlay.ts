@@ -1,11 +1,11 @@
 import {
   getSurfaceComponent,
   ToolOverlay,
-} from '@blocksuite/affine-block-surface';
-import { type Color, DefaultTheme } from '@blocksuite/affine-model';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import type { XYWH } from '@blocksuite/global/gfx';
-import type { GfxController } from '@blocksuite/std/gfx';
+} from '@labre/affine-block-surface';
+import { type Color, DefaultTheme } from '@labre/affine-model';
+import { ThemeProvider } from '@labre/affine-shared/services';
+import type { XYWH } from '@labre/global/gfx';
+import type { GfxController } from '@labre/std/gfx';
 import { effect } from '@preact/signals-core';
 import { Subject } from 'rxjs';
 

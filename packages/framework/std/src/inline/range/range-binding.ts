@@ -1,4 +1,4 @@
-import type { BaseSelection, BlockModel } from '@blocksuite/store';
+import type { BaseSelection, BlockModel } from '@labre/store';
 import throttle from 'lodash-es/throttle';
 
 import { TextSelection } from '../../selection/index.js';

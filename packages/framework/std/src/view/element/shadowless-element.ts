@@ -1,4 +1,4 @@
-import type { Constructor } from '@blocksuite/global/utils';
+import type { Constructor } from '@labre/global/utils';
 import type { CSSResultGroup, CSSResultOrNative } from 'lit';
 import { CSSResult, LitElement } from 'lit';
 

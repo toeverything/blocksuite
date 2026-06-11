@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-gfx-shape';
+export * from '@labre/affine-gfx-shape';

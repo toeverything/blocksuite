@@ -1,5 +1,5 @@
-import { type Container, createIdentifier } from '@blocksuite/global/di';
-import { Extension } from '@blocksuite/store';
+import { type Container, createIdentifier } from '@labre/global/di';
+import { Extension } from '@labre/store';
 
 export interface IFileSizeLimitService {
   maxFileSize: number;

@@ -1,4 +1,4 @@
-import { almostEqual, type Bound, type IVec3 } from '@blocksuite/global/gfx';
+import { almostEqual, type Bound, type IVec3 } from '@labre/global/gfx';
 
 import { Graph } from './graph.js';
 import { PriorityQueue } from './priority-queue.js';

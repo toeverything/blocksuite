@@ -1,23 +1,23 @@
-import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
+import { EdgelessCRUDIdentifier } from '@labre/affine-block-surface';
 import {
   packColor,
   type PickColorEvent,
-} from '@blocksuite/affine-components/color-picker';
+} from '@labre/affine-components/color-picker';
 import {
   BrushElementModel,
   DefaultTheme,
   LineWidth,
   resolveColor,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   getMostCommonResolvedValue,
   getMostCommonValue,
-} from '@blocksuite/affine-shared/utils';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
+} from '@labre/affine-shared/utils';
+import { BlockFlavourIdentifier } from '@labre/std';
 import { html } from 'lit';
 
 export const brushToolbarConfig = {

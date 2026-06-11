@@ -1,1 +1,1 @@
-export * from '@blocksuite/data-view';
+export * from '@labre/data-view';

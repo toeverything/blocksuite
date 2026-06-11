@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/context-menu';
+export * from '@labre/affine-components/context-menu';

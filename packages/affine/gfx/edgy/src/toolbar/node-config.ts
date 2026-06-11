@@ -1,9 +1,9 @@
-import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
+import { EdgelessCRUDIdentifier } from '@labre/affine-block-surface';
 import {
   packColor,
   type PickColorEvent,
-} from '@blocksuite/affine-components/color-picker';
-import { shapeToolbarConfig } from '@blocksuite/affine-gfx-shape';
+} from '@labre/affine-components/color-picker';
+import { shapeToolbarConfig } from '@labre/affine-gfx-shape';
 import {
   type Color,
   DefaultTheme,
@@ -13,14 +13,14 @@ import {
   resolveColor,
   ShapeElementModel,
   StrokeStyle,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   type ToolbarContext,
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
-import { getMostCommonValue } from '@blocksuite/affine-shared/utils';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { getMostCommonValue } from '@labre/affine-shared/utils';
+import { BlockFlavourIdentifier } from '@labre/std';
 import { html } from 'lit';
 
 /**

@@ -1,7 +1,7 @@
-import { LoadingIcon } from '@blocksuite/affine-components/icons';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+import { LoadingIcon } from '@labre/affine-components/icons';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
 import { EmbedIcon } from '@blocksuite/icons/lit';
-import { type BlockStdScope } from '@blocksuite/std';
+import { type BlockStdScope } from '@labre/std';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

@@ -1,1 +1,1 @@
-export * from '@blocksuite/global/lit';
+export * from '@labre/global/lit';

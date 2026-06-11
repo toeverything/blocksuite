@@ -1,6 +1,6 @@
-import type { MenuConfig } from '@blocksuite/affine-components/context-menu';
-import type { BlockComponent } from '@blocksuite/std';
-import type { GfxController } from '@blocksuite/std/gfx';
+import type { MenuConfig } from '@labre/affine-components/context-menu';
+import type { BlockComponent } from '@labre/std';
+import type { GfxController } from '@labre/std/gfx';
 import type { TemplateResult } from 'lit';
 
 export type MenuItem<T> = {

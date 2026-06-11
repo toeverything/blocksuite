@@ -1,8 +1,8 @@
-import { DefaultTool } from '@blocksuite/affine-block-surface';
-import { ArrowDownSmallIcon } from '@blocksuite/affine-components/icons';
-import { once } from '@blocksuite/affine-shared/utils';
-import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
-import type { ToolOptionWithType } from '@blocksuite/std/gfx';
+import { DefaultTool } from '@labre/affine-block-surface';
+import { ArrowDownSmallIcon } from '@labre/affine-components/icons';
+import { once } from '@labre/affine-shared/utils';
+import { EdgelessToolbarToolMixin } from '@labre/affine-widget-edgeless-toolbar';
+import type { ToolOptionWithType } from '@labre/std/gfx';
 import {
   arrow,
   autoUpdate,

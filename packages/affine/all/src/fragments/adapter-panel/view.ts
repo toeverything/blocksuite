@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-fragment-adapter-panel/view';
+export * from '@labre/affine-fragment-adapter-panel/view';

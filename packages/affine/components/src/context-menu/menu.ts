@@ -1,4 +1,4 @@
-import { IS_MOBILE } from '@blocksuite/global/env';
+import { IS_MOBILE } from '@labre/global/env';
 import { computed, signal } from '@preact/signals-core';
 import type { TemplateResult } from 'lit';
 

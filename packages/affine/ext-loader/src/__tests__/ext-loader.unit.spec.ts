@@ -1,5 +1,5 @@
-import { Container } from '@blocksuite/global/di';
-import { type ExtensionType } from '@blocksuite/store';
+import { Container } from '@labre/global/di';
+import { type ExtensionType } from '@labre/store';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 

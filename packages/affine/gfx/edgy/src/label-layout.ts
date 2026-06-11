@@ -1,4 +1,4 @@
-import type { EdgyFacetsElementModel } from '@blocksuite/affine-model';
+import type { EdgyFacetsElementModel } from '@labre/affine-model';
 
 import { LABEL_FONT_SIZE, VENN } from './consts';
 

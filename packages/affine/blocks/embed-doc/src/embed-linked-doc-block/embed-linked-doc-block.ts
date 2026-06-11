@@ -1,21 +1,21 @@
 import {
   EmbedBlockComponent,
   RENDER_CARD_THROTTLE_MS,
-} from '@blocksuite/affine-block-embed';
-import { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
-import { LoadingIcon } from '@blocksuite/affine-components/icons';
-import { isPeekable, Peekable } from '@blocksuite/affine-components/peek';
-import { RefNodeSlotsProvider } from '@blocksuite/affine-inline-reference';
+} from '@labre/affine-block-embed';
+import { SurfaceBlockModel } from '@labre/affine-block-surface';
+import { LoadingIcon } from '@labre/affine-components/icons';
+import { isPeekable, Peekable } from '@labre/affine-components/peek';
+import { RefNodeSlotsProvider } from '@labre/affine-inline-reference';
 import type {
   DocMode,
   EmbedLinkedDocModel,
   EmbedLinkedDocStyles,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
   REFERENCE_NODE,
-} from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-shared/consts';
 import {
   CitationProvider,
   DocDisplayMetaProvider,
@@ -23,7 +23,7 @@ import {
   OpenDocExtensionIdentifier,
   type OpenDocMode,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   cloneReferenceInfo,
   cloneReferenceInfoWithoutAliases,
@@ -31,11 +31,11 @@ import {
   isNewViewTrigger,
   matchModels,
   referenceToNode,
-} from '@blocksuite/affine-shared/utils';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/utils';
+import { Bound } from '@labre/global/gfx';
 import { ResetIcon } from '@blocksuite/icons/lit';
-import { BlockSelection } from '@blocksuite/std';
-import { Text } from '@blocksuite/store';
+import { BlockSelection } from '@labre/std';
+import { Text } from '@labre/store';
 import { computed } from '@preact/signals-core';
 import { html, nothing } from 'lit';
 import { property, queryAsync, state } from 'lit/decorators.js';

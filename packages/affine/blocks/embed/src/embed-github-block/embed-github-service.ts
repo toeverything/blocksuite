@@ -2,12 +2,12 @@ import {
   EmbedGithubBlockSchema,
   type EmbedGithubModel,
   EmbedGithubStyles,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EmbedOptionConfig,
   LinkPreviewServiceIdentifier,
-} from '@blocksuite/affine-shared/services';
-import { BlockService } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { BlockService } from '@labre/std';
 
 import { githubUrlRegex } from './embed-github-model.js';
 import { queryEmbedGithubApiData, queryEmbedGithubData } from './utils.js';

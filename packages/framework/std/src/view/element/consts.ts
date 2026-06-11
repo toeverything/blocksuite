@@ -1,4 +1,4 @@
-import type { BlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@labre/store';
 import { createContext } from '@lit/context';
 
 import type { BlockService } from '../../extension/index.js';

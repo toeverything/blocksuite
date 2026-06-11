@@ -1,4 +1,4 @@
-import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/store';
+import type { BaseTextAttributes, DeltaInsert } from '@labre/store';
 import { html, type TemplateResult } from 'lit';
 
 export function renderElement<TextAttributes extends BaseTextAttributes>(

@@ -1,6 +1,6 @@
-import { CommentInlineSpecExtension } from '@blocksuite/affine-inline-comment';
-import { LatexInlineSpecExtension } from '@blocksuite/affine-inline-latex';
-import { LinkInlineSpecExtension } from '@blocksuite/affine-inline-link';
+import { CommentInlineSpecExtension } from '@labre/affine-inline-comment';
+import { LatexInlineSpecExtension } from '@labre/affine-inline-latex';
+import { LinkInlineSpecExtension } from '@labre/affine-inline-link';
 import {
   BackgroundInlineSpecExtension,
   BoldInlineSpecExtension,
@@ -9,12 +9,12 @@ import {
   ItalicInlineSpecExtension,
   StrikeInlineSpecExtension,
   UnderlineInlineSpecExtension,
-} from '@blocksuite/affine-inline-preset';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
+} from '@labre/affine-inline-preset';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
 import {
   InlineManagerExtension,
   InlineSpecExtension,
-} from '@blocksuite/std/inline';
+} from '@labre/std/inline';
 import { html } from 'lit';
 import { z } from 'zod';
 

@@ -1,13 +1,13 @@
-import { createLitPortal } from '@blocksuite/affine-components/portal';
+import { createLitPortal } from '@labre/affine-components/portal';
 import {
   AttachmentBlockModel,
   defaultAttachmentProps,
   type EmbedCardStyle,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
-} from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-shared/consts';
 import {
   ActionPlacement,
   blockCommentToolbarButton,
@@ -15,9 +15,9 @@ import {
   type ToolbarActionGroup,
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
-import { getBlockProps } from '@blocksuite/affine-shared/utils';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/services';
+import { getBlockProps } from '@labre/affine-shared/utils';
+import { Bound } from '@labre/global/gfx';
 import {
   CaptionIcon,
   CopyIcon,
@@ -28,8 +28,8 @@ import {
   ReplaceIcon,
   ResetIcon,
 } from '@blocksuite/icons/lit';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
-import type { ExtensionType } from '@blocksuite/store';
+import { BlockFlavourIdentifier } from '@labre/std';
+import type { ExtensionType } from '@labre/store';
 import { flip, offset } from '@floating-ui/dom';
 import { computed } from '@preact/signals-core';
 import { html } from 'lit';

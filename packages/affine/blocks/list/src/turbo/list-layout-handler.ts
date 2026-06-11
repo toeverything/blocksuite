@@ -1,14 +1,14 @@
-import type { Rect } from '@blocksuite/affine-gfx-turbo-renderer';
+import type { Rect } from '@labre/affine-gfx-turbo-renderer';
 import {
   BlockLayoutHandlerExtension,
   BlockLayoutHandlersIdentifier,
   getSentenceRects,
   segmentSentences,
-} from '@blocksuite/affine-gfx-turbo-renderer';
-import type { Container } from '@blocksuite/global/di';
-import type { EditorHost, GfxBlockComponent } from '@blocksuite/std';
-import { clientToModelCoord, type ViewportRecord } from '@blocksuite/std/gfx';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/affine-gfx-turbo-renderer';
+import type { Container } from '@labre/global/di';
+import type { EditorHost, GfxBlockComponent } from '@labre/std';
+import { clientToModelCoord, type ViewportRecord } from '@labre/std/gfx';
+import type { BlockModel } from '@labre/store';
 
 import type { ListLayout } from './list-painter.worker';
 

@@ -1,17 +1,17 @@
 import {
   EdgelessFrameManager,
   EdgelessFrameManagerIdentifier,
-} from '@blocksuite/affine-block-frame';
-import type { FrameBlockProps } from '@blocksuite/affine-model';
-import { encodeClipboardBlobs } from '@blocksuite/affine-shared/adapters';
-import { Bound, getBoundWithRotation } from '@blocksuite/global/gfx';
-import type { BlockStdScope } from '@blocksuite/std';
+} from '@labre/affine-block-frame';
+import type { FrameBlockProps } from '@labre/affine-model';
+import { encodeClipboardBlobs } from '@labre/affine-shared/adapters';
+import { Bound, getBoundWithRotation } from '@labre/global/gfx';
+import type { BlockStdScope } from '@labre/std';
 import {
   generateKeyBetweenV2,
   type GfxModel,
   type SerializedElement,
-} from '@blocksuite/std/gfx';
-import { type BlockSnapshot, BlockSnapshotSchema } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import { type BlockSnapshot, BlockSnapshotSchema } from '@labre/store';
 import DOMPurify from 'dompurify';
 
 import { serializeElement } from '../utils/clone-utils';

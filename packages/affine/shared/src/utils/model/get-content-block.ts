@@ -1,6 +1,6 @@
-import { FrameBlockModel } from '@blocksuite/affine-model';
-import type { EditorHost } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+import { FrameBlockModel } from '@labre/affine-model';
+import type { EditorHost } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 
 import { DocModeProvider } from '../../services/doc-mode-service.js';
 import { matchModels } from './checker.js';

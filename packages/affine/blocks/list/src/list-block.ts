@@ -1,24 +1,24 @@
-import '@blocksuite/affine-shared/commands';
+import '@labre/affine-shared/commands';
 
-import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
-import { playCheckAnimation } from '@blocksuite/affine-components/icons';
-import { TOGGLE_BUTTON_PARENT_CLASS } from '@blocksuite/affine-components/toggle-button';
-import { DefaultInlineManagerExtension } from '@blocksuite/affine-inline-preset';
-import type { ListBlockModel } from '@blocksuite/affine-model';
-import type { RichText } from '@blocksuite/affine-rich-text';
+import { CaptionedBlockComponent } from '@labre/affine-components/caption';
+import { playCheckAnimation } from '@labre/affine-components/icons';
+import { TOGGLE_BUTTON_PARENT_CLASS } from '@labre/affine-components/toggle-button';
+import { DefaultInlineManagerExtension } from '@labre/affine-inline-preset';
+import type { ListBlockModel } from '@labre/affine-model';
+import type { RichText } from '@labre/affine-rich-text';
 import {
   BLOCK_CHILDREN_CONTAINER_PADDING_LEFT,
   EDGELESS_TOP_CONTENTEDITABLE_SELECTOR,
-} from '@blocksuite/affine-shared/consts';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import { getViewportElement } from '@blocksuite/affine-shared/utils';
-import type { BlockComponent } from '@blocksuite/std';
-import { BlockSelection, TextSelection } from '@blocksuite/std';
+} from '@labre/affine-shared/consts';
+import { DocModeProvider } from '@labre/affine-shared/services';
+import { getViewportElement } from '@labre/affine-shared/utils';
+import type { BlockComponent } from '@labre/std';
+import { BlockSelection, TextSelection } from '@labre/std';
 import {
   getInlineRangeProvider,
   type InlineRangeProvider,
-} from '@blocksuite/std/inline';
-import type { BaseSelection } from '@blocksuite/store';
+} from '@labre/std/inline';
+import type { BaseSelection } from '@labre/store';
 import { effect } from '@preact/signals-core';
 import { html, nothing, type TemplateResult } from 'lit';
 import { query, state } from 'lit/decorators.js';

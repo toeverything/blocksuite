@@ -1,8 +1,8 @@
-import { ConfirmIcon } from '@blocksuite/affine-components/icons';
-import { toast } from '@blocksuite/affine-components/toast';
-import type { AttachmentBlockModel } from '@blocksuite/affine-model';
-import { CitationProvider } from '@blocksuite/affine-shared/services';
-import type { EditorHost } from '@blocksuite/std';
+import { ConfirmIcon } from '@labre/affine-components/icons';
+import { toast } from '@labre/affine-components/toast';
+import type { AttachmentBlockModel } from '@labre/affine-model';
+import { CitationProvider } from '@labre/affine-shared/services';
+import type { EditorHost } from '@labre/std';
 import { html } from 'lit';
 import { createRef, ref } from 'lit/directives/ref.js';
 

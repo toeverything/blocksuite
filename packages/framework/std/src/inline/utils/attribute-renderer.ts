@@ -1,4 +1,4 @@
-import type { BaseTextAttributes } from '@blocksuite/store';
+import type { BaseTextAttributes } from '@labre/store';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 

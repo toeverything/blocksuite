@@ -1,4 +1,4 @@
-import { BlockModel } from '@blocksuite/store';
+import { BlockModel } from '@labre/store';
 
 import type { ReferenceInfo } from '../../../consts/doc.js';
 import type { EmbedCardStyle } from '../../../utils/index.js';

@@ -2,15 +2,15 @@ import {
   CanvasElementType,
   type ClipboardConfigCreationContext,
   EdgelessCRUDIdentifier,
-} from '@blocksuite/affine-block-surface';
-import type { Connection } from '@blocksuite/affine-model';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import { Bound, type SerializedXYWH, Vec } from '@blocksuite/global/gfx';
-import type { BlockStdScope } from '@blocksuite/std';
+} from '@labre/affine-block-surface';
+import type { Connection } from '@labre/affine-model';
+import { TelemetryProvider } from '@labre/affine-shared/services';
+import { Bound, type SerializedXYWH, Vec } from '@labre/global/gfx';
+import type { BlockStdScope } from '@labre/std';
 import type {
   GfxPrimitiveElementModel,
   SerializedElement,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import * as Y from 'yjs';
 
 const { GROUP, MINDMAP, CONNECTOR } = CanvasElementType;

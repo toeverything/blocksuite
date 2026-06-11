@@ -2,13 +2,13 @@ import {
   Heading1Icon,
   LinkIcon,
   TextIcon,
-} from '@blocksuite/affine-components/icons';
+} from '@labre/affine-components/icons';
 import {
   EditPropsStore,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
-import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
-import { SignalWatcher } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/services';
+import { EdgelessToolbarToolMixin } from '@labre/affine-widget-edgeless-toolbar';
+import { SignalWatcher } from '@labre/global/lit';
 import { computed } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { state } from 'lit/decorators.js';

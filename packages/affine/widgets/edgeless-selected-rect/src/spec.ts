@@ -1,4 +1,4 @@
-import { WidgetViewExtension } from '@blocksuite/std';
+import { WidgetViewExtension } from '@labre/std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { EDGELESS_SELECTED_RECT_WIDGET } from './edgeless-selected-rect';

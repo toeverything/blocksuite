@@ -1,5 +1,5 @@
-import type { PropertyModel } from '@blocksuite/data-view';
-import { propertyModelPresets } from '@blocksuite/data-view/property-pure-presets';
+import type { PropertyModel } from '@labre/data-view';
+import { propertyModelPresets } from '@labre/data-view/property-pure-presets';
 
 import { linkPropertyModelConfig } from './link/define';
 import { richTextPropertyModelConfig } from './rich-text/define';

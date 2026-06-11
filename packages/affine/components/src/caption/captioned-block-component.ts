@@ -1,6 +1,6 @@
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { BlockComponent, type BlockService } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+import { ThemeProvider } from '@labre/affine-shared/services';
+import { BlockComponent, type BlockService } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 import { html, nothing } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';

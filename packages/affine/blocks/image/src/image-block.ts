@@ -1,18 +1,18 @@
-import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
-import { whenHover } from '@blocksuite/affine-components/hover';
-import { LoadingIcon } from '@blocksuite/affine-components/icons';
-import { Peekable } from '@blocksuite/affine-components/peek';
-import { ResourceController } from '@blocksuite/affine-components/resource';
-import type { ImageBlockModel } from '@blocksuite/affine-model';
-import { ImageSelection } from '@blocksuite/affine-shared/selection';
+import { CaptionedBlockComponent } from '@labre/affine-components/caption';
+import { whenHover } from '@labre/affine-components/hover';
+import { LoadingIcon } from '@labre/affine-components/icons';
+import { Peekable } from '@labre/affine-components/peek';
+import { ResourceController } from '@labre/affine-components/resource';
+import type { ImageBlockModel } from '@labre/affine-model';
+import { ImageSelection } from '@labre/affine-shared/selection';
 import {
   BlockCommentManager,
   ToolbarRegistryIdentifier,
-} from '@blocksuite/affine-shared/services';
-import { formatSize } from '@blocksuite/affine-shared/utils';
-import { IS_MOBILE } from '@blocksuite/global/env';
+} from '@labre/affine-shared/services';
+import { formatSize } from '@labre/affine-shared/utils';
+import { IS_MOBILE } from '@labre/global/env';
 import { BrokenImageIcon, ImageIcon } from '@blocksuite/icons/lit';
-import { BlockSelection } from '@blocksuite/std';
+import { BlockSelection } from '@labre/std';
 import { computed } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { html } from 'lit';

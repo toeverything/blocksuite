@@ -1,4 +1,4 @@
-import { InlineDeltaToMarkdownAdapterExtension } from '@blocksuite/affine-shared/adapters';
+import { InlineDeltaToMarkdownAdapterExtension } from '@labre/affine-shared/adapters';
 
 export const boldDeltaToMarkdownAdapterMatcher =
   InlineDeltaToMarkdownAdapterExtension({

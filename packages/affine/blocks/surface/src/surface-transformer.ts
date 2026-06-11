@@ -1,14 +1,14 @@
-import type { SurfaceBlockProps } from '@blocksuite/std/gfx';
+import type { SurfaceBlockProps } from '@labre/std/gfx';
 import {
   SURFACE_TEXT_UNIQ_IDENTIFIER,
   SURFACE_YMAP_UNIQ_IDENTIFIER,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import type {
   FromSnapshotPayload,
   SnapshotNode,
   ToSnapshotPayload,
-} from '@blocksuite/store';
-import { BaseBlockTransformer } from '@blocksuite/store';
+} from '@labre/store';
+import { BaseBlockTransformer } from '@labre/store';
 import * as Y from 'yjs';
 
 export class SurfaceBlockTransformer extends BaseBlockTransformer<SurfaceBlockProps> {

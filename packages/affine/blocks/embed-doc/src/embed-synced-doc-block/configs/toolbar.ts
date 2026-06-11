@@ -1,5 +1,5 @@
-import { toast } from '@blocksuite/affine-components/toast';
-import { EditorChevronDown } from '@blocksuite/affine-components/toolbar';
+import { toast } from '@labre/affine-components/toast';
+import { EditorChevronDown } from '@labre/affine-components/toolbar';
 import {
   DEFAULT_NOTE_HEIGHT,
   DEFAULT_NOTE_WIDTH,
@@ -8,12 +8,12 @@ import {
   NoteDisplayMode,
   type NoteProps,
   type ParagraphProps,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   draftSelectedModelsCommand,
   duplicateSelectedModelsCommand,
-} from '@blocksuite/affine-shared/commands';
-import { REFERENCE_NODE } from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-shared/commands';
+import { REFERENCE_NODE } from '@labre/affine-shared/consts';
 import {
   ActionPlacement,
   blockCommentToolbarButton,
@@ -25,10 +25,10 @@ import {
   type ToolbarContext,
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { getBlockProps, matchModels } from '@blocksuite/affine-shared/utils';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/services';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { getBlockProps, matchModels } from '@labre/affine-shared/utils';
+import { Bound } from '@labre/global/gfx';
 import {
   CaptionIcon,
   CopyIcon,
@@ -38,13 +38,13 @@ import {
   InsertIntoPageIcon,
   OpenInNewIcon,
 } from '@blocksuite/icons/lit';
-import { BlockFlavourIdentifier, isGfxBlockComponent } from '@blocksuite/std';
+import { BlockFlavourIdentifier, isGfxBlockComponent } from '@labre/std';
 import {
   type BlockModel,
   type ExtensionType,
   Slice,
   Text,
-} from '@blocksuite/store';
+} from '@labre/store';
 import { computed, signal } from '@preact/signals-core';
 import { html } from 'lit';
 import { ifDefined } from 'lit/directives/if-defined.js';

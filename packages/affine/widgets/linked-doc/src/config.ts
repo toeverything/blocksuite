@@ -3,27 +3,27 @@ import {
   LinkedDocIcon,
   LinkedEdgelessIcon,
   NewDocIcon,
-} from '@blocksuite/affine-components/icons';
-import { toast } from '@blocksuite/affine-components/toast';
-import { StoreExtensionManagerIdentifier } from '@blocksuite/affine-ext-loader';
-import { insertLinkedNode } from '@blocksuite/affine-inline-reference';
+} from '@labre/affine-components/icons';
+import { toast } from '@labre/affine-components/toast';
+import { StoreExtensionManagerIdentifier } from '@labre/affine-ext-loader';
+import { insertLinkedNode } from '@labre/affine-inline-reference';
 import {
   DocModeProvider,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import type { AffineInlineEditor } from '@blocksuite/affine-shared/types';
+} from '@labre/affine-shared/services';
+import type { AffineInlineEditor } from '@labre/affine-shared/types';
 import {
   createDefaultDoc,
   isFuzzyMatch,
   type Signal,
-} from '@blocksuite/affine-shared/utils';
-import { IS_MOBILE } from '@blocksuite/global/env';
+} from '@labre/affine-shared/utils';
+import { IS_MOBILE } from '@labre/global/env';
 import {
   type BlockStdScope,
   ConfigExtensionFactory,
   type EditorHost,
-} from '@blocksuite/std';
-import type { InlineRange } from '@blocksuite/std/inline';
+} from '@labre/std';
+import type { InlineRange } from '@labre/std/inline';
 import type { TemplateResult } from 'lit';
 
 import { showImportModal } from './import-doc/index.js';

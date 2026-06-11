@@ -1,4 +1,4 @@
-import type { BlockModel, Store, Text } from '@blocksuite/store';
+import type { BlockModel, Store, Text } from '@labre/store';
 
 export function transformModel(
   model: BlockModel,

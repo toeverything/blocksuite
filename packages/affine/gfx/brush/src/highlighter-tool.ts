@@ -1,9 +1,9 @@
-import { CanvasElementType } from '@blocksuite/affine-block-surface';
-import type { HighlighterElementModel } from '@blocksuite/affine-model';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import type { IVec } from '@blocksuite/global/gfx';
-import type { PointerEventState } from '@blocksuite/std';
-import { BaseTool } from '@blocksuite/std/gfx';
+import { CanvasElementType } from '@labre/affine-block-surface';
+import type { HighlighterElementModel } from '@labre/affine-model';
+import { TelemetryProvider } from '@labre/affine-shared/services';
+import type { IVec } from '@labre/global/gfx';
+import type { PointerEventState } from '@labre/std';
+import { BaseTool } from '@labre/std/gfx';
 
 export class HighlighterTool extends BaseTool {
   static HIGHLIGHTER_POP_GAP = 20;

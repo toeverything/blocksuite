@@ -1,14 +1,14 @@
-import { createLitPortal } from '@blocksuite/affine-components/portal';
+import { createLitPortal } from '@labre/affine-components/portal';
 import {
   cleanSpecifiedTail,
   getInlineEditorByModel,
   getTextContentFromInlineRange,
-} from '@blocksuite/affine-rich-text';
+} from '@labre/affine-rich-text';
 import {
   DocModeProvider,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import type { AffineInlineEditor } from '@blocksuite/affine-shared/types';
+} from '@labre/affine-shared/services';
+import type { AffineInlineEditor } from '@labre/affine-shared/types';
 import {
   createKeydownObserver,
   getCurrentNativeRange,
@@ -16,8 +16,8 @@ import {
   isControlledKeyboardEvent,
   isFuzzyMatch,
   substringMatchScore,
-} from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
 import { ArrowDownSmallIcon } from '@blocksuite/icons/lit';
 import { autoPlacement, offset } from '@floating-ui/dom';
 import { html, LitElement, nothing, type PropertyValues } from 'lit';

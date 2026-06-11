@@ -1,4 +1,4 @@
-import type { BlockSnapshot, SliceSnapshot } from '@blocksuite/store';
+import type { BlockSnapshot, SliceSnapshot } from '@labre/store';
 
 export function nanoidReplacement(snapshot: BlockSnapshot | SliceSnapshot) {
   return JSON.parse(nanoidReplacementString(JSON.stringify(snapshot)));

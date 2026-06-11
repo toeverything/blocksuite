@@ -1,14 +1,14 @@
-import type { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
-import type { ConnectorElementModel } from '@blocksuite/affine-model';
-import type { IVec, SerializedXYWH } from '@blocksuite/global/gfx';
-import { assertType } from '@blocksuite/global/utils';
-import type { BlockStdScope } from '@blocksuite/std';
+import type { SurfaceBlockModel } from '@labre/affine-block-surface';
+import type { ConnectorElementModel } from '@labre/affine-model';
+import type { IVec, SerializedXYWH } from '@labre/global/gfx';
+import { assertType } from '@labre/global/utils';
+import type { BlockStdScope } from '@labre/std';
 import {
   GfxController,
   type GfxModel,
   isGfxGroupCompatibleModel,
-} from '@blocksuite/std/gfx';
-import type { TransformerMiddleware } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import type { TransformerMiddleware } from '@labre/store';
 
 /**
  * Used to filter out gfx elements that are not selected

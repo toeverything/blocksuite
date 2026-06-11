@@ -1,6 +1,6 @@
-import { scrollbarStyle } from '@blocksuite/affine-shared/styles';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher } from '@blocksuite/global/lit';
+import { scrollbarStyle } from '@labre/affine-shared/styles';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { SignalWatcher } from '@labre/global/lit';
 import { consume } from '@lit/context';
 import { css, html, LitElement } from 'lit';
 import { classMap } from 'lit/directives/class-map.js';

@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/smooth-corner';
+export * from '@labre/affine-components/smooth-corner';

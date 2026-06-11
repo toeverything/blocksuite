@@ -1,18 +1,18 @@
-import { OverlayIdentifier } from '@blocksuite/affine-block-surface';
+import { OverlayIdentifier } from '@labre/affine-block-surface';
 import {
   DefaultTheme,
   type FrameBlockModel,
   FrameBlockSchema,
   isTransparent,
-} from '@blocksuite/affine-model';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { Bound } from '@blocksuite/global/gfx';
-import { GfxBlockComponent } from '@blocksuite/std';
+} from '@labre/affine-model';
+import { ThemeProvider } from '@labre/affine-shared/services';
+import { Bound } from '@labre/global/gfx';
+import { GfxBlockComponent } from '@labre/std';
 import {
   type BoxSelectionContext,
   getTopElements,
   GfxViewInteractionExtension,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { html } from 'lit';
 import { state } from 'lit/decorators.js';

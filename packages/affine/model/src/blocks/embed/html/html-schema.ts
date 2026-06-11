@@ -1,4 +1,4 @@
-import { BlockSchemaExtension } from '@blocksuite/store';
+import { BlockSchemaExtension } from '@labre/store';
 
 import { createEmbedBlockSchema } from '../../../utils/index.js';
 import {

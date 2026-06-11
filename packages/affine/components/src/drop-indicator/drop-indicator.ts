@@ -1,4 +1,4 @@
-import { type Rect } from '@blocksuite/global/gfx';
+import { type Rect } from '@labre/global/gfx';
 import { css, html, LitElement } from 'lit';
 import { property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

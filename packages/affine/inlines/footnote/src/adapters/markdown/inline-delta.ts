@@ -1,7 +1,7 @@
 import {
   FOOTNOTE_DEFINITION_PREFIX,
   InlineDeltaToMarkdownAdapterExtension,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 import type { PhrasingContent } from 'mdast';
 
 export const footnoteReferenceDeltaToMarkdownAdapterMatcher =

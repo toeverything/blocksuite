@@ -1,10 +1,10 @@
-import { ListBlockModel } from '@blocksuite/affine-model';
+import { ListBlockModel } from '@labre/affine-model';
 import {
   getNextContentBlock,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import { type BlockStdScope, TextSelection } from '@blocksuite/std';
-import type { Text } from '@blocksuite/store';
+} from '@labre/affine-shared/utils';
+import { type BlockStdScope, TextSelection } from '@labre/std';
+import type { Text } from '@labre/store';
 
 // When deleting at line end of a list block,
 // check current block's children and siblings

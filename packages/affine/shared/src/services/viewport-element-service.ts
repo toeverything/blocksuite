@@ -1,7 +1,7 @@
-import { createIdentifier } from '@blocksuite/global/di';
-import { BlockSuiteError } from '@blocksuite/global/exceptions';
-import { StdIdentifier } from '@blocksuite/std';
-import type { ExtensionType } from '@blocksuite/store';
+import { createIdentifier } from '@labre/global/di';
+import { BlockSuiteError } from '@labre/global/exceptions';
+import { StdIdentifier } from '@labre/std';
+import type { ExtensionType } from '@labre/store';
 
 import type { Viewport } from '../types';
 

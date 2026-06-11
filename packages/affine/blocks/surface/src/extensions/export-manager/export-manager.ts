@@ -1,23 +1,23 @@
-import { ImageBlockModel, type RootBlockModel } from '@blocksuite/affine-model';
-import { FetchUtils } from '@blocksuite/affine-shared/adapters';
+import { ImageBlockModel, type RootBlockModel } from '@labre/affine-model';
+import { FetchUtils } from '@labre/affine-shared/adapters';
 import {
   CANVAS_EXPORT_IGNORE_TAGS,
   DEFAULT_IMAGE_PROXY_ENDPOINT,
-} from '@blocksuite/affine-shared/consts';
-import type { Viewport } from '@blocksuite/affine-shared/types';
+} from '@labre/affine-shared/consts';
+import type { Viewport } from '@labre/affine-shared/types';
 import {
   isInsidePageEditor,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import type { IBound } from '@blocksuite/global/gfx';
-import { deserializeXYWH } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/utils';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import type { IBound } from '@labre/global/gfx';
+import { deserializeXYWH } from '@labre/global/gfx';
 import {
   type BlockComponent,
   type BlockStdScope,
   type EditorHost,
   StdIdentifier,
-} from '@blocksuite/std';
+} from '@labre/std';
 import {
   GfxBlockElementModel,
   type GfxController,
@@ -25,8 +25,8 @@ import {
   type GfxModel,
   GfxPrimitiveElementModel,
   isGfxGroupCompatibleModel,
-} from '@blocksuite/std/gfx';
-import type { ExtensionType, Store } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import type { ExtensionType, Store } from '@labre/store';
 
 import { CanvasRenderer } from '../../renderer/canvas-renderer.js';
 import type { SurfaceBlockComponent } from '../../surface-block.js';

@@ -1,10 +1,10 @@
-import { ListBlockModel, ParagraphBlockModel } from '@blocksuite/affine-model';
-import type { IndentContext } from '@blocksuite/affine-shared/types';
+import { ListBlockModel, ParagraphBlockModel } from '@labre/affine-model';
+import type { IndentContext } from '@labre/affine-shared/types';
 import {
   getNearestHeadingBefore,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import { type Command, TextSelection } from '@blocksuite/std';
+} from '@labre/affine-shared/utils';
+import { type Command, TextSelection } from '@labre/std';
 
 import { correctNumberedListsOrderToPrev } from './utils.js';
 

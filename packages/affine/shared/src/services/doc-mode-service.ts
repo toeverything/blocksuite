@@ -1,9 +1,9 @@
-import type { DocMode } from '@blocksuite/affine-model';
-import type { Container } from '@blocksuite/global/di';
-import { createIdentifier } from '@blocksuite/global/di';
-import { noop } from '@blocksuite/global/utils';
-import type { ExtensionType } from '@blocksuite/store';
-import { Extension } from '@blocksuite/store';
+import type { DocMode } from '@labre/affine-model';
+import type { Container } from '@labre/global/di';
+import { createIdentifier } from '@labre/global/di';
+import { noop } from '@labre/global/utils';
+import type { ExtensionType } from '@labre/store';
+import { Extension } from '@labre/store';
 import { Subject, type Subscription } from 'rxjs';
 
 const DEFAULT_MODE: DocMode = 'page';

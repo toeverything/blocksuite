@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { EmbedSyncedDocBlockHtmlAdapterExtension } from './html.js';
 import { EmbedSyncedDocMarkdownAdapterExtension } from './markdown.js';

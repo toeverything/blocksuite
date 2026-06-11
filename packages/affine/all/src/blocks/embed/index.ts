@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-block-embed';
+export * from '@labre/affine-block-embed';

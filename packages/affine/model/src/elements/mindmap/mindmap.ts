@@ -1,20 +1,20 @@
-import type { Bound, SerializedXYWH, XYWH } from '@blocksuite/global/gfx';
-import { deserializeXYWH } from '@blocksuite/global/gfx';
-import { assertType, noop } from '@blocksuite/global/utils';
+import type { Bound, SerializedXYWH, XYWH } from '@labre/global/gfx';
+import { deserializeXYWH } from '@labre/global/gfx';
+import { assertType, noop } from '@labre/global/utils';
 import type {
   BaseElementProps,
   GfxModel,
   GfxPrimitiveElementModel,
   PointTestOptions,
   SerializedElement,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import {
   convert,
   field,
   GfxGroupLikeElementModel,
   observe,
   watch,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import { generateKeyBetween } from 'fractional-indexing';
 import last from 'lodash-es/last';
 import pick from 'lodash-es/pick';

@@ -1,7 +1,7 @@
-import { ListBlockModel } from '@blocksuite/affine-model';
-import { focusTextModel } from '@blocksuite/affine-rich-text';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import type { Command } from '@blocksuite/std';
+import { ListBlockModel } from '@labre/affine-model';
+import { focusTextModel } from '@labre/affine-rich-text';
+import { matchModels } from '@labre/affine-shared/utils';
+import type { Command } from '@labre/std';
 
 export const listToParagraphCommand: Command<
   {

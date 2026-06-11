@@ -1,4 +1,4 @@
-import type { DocSnapshot } from '@blocksuite/store';
+import type { DocSnapshot } from '@labre/store';
 import { createContext } from '@lit/context';
 import type { Signal } from '@preact/signals-core';
 

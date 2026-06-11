@@ -2,15 +2,15 @@ import {
   type FilterableListItem,
   type FilterableListOptions,
   showPopFilterableList,
-} from '@blocksuite/affine-components/filterable-list';
-import { ArrowDownIcon } from '@blocksuite/affine-components/icons';
+} from '@labre/affine-components/filterable-list';
+import { ArrowDownIcon } from '@labre/affine-components/icons';
 import {
   DocModeProvider,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { noop } from '@blocksuite/global/utils';
+} from '@labre/affine-shared/services';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import { noop } from '@labre/global/utils';
 import { css, LitElement, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';

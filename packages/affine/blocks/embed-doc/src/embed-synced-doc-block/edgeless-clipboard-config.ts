@@ -1,6 +1,6 @@
-import { EdgelessClipboardConfig } from '@blocksuite/affine-block-surface';
-import { ReferenceInfoSchema } from '@blocksuite/affine-model';
-import { type BlockSnapshot } from '@blocksuite/store';
+import { EdgelessClipboardConfig } from '@labre/affine-block-surface';
+import { ReferenceInfoSchema } from '@labre/affine-model';
+import { type BlockSnapshot } from '@labre/store';
 
 export class EdgelessClipboardEmbedSyncedDocConfig extends EdgelessClipboardConfig {
   static override readonly key = 'affine:embed-synced-doc';

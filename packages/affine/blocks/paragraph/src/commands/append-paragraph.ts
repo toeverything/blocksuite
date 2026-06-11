@@ -1,7 +1,7 @@
-import { focusTextModel } from '@blocksuite/affine-rich-text';
-import { getLastNoteBlock } from '@blocksuite/affine-shared/utils';
-import type { Command } from '@blocksuite/std';
-import { Text } from '@blocksuite/store';
+import { focusTextModel } from '@labre/affine-rich-text';
+import { getLastNoteBlock } from '@labre/affine-shared/utils';
+import type { Command } from '@labre/std';
+import { Text } from '@labre/store';
 
 /**
  * Append a paragraph block at the end of the whole page.

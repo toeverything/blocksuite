@@ -1,8 +1,8 @@
-import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import type { BlockComponent } from '@blocksuite/std';
-import { generateKeyBetweenV2 } from '@blocksuite/std/gfx';
+import { EdgelessCRUDIdentifier } from '@labre/affine-block-surface';
+import { DisposableGroup } from '@labre/global/disposable';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import type { BlockComponent } from '@labre/std';
+import { generateKeyBetweenV2 } from '@labre/std/gfx';
 import { css, html, LitElement, nothing } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

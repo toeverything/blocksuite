@@ -4,15 +4,15 @@ import {
   ListBlockModel,
   ParagraphBlockModel,
   type RootBlockModel,
-} from '@blocksuite/affine-model';
-import { REFERENCE_NODE } from '@blocksuite/affine-shared/consts';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { createDefaultDoc, matchModels } from '@blocksuite/affine-shared/utils';
-import type { DetailSlotProps, SingleView } from '@blocksuite/data-view';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { type EditorHost, ShadowlessElement } from '@blocksuite/std';
-import type { BaseTextAttributes } from '@blocksuite/store';
+} from '@labre/affine-model';
+import { REFERENCE_NODE } from '@labre/affine-shared/consts';
+import { TelemetryProvider } from '@labre/affine-shared/services';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { createDefaultDoc, matchModels } from '@labre/affine-shared/utils';
+import type { DetailSlotProps, SingleView } from '@labre/data-view';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import { type EditorHost, ShadowlessElement } from '@labre/std';
+import type { BaseTextAttributes } from '@labre/store';
 import { computed } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, unsafeCSS } from 'lit';

@@ -1,6 +1,6 @@
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { WithDisposable } from '@blocksuite/global/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { WithDisposable } from '@labre/global/lit';
+import { ShadowlessElement } from '@labre/std';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

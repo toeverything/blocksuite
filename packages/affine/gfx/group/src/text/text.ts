@@ -1,8 +1,8 @@
-import { DefaultTool } from '@blocksuite/affine-block-surface';
-import type { GroupElementModel } from '@blocksuite/affine-model';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import type { BlockComponent } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+import { DefaultTool } from '@labre/affine-block-surface';
+import type { GroupElementModel } from '@labre/affine-model';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import type { BlockComponent } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 
 import { EdgelessGroupTitleEditor } from './edgeless-group-title-editor';
 

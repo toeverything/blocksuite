@@ -2,7 +2,7 @@ import {
   CanvasElementType,
   DefaultTool,
   OverlayIdentifier,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   type Connection,
   type ConnectorElementModel,
@@ -11,15 +11,15 @@ import {
   GroupElementModel,
   ShapeElementModel,
   ShapeType,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EditPropsStore,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import type { IBound, IVec } from '@blocksuite/global/gfx';
-import { Bound, polygonCentroid } from '@blocksuite/global/gfx';
-import type { PointerEventState } from '@blocksuite/std';
-import { BaseTool, type GfxModel } from '@blocksuite/std/gfx';
+} from '@labre/affine-shared/services';
+import type { IBound, IVec } from '@labre/global/gfx';
+import { Bound, polygonCentroid } from '@labre/global/gfx';
+import type { PointerEventState } from '@labre/std';
+import { BaseTool, type GfxModel } from '@labre/std/gfx';
 
 import {
   calculateNearestLocation,

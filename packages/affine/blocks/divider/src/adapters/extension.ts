@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { DividerBlockHtmlAdapterExtension } from './html.js';
 import { DividerBlockMarkdownAdapterExtension } from './markdown.js';

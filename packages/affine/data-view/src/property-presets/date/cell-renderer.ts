@@ -1,10 +1,10 @@
 import {
   popMenu,
   popupTargetFromElement,
-} from '@blocksuite/affine-components/context-menu';
-import { DatePicker } from '@blocksuite/affine-components/date-picker';
-import { createLitPortal } from '@blocksuite/affine-components/portal';
-import { IS_MOBILE } from '@blocksuite/global/env';
+} from '@labre/affine-components/context-menu';
+import { DatePicker } from '@labre/affine-components/date-picker';
+import { createLitPortal } from '@labre/affine-components/portal';
+import { IS_MOBILE } from '@labre/global/env';
 import { flip, offset } from '@floating-ui/dom';
 import { computed, signal } from '@preact/signals-core';
 import { format } from 'date-fns/format';

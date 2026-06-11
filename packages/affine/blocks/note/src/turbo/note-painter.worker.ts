@@ -2,8 +2,8 @@ import type {
   BlockLayout,
   BlockLayoutPainter,
   WorkerToHostMessage,
-} from '@blocksuite/affine-gfx-turbo-renderer';
-import { BlockLayoutPainterExtension } from '@blocksuite/affine-gfx-turbo-renderer/painter';
+} from '@labre/affine-gfx-turbo-renderer';
+import { BlockLayoutPainterExtension } from '@labre/affine-gfx-turbo-renderer/painter';
 
 export interface NoteLayout extends BlockLayout {
   type: 'affine:note';

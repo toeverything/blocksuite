@@ -2,20 +2,20 @@ import {
   DefaultTool,
   EdgelessCRUDIdentifier,
   SurfaceBlockComponent,
-} from '@blocksuite/affine-block-surface';
-import type { EmbedCardStyle } from '@blocksuite/affine-model';
+} from '@labre/affine-block-surface';
+import type { EmbedCardStyle } from '@labre/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
-} from '@blocksuite/affine-shared/consts';
-import { Bound, Vec } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/consts';
+import { Bound, Vec } from '@labre/global/gfx';
 import {
   BlockSelection,
   type BlockStdScope,
   SurfaceSelection,
   TextSelection,
-} from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 
 interface EmbedCardProperties {
   flavour: string;

@@ -1,15 +1,15 @@
-import type { ColumnDataType } from '@blocksuite/affine-model';
+import type { ColumnDataType } from '@labre/affine-model';
 import {
   arrayMove,
   insertPositionToIndex,
   type InsertToPosition,
-} from '@blocksuite/affine-shared/utils';
-import type { DataViewDataType } from '@blocksuite/data-view';
+} from '@labre/affine-shared/utils';
+import type { DataViewDataType } from '@labre/data-view';
 import {
   BlockModel,
   BlockSchemaExtension,
   defineBlockSchema,
-} from '@blocksuite/store';
+} from '@labre/store';
 
 type Props = {
   title: string;

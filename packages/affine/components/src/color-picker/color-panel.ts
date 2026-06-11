@@ -1,7 +1,7 @@
-import type { Color, ColorScheme, Palette } from '@blocksuite/affine-model';
-import { DefaultTheme, resolveColor } from '@blocksuite/affine-model';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { ColorEvent } from '@blocksuite/affine-shared/utils';
+import type { Color, ColorScheme, Palette } from '@labre/affine-model';
+import { DefaultTheme, resolveColor } from '@labre/affine-model';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { ColorEvent } from '@labre/affine-shared/utils';
 import { css, html, LitElement, type PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

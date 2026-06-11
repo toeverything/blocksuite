@@ -1,4 +1,4 @@
-import { EmbedIframeConfigExtension } from '@blocksuite/affine-shared/services';
+import { EmbedIframeConfigExtension } from '@labre/affine-shared/services';
 
 import {
   type EmbedIframeUrlValidationOptions,

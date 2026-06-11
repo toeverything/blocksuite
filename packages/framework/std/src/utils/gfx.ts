@@ -1,4 +1,4 @@
-import type { Store } from '@blocksuite/store';
+import type { Store } from '@labre/store';
 import { effect } from '@preact/signals-core';
 
 import { SurfaceBlockModel } from '../gfx/model/surface/surface-model.js';

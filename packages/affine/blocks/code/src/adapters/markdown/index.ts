@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { CodeBlockMarkdownAdapterExtension } from './markdown.js';
 import { CodeMarkdownPreprocessorExtension } from './preprocessor.js';

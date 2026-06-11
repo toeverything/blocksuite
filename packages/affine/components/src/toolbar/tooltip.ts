@@ -1,4 +1,4 @@
-import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
+import { requestConnectedFrame } from '@labre/affine-shared/utils';
 import {
   arrow,
   type ComputePositionReturn,

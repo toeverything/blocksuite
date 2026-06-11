@@ -1,4 +1,4 @@
-import type { BlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@labre/store';
 
 export type DocRemoteSelectionConfig = {
   blockSelectionBackgroundTransparent: (block: BlockModel) => boolean;

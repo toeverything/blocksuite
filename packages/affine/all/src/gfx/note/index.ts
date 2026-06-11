@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-gfx-note';
+export * from '@labre/affine-gfx-note';

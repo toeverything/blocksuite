@@ -1,4 +1,4 @@
-import type { ParagraphType } from '@blocksuite/affine-model';
+import type { ParagraphType } from '@labre/affine-model';
 import {
   BulletedListIcon,
   CheckBoxCheckLinearIcon,
@@ -12,7 +12,7 @@ import {
   QuoteIcon,
   TextIcon,
 } from '@blocksuite/icons/lit';
-import type { BlockModel } from '@blocksuite/store';
+import type { BlockModel } from '@labre/store';
 import type { TemplateResult } from 'lit';
 const icons: Record<string, TemplateResult> = {
   text: TextIcon(),

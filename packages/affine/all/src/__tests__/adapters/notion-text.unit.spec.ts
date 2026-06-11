@@ -1,6 +1,6 @@
-import { DefaultTheme } from '@blocksuite/affine-model';
-import { NotionTextAdapter } from '@blocksuite/affine-shared/adapters';
-import type { SliceSnapshot } from '@blocksuite/store';
+import { DefaultTheme } from '@labre/affine-model';
+import { NotionTextAdapter } from '@labre/affine-shared/adapters';
+import type { SliceSnapshot } from '@labre/store';
 import { describe, expect, test } from 'vitest';
 
 import { createJob } from '../utils/create-job.js';

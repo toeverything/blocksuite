@@ -1,8 +1,8 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { FrameBlockSchemaExtension } from '@blocksuite/affine-model';
+} from '@labre/affine-ext-loader';
+import { FrameBlockSchemaExtension } from '@labre/affine-model';
 
 export class FrameStoreExtension extends StoreExtensionProvider {
   override name = 'affine-frame-block';

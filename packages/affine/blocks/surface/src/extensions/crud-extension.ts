@@ -1,14 +1,14 @@
-import type { SurfaceElementModelMap } from '@blocksuite/affine-model';
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
-import { type Container, createIdentifier } from '@blocksuite/global/di';
-import { type BlockStdScope, StdIdentifier } from '@blocksuite/std';
+import type { SurfaceElementModelMap } from '@labre/affine-model';
+import { EditPropsStore } from '@labre/affine-shared/services';
+import { type Container, createIdentifier } from '@labre/global/di';
+import { type BlockStdScope, StdIdentifier } from '@labre/std';
 import {
   GfxBlockElementModel,
   GfxControllerIdentifier,
   type GfxModel,
   isGfxGroupCompatibleModel,
-} from '@blocksuite/std/gfx';
-import { type BlockModel, Extension } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import { type BlockModel, Extension } from '@labre/store';
 
 import type { SurfaceBlockModel } from '../surface-model';
 import { getLastPropsKey } from '../utils/get-last-props-key';

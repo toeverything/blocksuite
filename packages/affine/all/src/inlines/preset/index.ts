@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-inline-preset';
+export * from '@labre/affine-inline-preset';

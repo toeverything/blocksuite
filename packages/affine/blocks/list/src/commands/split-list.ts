@@ -1,10 +1,10 @@
-import { ListBlockModel } from '@blocksuite/affine-model';
-import { focusTextModel } from '@blocksuite/affine-rich-text';
+import { ListBlockModel } from '@labre/affine-model';
+import { focusTextModel } from '@labre/affine-rich-text';
 import {
   getNextContinuousNumberedLists,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import type { Command, EditorHost } from '@blocksuite/std';
+} from '@labre/affine-shared/utils';
+import type { Command, EditorHost } from '@labre/std';
 
 import { canDedentListCommand, dedentListCommand } from './dedent-list.js';
 import { correctNumberedListsOrderToPrev } from './utils.js';

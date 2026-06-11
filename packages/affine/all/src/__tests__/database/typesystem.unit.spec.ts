@@ -1,4 +1,4 @@
-import { type SelectTag, t, typeSystem } from '@blocksuite/data-view';
+import { type SelectTag, t, typeSystem } from '@labre/data-view';
 import { describe, expect, test } from 'vitest';
 
 describe('subtyping', () => {

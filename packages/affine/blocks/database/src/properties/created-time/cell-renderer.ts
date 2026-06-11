@@ -2,7 +2,7 @@ import {
   BaseCellRenderer,
   createFromBaseCellRenderer,
   createIcon,
-} from '@blocksuite/data-view';
+} from '@labre/data-view';
 import { css } from '@emotion/css';
 import { format } from 'date-fns/format';
 import { html } from 'lit';

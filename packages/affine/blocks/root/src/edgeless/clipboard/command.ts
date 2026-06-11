@@ -3,10 +3,10 @@ import {
   EdgelessClipboardConfigIdentifier,
   EdgelessCRUDIdentifier,
   SurfaceGroupLikeModel,
-} from '@blocksuite/affine-block-surface';
-import { Bound, type IVec, type SerializedXYWH } from '@blocksuite/global/gfx';
-import { assertType } from '@blocksuite/global/utils';
-import type { BlockStdScope, Command } from '@blocksuite/std';
+} from '@labre/affine-block-surface';
+import { Bound, type IVec, type SerializedXYWH } from '@labre/global/gfx';
+import { assertType } from '@labre/global/utils';
+import type { BlockStdScope, Command } from '@labre/std';
 import {
   type GfxBlockElementModel,
   type GfxCompatibleProps,
@@ -15,8 +15,8 @@ import {
   type GfxPrimitiveElementModel,
   type SerializedElement,
   SortOrder,
-} from '@blocksuite/std/gfx';
-import { type BlockSnapshot, BlockSnapshotSchema } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import { type BlockSnapshot, BlockSnapshotSchema } from '@labre/store';
 
 import { createCanvasElement } from './canvas';
 import {

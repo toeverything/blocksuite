@@ -1,4 +1,4 @@
-import type { NoteBlockModel, NoteDisplayMode } from '@blocksuite/affine-model';
+import type { NoteBlockModel, NoteDisplayMode } from '@labre/affine-model';
 
 export type ReorderEvent = CustomEvent<{
   currentNumber: number;

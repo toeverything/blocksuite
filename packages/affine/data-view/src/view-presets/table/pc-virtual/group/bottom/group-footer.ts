@@ -1,6 +1,6 @@
-import { WithDisposable } from '@blocksuite/global/lit';
+import { WithDisposable } from '@labre/global/lit';
 import { PlusIcon } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { ShadowlessElement } from '@labre/std';
 import { computed } from '@preact/signals-core';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';

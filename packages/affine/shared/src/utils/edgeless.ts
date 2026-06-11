@@ -1,10 +1,10 @@
-import { FrameBlockModel, GroupElementModel } from '@blocksuite/affine-model';
+import { FrameBlockModel, GroupElementModel } from '@labre/affine-model';
 import {
   deserializeXYWH,
   getQuadBoundWithRotation,
-} from '@blocksuite/global/gfx';
-import type { GfxBlockElementModel, GfxModel } from '@blocksuite/std/gfx';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/global/gfx';
+import type { GfxBlockElementModel, GfxModel } from '@labre/std/gfx';
+import type { BlockModel } from '@labre/store';
 
 export function getSelectedRect(selected: GfxModel[]): DOMRect {
   if (selected.length === 0) {

@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/portal';
+export * from '@labre/affine-components/portal';

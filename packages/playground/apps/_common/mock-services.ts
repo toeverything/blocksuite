@@ -1,9 +1,9 @@
-import { toast } from '@blocksuite/affine/components/toast';
+import { toast } from '@labre/affine/components/toast';
 import {
   ColorScheme,
   type DocMode,
   type ReferenceParams,
-} from '@blocksuite/affine/model';
+} from '@labre/affine/model';
 import {
   type CommentId,
   type CommentProvider,
@@ -14,9 +14,9 @@ import {
   type NotificationService,
   type ParseDocUrlService,
   type ThemeExtension,
-} from '@blocksuite/affine/shared/services';
-import type { BaseSelection, Workspace } from '@blocksuite/affine/store';
-import type { TestAffineEditorContainer } from '@blocksuite/integration-test';
+} from '@labre/affine/shared/services';
+import type { BaseSelection, Workspace } from '@labre/affine/store';
+import type { TestAffineEditorContainer } from '@labre/integration-test';
 import { Signal, signal } from '@preact/signals-core';
 import { Subject } from 'rxjs';
 

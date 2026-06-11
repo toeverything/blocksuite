@@ -1,5 +1,5 @@
-import { WithDisposable } from '@blocksuite/global/lit';
-import { type EditorHost, ShadowlessElement } from '@blocksuite/std';
+import { WithDisposable } from '@labre/global/lit';
+import { type EditorHost, ShadowlessElement } from '@labre/std';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, unsafeCSS } from 'lit';
 import { property } from 'lit/decorators.js';

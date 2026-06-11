@@ -1,6 +1,6 @@
-import type { TableBlockModel, TableCell } from '@blocksuite/affine-model';
-import { generateFractionalIndexingKeyBetween } from '@blocksuite/affine-shared/utils';
-import { nanoid, Text } from '@blocksuite/store';
+import type { TableBlockModel, TableCell } from '@labre/affine-model';
+import { generateFractionalIndexingKeyBetween } from '@labre/affine-shared/utils';
+import { nanoid, Text } from '@labre/store';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 
 import type { TableAreaSelection } from './selection-schema';

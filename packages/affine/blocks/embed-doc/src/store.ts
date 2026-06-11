@@ -1,11 +1,11 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
+} from '@labre/affine-ext-loader';
 import {
   EmbedLinkedDocBlockSchemaExtension,
   EmbedSyncedDocBlockSchemaExtension,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 
 import { EmbedLinkedDocBlockAdapterExtensions } from './embed-linked-doc-block/adapters/extension';
 import { EmbedSyncedDocBlockAdapterExtensions } from './embed-synced-doc-block/adapters/extension';

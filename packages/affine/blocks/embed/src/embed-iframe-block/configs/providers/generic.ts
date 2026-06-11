@@ -1,4 +1,4 @@
-import { EmbedIframeConfigExtension } from '@blocksuite/affine-shared/services';
+import { EmbedIframeConfigExtension } from '@labre/affine-shared/services';
 
 const GENERIC_DEFAULT_WIDTH_IN_SURFACE = 800;
 const GENERIC_DEFAULT_HEIGHT_IN_SURFACE = 600;

@@ -1,16 +1,16 @@
-import type { EdgelessRootBlockComponent } from '@blocksuite/affine/blocks/root';
+import type { EdgelessRootBlockComponent } from '@labre/affine/blocks/root';
 import type {
   CanvasRenderer,
   SurfaceElementModel,
-} from '@blocksuite/affine/blocks/surface';
-import { ungroupCommand } from '@blocksuite/affine/gfx/group';
+} from '@labre/affine/blocks/surface';
+import { ungroupCommand } from '@labre/affine/gfx/group';
 import type {
   GroupElementModel,
   NoteBlockModel,
-} from '@blocksuite/affine/model';
-import { generateKeyBetween } from '@blocksuite/affine/std/gfx';
-import type { BlockComponent } from '@blocksuite/std';
-import type { BlockModel, Store } from '@blocksuite/store';
+} from '@labre/affine/model';
+import { generateKeyBetween } from '@labre/affine/std/gfx';
+import type { BlockComponent } from '@labre/std';
+import type { BlockModel, Store } from '@labre/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 

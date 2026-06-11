@@ -1,6 +1,6 @@
-import { createEmbedBlockPlainTextAdapterMatcher } from '@blocksuite/affine-block-embed';
-import { BookmarkBlockSchema } from '@blocksuite/affine-model';
-import { BlockPlainTextAdapterExtension } from '@blocksuite/affine-shared/adapters';
+import { createEmbedBlockPlainTextAdapterMatcher } from '@labre/affine-block-embed';
+import { BookmarkBlockSchema } from '@labre/affine-model';
+import { BlockPlainTextAdapterExtension } from '@labre/affine-shared/adapters';
 
 export const bookmarkBlockPlainTextAdapterMatcher =
   createEmbedBlockPlainTextAdapterMatcher(BookmarkBlockSchema.model.flavour);

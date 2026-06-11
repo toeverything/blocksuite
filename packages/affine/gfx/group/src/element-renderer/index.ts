@@ -2,9 +2,9 @@ import {
   type CanvasRenderer,
   type ElementRenderer,
   ElementRendererExtension,
-} from '@blocksuite/affine-block-surface';
-import type { GroupElementModel } from '@blocksuite/affine-model';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-block-surface';
+import type { GroupElementModel } from '@labre/affine-model';
+import { Bound } from '@labre/global/gfx';
 
 import { titleRenderParams } from './utils.js';
 

@@ -2,7 +2,7 @@ import {
   menu,
   popMenu,
   popupTargetFromElement,
-} from '@blocksuite/affine-components/context-menu';
+} from '@labre/affine-components/context-menu';
 import { css, html } from 'lit';
 
 import { BaseGroup } from './base.js';

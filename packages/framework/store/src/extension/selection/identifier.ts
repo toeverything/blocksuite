@@ -1,4 +1,4 @@
-import { createIdentifier } from '@blocksuite/global/di';
+import { createIdentifier } from '@labre/global/di';
 
 import type { ExtensionType } from '../extension';
 import type { SelectionConstructor } from './types';

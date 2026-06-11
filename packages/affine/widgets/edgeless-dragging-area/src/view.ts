@@ -1,7 +1,7 @@
 import {
   type ViewExtensionContext,
   ViewExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
+} from '@labre/affine-ext-loader';
 
 import { edgelessDraggingAreaWidget } from './edgeless-dragging-area-rect';
 import { effects } from './effects';

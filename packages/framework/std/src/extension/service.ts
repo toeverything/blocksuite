@@ -1,7 +1,7 @@
-import type { Container } from '@blocksuite/global/di';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Extension } from '@blocksuite/store';
+import type { Container } from '@labre/global/di';
+import { DisposableGroup } from '@labre/global/disposable';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { Extension } from '@labre/store';
 
 import type { EventName, UIEventHandler } from '../event/index.js';
 import {

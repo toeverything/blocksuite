@@ -1,9 +1,9 @@
 import {
   type ViewExtensionContext,
   ViewExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import type { AffineInlineEditor } from '@blocksuite/affine-shared/types';
-import type { EditorHost } from '@blocksuite/std';
+} from '@labre/affine-ext-loader';
+import type { AffineInlineEditor } from '@labre/affine-shared/types';
+import type { EditorHost } from '@labre/std';
 import { z } from 'zod';
 
 import { type LinkedMenuGroup, LinkedWidgetConfigExtension } from './config';

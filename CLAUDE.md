@@ -4,7 +4,7 @@ Editor library for **Labre** — a markdown + whiteboard editor for enterprise
 transformation architects. Fork of BlockSuite (AFFiNE's editor), **assumed
 divergent** from upstream (see `docs/adr/0001`). This repo is the open-source
 library ONLY; the SaaS lives in the private `labreapp` repo, which consumes
-this library as npm packages (`@labre/*` scope, publication pending).
+this library as npm packages (`@blocksuite/*` scope, publication pending).
 
 ## Commands
 
@@ -24,7 +24,7 @@ in the script) and expect occasional cold-start retries.
 
 - `packages/affine/all/src/schemas.ts` + `extensions/{store,view}.ts` — the
   three assembly points. All three honor **block flags**
-  (`@blocksuite/affine/flags`): optional blocks can be shipped dark and
+  (`@labre/affine/flags`): optional blocks can be shipped dark and
   enabled at runtime by the host app. Core (root, surface, note, paragraph,
   base gfx) is not flaggable. See `docs/adr/0002`.
 - `packages/affine/shared/src/services/telemetry-service/` — the telemetry

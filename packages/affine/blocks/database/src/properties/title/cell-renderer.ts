@@ -3,8 +3,8 @@ import {
   createFromBaseCellRenderer,
   createIcon,
   uniMap,
-} from '@blocksuite/data-view';
-import { TableSingleView } from '@blocksuite/data-view/view-presets';
+} from '@labre/data-view';
+import { TableSingleView } from '@labre/data-view/view-presets';
 
 import { titlePropertyModelConfig } from './define.js';
 import { HeaderAreaTextCell } from './text.js';

@@ -1,4 +1,4 @@
-import { FontFamily, FontStyle, FontWeight } from '@blocksuite/affine-model';
+import { FontFamily, FontStyle, FontWeight } from '@labre/affine-model';
 import { z } from 'zod';
 
 export const fontConfigSchema = z.object({

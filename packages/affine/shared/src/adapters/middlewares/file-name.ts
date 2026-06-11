@@ -1,4 +1,4 @@
-import type { TransformerMiddleware } from '@blocksuite/store';
+import type { TransformerMiddleware } from '@labre/store';
 
 export const fileNameMiddleware =
   (fileName?: string): TransformerMiddleware =>

@@ -1,4 +1,4 @@
-import { createIdentifier } from '@blocksuite/global/di';
+import { createIdentifier } from '@labre/global/di';
 
 import type { SurfaceElementModel } from '../../element-model/base.js';
 import type { DomRenderer } from '../dom-renderer.js';

@@ -1,10 +1,10 @@
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
+import { DocModeProvider } from '@labre/affine-shared/services';
 import {
   getClosestBlockComponentByElement,
   getModelByElement,
-} from '@blocksuite/affine-shared/utils';
-import type { BlockComponent, PointerEventState } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/affine-shared/utils';
+import type { BlockComponent, PointerEventState } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 
 export class ImageResizeManager {
   private _activeComponent: BlockComponent | null = null;

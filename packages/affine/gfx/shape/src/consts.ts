@@ -2,7 +2,7 @@ import {
   DEFAULT_ROUGHNESS,
   LineWidth,
   StrokeStyle,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 
 export const SHAPE_OVERLAY_WIDTH = 100;
 export const SHAPE_OVERLAY_HEIGHT = 100;

@@ -1,6 +1,6 @@
 /* CSS variables. You need to handle all places where `CSS variables` are marked. */
 
-import { LINE_COLORS } from '@blocksuite/affine-model';
+import { LINE_COLORS } from '@labre/affine-model';
 import {
   type AffineCssVariables,
   type AffineTheme,

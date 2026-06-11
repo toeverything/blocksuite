@@ -1,5 +1,5 @@
-import type { TransformerMiddleware } from '@blocksuite/store';
-import { StoreExtension } from '@blocksuite/store';
+import type { TransformerMiddleware } from '@labre/store';
+import { StoreExtension } from '@labre/store';
 
 import { DEFAULT_IMAGE_PROXY_ENDPOINT } from '../../consts';
 

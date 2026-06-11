@@ -2,23 +2,23 @@ import {
   type AttachmentBlockModel,
   type ImageBlockProps,
   MAX_IMAGE_WIDTH,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
-} from '@blocksuite/affine-shared/consts';
-import { FileSizeLimitProvider } from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/consts';
+import { FileSizeLimitProvider } from '@labre/affine-shared/services';
 import {
   readImageSize,
   transformModel,
   withTempBlobData,
-} from '@blocksuite/affine-shared/utils';
-import type { Container } from '@blocksuite/global/di';
-import { createIdentifier } from '@blocksuite/global/di';
-import { Bound } from '@blocksuite/global/gfx';
-import { type BlockStdScope, StdIdentifier } from '@blocksuite/std';
-import type { ExtensionType } from '@blocksuite/store';
-import { Extension } from '@blocksuite/store';
+} from '@labre/affine-shared/utils';
+import type { Container } from '@labre/global/di';
+import { createIdentifier } from '@labre/global/di';
+import { Bound } from '@labre/global/gfx';
+import { type BlockStdScope, StdIdentifier } from '@labre/std';
+import type { ExtensionType } from '@labre/store';
+import { Extension } from '@labre/store';
 import type { TemplateResult } from 'lit';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';

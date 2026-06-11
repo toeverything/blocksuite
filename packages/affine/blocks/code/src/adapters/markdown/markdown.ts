@@ -1,13 +1,13 @@
-import { CodeBlockSchema } from '@blocksuite/affine-model';
+import { CodeBlockSchema } from '@labre/affine-model';
 import {
   BlockMarkdownAdapterExtension,
   type BlockMarkdownAdapterMatcher,
   CODE_BLOCK_WRAP_KEY,
   IN_PARAGRAPH_NODE_CONTEXT_KEY,
   type MarkdownAST,
-} from '@blocksuite/affine-shared/adapters';
-import type { DeltaInsert } from '@blocksuite/store';
-import { nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import type { DeltaInsert } from '@labre/store';
+import { nanoid } from '@labre/store';
 import type { Code, Html } from 'mdast';
 
 const isCodeNode = (node: MarkdownAST): node is Code => node.type === 'code';

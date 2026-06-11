@@ -1,4 +1,4 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 import type {
   BlockSnapshot,
   DocSnapshot,
@@ -12,8 +12,8 @@ import type {
   ToBlockSnapshotPayload,
   ToDocSnapshotPayload,
   ToSliceSnapshotPayload,
-} from '@blocksuite/store';
-import { BaseAdapter } from '@blocksuite/store';
+} from '@labre/store';
+import { BaseAdapter } from '@labre/store';
 
 import { NotificationProvider } from '../../services/notification-service.js';
 import { decodeClipboardBlobs, encodeClipboardBlobs } from './utils.js';

@@ -1,11 +1,11 @@
-import { DividerBlockModel } from '@blocksuite/affine-model';
-import { DisposableGroup } from '@blocksuite/global/disposable';
+import { DividerBlockModel } from '@labre/affine-model';
+import { DisposableGroup } from '@labre/global/disposable';
 import {
   BlockSelection,
   LifeCycleWatcher,
   TextSelection,
-} from '@blocksuite/std';
-import type { BaseSelection, BlockModel } from '@blocksuite/store';
+} from '@labre/std';
+import type { BaseSelection, BlockModel } from '@labre/store';
 import { signal } from '@preact/signals-core';
 
 import { getSelectedBlocksCommand } from '../../commands';

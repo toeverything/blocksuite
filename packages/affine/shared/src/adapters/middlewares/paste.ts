@@ -5,8 +5,8 @@ import {
   ImageBlockModel,
   type ParagraphBlockModel,
   type ReferenceInfo,
-} from '@blocksuite/affine-model';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+} from '@labre/affine-model';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 import {
   BLOCK_ID_ATTR,
   type BlockComponent,
@@ -14,7 +14,7 @@ import {
   type EditorHost,
   type TextRangePoint,
   TextSelection,
-} from '@blocksuite/std';
+} from '@labre/std';
 import {
   type BlockModel,
   type BlockSnapshot,
@@ -23,7 +23,7 @@ import {
   type SliceSnapshot,
   type Text,
   type TransformerMiddleware,
-} from '@blocksuite/store';
+} from '@labre/store';
 import * as Y from 'yjs';
 
 import { REFERENCE_NODE } from '../../consts';

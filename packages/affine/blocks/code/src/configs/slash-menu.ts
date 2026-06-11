@@ -1,4 +1,4 @@
-import { type SlashMenuConfig } from '@blocksuite/affine-widget-slash-menu';
+import { type SlashMenuConfig } from '@labre/affine-widget-slash-menu';
 
 export const codeSlashMenuConfig: SlashMenuConfig = {
   disableWhen: ({ model }) => {

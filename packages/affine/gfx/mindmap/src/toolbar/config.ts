@@ -1,22 +1,22 @@
-import { hasGrouped } from '@blocksuite/affine-gfx-shape';
+import { hasGrouped } from '@labre/affine-gfx-shape';
 import {
   LayoutType,
   MindmapElementModel,
   MindmapStyle,
   ShapeElementModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   type ToolbarContext,
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
-import { getMostCommonValue } from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/services';
+import { getMostCommonValue } from '@labre/affine-shared/utils';
 import {
   type MenuItem,
   renderMenu,
-} from '@blocksuite/affine-widget-edgeless-toolbar';
+} from '@labre/affine-widget-edgeless-toolbar';
 import { RadiantIcon, RightLayoutIcon, StyleIcon } from '@blocksuite/icons/lit';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
+import { BlockFlavourIdentifier } from '@labre/std';
 
 import {
   MindmapStyleFour,

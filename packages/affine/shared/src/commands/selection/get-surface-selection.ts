@@ -1,4 +1,4 @@
-import { SurfaceSelection } from '@blocksuite/std';
+import { SurfaceSelection } from '@labre/std';
 
 import type { GetSelectionCommand } from './types';
 

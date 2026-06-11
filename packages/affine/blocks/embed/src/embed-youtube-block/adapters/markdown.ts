@@ -1,5 +1,5 @@
-import { EmbedYoutubeBlockSchema } from '@blocksuite/affine-model';
-import { BlockMarkdownAdapterExtension } from '@blocksuite/affine-shared/adapters';
+import { EmbedYoutubeBlockSchema } from '@labre/affine-model';
+import { BlockMarkdownAdapterExtension } from '@labre/affine-shared/adapters';
 
 import { createEmbedBlockMarkdownAdapterMatcher } from '../../common/adapters/markdown.js';
 

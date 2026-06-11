@@ -1,17 +1,17 @@
 import {
   DatabaseBlockDataSource,
   databasePropertyConverts,
-} from '@blocksuite/affine-block-database';
-import type { ColumnDataType } from '@blocksuite/affine-model';
+} from '@labre/affine-block-database';
+import type { ColumnDataType } from '@labre/affine-model';
 import {
   insertPositionToIndex,
   type InsertToPosition,
-} from '@blocksuite/affine-shared/utils';
-import { DataSourceBase, type PropertyMetaConfig } from '@blocksuite/data-view';
-import { propertyPresets } from '@blocksuite/data-view/property-presets';
-import { BlockSuiteError } from '@blocksuite/global/exceptions';
-import type { EditorHost } from '@blocksuite/std';
-import type { Block, Store } from '@blocksuite/store';
+} from '@labre/affine-shared/utils';
+import { DataSourceBase, type PropertyMetaConfig } from '@labre/data-view';
+import { propertyPresets } from '@labre/data-view/property-presets';
+import { BlockSuiteError } from '@labre/global/exceptions';
+import type { EditorHost } from '@labre/std';
+import type { Block, Store } from '@labre/store';
 import { Subject } from 'rxjs';
 
 import type { BlockMeta } from './block-meta/base.js';

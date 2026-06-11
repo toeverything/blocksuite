@@ -1,13 +1,13 @@
-import { createLitPortal } from '@blocksuite/affine-components/portal';
-import type { EmbedIframeBlockModel } from '@blocksuite/affine-model';
+import { createLitPortal } from '@labre/affine-components/portal';
+import type { EmbedIframeBlockModel } from '@labre/affine-model';
 import {
   DocModeProvider,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/services';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { WithDisposable } from '@labre/global/lit';
 import { EditIcon, InformationIcon, ResetIcon } from '@blocksuite/icons/lit';
-import type { BlockStdScope } from '@blocksuite/std';
+import type { BlockStdScope } from '@labre/std';
 import { flip, offset } from '@floating-ui/dom';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';

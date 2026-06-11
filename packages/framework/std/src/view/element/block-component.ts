@@ -1,6 +1,6 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { type BlockModel, type BlockViewType, Store } from '@blocksuite/store';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import { type BlockModel, type BlockViewType, Store } from '@labre/store';
 import { consume, provide } from '@lit/context';
 import { computed } from '@preact/signals-core';
 import { nothing, type TemplateResult } from 'lit';

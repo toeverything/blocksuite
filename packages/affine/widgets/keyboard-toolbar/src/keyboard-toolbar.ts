@@ -1,13 +1,13 @@
-import { getSelectedModelsCommand } from '@blocksuite/affine-shared/commands';
-import { type VirtualKeyboardProviderWithAction } from '@blocksuite/affine-shared/services';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { getSelectedModelsCommand } from '@labre/affine-shared/commands';
+import { type VirtualKeyboardProviderWithAction } from '@labre/affine-shared/services';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { ArrowLeftBigIcon, KeyboardIcon } from '@blocksuite/icons/lit';
 import {
   BlockComponent,
   PropTypes,
   requiredProperties,
   ShadowlessElement,
-} from '@blocksuite/std';
+} from '@labre/std';
 import { effect, type Signal, signal, untracked } from '@preact/signals-core';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';

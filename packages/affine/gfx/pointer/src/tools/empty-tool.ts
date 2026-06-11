@@ -1,4 +1,4 @@
-import { BaseTool } from '@blocksuite/std/gfx';
+import { BaseTool } from '@labre/std/gfx';
 
 /**
  * Empty tool that does nothing.

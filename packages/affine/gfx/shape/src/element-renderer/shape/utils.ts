@@ -1,4 +1,4 @@
-import type { CanvasRenderer } from '@blocksuite/affine-block-surface';
+import type { CanvasRenderer } from '@labre/affine-block-surface';
 import {
   getFontString,
   getLineHeight,
@@ -8,16 +8,16 @@ import {
   type TextDelta,
   wrapText,
   wrapTextDeltas,
-} from '@blocksuite/affine-gfx-text';
+} from '@labre/affine-gfx-text';
 import type {
   LocalShapeElementModel,
   ShapeElementModel,
   TextAlign,
   TextVerticalAlign,
-} from '@blocksuite/affine-model';
-import { FeatureFlagService } from '@blocksuite/affine-shared/services';
-import type { Bound, SerializedXYWH } from '@blocksuite/global/gfx';
-import { deltaInsertsToChunks } from '@blocksuite/std/inline';
+} from '@labre/affine-model';
+import { FeatureFlagService } from '@labre/affine-shared/services';
+import type { Bound, SerializedXYWH } from '@labre/global/gfx';
+import { deltaInsertsToChunks } from '@labre/std/inline';
 
 export type Colors = {
   color: string;

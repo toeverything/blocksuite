@@ -1,5 +1,5 @@
-import { TextUtils } from '@blocksuite/affine-block-surface';
-import { FontFamily, FontFamilyList } from '@blocksuite/affine-model';
+import { TextUtils } from '@labre/affine-block-surface';
+import { FontFamily, FontFamilyList } from '@labre/affine-model';
 import { DoneIcon } from '@blocksuite/icons/lit';
 import { css, html, LitElement, nothing } from 'lit';
 import { property } from 'lit/decorators.js';

@@ -1,4 +1,4 @@
-import { createIdentifier } from '@blocksuite/global/di';
+import { createIdentifier } from '@labre/global/di';
 import type * as Y from 'yjs';
 
 import type { Store, StoreOptions, YBlock } from '../../model';

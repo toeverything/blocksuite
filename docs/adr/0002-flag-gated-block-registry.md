@@ -17,7 +17,7 @@ deletion — the mechanism that bounds the blast radius of autonomous changes.
 
 ## Decision
 
-A `BlockFlags` map (`@blocksuite/affine/flags`) is honored by the three
+A `BlockFlags` map (`@labre/affine/flags`) is honored by the three
 assembly points: `getAffineSchemas(flags)`, `getInternalStoreExtensions(flags)`
 and `getInternalViewExtensions(flags)`. ~22 optional blocks/gfx modules;
 the structural core (root, surface, note, paragraph, base gfx tools) is not

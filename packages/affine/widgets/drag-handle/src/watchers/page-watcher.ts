@@ -1,4 +1,4 @@
-import { PageViewportService } from '@blocksuite/affine-shared/services';
+import { PageViewportService } from '@labre/affine-shared/services';
 
 import type { AffineDragHandleWidget } from '../drag-handle.js';
 

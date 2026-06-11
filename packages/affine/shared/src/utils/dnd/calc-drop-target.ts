@@ -1,7 +1,7 @@
-import { DatabaseBlockModel, ListBlockModel } from '@blocksuite/affine-model';
-import { type Point, Rect } from '@blocksuite/global/gfx';
-import type { BlockComponent } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+import { DatabaseBlockModel, ListBlockModel } from '@labre/affine-model';
+import { type Point, Rect } from '@labre/global/gfx';
+import type { BlockComponent } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../consts/index.js';
 import {

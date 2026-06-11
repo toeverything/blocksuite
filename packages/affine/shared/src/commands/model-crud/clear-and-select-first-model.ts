@@ -1,5 +1,5 @@
-import { type Command, TextSelection } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+import { type Command, TextSelection } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 
 export const clearAndSelectFirstModelCommand: Command<{
   selectedModels?: BlockModel[];

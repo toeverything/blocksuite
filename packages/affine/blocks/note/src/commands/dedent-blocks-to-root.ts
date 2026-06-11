@@ -1,6 +1,6 @@
-import { NoteBlockModel } from '@blocksuite/affine-model';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import { type Command, TextSelection } from '@blocksuite/std';
+import { NoteBlockModel } from '@labre/affine-model';
+import { matchModels } from '@labre/affine-shared/utils';
+import { type Command, TextSelection } from '@labre/std';
 
 import { dedentBlockToRoot } from './dedent-block-to-root';
 

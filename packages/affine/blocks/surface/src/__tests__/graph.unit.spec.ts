@@ -1,4 +1,4 @@
-import { Bound } from '@blocksuite/global/gfx';
+import { Bound } from '@labre/global/gfx';
 import { describe, expect, it } from 'vitest';
 
 import { Graph } from '../utils/graph.js';

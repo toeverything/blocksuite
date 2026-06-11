@@ -1,14 +1,14 @@
-import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { IS_MOBILE } from '@blocksuite/global/env';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { unsafeCSSVar, unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { IS_MOBILE } from '@labre/global/env';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import {
   ArrowLeftBigIcon,
   ArrowLeftSmallIcon,
   CloseIcon,
   SearchIcon,
 } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
-import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/std/inline';
+import { ShadowlessElement } from '@labre/std';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@labre/std/inline';
 import {
   autoPlacement,
   autoUpdate,

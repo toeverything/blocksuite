@@ -1,4 +1,4 @@
-import type { BlobEngine } from '@blocksuite/sync';
+import type { BlobEngine } from '@labre/sync';
 import type { Subject } from 'rxjs';
 import type { Awareness } from 'y-protocols/awareness.js';
 import type * as Y from 'yjs';

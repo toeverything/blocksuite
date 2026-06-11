@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-inline-footnote/view';
+export * from '@labre/affine-inline-footnote/view';

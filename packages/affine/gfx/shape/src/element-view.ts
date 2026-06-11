@@ -1,20 +1,20 @@
 import {
   type SurfaceBlockComponent,
   type SurfaceBlockModel,
-} from '@blocksuite/affine-block-surface';
-import { ConnectorPathGenerator } from '@blocksuite/affine-gfx-connector';
+} from '@labre/affine-block-surface';
+import { ConnectorPathGenerator } from '@labre/affine-gfx-connector';
 import {
   type ConnectorElementModel,
   ShapeElementModel,
   ShapeType,
-} from '@blocksuite/affine-model';
-import { Bound, rotatePoint } from '@blocksuite/global/gfx';
-import type { GfxModel } from '@blocksuite/std/gfx';
+} from '@labre/affine-model';
+import { Bound, rotatePoint } from '@labre/global/gfx';
+import type { GfxModel } from '@labre/std/gfx';
 import {
   GfxElementModelView,
   GfxViewInteractionExtension,
-} from '@blocksuite/std/gfx';
-import type { PointerEventState } from '@blocksuite/std';
+} from '@labre/std/gfx';
+import type { PointerEventState } from '@labre/std';
 
 import { normalizeShapeBound } from './element-renderer';
 import { PolygonVertexEditingOverlay } from './overlay/polygon-vertex-editing-overlay';

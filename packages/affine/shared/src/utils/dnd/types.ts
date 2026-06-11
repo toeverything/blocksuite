@@ -1,6 +1,6 @@
-import type { Rect } from '@blocksuite/global/gfx';
-import type { BlockComponent } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+import type { Rect } from '@labre/global/gfx';
+import type { BlockComponent } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 
 export interface EditingState {
   element: BlockComponent;

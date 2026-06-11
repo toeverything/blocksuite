@@ -2,9 +2,9 @@ import {
   EmbedLoomBlockSchema,
   type EmbedLoomModel,
   EmbedLoomStyles,
-} from '@blocksuite/affine-model';
-import { EmbedOptionConfig } from '@blocksuite/affine-shared/services';
-import { BlockService } from '@blocksuite/std';
+} from '@labre/affine-model';
+import { EmbedOptionConfig } from '@labre/affine-shared/services';
+import { BlockService } from '@labre/std';
 
 import { loomUrlRegex } from './embed-loom-model.js';
 import { queryEmbedLoomData } from './utils.js';

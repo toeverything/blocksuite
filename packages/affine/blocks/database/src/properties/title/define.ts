@@ -1,5 +1,5 @@
-import { propertyType, t } from '@blocksuite/data-view';
-import { Text } from '@blocksuite/store';
+import { propertyType, t } from '@labre/data-view';
+import { Text } from '@labre/store';
 import { Doc } from 'yjs';
 import zod from 'zod';
 

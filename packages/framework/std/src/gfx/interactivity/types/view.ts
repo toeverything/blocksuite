@@ -1,4 +1,4 @@
-import type { Bound, IBound, IPoint } from '@blocksuite/global/gfx';
+import type { Bound, IBound, IPoint } from '@labre/global/gfx';
 
 import type { GfxBlockComponent } from '../../../view/element/gfx-block-component.js';
 import type { GfxModel } from '../../model/model.js';

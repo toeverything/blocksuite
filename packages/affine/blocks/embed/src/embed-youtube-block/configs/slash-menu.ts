@@ -1,8 +1,8 @@
-import { DefaultTool } from '@blocksuite/affine-block-surface';
-import { toggleEmbedCardCreateModal } from '@blocksuite/affine-components/embed-card-modal';
-import type { SlashMenuConfig } from '@blocksuite/affine-widget-slash-menu';
+import { DefaultTool } from '@labre/affine-block-surface';
+import { toggleEmbedCardCreateModal } from '@labre/affine-components/embed-card-modal';
+import type { SlashMenuConfig } from '@labre/affine-widget-slash-menu';
 import { YoutubeDuotoneIcon } from '@blocksuite/icons/lit';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 
 import { YoutubeVideoTooltip } from './tooltips';
 

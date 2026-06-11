@@ -1,6 +1,6 @@
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { CheckBoxCheckSolidIcon, CheckBoxUnIcon } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { ShadowlessElement } from '@labre/std';
 import { computed } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';

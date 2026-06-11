@@ -1,13 +1,13 @@
-import { RENDER_CARD_THROTTLE_MS } from '@blocksuite/affine-block-embed';
-import { LoadingIcon } from '@blocksuite/affine-components/icons';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { WithDisposable } from '@blocksuite/global/lit';
+import { RENDER_CARD_THROTTLE_MS } from '@labre/affine-block-embed';
+import { LoadingIcon } from '@labre/affine-components/icons';
+import { ThemeProvider } from '@labre/affine-shared/services';
+import { WithDisposable } from '@labre/global/lit';
 import { ResetIcon } from '@blocksuite/icons/lit';
 import {
   BlockSelection,
   isGfxBlockComponent,
   ShadowlessElement,
-} from '@blocksuite/std';
+} from '@labre/std';
 import { html, nothing } from 'lit';
 import { property, queryAsync } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

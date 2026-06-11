@@ -1,10 +1,10 @@
 import {
   DefaultModeDragType,
   DefaultTool,
-} from '@blocksuite/affine-block-surface';
-import type { RootBlockModel } from '@blocksuite/affine-model';
-import { WidgetComponent, WidgetViewExtension } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/affine-block-surface';
+import type { RootBlockModel } from '@labre/affine-model';
+import { WidgetComponent, WidgetViewExtension } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, nothing, unsafeCSS } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';

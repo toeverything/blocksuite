@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/notification';
+export * from '@labre/affine-components/notification';

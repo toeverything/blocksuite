@@ -1,8 +1,8 @@
-import type { DocMode } from '@blocksuite/affine-model';
-import { HighlightSelection } from '@blocksuite/affine-shared/selection';
-import { Bound, deserializeXYWH } from '@blocksuite/global/gfx';
-import { WidgetComponent } from '@blocksuite/std';
-import { GfxControllerIdentifier, type GfxModel } from '@blocksuite/std/gfx';
+import type { DocMode } from '@labre/affine-model';
+import { HighlightSelection } from '@labre/affine-shared/selection';
+import { Bound, deserializeXYWH } from '@labre/global/gfx';
+import { WidgetComponent } from '@labre/std';
+import { GfxControllerIdentifier, type GfxModel } from '@labre/std/gfx';
 import { computed, signal } from '@preact/signals-core';
 import { cssVarV2 } from '@toeverything/theme/v2';
 import { css, html, nothing, unsafeCSS } from 'lit';

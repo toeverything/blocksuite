@@ -1,4 +1,4 @@
-import { BlockSuiteError } from '@blocksuite/global/exceptions';
+import { BlockSuiteError } from '@labre/global/exceptions';
 import { Array as YArray, Map as YMap, Text as YText } from 'yjs';
 
 import { Boxed } from '../boxed';

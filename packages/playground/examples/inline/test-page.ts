@@ -1,16 +1,16 @@
 import '@shoelace-style/shoelace';
 
-import { ShadowlessElement } from '@blocksuite/affine/std';
-import { effects } from '@blocksuite/affine/std/effects';
+import { ShadowlessElement } from '@labre/affine/std';
+import { effects } from '@labre/affine/std/effects';
 import {
   type AttributeRenderer,
   InlineEditor,
   ZERO_WIDTH_FOR_EMBED_NODE,
-} from '@blocksuite/affine/std/inline';
+} from '@labre/affine/std/inline';
 import {
   type BaseTextAttributes,
   baseTextAttributes,
-} from '@blocksuite/affine/store';
+} from '@labre/affine/store';
 import { effect } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';

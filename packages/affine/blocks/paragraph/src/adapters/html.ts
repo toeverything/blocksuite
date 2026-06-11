@@ -1,12 +1,12 @@
-import { ParagraphBlockSchema } from '@blocksuite/affine-model';
+import { ParagraphBlockSchema } from '@labre/affine-model';
 import {
   BlockHtmlAdapterExtension,
   type BlockHtmlAdapterMatcher,
   HastUtils,
   type HtmlAST,
-} from '@blocksuite/affine-shared/adapters';
-import type { DeltaInsert, NodeProps } from '@blocksuite/store';
-import { nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import type { DeltaInsert, NodeProps } from '@labre/store';
+import { nanoid } from '@labre/store';
 
 const paragraphBlockMatchTags = new Set([
   'p',

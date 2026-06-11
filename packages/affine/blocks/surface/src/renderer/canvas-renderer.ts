@@ -1,17 +1,17 @@
-import { type Color, ColorScheme } from '@blocksuite/affine-model';
-import { FeatureFlagService } from '@blocksuite/affine-shared/services';
-import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import type { IBound } from '@blocksuite/global/gfx';
-import { getBoundWithRotation, intersects } from '@blocksuite/global/gfx';
-import type { BlockStdScope } from '@blocksuite/std';
+import { type Color, ColorScheme } from '@labre/affine-model';
+import { FeatureFlagService } from '@labre/affine-shared/services';
+import { requestConnectedFrame } from '@labre/affine-shared/utils';
+import { DisposableGroup } from '@labre/global/disposable';
+import type { IBound } from '@labre/global/gfx';
+import { getBoundWithRotation, intersects } from '@labre/global/gfx';
+import type { BlockStdScope } from '@labre/std';
 import type {
   GfxCompatibleInterface,
   GridManager,
   LayerManager,
   SurfaceBlockModel,
   Viewport,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 import last from 'lodash-es/last';
 import { Subject } from 'rxjs';
 

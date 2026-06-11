@@ -2,16 +2,16 @@ import type {
   DatabaseAllEvents,
   DatabaseAllViewEvents,
   EventTraceFn,
-} from '@blocksuite/affine-shared/services';
-import type { UniComponent } from '@blocksuite/affine-shared/types';
-import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
-import type { DisposableMember } from '@blocksuite/global/disposable';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/services';
+import type { UniComponent } from '@labre/affine-shared/types';
+import type { InsertToPosition } from '@labre/affine-shared/utils';
+import type { DisposableMember } from '@labre/global/disposable';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import {
   type EventName,
   ShadowlessElement,
   type UIEventHandler,
-} from '@blocksuite/std';
+} from '@labre/std';
 import { computed } from '@preact/signals-core';
 import { property } from 'lit/decorators.js';
 

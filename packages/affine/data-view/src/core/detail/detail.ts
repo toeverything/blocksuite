@@ -2,15 +2,15 @@ import {
   menu,
   popMenu,
   popupTargetFromElement,
-} from '@blocksuite/affine-components/context-menu';
-import type { UniComponent } from '@blocksuite/affine-shared/types';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-components/context-menu';
+import type { UniComponent } from '@labre/affine-shared/types';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import {
   ArrowDownBigIcon,
   ArrowUpBigIcon,
   PlusIcon,
 } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+import { ShadowlessElement } from '@labre/std';
 import { computed } from '@preact/signals-core';
 import { css, nothing, unsafeCSS } from 'lit';
 import { property, query } from 'lit/decorators.js';

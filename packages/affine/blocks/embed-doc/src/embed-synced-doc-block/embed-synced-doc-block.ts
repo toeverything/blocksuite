@@ -1,21 +1,21 @@
 import {
   EmbedBlockComponent,
   isEmptyDoc,
-} from '@blocksuite/affine-block-embed';
-import { Peekable } from '@blocksuite/affine-components/peek';
-import { ViewExtensionManagerIdentifier } from '@blocksuite/affine-ext-loader';
+} from '@labre/affine-block-embed';
+import { Peekable } from '@labre/affine-components/peek';
+import { ViewExtensionManagerIdentifier } from '@labre/affine-ext-loader';
 import {
   type DocLinkClickedEvent,
   RefNodeSlotsProvider,
-} from '@blocksuite/affine-inline-reference';
+} from '@labre/affine-inline-reference';
 import {
   type AliasInfo,
   type DocMode,
   type EmbedSyncedDocModel,
   NoteDisplayMode,
   type ReferenceInfo,
-} from '@blocksuite/affine-model';
-import { REFERENCE_NODE } from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-model';
+import { REFERENCE_NODE } from '@labre/affine-shared/consts';
 import {
   DocDisplayMetaProvider,
   DocModeProvider,
@@ -24,17 +24,17 @@ import {
   GeneralSettingSchema,
   ThemeExtensionIdentifier,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
-import { cloneReferenceInfo } from '@blocksuite/affine-shared/utils';
-import { Bound, getCommonBound } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/services';
+import { cloneReferenceInfo } from '@labre/affine-shared/utils';
+import { Bound, getCommonBound } from '@labre/global/gfx';
 import {
   BlockSelection,
   BlockStdScope,
   type EditorHost,
   LifeCycleWatcher,
-} from '@blocksuite/std';
-import { GfxControllerIdentifier, GfxExtension } from '@blocksuite/std/gfx';
-import { type GetStoreOptions, type Query, Text } from '@blocksuite/store';
+} from '@labre/std';
+import { GfxControllerIdentifier, GfxExtension } from '@labre/std/gfx';
+import { type GetStoreOptions, type Query, Text } from '@labre/store';
 import { computed, signal } from '@preact/signals-core';
 import { html, nothing, type PropertyValues } from 'lit';
 import { query, state } from 'lit/decorators.js';

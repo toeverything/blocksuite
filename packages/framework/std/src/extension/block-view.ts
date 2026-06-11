@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { BlockViewIdentifier } from '../identifier.js';
 import type { BlockViewType } from '../spec/type.js';
@@ -13,7 +13,7 @@ import type { BlockViewType } from '../spec/type.js';
  *
  * @example
  * ```ts
- * import { BlockViewExtension } from '@blocksuite/std';
+ * import { BlockViewExtension } from '@labre/std';
  *
  * const MyListBlockViewExtension = BlockViewExtension(
  *   'affine:list',

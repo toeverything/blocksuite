@@ -3,12 +3,12 @@ import {
   ParagraphBlockModel,
   ParagraphBlockSchema,
   type ParagraphType,
-} from '@blocksuite/affine-model';
-import { focusTextModel } from '@blocksuite/affine-rich-text';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import type { BlockComponent } from '@blocksuite/std';
-import { InlineMarkdownExtension } from '@blocksuite/std/inline';
+} from '@labre/affine-model';
+import { focusTextModel } from '@labre/affine-rich-text';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { matchModels } from '@labre/affine-shared/utils';
+import type { BlockComponent } from '@labre/std';
+import { InlineMarkdownExtension } from '@labre/std/inline';
 
 export const ParagraphMarkdownExtension =
   InlineMarkdownExtension<AffineTextAttributes>({

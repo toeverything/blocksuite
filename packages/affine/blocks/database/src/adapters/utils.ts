@@ -1,5 +1,5 @@
-import type { ColumnDataType, SerializedCells } from '@blocksuite/affine-model';
-import type { BlockSnapshot, DeltaInsert } from '@blocksuite/store';
+import type { ColumnDataType, SerializedCells } from '@labre/affine-model';
+import type { BlockSnapshot, DeltaInsert } from '@labre/store';
 
 import { databaseBlockModels } from '../properties/model';
 

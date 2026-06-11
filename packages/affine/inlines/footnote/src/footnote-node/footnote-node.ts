@@ -1,23 +1,23 @@
-import { HoverController } from '@blocksuite/affine-components/hover';
-import { PeekViewProvider } from '@blocksuite/affine-components/peek';
-import type { FootNote } from '@blocksuite/affine-model';
-import { CitationProvider } from '@blocksuite/affine-shared/services';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { WithDisposable } from '@blocksuite/global/lit';
+import { HoverController } from '@labre/affine-components/hover';
+import { PeekViewProvider } from '@labre/affine-components/peek';
+import type { FootNote } from '@labre/affine-model';
+import { CitationProvider } from '@labre/affine-shared/services';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { WithDisposable } from '@labre/global/lit';
 import {
   BlockSelection,
   type BlockStdScope,
   ShadowlessElement,
   TextSelection,
-} from '@blocksuite/std';
+} from '@labre/std';
 import {
   INLINE_ROOT_ATTR,
   type InlineRootElement,
   ZERO_WIDTH_FOR_EMBED_NODE,
   ZERO_WIDTH_FOR_EMPTY_LINE,
-} from '@blocksuite/std/inline';
-import type { DeltaInsert } from '@blocksuite/store';
+} from '@labre/std/inline';
+import type { DeltaInsert } from '@labre/store';
 import { flip, offset, shift } from '@floating-ui/dom';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, nothing, unsafeCSS } from 'lit';

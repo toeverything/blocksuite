@@ -1,8 +1,8 @@
 import {
   type EdgelessRootBlockComponent,
   EdgelessRootService,
-} from '@blocksuite/affine/blocks/root';
-import type { DocSnapshot } from '@blocksuite/store';
+} from '@labre/affine/blocks/root';
+import type { DocSnapshot } from '@labre/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { wait } from '../utils/common.js';
@@ -263,8 +263,8 @@ describe('basic', () => {
   });
 });
 
-import type { FrameBlockComponent } from '@blocksuite/affine/blocks/frame';
-import type { SurfaceRefBlockComponent } from '@blocksuite/affine/blocks/surface-ref';
+import type { FrameBlockComponent } from '@labre/affine/blocks/frame';
+import type { SurfaceRefBlockComponent } from '@labre/affine/blocks/surface-ref';
 
 import snapshot from '../snapshots/edgeless/surface-ref.spec.ts/surface-ref.json' assert { type: 'json' };
 

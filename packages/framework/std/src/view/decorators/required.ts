@@ -1,5 +1,5 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import type { Constructor } from '@blocksuite/global/utils';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import type { Constructor } from '@labre/global/utils';
 import type { LitElement } from 'lit';
 
 type ValidatorFunction = (value: unknown) => boolean;

@@ -1,5 +1,5 @@
-import { ParagraphBlockModel } from '@blocksuite/affine-model';
-import type { BlockModel } from '@blocksuite/store';
+import { ParagraphBlockModel } from '@labre/affine-model';
+import type { BlockModel } from '@labre/store';
 
 import { matchModels } from '../model/checker.js';
 

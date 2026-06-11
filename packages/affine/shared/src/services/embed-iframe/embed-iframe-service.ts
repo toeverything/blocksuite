@@ -1,5 +1,5 @@
-import type { EmbedIframeBlockProps } from '@blocksuite/affine-model';
-import { type Store, StoreExtension } from '@blocksuite/store';
+import type { EmbedIframeBlockProps } from '@labre/affine-model';
+import { type Store, StoreExtension } from '@labre/store';
 
 import {
   type EmbedIframeConfig,

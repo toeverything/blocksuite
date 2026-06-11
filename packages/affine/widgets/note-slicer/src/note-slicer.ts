@@ -1,23 +1,23 @@
-import type { NoteBlockComponent } from '@blocksuite/affine-block-note';
+import type { NoteBlockComponent } from '@labre/affine-block-note';
 import {
   EdgelessLegacySlotIdentifier,
   getSurfaceComponent,
   isNoteBlock,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   DEFAULT_NOTE_HEIGHT,
   type NoteBlockModel,
   type RootBlockModel,
-} from '@blocksuite/affine-model';
-import { EDGELESS_BLOCK_CHILD_PADDING } from '@blocksuite/affine-shared/consts';
-import { TelemetryProvider } from '@blocksuite/affine-shared/services';
-import { getRectByBlockComponent } from '@blocksuite/affine-shared/utils';
-import type { EdgelessSelectedRectWidget } from '@blocksuite/affine-widget-edgeless-selected-rect';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { deserializeXYWH, Point, serializeXYWH } from '@blocksuite/global/gfx';
+} from '@labre/affine-model';
+import { EDGELESS_BLOCK_CHILD_PADDING } from '@labre/affine-shared/consts';
+import { TelemetryProvider } from '@labre/affine-shared/services';
+import { getRectByBlockComponent } from '@labre/affine-shared/utils';
+import type { EdgelessSelectedRectWidget } from '@labre/affine-widget-edgeless-selected-rect';
+import { DisposableGroup } from '@labre/global/disposable';
+import { deserializeXYWH, Point, serializeXYWH } from '@labre/global/gfx';
 import { ScissorsIcon } from '@blocksuite/icons/lit';
-import { WidgetComponent, WidgetViewExtension } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+import { WidgetComponent, WidgetViewExtension } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

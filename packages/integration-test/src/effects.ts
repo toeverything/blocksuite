@@ -1,4 +1,4 @@
-import '@blocksuite/affine/effects';
+import '@labre/affine/effects';
 
 import { TestAffineEditorContainer } from './editors/index.js';
 

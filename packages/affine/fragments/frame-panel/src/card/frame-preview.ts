@@ -1,21 +1,21 @@
-import { ViewExtensionManagerIdentifier } from '@blocksuite/affine-ext-loader';
-import type { FrameBlockModel } from '@blocksuite/affine-model';
+import { ViewExtensionManagerIdentifier } from '@labre/affine-ext-loader';
+import type { FrameBlockModel } from '@labre/affine-model';
 import {
   DocModeExtension,
   DocModeProvider,
   ViewportElementExtension,
-} from '@blocksuite/affine-shared/services';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { Bound, deserializeXYWH } from '@blocksuite/global/gfx';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/services';
+import { DisposableGroup } from '@labre/global/disposable';
+import { Bound, deserializeXYWH } from '@labre/global/gfx';
+import { WithDisposable } from '@labre/global/lit';
 import {
   BlockStdScope,
   type EditorHost,
   LifeCycleWatcher,
   ShadowlessElement,
-} from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
-import { type ExtensionType, type Query, type Store } from '@blocksuite/store';
+} from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
+import { type ExtensionType, type Query, type Store } from '@labre/store';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { guard } from 'lit/directives/guard.js';

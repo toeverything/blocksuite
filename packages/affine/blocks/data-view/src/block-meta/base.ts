@@ -1,6 +1,6 @@
-import type { PropertyMetaConfig } from '@blocksuite/data-view';
-import type { DisposableMember } from '@blocksuite/global/disposable';
-import type { Block, BlockModel } from '@blocksuite/store';
+import type { PropertyMetaConfig } from '@labre/data-view';
+import type { DisposableMember } from '@labre/global/disposable';
+import type { Block, BlockModel } from '@labre/store';
 
 type PropertyMeta<
   T extends BlockModel = BlockModel,

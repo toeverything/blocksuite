@@ -1,5 +1,5 @@
-import type { Command } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+import type { Command } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 
 type Role = 'content' | 'hub';
 

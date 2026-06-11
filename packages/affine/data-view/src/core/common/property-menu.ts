@@ -1,5 +1,5 @@
-import { menu } from '@blocksuite/affine-components/context-menu';
-import { IS_MOBILE } from '@blocksuite/global/env';
+import { menu } from '@labre/affine-components/context-menu';
+import { IS_MOBILE } from '@labre/global/env';
 import { html } from 'lit/static-html.js';
 
 import { renderUniLit } from '../utils/uni-component/index.js';

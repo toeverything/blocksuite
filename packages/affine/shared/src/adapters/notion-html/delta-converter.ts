@@ -1,8 +1,8 @@
 import {
   createIdentifier,
   type ServiceIdentifier,
-} from '@blocksuite/global/di';
-import type { DeltaInsert, ExtensionType } from '@blocksuite/store';
+} from '@labre/global/di';
+import type { DeltaInsert, ExtensionType } from '@labre/store';
 import isEqual from 'lodash-es/isEqual';
 
 import type { AffineTextAttributes } from '../../types/index.js';

@@ -1,4 +1,4 @@
-import type { AwarenessSource } from '@blocksuite/sync';
+import type { AwarenessSource } from '@labre/sync';
 import type { Awareness } from 'y-protocols/awareness';
 import {
   applyAwarenessUpdate,

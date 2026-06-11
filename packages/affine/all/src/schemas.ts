@@ -1,6 +1,6 @@
 // Import models only, the bundled file should not include anything else.
-import { DataViewBlockSchema } from '@blocksuite/affine-block-data-view';
-import { SurfaceBlockSchema } from '@blocksuite/affine-block-surface';
+import { DataViewBlockSchema } from '@labre/affine-block-data-view';
+import { SurfaceBlockSchema } from '@labre/affine-block-surface';
 import {
   AttachmentBlockSchema,
   BookmarkBlockSchema,
@@ -25,8 +25,8 @@ import {
   RootBlockSchema,
   SurfaceRefBlockSchema,
   TableBlockSchema,
-} from '@blocksuite/affine-model';
-import type { BlockSchema } from '@blocksuite/store';
+} from '@labre/affine-model';
+import type { BlockSchema } from '@labre/store';
 import type { z } from 'zod';
 
 import { type BlockFlags, isBlockEnabled, type OptionalBlock } from './flags.js';

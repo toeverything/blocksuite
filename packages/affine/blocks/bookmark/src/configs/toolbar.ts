@@ -3,18 +3,18 @@ import {
   canEmbedAsIframe,
   EMBED_IFRAME_DEFAULT_HEIGHT_IN_SURFACE,
   EMBED_IFRAME_DEFAULT_WIDTH_IN_SURFACE,
-} from '@blocksuite/affine-block-embed';
-import { reassociateConnectorsCommand } from '@blocksuite/affine-block-surface';
-import { toast } from '@blocksuite/affine-components/toast';
+} from '@labre/affine-block-embed';
+import { reassociateConnectorsCommand } from '@labre/affine-block-surface';
+import { toast } from '@labre/affine-components/toast';
 import {
   BookmarkBlockModel,
   BookmarkStyles,
   type EmbedCardStyle,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EMBED_CARD_HEIGHT,
   EMBED_CARD_WIDTH,
-} from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-shared/consts';
 import {
   ActionPlacement,
   blockCommentToolbarButton,
@@ -26,9 +26,9 @@ import {
   type ToolbarContext,
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
-import { getBlockProps } from '@blocksuite/affine-shared/utils';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/services';
+import { getBlockProps } from '@labre/affine-shared/utils';
+import { Bound } from '@labre/global/gfx';
 import {
   CaptionIcon,
   CopyIcon,
@@ -36,8 +36,8 @@ import {
   DuplicateIcon,
   ResetIcon,
 } from '@blocksuite/icons/lit';
-import { BlockFlavourIdentifier, BlockSelection } from '@blocksuite/std';
-import { type ExtensionType, Slice, Text } from '@blocksuite/store';
+import { BlockFlavourIdentifier, BlockSelection } from '@labre/std';
+import { type ExtensionType, Slice, Text } from '@labre/store';
 import { computed, signal } from '@preact/signals-core';
 import { html } from 'lit';
 import { keyed } from 'lit/directives/keyed.js';

@@ -1,23 +1,23 @@
 import {
   DefaultTool,
   EdgelessCRUDIdentifier,
-} from '@blocksuite/affine-block-surface';
-import { getLineHeight } from '@blocksuite/affine-gfx-text';
-import type { ConnectorElementModel } from '@blocksuite/affine-model';
-import type { RichText } from '@blocksuite/affine-rich-text';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { almostEqual } from '@blocksuite/affine-shared/utils';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Bound, type IVec, Vec } from '@blocksuite/global/gfx';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-block-surface';
+import { getLineHeight } from '@labre/affine-gfx-text';
+import type { ConnectorElementModel } from '@labre/affine-model';
+import type { RichText } from '@labre/affine-rich-text';
+import { ThemeProvider } from '@labre/affine-shared/services';
+import { almostEqual } from '@labre/affine-shared/utils';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { Bound, type IVec, Vec } from '@labre/global/gfx';
+import { WithDisposable } from '@labre/global/lit';
 import {
   type BlockComponent,
   type BlockStdScope,
   ShadowlessElement,
   stdContext,
-} from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
-import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/std/inline';
+} from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@labre/std/inline';
 import { consume } from '@lit/context';
 import { css, html, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';

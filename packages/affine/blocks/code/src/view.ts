@@ -1,13 +1,13 @@
 import {
   type ViewExtensionContext,
   ViewExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { SlashMenuConfigExtension } from '@blocksuite/affine-widget-slash-menu';
+} from '@labre/affine-ext-loader';
+import { SlashMenuConfigExtension } from '@labre/affine-widget-slash-menu';
 import {
   BlockViewExtension,
   FlavourExtension,
   WidgetViewExtension,
-} from '@blocksuite/std';
+} from '@labre/std';
 import { literal, unsafeStatic } from 'lit/static-html.js';
 
 import { getCodeClipboardExtensions } from './clipboard/index.js';

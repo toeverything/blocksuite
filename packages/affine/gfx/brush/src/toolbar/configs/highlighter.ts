@@ -1,26 +1,26 @@
-import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
+import { EdgelessCRUDIdentifier } from '@labre/affine-block-surface';
 import {
   adjustColorAlpha,
   keepColor,
   packColor,
   type PickColorEvent,
-} from '@blocksuite/affine-components/color-picker';
+} from '@labre/affine-components/color-picker';
 import {
   DEFAULT_HIGHLIGHTER_LINE_WIDTH,
   DefaultTheme,
   HIGHLIGHTER_LINE_WIDTHS,
   HighlighterElementModel,
   resolveColor,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   getMostCommonResolvedValue,
   getMostCommonValue,
-} from '@blocksuite/affine-shared/utils';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
+} from '@labre/affine-shared/utils';
+import { BlockFlavourIdentifier } from '@labre/std';
 import { html } from 'lit';
 
 const trackBaseProps = {

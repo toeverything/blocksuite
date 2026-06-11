@@ -2,13 +2,13 @@ import {
   focusTextModel,
   getInlineEditorByModel,
   selectTextModel,
-} from '@blocksuite/affine-rich-text';
+} from '@labre/affine-rich-text';
 import {
   BlockSelection,
   type BlockStdScope,
   TextSelection,
   type UIEventHandler,
-} from '@blocksuite/std';
+} from '@labre/std';
 
 export const textCommonKeymap = (
   std: BlockStdScope

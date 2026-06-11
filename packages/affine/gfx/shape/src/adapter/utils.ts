@@ -1,4 +1,4 @@
-import type { DeltaInsert } from '@blocksuite/store';
+import type { DeltaInsert } from '@labre/store';
 
 export function getShapeType(elementModel: Record<string, unknown>): string {
   let shapeType = '';

@@ -1,14 +1,14 @@
-import { NoteDisplayMode } from '@blocksuite/affine-model';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import { scrollbarStyle } from '@blocksuite/affine-shared/styles';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+import { NoteDisplayMode } from '@labre/affine-model';
+import { DocModeProvider } from '@labre/affine-shared/services';
+import { scrollbarStyle } from '@labre/affine-shared/styles';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { TocIcon } from '@blocksuite/icons/lit';
 import {
   type EditorHost,
   PropTypes,
   requiredProperties,
   ShadowlessElement,
-} from '@blocksuite/std';
+} from '@labre/std';
 import { provide } from '@lit/context';
 import { signal } from '@preact/signals-core';
 import { css, html, nothing, type PropertyValues } from 'lit';

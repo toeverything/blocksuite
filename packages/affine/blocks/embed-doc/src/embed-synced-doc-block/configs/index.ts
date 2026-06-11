@@ -1,8 +1,8 @@
 import {
   EmbedSyncedDocBlockSchema,
   type EmbedSyncedDocModel,
-} from '@blocksuite/affine-model';
-import { type BlockStdScope, ConfigExtensionFactory } from '@blocksuite/std';
+} from '@labre/affine-model';
+import { type BlockStdScope, ConfigExtensionFactory } from '@labre/std';
 import type { TemplateResult } from 'lit';
 
 export type EmbedSyncedDocConfig = {

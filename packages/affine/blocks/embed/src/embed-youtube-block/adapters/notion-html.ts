@@ -1,5 +1,5 @@
-import { EmbedYoutubeBlockSchema } from '@blocksuite/affine-model';
-import { BlockNotionHtmlAdapterExtension } from '@blocksuite/affine-shared/adapters';
+import { EmbedYoutubeBlockSchema } from '@labre/affine-model';
+import { BlockNotionHtmlAdapterExtension } from '@labre/affine-shared/adapters';
 
 import { createEmbedBlockNotionHtmlAdapterMatcher } from '../../common/adapters/notion-html.js';
 import { youtubeUrlRegex } from '../embed-youtube-model.js';

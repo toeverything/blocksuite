@@ -1,9 +1,9 @@
 import {
   type ViewExtensionContext,
   ViewExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { BookmarkBlockSchema } from '@blocksuite/affine-model';
-import { BlockViewExtension, FlavourExtension } from '@blocksuite/std';
+} from '@labre/affine-ext-loader';
+import { BookmarkBlockSchema } from '@labre/affine-model';
+import { BlockViewExtension, FlavourExtension } from '@labre/std';
 import { literal } from 'lit/static-html.js';
 
 import { BookmarkBlockInteraction } from './bookmark-edgeless-block';

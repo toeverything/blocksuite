@@ -1,8 +1,8 @@
-import type { ReferenceInfo } from '@blocksuite/affine-model';
-import type { OpenDocMode } from '@blocksuite/affine-shared/services';
-import { createIdentifier } from '@blocksuite/global/di';
-import type { EditorHost } from '@blocksuite/std';
-import type { ExtensionType } from '@blocksuite/store';
+import type { ReferenceInfo } from '@labre/affine-model';
+import type { OpenDocMode } from '@labre/affine-shared/services';
+import { createIdentifier } from '@labre/global/di';
+import type { EditorHost } from '@labre/std';
+import type { ExtensionType } from '@labre/store';
 import { Subject } from 'rxjs';
 
 export type DocLinkClickedEvent = ReferenceInfo & {

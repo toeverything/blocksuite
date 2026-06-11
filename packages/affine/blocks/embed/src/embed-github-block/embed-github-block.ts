@@ -1,11 +1,11 @@
-import { LoadingIcon, OpenIcon } from '@blocksuite/affine-components/icons';
+import { LoadingIcon, OpenIcon } from '@labre/affine-components/icons';
 import type {
   EmbedGithubModel,
   EmbedGithubStyles,
-} from '@blocksuite/affine-model';
-import { ImageProxyService } from '@blocksuite/affine-shared/adapters';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { BlockSelection, isGfxBlockComponent } from '@blocksuite/std';
+} from '@labre/affine-model';
+import { ImageProxyService } from '@labre/affine-shared/adapters';
+import { ThemeProvider } from '@labre/affine-shared/services';
+import { BlockSelection, isGfxBlockComponent } from '@labre/std';
 import { html, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

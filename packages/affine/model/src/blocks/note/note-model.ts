@@ -1,14 +1,14 @@
-import { Bound } from '@blocksuite/global/gfx';
+import { Bound } from '@labre/global/gfx';
 import type {
   GfxCompatibleProps,
   GfxElementGeometry,
-} from '@blocksuite/std/gfx';
-import { GfxCompatible } from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
+import { GfxCompatible } from '@labre/std/gfx';
 import {
   BlockModel,
   BlockSchemaExtension,
   defineBlockSchema,
-} from '@blocksuite/store';
+} from '@labre/store';
 import { z } from 'zod';
 
 import {

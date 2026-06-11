@@ -1,4 +1,4 @@
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 
 type MatchEvent<T extends string> = T extends UIEventStateType
   ? BlockSuiteUIEventState[T]

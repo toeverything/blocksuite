@@ -2,8 +2,8 @@ import {
   type GfxCommonBlockProps,
   GfxCompatible,
   type GfxElementGeometry,
-} from '@blocksuite/std/gfx';
-import { BlockModel } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import { BlockModel } from '@labre/store';
 
 import { type EmbedCardStyle } from '../../../utils/index.js';
 

@@ -1,7 +1,7 @@
-import type { MindMapView } from '@blocksuite/affine/gfx/mindmap';
-import { LayoutType, type MindmapElementModel } from '@blocksuite/affine-model';
-import { Bound } from '@blocksuite/global/gfx';
-import type { GfxController } from '@blocksuite/std/gfx';
+import type { MindMapView } from '@labre/affine/gfx/mindmap';
+import { LayoutType, type MindmapElementModel } from '@labre/affine-model';
+import { Bound } from '@labre/global/gfx';
+import type { GfxController } from '@labre/std/gfx';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { click, pointermove, wait } from '../utils/common.js';

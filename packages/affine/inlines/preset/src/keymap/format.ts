@@ -2,7 +2,7 @@ import {
   type BlockStdScope,
   TextSelection,
   type UIEventHandler,
-} from '@blocksuite/std';
+} from '@labre/std';
 
 import { textFormatConfigs } from '../command/index.js';
 

@@ -1,6 +1,6 @@
-import { NoteBlockModel, NoteDisplayMode } from '@blocksuite/affine-model';
-import type { BlockComponent, BlockStdScope } from '@blocksuite/std';
-import type { BlockModel, Store } from '@blocksuite/store';
+import { NoteBlockModel, NoteDisplayMode } from '@labre/affine-model';
+import type { BlockComponent, BlockStdScope } from '@labre/std';
+import type { BlockModel, Store } from '@labre/store';
 
 import { matchModels } from './checker.js';
 

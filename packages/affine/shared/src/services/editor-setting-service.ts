@@ -1,6 +1,6 @@
-import { createIdentifier } from '@blocksuite/global/di';
-import type { DeepPartial } from '@blocksuite/global/utils';
-import type { ExtensionType } from '@blocksuite/store';
+import { createIdentifier } from '@labre/global/di';
+import type { DeepPartial } from '@labre/global/utils';
+import type { ExtensionType } from '@labre/store';
 import type { Signal } from '@preact/signals-core';
 import { z } from 'zod';
 

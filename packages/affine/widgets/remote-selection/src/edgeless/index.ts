@@ -1,14 +1,14 @@
-import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
-import type { RootBlockModel } from '@blocksuite/affine-model';
+import { EdgelessCRUDIdentifier } from '@labre/affine-block-surface';
+import type { RootBlockModel } from '@labre/affine-model';
 import {
   getSelectedRect,
   isTopLevelBlock,
   requestThrottledConnectedFrame,
-} from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/utils';
 import { MultiCursorDuotoneIcon } from '@blocksuite/icons/lit';
-import { WidgetComponent } from '@blocksuite/std';
-import { GfxControllerIdentifier, type GfxModel } from '@blocksuite/std/gfx';
-import type { UserInfo } from '@blocksuite/store';
+import { WidgetComponent } from '@labre/std';
+import { GfxControllerIdentifier, type GfxModel } from '@labre/std/gfx';
+import type { UserInfo } from '@labre/store';
 import { css, html, nothing } from 'lit';
 import { state } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

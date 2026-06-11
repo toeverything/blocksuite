@@ -1,8 +1,8 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { DividerBlockSchemaExtension } from '@blocksuite/affine-model';
+} from '@labre/affine-ext-loader';
+import { DividerBlockSchemaExtension } from '@labre/affine-model';
 
 import { DividerBlockAdapterExtensions } from './adapters/extension';
 

@@ -1,7 +1,7 @@
-import type { Color, ColorScheme, Palette } from '@blocksuite/affine-model';
-import { DefaultTheme, resolveColor } from '@blocksuite/affine-model';
-import type { ColorEvent } from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
+import type { Color, ColorScheme, Palette } from '@labre/affine-model';
+import { DefaultTheme, resolveColor } from '@labre/affine-model';
+import type { ColorEvent } from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
 import { html, LitElement } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';

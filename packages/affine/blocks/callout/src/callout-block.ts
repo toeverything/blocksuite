@@ -1,14 +1,14 @@
-import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
-import { createLitPortal } from '@blocksuite/affine-components/portal';
-import { DefaultInlineManagerExtension } from '@blocksuite/affine-inline-preset';
-import { type CalloutBlockModel } from '@blocksuite/affine-model';
-import { EDGELESS_TOP_CONTENTEDITABLE_SELECTOR } from '@blocksuite/affine-shared/consts';
+import { CaptionedBlockComponent } from '@labre/affine-components/caption';
+import { createLitPortal } from '@labre/affine-components/portal';
+import { DefaultInlineManagerExtension } from '@labre/affine-inline-preset';
+import { type CalloutBlockModel } from '@labre/affine-model';
+import { EDGELESS_TOP_CONTENTEDITABLE_SELECTOR } from '@labre/affine-shared/consts';
 import {
   DocModeProvider,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import type { BlockComponent } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import type { BlockComponent } from '@labre/std';
 import { flip, offset } from '@floating-ui/dom';
 import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';

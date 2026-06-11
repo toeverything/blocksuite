@@ -1,16 +1,16 @@
-import { isFrameBlock } from '@blocksuite/affine-block-frame';
-import { getSurfaceBlock, isNoteBlock } from '@blocksuite/affine-block-surface';
+import { isFrameBlock } from '@labre/affine-block-frame';
+import { getSurfaceBlock, isNoteBlock } from '@labre/affine-block-surface';
 import {
   type FrameBlockModel,
   type NoteBlockModel,
   NoteDisplayMode,
-} from '@blocksuite/affine-model';
-import { replaceIdMiddleware } from '@blocksuite/affine-shared/adapters';
-import { DocModeProvider } from '@blocksuite/affine-shared/services';
-import { getBlockProps } from '@blocksuite/affine-shared/utils';
-import type { EditorHost } from '@blocksuite/std';
-import { GfxBlockElementModel, type GfxModel } from '@blocksuite/std/gfx';
-import { type Store, Text } from '@blocksuite/store';
+} from '@labre/affine-model';
+import { replaceIdMiddleware } from '@labre/affine-shared/adapters';
+import { DocModeProvider } from '@labre/affine-shared/services';
+import { getBlockProps } from '@labre/affine-shared/utils';
+import type { EditorHost } from '@labre/std';
+import { GfxBlockElementModel, type GfxModel } from '@labre/std/gfx';
+import { type Store, Text } from '@labre/store';
 
 import {
   getElementProps,

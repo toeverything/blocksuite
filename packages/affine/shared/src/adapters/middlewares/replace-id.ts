@@ -5,14 +5,14 @@ import {
   ListBlockModel,
   ParagraphBlockModel,
   SurfaceRefBlockModel,
-} from '@blocksuite/affine-model';
-import { BlockSuiteError } from '@blocksuite/global/exceptions';
+} from '@labre/affine-model';
+import { BlockSuiteError } from '@labre/global/exceptions';
 import type {
   AfterImportBlockPayload,
   BeforeImportBlockPayload,
   DeltaOperation,
   TransformerMiddleware,
-} from '@blocksuite/store';
+} from '@labre/store';
 import { filter, map } from 'rxjs';
 
 import { matchModels } from '../../utils';

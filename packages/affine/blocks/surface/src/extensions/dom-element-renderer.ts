@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import type { SurfaceElementModel } from '../element-model/base.js';
 import {

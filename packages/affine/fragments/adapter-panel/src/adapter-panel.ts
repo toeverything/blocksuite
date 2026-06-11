@@ -1,4 +1,4 @@
-import type { Store, TransformerMiddleware } from '@blocksuite/affine/store';
+import type { Store, TransformerMiddleware } from '@labre/affine/store';
 import {
   type HtmlAdapter,
   HtmlAdapterFactoryIdentifier,
@@ -6,8 +6,8 @@ import {
   MarkdownAdapterFactoryIdentifier,
   type PlainTextAdapter,
   PlainTextAdapterFactoryIdentifier,
-} from '@blocksuite/affine-shared/adapters';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/adapters';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { provide } from '@lit/context';
 import { effect, signal } from '@preact/signals-core';
 import { baseTheme } from '@toeverything/theme';

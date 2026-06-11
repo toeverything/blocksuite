@@ -1,4 +1,4 @@
-import { LifeCycleWatcher } from '@blocksuite/std';
+import { LifeCycleWatcher } from '@labre/std';
 
 // Auto Clear selection when switching doc mode.
 export class AutoClearSelectionService extends LifeCycleWatcher {

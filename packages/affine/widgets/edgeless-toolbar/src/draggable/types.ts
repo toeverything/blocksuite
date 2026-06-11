@@ -1,6 +1,6 @@
-import type { Bound } from '@blocksuite/global/gfx';
-import type { DisposableClass } from '@blocksuite/global/lit';
-import type { BlockComponent } from '@blocksuite/std';
+import type { Bound } from '@labre/global/gfx';
+import type { DisposableClass } from '@labre/global/lit';
+import type { BlockComponent } from '@labre/std';
 import type { TemplateResult } from 'lit';
 
 export interface EdgelessDraggableElementHost extends DisposableClass {}

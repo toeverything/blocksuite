@@ -1,6 +1,6 @@
-import { LoadingIcon } from '@blocksuite/affine-components/icons';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { ShadowlessElement } from '@blocksuite/std';
+import { LoadingIcon } from '@labre/affine-components/icons';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { ShadowlessElement } from '@labre/std';
 import { css, html } from 'lit';
 
 import { importMindMapIcon } from './icons.js';

@@ -1,28 +1,28 @@
-import { CaptionedBlockComponent } from '@blocksuite/affine-components/caption';
-import type { CodeBlockModel } from '@blocksuite/affine-model';
-import { focusTextModel, type RichText } from '@blocksuite/affine-rich-text';
+import { CaptionedBlockComponent } from '@labre/affine-components/caption';
+import type { CodeBlockModel } from '@labre/affine-model';
+import { focusTextModel, type RichText } from '@labre/affine-rich-text';
 import {
   BRACKET_PAIRS,
   EDGELESS_TOP_CONTENTEDITABLE_SELECTOR,
-} from '@blocksuite/affine-shared/consts';
+} from '@labre/affine-shared/consts';
 import {
   BlockCommentManager,
   DocModeProvider,
   NotificationProvider,
-} from '@blocksuite/affine-shared/services';
-import { getViewportElement } from '@blocksuite/affine-shared/utils';
-import { IS_MAC, IS_MOBILE } from '@blocksuite/global/env';
-import { noop } from '@blocksuite/global/utils';
-import type { BlockComponent } from '@blocksuite/std';
-import { BlockSelection, TextSelection } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { getViewportElement } from '@labre/affine-shared/utils';
+import { IS_MAC, IS_MOBILE } from '@labre/global/env';
+import { noop } from '@labre/global/utils';
+import type { BlockComponent } from '@labre/std';
+import { BlockSelection, TextSelection } from '@labre/std';
 import {
   getInlineRangeProvider,
   INLINE_ROOT_ATTR,
   type InlineRangeProvider,
   type InlineRootElement,
   type VLine,
-} from '@blocksuite/std/inline';
-import { Slice } from '@blocksuite/store';
+} from '@labre/std/inline';
+import { Slice } from '@labre/store';
 import { computed, effect, type Signal, signal } from '@preact/signals-core';
 import { html, nothing, type TemplateResult } from 'lit';
 import { query } from 'lit/decorators.js';

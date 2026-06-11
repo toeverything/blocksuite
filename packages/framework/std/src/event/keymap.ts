@@ -1,5 +1,5 @@
-import { IS_MAC } from '@blocksuite/global/env';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
+import { IS_MAC } from '@labre/global/env';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
 import { base, keyName } from 'w3c-keyname';
 
 import type { UIEventHandler } from './base.js';

@@ -1,4 +1,4 @@
-import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
+import { popupTargetFromElement } from '@labre/affine-components/context-menu';
 import { SortIcon } from '@blocksuite/icons/lit';
 import { html } from 'lit';
 

@@ -1,10 +1,10 @@
 import {
   replaceIdMiddleware,
   titleMiddleware,
-} from '@blocksuite/affine-shared/adapters';
-import { sha } from '@blocksuite/global/utils';
-import type { DocSnapshot, Schema, Store, Workspace } from '@blocksuite/store';
-import { extMimeMap, getAssetName, Transformer } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import { sha } from '@labre/global/utils';
+import type { DocSnapshot, Schema, Store, Workspace } from '@labre/store';
+import { extMimeMap, getAssetName, Transformer } from '@labre/store';
 
 import { download, Unzip, Zip } from './utils.js';
 

@@ -1,7 +1,7 @@
 import {
   type HtmlAST,
   HtmlASTToDeltaExtension,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 import { collapseWhiteSpace } from 'collapse-white-space';
 import type { Element } from 'hast';
 

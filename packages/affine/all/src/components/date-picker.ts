@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/date-picker';
+export * from '@labre/affine-components/date-picker';

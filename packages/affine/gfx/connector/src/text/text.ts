@@ -1,13 +1,13 @@
 import {
   DefaultTool,
   EdgelessCRUDIdentifier,
-} from '@blocksuite/affine-block-surface';
-import type { ConnectorElementModel } from '@blocksuite/affine-model';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import type { IVec } from '@blocksuite/global/gfx';
-import { Bound } from '@blocksuite/global/gfx';
-import type { BlockComponent } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/affine-block-surface';
+import type { ConnectorElementModel } from '@labre/affine-model';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import type { IVec } from '@labre/global/gfx';
+import { Bound } from '@labre/global/gfx';
+import type { BlockComponent } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import * as Y from 'yjs';
 
 import { EdgelessConnectorLabelEditor } from './edgeless-connector-label-editor';

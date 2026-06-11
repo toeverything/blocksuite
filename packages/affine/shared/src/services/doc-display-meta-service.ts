@@ -1,9 +1,9 @@
-import type { AliasInfo, ReferenceParams } from '@blocksuite/affine-model';
-import { type Container, createIdentifier } from '@blocksuite/global/di';
+import type { AliasInfo, ReferenceParams } from '@labre/affine-model';
+import { type Container, createIdentifier } from '@labre/global/di';
 import {
   type DisposableMember,
   disposeMember,
-} from '@blocksuite/global/disposable';
+} from '@labre/global/disposable';
 import {
   AliasIcon,
   BlockLinkIcon,
@@ -13,8 +13,8 @@ import {
   LinkedPageIcon,
   PageIcon,
 } from '@blocksuite/icons/lit';
-import { LifeCycleWatcher, StdIdentifier } from '@blocksuite/std';
-import type { Store } from '@blocksuite/store';
+import { LifeCycleWatcher, StdIdentifier } from '@labre/std';
+import type { Store } from '@labre/store';
 import {
   computed,
   type ReadonlySignal,

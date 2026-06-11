@@ -1,9 +1,9 @@
 import {
   type ElementRenderer,
   ElementRendererExtension,
-} from '@blocksuite/affine-block-surface';
-import { DefaultTheme, type TextElementModel } from '@blocksuite/affine-model';
-import { deltaInsertsToChunks } from '@blocksuite/std/inline';
+} from '@labre/affine-block-surface';
+import { DefaultTheme, type TextElementModel } from '@labre/affine-model';
+import { deltaInsertsToChunks } from '@labre/std/inline';
 
 import {
   getFontString,

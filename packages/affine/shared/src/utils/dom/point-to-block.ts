@@ -1,8 +1,8 @@
-import { NoteBlockModel, RootBlockModel } from '@blocksuite/affine-model';
-import { clamp, type Point, type Rect } from '@blocksuite/global/gfx';
-import { BLOCK_ID_ATTR, type BlockComponent } from '@blocksuite/std';
-import { SurfaceBlockModel } from '@blocksuite/std/gfx';
-import type { BlockModel } from '@blocksuite/store';
+import { NoteBlockModel, RootBlockModel } from '@labre/affine-model';
+import { clamp, type Point, type Rect } from '@labre/global/gfx';
+import { BLOCK_ID_ATTR, type BlockComponent } from '@labre/std';
+import { SurfaceBlockModel } from '@labre/std/gfx';
+import type { BlockModel } from '@labre/store';
 
 import { BLOCK_CHILDREN_CONTAINER_PADDING_LEFT } from '../../consts/index.js';
 import { matchModels } from '../model/checker.js';

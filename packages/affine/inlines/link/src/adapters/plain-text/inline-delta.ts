@@ -1,7 +1,7 @@
 import {
   InlineDeltaToPlainTextAdapterExtension,
   type TextBuffer,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 
 export const linkDeltaMarkdownAdapterMatch =
   InlineDeltaToPlainTextAdapterExtension({

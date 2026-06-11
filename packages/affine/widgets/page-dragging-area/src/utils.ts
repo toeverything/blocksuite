@@ -1,10 +1,10 @@
-import { NoteBlockModel, RootBlockModel } from '@blocksuite/affine-model';
-import { matchModels } from '@blocksuite/affine-shared/utils';
+import { NoteBlockModel, RootBlockModel } from '@labre/affine-model';
+import { matchModels } from '@labre/affine-shared/utils';
 import {
   BLOCK_ID_ATTR,
   type BlockComponent,
   type PointerEventState,
-} from '@blocksuite/std';
+} from '@labre/std';
 
 export type Rect = {
   left: number;

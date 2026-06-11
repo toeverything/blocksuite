@@ -1,5 +1,5 @@
-import { LocalShapeElementModel } from '@blocksuite/affine-model';
-import { Text } from '@blocksuite/store';
+import { LocalShapeElementModel } from '@labre/affine-model';
+import { Text } from '@labre/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { addNote, getSurface } from '../utils/edgeless.js';

@@ -1,20 +1,20 @@
-import type { ResolvedStateInfo } from '@blocksuite/affine-components/resource';
+import type { ResolvedStateInfo } from '@labre/affine-components/resource';
 import {
   focusBlockEnd,
   focusBlockStart,
   getNextBlockCommand,
   getPrevBlockCommand,
-} from '@blocksuite/affine-shared/commands';
-import { ImageSelection } from '@blocksuite/affine-shared/selection';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import type { BlockComponent, UIEventStateContext } from '@blocksuite/std';
+} from '@labre/affine-shared/commands';
+import { ImageSelection } from '@labre/affine-shared/selection';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import type { BlockComponent, UIEventStateContext } from '@labre/std';
 import {
   BlockSelection,
   ShadowlessElement,
   TextSelection,
-} from '@blocksuite/std';
-import type { BaseSelection } from '@blocksuite/store';
+} from '@labre/std';
+import type { BaseSelection } from '@labre/store';
 import { computed } from '@preact/signals-core';
 import { css, html, type PropertyValues } from 'lit';
 import { property, query } from 'lit/decorators.js';

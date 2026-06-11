@@ -1,4 +1,4 @@
-import type { DocSource } from '@blocksuite/sync';
+import type { DocSource } from '@labre/sync';
 import { diffUpdate, encodeStateVectorFromUpdate, mergeUpdates } from 'yjs';
 
 import type { WebSocketMessage } from './types';

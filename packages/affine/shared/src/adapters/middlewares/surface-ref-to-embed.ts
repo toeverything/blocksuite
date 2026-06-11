@@ -1,5 +1,5 @@
-import type { BlockStdScope } from '@blocksuite/std';
-import type { TransformerMiddleware } from '@blocksuite/store';
+import type { BlockStdScope } from '@labre/std';
+import type { TransformerMiddleware } from '@labre/store';
 
 export const surfaceRefToEmbed =
   (std: BlockStdScope): TransformerMiddleware =>

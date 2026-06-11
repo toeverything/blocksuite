@@ -4,16 +4,16 @@ import {
   EmbedSyncedDocModel,
   MindmapElementModel,
   NoteBlockModel,
-} from '@blocksuite/affine-model';
-import { Bound } from '@blocksuite/global/gfx';
-import { GfxControllerIdentifier, type GfxModel } from '@blocksuite/std/gfx';
+} from '@labre/affine-model';
+import { Bound } from '@labre/global/gfx';
+import { GfxControllerIdentifier, type GfxModel } from '@labre/std/gfx';
 import chunk from 'lodash-es/chunk';
 
 const ALIGN_HEIGHT = 200;
 const ALIGN_PADDING = 20;
 
-import type { Command } from '@blocksuite/std';
-import type { BlockModel, BlockProps } from '@blocksuite/store';
+import type { Command } from '@labre/std';
+import type { BlockModel, BlockProps } from '@labre/store';
 
 import { EdgelessCRUDIdentifier } from '../extensions/crud-extension.js';
 import { updateXYWH } from '../utils/update-xywh.js';

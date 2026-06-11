@@ -1,8 +1,8 @@
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
+import { EditPropsStore } from '@labre/affine-shared/services';
 import {
   type SurfaceMiddleware,
   SurfaceMiddlewareBuilder,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 import { getLastPropsKey } from '../utils';
 

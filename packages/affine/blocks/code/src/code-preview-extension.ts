@@ -1,6 +1,6 @@
-import type { CodeBlockModel } from '@blocksuite/affine-model';
-import { createIdentifier } from '@blocksuite/global/di';
-import type { ExtensionType } from '@blocksuite/store';
+import type { CodeBlockModel } from '@labre/affine-model';
+import { createIdentifier } from '@labre/global/di';
+import type { ExtensionType } from '@labre/store';
 import type { HTMLTemplateResult } from 'lit';
 
 export type CodeBlockPreviewRenderer = (

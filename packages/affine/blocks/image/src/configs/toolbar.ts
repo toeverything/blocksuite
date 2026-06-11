@@ -1,10 +1,10 @@
-import { ImageBlockModel } from '@blocksuite/affine-model';
+import { ImageBlockModel } from '@labre/affine-model';
 import {
   ActionPlacement,
   blockCommentToolbarButton,
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   BookmarkIcon,
   CaptionIcon,
@@ -13,8 +13,8 @@ import {
   DownloadIcon,
   DuplicateIcon,
 } from '@blocksuite/icons/lit';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
-import type { ExtensionType } from '@blocksuite/store';
+import { BlockFlavourIdentifier } from '@labre/std';
+import type { ExtensionType } from '@labre/store';
 
 import { ImageBlockComponent } from '../image-block';
 import { ImageEdgelessBlockComponent } from '../image-edgeless-block';

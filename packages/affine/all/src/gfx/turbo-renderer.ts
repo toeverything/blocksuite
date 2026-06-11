@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-gfx-turbo-renderer';
+export * from '@labre/affine-gfx-turbo-renderer';

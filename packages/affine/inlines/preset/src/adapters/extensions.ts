@@ -1,4 +1,4 @@
-import type { ExtensionType } from '@blocksuite/store';
+import type { ExtensionType } from '@labre/store';
 
 import { HtmlInlineToDeltaAdapterExtensions } from './html/html-inline';
 import { InlineDeltaToHtmlAdapterExtensions } from './html/inline-delta';

@@ -6,16 +6,16 @@ import {
   NoteBlockSchemaExtension,
   ParagraphBlockSchemaExtension,
   RootBlockSchemaExtension,
-} from '@blocksuite/affine-model';
-import { Container } from '@blocksuite/global/di';
-import { TextSelection } from '@blocksuite/std';
+} from '@labre/affine-model';
+import { Container } from '@labre/global/di';
+import { TextSelection } from '@labre/std';
 import {
   type Block,
   type ExtensionType,
   type Store,
   Text,
-} from '@blocksuite/store';
-import { TestWorkspace } from '@blocksuite/store/test';
+} from '@labre/store';
+import { TestWorkspace } from '@labre/store/test';
 
 import { createTestHost } from './create-test-host';
 

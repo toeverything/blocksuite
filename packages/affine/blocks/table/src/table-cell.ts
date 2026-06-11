@@ -3,15 +3,15 @@ import {
   popMenu,
   type PopupTarget,
   popupTargetFromElement,
-} from '@blocksuite/affine-components/context-menu';
-import { TextBackgroundDuotoneIcon } from '@blocksuite/affine-components/icons';
-import { DefaultInlineManagerExtension } from '@blocksuite/affine-inline-preset';
-import type { TableColumn, TableRow } from '@blocksuite/affine-model';
-import { RichText } from '@blocksuite/affine-rich-text';
-import { cssVarV2 } from '@blocksuite/affine-shared/theme';
-import { getViewportElement } from '@blocksuite/affine-shared/utils';
-import { IS_MAC } from '@blocksuite/global/env';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-components/context-menu';
+import { TextBackgroundDuotoneIcon } from '@labre/affine-components/icons';
+import { DefaultInlineManagerExtension } from '@labre/affine-inline-preset';
+import type { TableColumn, TableRow } from '@labre/affine-model';
+import { RichText } from '@labre/affine-rich-text';
+import { cssVarV2 } from '@labre/affine-shared/theme';
+import { getViewportElement } from '@labre/affine-shared/utils';
+import { IS_MAC } from '@labre/global/env';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import {
   ArrowDownBigIcon,
   ArrowLeftBigIcon,
@@ -28,8 +28,8 @@ import {
   InsertRightIcon,
   PasteIcon,
 } from '@blocksuite/icons/lit';
-import { ShadowlessElement } from '@blocksuite/std';
-import type { Text } from '@blocksuite/store';
+import { ShadowlessElement } from '@labre/std';
+import type { Text } from '@labre/store';
 import { computed, effect, signal } from '@preact/signals-core';
 import { html, nothing } from 'lit';
 import { property, query } from 'lit/decorators.js';

@@ -1,4 +1,4 @@
-import type { ListBlockModel } from '@blocksuite/affine-model';
+import type { ListBlockModel } from '@labre/affine-model';
 import {
   BulletedList01Icon,
   BulletedList02Icon,

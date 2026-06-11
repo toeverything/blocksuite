@@ -1,8 +1,8 @@
-import { DefaultTool } from '@blocksuite/affine-block-surface';
-import { EmptyTool } from '@blocksuite/affine-gfx-pointer';
-import { ShapeStyle } from '@blocksuite/affine-model';
-import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
-import { Bound } from '@blocksuite/global/gfx';
+import { DefaultTool } from '@labre/affine-block-surface';
+import { EmptyTool } from '@labre/affine-gfx-pointer';
+import { ShapeStyle } from '@labre/affine-model';
+import { EdgelessToolbarToolMixin } from '@labre/affine-widget-edgeless-toolbar';
+import { Bound } from '@labre/global/gfx';
 import { css, html, LitElement } from 'lit';
 
 import { REF_H as CYN_H, REF_W as CYN_W } from '../cynefin/consts';

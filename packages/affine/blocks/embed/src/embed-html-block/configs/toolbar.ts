@@ -1,13 +1,13 @@
-import { toast } from '@blocksuite/affine-components/toast';
-import { EmbedHtmlModel } from '@blocksuite/affine-model';
+import { toast } from '@labre/affine-components/toast';
+import { EmbedHtmlModel } from '@labre/affine-model';
 import {
   ActionPlacement,
   type ToolbarAction,
   type ToolbarActionGroup,
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
-} from '@blocksuite/affine-shared/services';
-import { getBlockProps } from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/services';
+import { getBlockProps } from '@labre/affine-shared/utils';
 import {
   CaptionIcon,
   CopyIcon,
@@ -15,8 +15,8 @@ import {
   DuplicateIcon,
   ExpandFullIcon,
 } from '@blocksuite/icons/lit';
-import { BlockFlavourIdentifier } from '@blocksuite/std';
-import { type ExtensionType, Slice } from '@blocksuite/store';
+import { BlockFlavourIdentifier } from '@labre/std';
+import { type ExtensionType, Slice } from '@labre/store';
 import { html } from 'lit';
 import { keyed } from 'lit/directives/keyed.js';
 

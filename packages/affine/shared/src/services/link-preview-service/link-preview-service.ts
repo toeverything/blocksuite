@@ -1,7 +1,7 @@
-import { type LinkPreviewData } from '@blocksuite/affine-model';
-import { type Container, createIdentifier } from '@blocksuite/global/di';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Extension } from '@blocksuite/store';
+import { type LinkPreviewData } from '@labre/affine-model';
+import { type Container, createIdentifier } from '@labre/global/di';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { Extension } from '@labre/store';
 
 import { DEFAULT_LINK_PREVIEW_ENDPOINT } from '../../consts';
 import { isAbortError } from '../../utils/is-abort-error';

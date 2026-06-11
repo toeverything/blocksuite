@@ -1,18 +1,18 @@
-import type { EditorIconButton } from '@blocksuite/affine-components/toolbar';
-import type { AffineInlineEditor } from '@blocksuite/affine-shared/types';
+import type { EditorIconButton } from '@labre/affine-components/toolbar';
+import type { AffineInlineEditor } from '@labre/affine-shared/types';
 import {
   isValidUrl,
   normalizeUrl,
   stopPropagation,
-} from '@blocksuite/affine-shared/utils';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/utils';
+import { WithDisposable } from '@labre/global/lit';
 import { DoneIcon } from '@blocksuite/icons/lit';
 import {
   type BlockStdScope,
   ShadowlessElement,
   TextSelection,
-} from '@blocksuite/std';
-import type { InlineRange } from '@blocksuite/std/inline';
+} from '@labre/std';
+import type { InlineRange } from '@labre/std/inline';
 import {
   autoUpdate,
   computePosition,

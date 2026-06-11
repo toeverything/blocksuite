@@ -1,9 +1,9 @@
 import {
   type ViewExtensionContext,
   ViewExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { SlashMenuConfigExtension } from '@blocksuite/affine-widget-slash-menu';
-import { BlockViewExtension, FlavourExtension } from '@blocksuite/std';
+} from '@labre/affine-ext-loader';
+import { SlashMenuConfigExtension } from '@labre/affine-widget-slash-menu';
+import { BlockViewExtension, FlavourExtension } from '@labre/std';
 import { literal } from 'lit/static-html.js';
 
 import { CalloutKeymapExtension } from './callout-keymap';

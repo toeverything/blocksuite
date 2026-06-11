@@ -1,4 +1,4 @@
-import { QuickToolExtension } from '@blocksuite/affine-widget-edgeless-toolbar';
+import { QuickToolExtension } from '@labre/affine-widget-edgeless-toolbar';
 import { html } from 'lit';
 
 export const connectorQuickTool = QuickToolExtension(

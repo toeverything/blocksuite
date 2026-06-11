@@ -2,10 +2,10 @@ import {
   type OpenDocMode,
   type ToolbarAction,
   ToolbarContext,
-} from '@blocksuite/affine-shared/services';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { PropTypes, requiredProperties } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import { PropTypes, requiredProperties } from '@labre/std';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';

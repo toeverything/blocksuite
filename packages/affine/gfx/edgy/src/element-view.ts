@@ -1,11 +1,11 @@
-import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
-import type { EdgyFacetsElementModel } from '@blocksuite/affine-model';
-import { rotatePoint } from '@blocksuite/global/gfx';
-import type { PointerEventState } from '@blocksuite/std';
+import { EdgelessCRUDIdentifier } from '@labre/affine-block-surface';
+import type { EdgyFacetsElementModel } from '@labre/affine-model';
+import { rotatePoint } from '@labre/global/gfx';
+import type { PointerEventState } from '@labre/std';
 import {
   GfxElementModelView,
   GfxViewInteractionExtension,
-} from '@blocksuite/std/gfx';
+} from '@labre/std/gfx';
 
 import { refScale } from './consts';
 import {

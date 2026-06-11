@@ -1,5 +1,5 @@
-import { ColorScheme, NoteShadow } from '@blocksuite/affine-model';
-import { WithDisposable } from '@blocksuite/global/lit';
+import { ColorScheme, NoteShadow } from '@labre/affine-model';
+import { WithDisposable } from '@labre/global/lit';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 import { repeat } from 'lit/directives/repeat.js';

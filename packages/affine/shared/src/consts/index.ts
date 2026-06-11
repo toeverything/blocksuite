@@ -8,7 +8,7 @@ import {
   EmbedSyncedDocModel,
   EmbedYoutubeModel,
   SYNCED_DEFAULT_WIDTH,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 
 export const BLOCK_CHILDREN_CONTAINER_PADDING_LEFT = 24;
 export const EDGELESS_BLOCK_CHILD_PADDING = 24;

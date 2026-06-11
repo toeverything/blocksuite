@@ -9,10 +9,10 @@ import {
   EmbedCardLightHorizontalIcon,
   EmbedCardLightListIcon,
   EmbedCardLightVerticalIcon,
-} from '@blocksuite/affine-components/icons';
-import { ColorScheme } from '@blocksuite/affine-model';
-import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
-import type { BlockStdScope } from '@blocksuite/std';
+} from '@labre/affine-components/icons';
+import { ColorScheme } from '@labre/affine-model';
+import { EmbedOptionProvider } from '@labre/affine-shared/services';
+import type { BlockStdScope } from '@labre/std';
 import type { TemplateResult } from 'lit';
 
 type EmbedCardIcons = {

@@ -1,1 +1,1 @@
-export * from '@blocksuite/sync';
+export * from '@labre/sync';

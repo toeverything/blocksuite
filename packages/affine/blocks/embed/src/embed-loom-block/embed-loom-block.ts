@@ -1,8 +1,8 @@
-import { LoadingIcon, OpenIcon } from '@blocksuite/affine-components/icons';
-import type { EmbedLoomModel, EmbedLoomStyles } from '@blocksuite/affine-model';
-import { ImageProxyService } from '@blocksuite/affine-shared/adapters';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { BlockSelection } from '@blocksuite/std';
+import { LoadingIcon, OpenIcon } from '@labre/affine-components/icons';
+import type { EmbedLoomModel, EmbedLoomStyles } from '@labre/affine-model';
+import { ImageProxyService } from '@labre/affine-shared/adapters';
+import { ThemeProvider } from '@labre/affine-shared/services';
+import { BlockSelection } from '@labre/std';
 import { html } from 'lit';
 import { property } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

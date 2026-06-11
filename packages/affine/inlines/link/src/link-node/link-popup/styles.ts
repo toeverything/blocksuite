@@ -1,4 +1,4 @@
-import { fontSMStyle, panelBaseStyle } from '@blocksuite/affine-shared/styles';
+import { fontSMStyle, panelBaseStyle } from '@labre/affine-shared/styles';
 import { css } from 'lit';
 
 const editLinkStyle = css`

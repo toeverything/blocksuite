@@ -1,28 +1,28 @@
-import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
+import { EdgelessCRUDIdentifier } from '@labre/affine-block-surface';
 import {
   packColorsWith,
   type PickColorEvent,
   preprocessColor,
-} from '@blocksuite/affine-components/color-picker';
-import type { LineDetailType } from '@blocksuite/affine-components/edgeless-line-styles-panel';
-import type { SliderSelectEvent } from '@blocksuite/affine-components/slider';
+} from '@labre/affine-components/color-picker';
+import type { LineDetailType } from '@labre/affine-components/edgeless-line-styles-panel';
+import type { SliderSelectEvent } from '@labre/affine-components/slider';
 import {
   DefaultTheme,
   NoteBlockModel,
   type NoteProps,
   type NoteShadow,
   resolveColor,
-} from '@blocksuite/affine-model';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
+} from '@labre/affine-model';
+import { ThemeProvider } from '@labre/affine-shared/services';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
 import {
   type ColorEvent,
   getMostCommonResolvedValue,
   stopPropagation,
-} from '@blocksuite/affine-shared/utils';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/utils';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import { ArrowLeftSmallIcon, PaletteIcon } from '@blocksuite/icons/lit';
-import { BlockStdScope, PropTypes, requiredProperties } from '@blocksuite/std';
+import { BlockStdScope, PropTypes, requiredProperties } from '@labre/std';
 import { css, html, LitElement } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { choose } from 'lit/directives/choose.js';

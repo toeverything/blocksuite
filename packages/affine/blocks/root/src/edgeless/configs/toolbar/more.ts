@@ -1,17 +1,17 @@
-import { AttachmentBlockComponent } from '@blocksuite/affine-block-attachment';
-import { BookmarkBlockComponent } from '@blocksuite/affine-block-bookmark';
+import { AttachmentBlockComponent } from '@labre/affine-block-attachment';
+import { BookmarkBlockComponent } from '@labre/affine-block-bookmark';
 import {
   isExternalEmbedBlockComponent,
   notifyDocCreated,
   promptDocTitle,
-} from '@blocksuite/affine-block-embed';
-import { EdgelessFrameManagerIdentifier } from '@blocksuite/affine-block-frame';
-import { ImageBlockComponent } from '@blocksuite/affine-block-image';
+} from '@labre/affine-block-embed';
+import { EdgelessFrameManagerIdentifier } from '@labre/affine-block-frame';
+import { ImageBlockComponent } from '@labre/affine-block-image';
 import {
   EdgelessCRUDIdentifier,
   getSurfaceComponent,
-} from '@blocksuite/affine-block-surface';
-import { createGroupFromSelectedCommand } from '@blocksuite/affine-gfx-group';
+} from '@labre/affine-block-surface';
+import { createGroupFromSelectedCommand } from '@labre/affine-gfx-group';
 import {
   AttachmentBlockModel,
   BookmarkBlockModel,
@@ -24,16 +24,16 @@ import {
   isExternalEmbedModel,
   NoteBlockModel,
   ParagraphBlockModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import type {
   ToolbarActions,
   ToolbarContext,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   matchModels,
   type ReorderingType,
-} from '@blocksuite/affine-shared/utils';
-import { Bound, getCommonBoundWithRotation } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/utils';
+import { Bound, getCommonBoundWithRotation } from '@labre/global/gfx';
 import {
   ArrowDownBigBottomIcon,
   ArrowDownBigIcon,
@@ -47,8 +47,8 @@ import {
   LinkedPageIcon,
   ResetIcon,
 } from '@blocksuite/icons/lit';
-import type { BlockComponent } from '@blocksuite/std';
-import { GfxBlockElementModel, type GfxModel } from '@blocksuite/std/gfx';
+import type { BlockComponent } from '@labre/std';
+import { GfxBlockElementModel, type GfxModel } from '@labre/std/gfx';
 
 import { EdgelessClipboardController } from '../../clipboard/clipboard';
 import { duplicate } from '../../utils/clipboard-utils';

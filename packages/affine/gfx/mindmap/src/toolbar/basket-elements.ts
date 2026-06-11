@@ -1,25 +1,25 @@
-import { addAttachments } from '@blocksuite/affine-block-attachment';
-import { addImages } from '@blocksuite/affine-block-image';
+import { addAttachments } from '@labre/affine-block-attachment';
+import { addImages } from '@labre/affine-block-image';
 import {
   CanvasElementType,
   EdgelessCRUDIdentifier,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   insertEdgelessTextCommand,
   mountTextElementEditor,
-} from '@blocksuite/affine-gfx-text';
+} from '@labre/affine-gfx-text';
 import {
   MAX_IMAGE_WIDTH,
   type MindmapStyle,
   TextElementModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   FeatureFlagService,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import { openSingleFileWith } from '@blocksuite/affine-shared/utils';
-import { Bound, type IVec } from '@blocksuite/global/gfx';
-import type { BlockComponent } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { openSingleFileWith } from '@labre/affine-shared/utils';
+import { Bound, type IVec } from '@labre/global/gfx';
+import type { BlockComponent } from '@labre/std';
 import type { TemplateResult } from 'lit';
 import * as Y from 'yjs';
 

@@ -1,7 +1,7 @@
 import {
   BlockHtmlAdapterExtension,
   type BlockHtmlAdapterMatcher,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 
 export const surfaceBlockHtmlAdapterMatcher: BlockHtmlAdapterMatcher = {
   flavour: 'affine:surface',

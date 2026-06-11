@@ -1,12 +1,12 @@
-import { createLitPortal } from '@blocksuite/affine-components/portal';
+import { createLitPortal } from '@labre/affine-components/portal';
 import type {
   EditorIconButton,
   MenuItemGroup,
-} from '@blocksuite/affine-components/toolbar';
-import { renderGroups } from '@blocksuite/affine-components/toolbar';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { WithDisposable } from '@blocksuite/global/lit';
-import { noop } from '@blocksuite/global/utils';
+} from '@labre/affine-components/toolbar';
+import { renderGroups } from '@labre/affine-components/toolbar';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { WithDisposable } from '@labre/global/lit';
+import { noop } from '@labre/global/utils';
 import { MoreVerticalIcon } from '@blocksuite/icons/lit';
 import { flip, offset } from '@floating-ui/dom';
 import { css, html, LitElement } from 'lit';

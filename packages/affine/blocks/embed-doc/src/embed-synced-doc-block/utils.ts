@@ -1,9 +1,9 @@
 import {
   EmbedEdgelessIcon,
   EmbedPageIcon,
-} from '@blocksuite/affine-components/icons';
-import { ColorScheme } from '@blocksuite/affine-model';
-import type { BlockComponent } from '@blocksuite/std';
+} from '@labre/affine-components/icons';
+import { ColorScheme } from '@labre/affine-model';
+import type { BlockComponent } from '@labre/std';
 import type { TemplateResult } from 'lit';
 
 import { EmbedEdgelessSyncedDocBlockComponent } from './embed-edgeless-synced-doc-block.js';

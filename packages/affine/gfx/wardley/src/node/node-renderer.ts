@@ -1,9 +1,9 @@
 import {
   type ElementRenderer,
   ElementRendererExtension,
-} from '@blocksuite/affine-block-surface';
-import { shape as shapeRenderer } from '@blocksuite/affine-gfx-shape';
-import { type WardleyNodeElementModel, DefaultTheme } from '@blocksuite/affine-model';
+} from '@labre/affine-block-surface';
+import { shape as shapeRenderer } from '@labre/affine-gfx-shape';
+import { type WardleyNodeElementModel, DefaultTheme } from '@labre/affine-model';
 
 import { ANCHOR, ECOSYSTEM, METHOD, NODE_FILL } from './consts';
 

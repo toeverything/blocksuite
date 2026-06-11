@@ -1,4 +1,4 @@
-import { createIdentifier } from '@blocksuite/global/di';
+import { createIdentifier } from '@labre/global/di';
 
 import type { DataSource } from '../data-source/base.js';
 import { Matcher_ } from '../logical/matcher.js';

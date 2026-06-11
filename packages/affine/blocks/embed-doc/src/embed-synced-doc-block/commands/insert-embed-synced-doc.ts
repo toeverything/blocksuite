@@ -1,6 +1,6 @@
-import { insertEmbedCard } from '@blocksuite/affine-block-embed';
-import type { EmbedCardStyle, ReferenceParams } from '@blocksuite/affine-model';
-import type { Command } from '@blocksuite/std';
+import { insertEmbedCard } from '@labre/affine-block-embed';
+import type { EmbedCardStyle, ReferenceParams } from '@labre/affine-model';
+import type { Command } from '@labre/std';
 
 export const insertEmbedSyncedDocCommand: Command<
   {

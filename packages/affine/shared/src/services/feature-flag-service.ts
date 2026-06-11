@@ -1,4 +1,4 @@
-import { type Store, StoreExtension } from '@blocksuite/store';
+import { type Store, StoreExtension } from '@labre/store';
 import { type Signal, signal } from '@preact/signals-core';
 
 export interface BlockSuiteFlags {

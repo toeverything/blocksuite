@@ -1,4 +1,4 @@
-import { SeniorToolExtension } from '@blocksuite/affine-widget-edgeless-toolbar';
+import { SeniorToolExtension } from '@labre/affine-widget-edgeless-toolbar';
 import { html } from 'lit';
 
 export const penSeniorTool = SeniorToolExtension('pen', ({ block }) => {

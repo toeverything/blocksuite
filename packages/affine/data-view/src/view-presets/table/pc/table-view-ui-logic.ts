@@ -2,8 +2,8 @@ import {
   menu,
   popMenu,
   popupTargetFromElement,
-} from '@blocksuite/affine-components/context-menu';
-import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-components/context-menu';
+import type { InsertToPosition } from '@labre/affine-shared/utils';
 import { AddCursorIcon } from '@blocksuite/icons/lit';
 import { signal } from '@preact/signals-core';
 import type { TemplateResult } from 'lit';

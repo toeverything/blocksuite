@@ -1,10 +1,10 @@
-import { BookmarkBlockSchema } from '@blocksuite/affine-model';
+import { BookmarkBlockSchema } from '@labre/affine-model';
 import {
   BlockNotionHtmlAdapterExtension,
   type BlockNotionHtmlAdapterMatcher,
   HastUtils,
-} from '@blocksuite/affine-shared/adapters';
-import { nanoid } from '@blocksuite/store';
+} from '@labre/affine-shared/adapters';
+import { nanoid } from '@labre/store';
 
 export const bookmarkBlockNotionHtmlAdapterMatcher: BlockNotionHtmlAdapterMatcher =
   {

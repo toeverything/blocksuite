@@ -1,14 +1,14 @@
-import { UserProvider } from '@blocksuite/affine-shared/services';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import type { AffineTextAttributes } from '@blocksuite/affine-shared/types';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import type { BlockStdScope } from '@blocksuite/std';
-import { ShadowlessElement } from '@blocksuite/std';
+import { UserProvider } from '@labre/affine-shared/services';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import type { AffineTextAttributes } from '@labre/affine-shared/types';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import type { BlockStdScope } from '@labre/std';
+import { ShadowlessElement } from '@labre/std';
 import {
   ZERO_WIDTH_FOR_EMBED_NODE,
   ZERO_WIDTH_FOR_EMPTY_LINE,
-} from '@blocksuite/std/inline';
-import type { DeltaInsert } from '@blocksuite/store';
+} from '@labre/std/inline';
+import type { DeltaInsert } from '@labre/store';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
 

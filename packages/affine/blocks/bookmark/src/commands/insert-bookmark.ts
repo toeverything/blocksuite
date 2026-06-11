@@ -1,7 +1,7 @@
-import { insertEmbedCard } from '@blocksuite/affine-block-embed';
-import type { EmbedCardStyle } from '@blocksuite/affine-model';
-import { EmbedOptionProvider } from '@blocksuite/affine-shared/services';
-import type { Command } from '@blocksuite/std';
+import { insertEmbedCard } from '@labre/affine-block-embed';
+import type { EmbedCardStyle } from '@labre/affine-model';
+import { EmbedOptionProvider } from '@labre/affine-shared/services';
+import type { Command } from '@labre/std';
 
 export const insertBookmarkCommand: Command<
   { url: string },

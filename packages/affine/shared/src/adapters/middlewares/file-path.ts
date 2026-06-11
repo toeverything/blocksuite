@@ -1,4 +1,4 @@
-import type { TransformerMiddleware } from '@blocksuite/store';
+import type { TransformerMiddleware } from '@labre/store';
 
 export const FULL_FILE_PATH_KEY = 'fullFilePath';
 

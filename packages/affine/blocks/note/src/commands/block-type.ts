@@ -2,29 +2,29 @@ import {
   CodeBlockModel,
   ListBlockModel,
   ParagraphBlockModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   asyncSetInlineRange,
   focusTextModel,
   onModelTextUpdated,
-} from '@blocksuite/affine-rich-text';
+} from '@labre/affine-rich-text';
 import {
   getBlockSelectionsCommand,
   getSelectedBlocksCommand,
   getTextSelectionCommand,
-} from '@blocksuite/affine-shared/commands';
+} from '@labre/affine-shared/commands';
 import {
   matchModels,
   mergeToCodeModel,
   transformModel,
-} from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/utils';
 import {
   type BlockComponent,
   BlockSelection,
   type Command,
   TextSelection,
-} from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+} from '@labre/std';
+import type { BlockModel } from '@labre/store';
 
 type UpdateBlockConfig = {
   flavour: string;

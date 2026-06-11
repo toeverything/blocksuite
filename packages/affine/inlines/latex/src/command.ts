@@ -1,8 +1,8 @@
 import {
   DocModeProvider,
   TelemetryProvider,
-} from '@blocksuite/affine-shared/services';
-import type { Command, TextSelection } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import type { Command, TextSelection } from '@labre/std';
 
 export const insertInlineLatex: Command<{
   currentTextSelection?: TextSelection;

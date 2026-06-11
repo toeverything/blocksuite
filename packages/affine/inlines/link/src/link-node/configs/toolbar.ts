@@ -1,4 +1,4 @@
-import { toast } from '@blocksuite/affine-components/toast';
+import { toast } from '@labre/affine-components/toast';
 import {
   ActionPlacement,
   EmbedIframeService,
@@ -6,14 +6,14 @@ import {
   type ToolbarAction,
   type ToolbarActionGroup,
   type ToolbarModuleConfig,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   CopyIcon,
   DeleteIcon,
   EditIcon,
   UnlinkIcon,
 } from '@blocksuite/icons/lit';
-import { BlockSelection } from '@blocksuite/std';
+import { BlockSelection } from '@labre/std';
 import { signal } from '@preact/signals-core';
 import { html } from 'lit-html';
 import { keyed } from 'lit-html/directives/keyed.js';

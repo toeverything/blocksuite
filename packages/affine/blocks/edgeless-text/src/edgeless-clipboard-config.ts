@@ -1,5 +1,5 @@
-import { EdgelessClipboardConfig } from '@blocksuite/affine-block-surface';
-import { type BlockSnapshot } from '@blocksuite/store';
+import { EdgelessClipboardConfig } from '@labre/affine-block-surface';
+import { type BlockSnapshot } from '@labre/store';
 
 export class EdgelessClipboardEdgelessTextConfig extends EdgelessClipboardConfig {
   static override readonly key = 'affine:edgeless-text';

@@ -1,5 +1,5 @@
-import { toNumberedList } from '@blocksuite/affine-shared/utils';
-import type { Command, EditorHost } from '@blocksuite/std';
+import { toNumberedList } from '@labre/affine-shared/utils';
+import type { Command, EditorHost } from '@labre/std';
 
 export const convertToNumberedListCommand: Command<
   {

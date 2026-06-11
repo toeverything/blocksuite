@@ -2,13 +2,13 @@ import {
   getSurfaceBlock,
   type SurfaceBlockModel,
   type SurfaceBlockTransformer,
-} from '@blocksuite/affine-block-surface';
-import type { ConnectorElementModel } from '@blocksuite/affine-model';
-import { BlockSuiteError } from '@blocksuite/global/exceptions';
-import { Bound, getCommonBound } from '@blocksuite/global/gfx';
-import { assertType } from '@blocksuite/global/utils';
-import type { BlockStdScope } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/affine-block-surface';
+import type { ConnectorElementModel } from '@labre/affine-model';
+import { BlockSuiteError } from '@labre/global/exceptions';
+import { Bound, getCommonBound } from '@labre/global/gfx';
+import { assertType } from '@labre/global/utils';
+import type { BlockStdScope } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import {
   type BlockModel,
   type BlockSnapshot,
@@ -16,7 +16,7 @@ import {
   DocSnapshotSchema,
   type SnapshotNode,
   type Transformer,
-} from '@blocksuite/store';
+} from '@labre/store';
 import { Subject } from 'rxjs';
 import type * as Y from 'yjs';
 

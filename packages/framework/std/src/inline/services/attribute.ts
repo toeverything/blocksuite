@@ -1,4 +1,4 @@
-import { type BaseTextAttributes, baseTextAttributes } from '@blocksuite/store';
+import { type BaseTextAttributes, baseTextAttributes } from '@labre/store';
 import type { z, ZodTypeDef } from 'zod';
 
 import type { InlineEditor } from '../inline-editor.js';

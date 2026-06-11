@@ -1,16 +1,16 @@
-import { EdgelessFrameManagerIdentifier } from '@blocksuite/affine-block-frame';
-import { EdgelessCRUDExtension } from '@blocksuite/affine-block-surface';
-import { MindmapStyle, SurfaceRefBlockSchema } from '@blocksuite/affine-model';
+import { EdgelessFrameManagerIdentifier } from '@labre/affine-block-frame';
+import { EdgelessCRUDExtension } from '@labre/affine-block-surface';
+import { MindmapStyle, SurfaceRefBlockSchema } from '@labre/affine-model';
 import {
   type SlashMenuActionItem,
   type SlashMenuConfig,
   SlashMenuConfigExtension,
   type SlashMenuItem,
-} from '@blocksuite/affine-widget-slash-menu';
-import { Bound } from '@blocksuite/global/gfx';
+} from '@labre/affine-widget-slash-menu';
+import { Bound } from '@labre/global/gfx';
 import { FrameIcon, GroupingIcon, MindmapIcon } from '@blocksuite/icons/lit';
-import { BlockSelection } from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+import { BlockSelection } from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 
 import { insertSurfaceRefBlockCommand } from '../commands';
 import { EdgelessTooltip, FrameTooltip, MindMapTooltip } from './tooltips';

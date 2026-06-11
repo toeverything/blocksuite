@@ -1,17 +1,17 @@
 import type {
   DatabaseAllEvents,
   EventTraceFn,
-} from '@blocksuite/affine-shared/services';
-import type { DisposableMember } from '@blocksuite/global/disposable';
-import { IS_MOBILE } from '@blocksuite/global/env';
-import { BlockSuiteError } from '@blocksuite/global/exceptions';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/services';
+import type { DisposableMember } from '@labre/global/disposable';
+import { IS_MOBILE } from '@labre/global/env';
+import { BlockSuiteError } from '@labre/global/exceptions';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import {
   type Clipboard,
   type EventName,
   ShadowlessElement,
   type UIEventHandler,
-} from '@blocksuite/std';
+} from '@labre/std';
 import { computed, type ReadonlySignal, signal } from '@preact/signals-core';
 import { css, unsafeCSS } from 'lit';
 import { property, state } from 'lit/decorators.js';

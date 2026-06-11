@@ -1,9 +1,9 @@
 import {
   type TableBlockModel,
   TableModelFlavour,
-} from '@blocksuite/affine-model';
-import type { Command } from '@blocksuite/std';
-import { type BlockModel } from '@blocksuite/store';
+} from '@labre/affine-model';
+import type { Command } from '@labre/std';
+import { type BlockModel } from '@labre/store';
 
 import { TableDataManager } from './table-data-manager';
 

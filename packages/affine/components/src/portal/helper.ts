@@ -1,4 +1,4 @@
-import { BlockSuiteError } from '@blocksuite/global/exceptions';
+import { BlockSuiteError } from '@labre/global/exceptions';
 import {
   autoUpdate,
   computePosition,

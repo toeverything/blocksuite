@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/toast';
+export * from '@labre/affine-components/toast';

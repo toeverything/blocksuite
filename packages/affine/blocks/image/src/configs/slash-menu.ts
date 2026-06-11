@@ -1,5 +1,5 @@
-import { getSelectedModelsCommand } from '@blocksuite/affine-shared/commands';
-import { type SlashMenuConfig } from '@blocksuite/affine-widget-slash-menu';
+import { getSelectedModelsCommand } from '@labre/affine-shared/commands';
+import { type SlashMenuConfig } from '@labre/affine-widget-slash-menu';
 import { ImageIcon } from '@blocksuite/icons/lit';
 
 import { insertImagesCommand } from '../commands';

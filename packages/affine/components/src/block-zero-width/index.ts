@@ -1,5 +1,5 @@
-import { stopPropagation } from '@blocksuite/affine-shared/utils';
-import { type BlockComponent, TextSelection } from '@blocksuite/std';
+import { stopPropagation } from '@labre/affine-shared/utils';
+import { type BlockComponent, TextSelection } from '@labre/std';
 import { css, html, LitElement } from 'lit';
 import { property } from 'lit/decorators.js';
 

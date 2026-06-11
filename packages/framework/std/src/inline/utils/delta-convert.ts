@@ -1,4 +1,4 @@
-import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/store';
+import type { BaseTextAttributes, DeltaInsert } from '@labre/store';
 
 export function transformDelta<TextAttributes extends BaseTextAttributes>(
   delta: DeltaInsert<TextAttributes>

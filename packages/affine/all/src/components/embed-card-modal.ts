@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-components/embed-card-modal';
+export * from '@labre/affine-components/embed-card-modal';

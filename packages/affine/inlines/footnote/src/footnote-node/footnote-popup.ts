@@ -2,16 +2,16 @@ import {
   getAttachmentFileIcon,
   LoadingIcon,
   WebIcon16,
-} from '@blocksuite/affine-components/icons';
-import type { FootNote } from '@blocksuite/affine-model';
-import { ImageProxyService } from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-components/icons';
+import type { FootNote } from '@labre/affine-model';
+import { ImageProxyService } from '@labre/affine-shared/adapters';
 import {
   DocDisplayMetaProvider,
   LinkPreviewServiceIdentifier,
-} from '@blocksuite/affine-shared/services';
-import { unsafeCSSVar, unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import type { BlockStdScope } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { unsafeCSSVar, unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import type { BlockStdScope } from '@labre/std';
 import { computed, signal } from '@preact/signals-core';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';

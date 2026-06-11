@@ -2,8 +2,8 @@ import {
   Container,
   createIdentifier,
   type ServiceProvider,
-} from '@blocksuite/global/di';
-import type { ExtensionType } from '@blocksuite/store';
+} from '@labre/global/di';
+import type { ExtensionType } from '@labre/store';
 
 import type {
   BlockLayoutPainter,

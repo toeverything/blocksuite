@@ -1,8 +1,8 @@
 import {
   type StoreExtensionContext,
   StoreExtensionProvider,
-} from '@blocksuite/affine-ext-loader';
-import { BookmarkBlockSchemaExtension } from '@blocksuite/affine-model';
+} from '@labre/affine-ext-loader';
+import { BookmarkBlockSchemaExtension } from '@labre/affine-model';
 
 import { BookmarkBlockAdapterExtensions } from './adapters/extension';
 

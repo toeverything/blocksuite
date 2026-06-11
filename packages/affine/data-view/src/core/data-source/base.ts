@@ -1,11 +1,11 @@
-import type { ColumnDataType } from '@blocksuite/affine-model';
-import type { InsertToPosition } from '@blocksuite/affine-shared/utils';
+import type { ColumnDataType } from '@labre/affine-model';
+import type { InsertToPosition } from '@labre/affine-shared/utils';
 import {
   Container,
   createScope,
   type GeneralServiceIdentifier,
   type ServiceProvider,
-} from '@blocksuite/global/di';
+} from '@labre/global/di';
 import { computed, type ReadonlySignal } from '@preact/signals-core';
 
 import type { TypeInstance } from '../logical/type.js';

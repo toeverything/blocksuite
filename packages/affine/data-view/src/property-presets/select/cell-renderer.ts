@@ -1,4 +1,4 @@
-import { popupTargetFromElement } from '@blocksuite/affine-components/context-menu';
+import { popupTargetFromElement } from '@labre/affine-components/context-menu';
 import { computed } from '@preact/signals-core';
 import { html } from 'lit/static-html.js';
 

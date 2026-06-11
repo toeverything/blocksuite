@@ -1,4 +1,4 @@
-import { Bound } from '@blocksuite/global/gfx';
+import { Bound } from '@labre/global/gfx';
 import last from 'lodash-es/last';
 
 import type { PointerEventState } from '../../event';

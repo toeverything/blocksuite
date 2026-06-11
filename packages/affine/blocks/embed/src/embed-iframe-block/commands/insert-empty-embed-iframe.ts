@@ -1,6 +1,6 @@
-import type { EmbedIframeBlockProps } from '@blocksuite/affine-model';
-import type { Command } from '@blocksuite/std';
-import type { BlockModel } from '@blocksuite/store';
+import type { EmbedIframeBlockProps } from '@labre/affine-model';
+import type { Command } from '@labre/std';
+import type { BlockModel } from '@labre/store';
 
 import type { EmbedLinkInputPopupOptions } from '../components/embed-iframe-link-input-popup';
 import { EmbedIframeBlockComponent } from '../embed-iframe-block';

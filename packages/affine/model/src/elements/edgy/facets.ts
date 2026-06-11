@@ -1,13 +1,13 @@
-import type { IVec, SerializedXYWH } from '@blocksuite/global/gfx';
+import type { IVec, SerializedXYWH } from '@labre/global/gfx';
 import {
   Bound,
   getPointsFromBoundWithRotation,
   linePolygonIntersects,
   pointInPolygon,
   polygonNearestPoint,
-} from '@blocksuite/global/gfx';
-import type { BaseElementProps } from '@blocksuite/std/gfx';
-import { field, GfxPrimitiveElementModel } from '@blocksuite/std/gfx';
+} from '@labre/global/gfx';
+import type { BaseElementProps } from '@labre/std/gfx';
+import { field, GfxPrimitiveElementModel } from '@labre/std/gfx';
 
 export type EdgyFacetsProps = BaseElementProps & {
   /** When false the resize handles are hidden — toggled from the toolbar. */

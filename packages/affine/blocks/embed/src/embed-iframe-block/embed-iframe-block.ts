@@ -1,20 +1,20 @@
-import { SurfaceBlockModel } from '@blocksuite/affine-block-surface';
+import { SurfaceBlockModel } from '@labre/affine-block-surface';
 import {
   CaptionedBlockComponent,
   SelectedStyle,
-} from '@blocksuite/affine-components/caption';
-import { createLitPortal } from '@blocksuite/affine-components/portal';
-import type { EmbedIframeBlockModel } from '@blocksuite/affine-model';
+} from '@labre/affine-components/caption';
+import { createLitPortal } from '@labre/affine-components/portal';
+import type { EmbedIframeBlockModel } from '@labre/affine-model';
 import {
   type EmbedIframeData,
   EmbedIframeService,
   type IframeOptions,
   LinkPreviewServiceIdentifier,
   NotificationProvider,
-} from '@blocksuite/affine-shared/services';
-import { matchModels } from '@blocksuite/affine-shared/utils';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { BlockSelection } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { matchModels } from '@labre/affine-shared/utils';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { BlockSelection } from '@labre/std';
 import { flip, offset, shift } from '@floating-ui/dom';
 import {
   computed,

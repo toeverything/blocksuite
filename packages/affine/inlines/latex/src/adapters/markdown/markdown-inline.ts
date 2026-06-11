@@ -1,4 +1,4 @@
-import { MarkdownASTToDeltaExtension } from '@blocksuite/affine-shared/adapters';
+import { MarkdownASTToDeltaExtension } from '@labre/affine-shared/adapters';
 
 export const markdownInlineMathToDeltaMatcher = MarkdownASTToDeltaExtension({
   name: 'inlineMath',

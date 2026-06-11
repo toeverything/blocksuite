@@ -1,7 +1,7 @@
-import { type SurfaceRefBlockModel } from '@blocksuite/affine-model';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { BlockComponent, BlockSelection } from '@blocksuite/std';
-import { GfxControllerIdentifier, type GfxModel } from '@blocksuite/std/gfx';
+import { type SurfaceRefBlockModel } from '@labre/affine-model';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { BlockComponent, BlockSelection } from '@labre/std';
+import { GfxControllerIdentifier, type GfxModel } from '@labre/std/gfx';
 import { css, html } from 'lit';
 import { state } from 'lit/decorators.js';
 import { classMap } from 'lit/directives/class-map.js';

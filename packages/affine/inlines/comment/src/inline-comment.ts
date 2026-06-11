@@ -1,16 +1,16 @@
 import {
   type CommentId,
   CommentProviderIdentifier,
-} from '@blocksuite/affine-shared/services';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-shared/services';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { WithDisposable } from '@labre/global/lit';
 import {
   type BlockStdScope,
   PropTypes,
   requiredProperties,
   ShadowlessElement,
   stdContext,
-} from '@blocksuite/std';
+} from '@labre/std';
 import { consume } from '@lit/context';
 import { css, type PropertyValues } from 'lit';
 import { property, state } from 'lit/decorators.js';

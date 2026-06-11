@@ -1,13 +1,13 @@
-import type { Color } from '@blocksuite/affine-model';
+import type { Color } from '@labre/affine-model';
 import {
   FeatureFlagService,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
-import { Bound } from '@blocksuite/global/gfx';
-import type { EditorHost, SurfaceSelection } from '@blocksuite/std';
-import { BlockComponent } from '@blocksuite/std';
-import { GfxControllerIdentifier, type Viewport } from '@blocksuite/std/gfx';
-import { RANGE_SYNC_EXCLUDE_ATTR } from '@blocksuite/std/inline';
+} from '@labre/affine-shared/services';
+import { Bound } from '@labre/global/gfx';
+import type { EditorHost, SurfaceSelection } from '@labre/std';
+import { BlockComponent } from '@labre/std';
+import { GfxControllerIdentifier, type Viewport } from '@labre/std/gfx';
+import { RANGE_SYNC_EXCLUDE_ATTR } from '@labre/std/inline';
 import { css, html } from 'lit';
 import { query } from 'lit/decorators.js';
 import type { Subject } from 'rxjs';

@@ -1,4 +1,4 @@
-import { QuickToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
+import { QuickToolMixin } from '@labre/affine-widget-edgeless-toolbar';
 import { FrameIcon } from '@blocksuite/icons/lit';
 import { css, html, LitElement } from 'lit';
 

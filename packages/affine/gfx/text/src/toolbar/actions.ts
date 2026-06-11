@@ -1,12 +1,12 @@
 import {
   EdgelessCRUDIdentifier,
   TextUtils,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   packColor,
   type PickColorEvent,
-} from '@blocksuite/affine-components/color-picker';
-import { EditorChevronDown } from '@blocksuite/affine-components/toolbar';
+} from '@labre/affine-components/color-picker';
+import { EditorChevronDown } from '@labre/affine-components/toolbar';
 import {
   DefaultTheme,
   FontFamily,
@@ -16,26 +16,26 @@ import {
   type SurfaceTextModelMap,
   TextAlign,
   type TextStyleProps,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import type {
   ToolbarActions,
   ToolbarContext,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   getMostCommonResolvedValue,
   getMostCommonValue,
-} from '@blocksuite/affine-shared/utils';
+} from '@labre/affine-shared/utils';
 import {
   type MenuItem,
   renderCurrentMenuItemWith,
   renderMenu,
-} from '@blocksuite/affine-widget-edgeless-toolbar';
+} from '@labre/affine-widget-edgeless-toolbar';
 import {
   TextAlignCenterIcon,
   TextAlignLeftIcon,
   TextAlignRightIcon,
 } from '@blocksuite/icons/lit';
-import type { GfxModel } from '@blocksuite/std/gfx';
+import type { GfxModel } from '@labre/std/gfx';
 import { signal } from '@preact/signals-core';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';

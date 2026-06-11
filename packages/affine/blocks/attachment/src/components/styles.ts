@@ -1,4 +1,4 @@
-import { fontXSStyle, panelBaseStyle } from '@blocksuite/affine-shared/styles';
+import { fontXSStyle, panelBaseStyle } from '@labre/affine-shared/styles';
 import { css } from 'lit';
 
 export const renameStyles = css`

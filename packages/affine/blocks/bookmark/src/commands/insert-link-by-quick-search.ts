@@ -1,16 +1,16 @@
-import { insertEmbedIframeWithUrlCommand } from '@blocksuite/affine-block-embed';
+import { insertEmbedIframeWithUrlCommand } from '@labre/affine-block-embed';
 import {
   type InsertedLinkType,
   insertEmbedLinkedDocCommand,
   insertEmbedSyncedDocCommand,
   type LinkableFlavour,
-} from '@blocksuite/affine-block-embed-doc';
+} from '@labre/affine-block-embed-doc';
 import {
   DocModeProvider,
   EditorSettingProvider,
   QuickSearchProvider,
-} from '@blocksuite/affine-shared/services';
-import type { Command } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import type { Command } from '@labre/std';
 
 import { insertBookmarkCommand } from './insert-bookmark';
 

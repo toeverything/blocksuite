@@ -1,1 +1,1 @@
-export * from '@blocksuite/affine-shared/styles';
+export * from '@labre/affine-shared/styles';

@@ -1,12 +1,12 @@
-import { CalloutBlockModel } from '@blocksuite/affine-model';
-import { focusBlockEnd } from '@blocksuite/affine-shared/commands';
-import { FeatureFlagService } from '@blocksuite/affine-shared/services';
+import { CalloutBlockModel } from '@labre/affine-model';
+import { focusBlockEnd } from '@labre/affine-shared/commands';
+import { FeatureFlagService } from '@labre/affine-shared/services';
 import {
   findAncestorModel,
   isInsideBlockByFlavour,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import { type SlashMenuConfig } from '@blocksuite/affine-widget-slash-menu';
+} from '@labre/affine-shared/utils';
+import { type SlashMenuConfig } from '@labre/affine-widget-slash-menu';
 import { FontIcon } from '@blocksuite/icons/lit';
 
 import { calloutTooltip } from './tooltips';

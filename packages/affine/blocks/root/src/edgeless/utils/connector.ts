@@ -1,8 +1,8 @@
 import {
   EdgelessCRUDIdentifier,
   getSurfaceBlock,
-} from '@blocksuite/affine-block-surface';
-import type { BlockStdScope } from '@blocksuite/std';
+} from '@labre/affine-block-surface';
+import type { BlockStdScope } from '@labre/std';
 
 /**
  * move connectors from origin to target

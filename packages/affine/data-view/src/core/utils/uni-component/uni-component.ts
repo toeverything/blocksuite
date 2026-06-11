@@ -1,9 +1,9 @@
 import type {
   UniComponent,
   UniComponentReturn,
-} from '@blocksuite/affine-shared/types';
-import { SignalWatcher } from '@blocksuite/global/lit';
-import { ShadowlessElement } from '@blocksuite/std';
+} from '@labre/affine-shared/types';
+import { SignalWatcher } from '@labre/global/lit';
+import { ShadowlessElement } from '@labre/std';
 import type { Signal } from '@preact/signals-core';
 import type { LitElement, PropertyValues, TemplateResult } from 'lit';
 import { css, html } from 'lit';

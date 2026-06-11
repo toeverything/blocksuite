@@ -1,5 +1,5 @@
-import type { ServiceProvider } from '@blocksuite/global/di';
-import type { BaseTextAttributes, DeltaInsert } from '@blocksuite/store';
+import type { ServiceProvider } from '@labre/global/di';
+import type { BaseTextAttributes, DeltaInsert } from '@labre/store';
 
 import type { AffineTextAttributes } from '../../types';
 

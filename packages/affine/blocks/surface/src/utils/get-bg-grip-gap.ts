@@ -1,4 +1,4 @@
-import { clamp } from '@blocksuite/global/gfx';
+import { clamp } from '@labre/global/gfx';
 
 import { GRID_GAP_MAX, GRID_GAP_MIN } from '../consts';
 

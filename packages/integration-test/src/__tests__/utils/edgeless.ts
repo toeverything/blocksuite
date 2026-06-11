@@ -1,9 +1,9 @@
 import type {
   EdgelessRootBlockComponent,
   PageRootBlockComponent,
-} from '@blocksuite/affine/blocks/root';
-import type { SurfaceBlockComponent } from '@blocksuite/affine/blocks/surface';
-import type { Store } from '@blocksuite/store';
+} from '@labre/affine/blocks/root';
+import type { SurfaceBlockComponent } from '@labre/affine/blocks/surface';
+import type { Store } from '@labre/store';
 
 import type { TestAffineEditorContainer } from '../../index.js';
 

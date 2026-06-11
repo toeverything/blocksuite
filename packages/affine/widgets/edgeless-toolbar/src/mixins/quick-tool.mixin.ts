@@ -1,4 +1,4 @@
-import type { Constructor } from '@blocksuite/global/utils';
+import type { Constructor } from '@labre/global/utils';
 import type { LitElement } from 'lit';
 
 import {

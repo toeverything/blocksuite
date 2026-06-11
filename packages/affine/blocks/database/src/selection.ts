@@ -1,9 +1,9 @@
-import type { DataViewSelection } from '@blocksuite/data-view';
+import type { DataViewSelection } from '@labre/data-view';
 import {
   KanbanViewSelectionWithTypeSchema,
   TableViewSelectionWithTypeSchema,
-} from '@blocksuite/data-view/view-presets';
-import { BaseSelection, SelectionExtension } from '@blocksuite/store';
+} from '@labre/data-view/view-presets';
+import { BaseSelection, SelectionExtension } from '@labre/store';
 import { z } from 'zod';
 
 const ViewSelectionSchema = z.union([

@@ -1,10 +1,10 @@
-import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
+import { EdgelessCRUDIdentifier } from '@labre/affine-block-surface';
 import {
   type GroupElementModel,
   MindmapElementModel,
-} from '@blocksuite/affine-model';
-import type { Command } from '@blocksuite/std';
-import { GfxControllerIdentifier, type GfxModel } from '@blocksuite/std/gfx';
+} from '@labre/affine-model';
+import type { Command } from '@labre/std';
+import { GfxControllerIdentifier, type GfxModel } from '@labre/std/gfx';
 
 export const createGroupCommand: Command<
   { elements: GfxModel[] | string[] },

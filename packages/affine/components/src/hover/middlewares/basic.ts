@@ -1,4 +1,4 @@
-import { sleep } from '@blocksuite/global/utils';
+import { sleep } from '@labre/global/utils';
 
 import type { HoverMiddleware } from '../types.js';
 

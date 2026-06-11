@@ -1,5 +1,5 @@
-import type { PropertyMetaConfig } from '@blocksuite/data-view';
-import { createIdentifier } from '@blocksuite/global/di';
+import type { PropertyMetaConfig } from '@labre/data-view';
+import { createIdentifier } from '@labre/global/di';
 
 export interface DatabaseBlockConfigService {
   propertiesPresets: PropertyMetaConfig[];

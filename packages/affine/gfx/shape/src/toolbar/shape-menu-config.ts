@@ -1,5 +1,5 @@
-import type { ShapeToolOption } from '@blocksuite/affine-gfx-shape';
-import { ShapeType } from '@blocksuite/affine-model';
+import type { ShapeToolOption } from '@labre/affine-gfx-shape';
+import { ShapeType } from '@labre/affine-model';
 import {
   DiamondIcon,
   EllipseIcon,

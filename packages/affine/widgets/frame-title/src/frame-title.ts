@@ -1,20 +1,20 @@
-import { parseStringToRgba } from '@blocksuite/affine-components/color-picker';
+import { parseStringToRgba } from '@labre/affine-components/color-picker';
 import {
   ColorScheme,
   FrameBlockModel,
   isTransparent,
-} from '@blocksuite/affine-model';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import { on } from '@blocksuite/affine-shared/utils';
-import { Bound, type SerializedXYWH } from '@blocksuite/global/gfx';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/affine-model';
+import { ThemeProvider } from '@labre/affine-shared/services';
+import { on } from '@labre/affine-shared/utils';
+import { Bound, type SerializedXYWH } from '@labre/global/gfx';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
 import {
   type BlockStdScope,
   PropTypes,
   requiredProperties,
   stdContext,
-} from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import { consume } from '@lit/context';
 import { themeToVar } from '@toeverything/theme/v2';
 import { LitElement } from 'lit';

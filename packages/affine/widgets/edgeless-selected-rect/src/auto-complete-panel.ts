@@ -1,26 +1,26 @@
-import { EdgelessFrameManagerIdentifier } from '@blocksuite/affine-block-frame';
+import { EdgelessFrameManagerIdentifier } from '@labre/affine-block-frame';
 import {
   CanvasElementType,
   EdgelessCRUDIdentifier,
   getSurfaceBlock,
   getSurfaceComponent,
-} from '@blocksuite/affine-block-surface';
-import { FontFamilyIcon } from '@blocksuite/affine-components/icons';
+} from '@labre/affine-block-surface';
+import { FontFamilyIcon } from '@labre/affine-components/icons';
 import {
   mountShapeTextEditor,
   SHAPE_OVERLAY_HEIGHT,
   SHAPE_OVERLAY_WIDTH,
   ShapeComponentConfig,
-} from '@blocksuite/affine-gfx-shape';
+} from '@labre/affine-gfx-shape';
 import {
   insertEdgelessTextCommand,
   mountTextElementEditor,
-} from '@blocksuite/affine-gfx-text';
+} from '@labre/affine-gfx-text';
 import type {
   Connection,
   ConnectorElementModel,
   ShapeElementModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   DEFAULT_NOTE_WIDTH,
   DefaultTheme,
@@ -32,17 +32,17 @@ import {
   NoteBlockModel,
   ShapeStyle,
   TextElementModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   EditPropsStore,
   FeatureFlagService,
   ThemeProvider,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import {
   captureEventTarget,
   matchModels,
-} from '@blocksuite/affine-shared/utils';
-import type { XYWH } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/utils';
+import type { XYWH } from '@labre/global/gfx';
 import {
   Bound,
   clamp,
@@ -50,15 +50,15 @@ import {
   serializeXYWH,
   toDegree,
   Vec,
-} from '@blocksuite/global/gfx';
-import { WithDisposable } from '@blocksuite/global/lit';
+} from '@labre/global/gfx';
+import { WithDisposable } from '@labre/global/lit';
 import { FrameIcon, PageIcon } from '@blocksuite/icons/lit';
 import {
   type BlockComponent,
   type BlockStdScope,
   stdContext,
-} from '@blocksuite/std';
-import { GfxControllerIdentifier } from '@blocksuite/std/gfx';
+} from '@labre/std';
+import { GfxControllerIdentifier } from '@labre/std/gfx';
 import { consume } from '@lit/context';
 import { baseTheme } from '@toeverything/theme';
 import { css, html, LitElement, nothing, unsafeCSS } from 'lit';

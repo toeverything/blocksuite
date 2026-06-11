@@ -4,7 +4,7 @@ import {
   type IPoint,
   type IVec,
   Vec,
-} from '@blocksuite/global/gfx';
+} from '@labre/global/gfx';
 import debounce from 'lodash-es/debounce';
 import { BehaviorSubject, debounceTime, Subject } from 'rxjs';
 

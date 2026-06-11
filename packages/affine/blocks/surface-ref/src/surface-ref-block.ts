@@ -1,17 +1,17 @@
-import { FrameBlockComponent } from '@blocksuite/affine-block-frame';
+import { FrameBlockComponent } from '@labre/affine-block-frame';
 import {
   EdgelessCRUDIdentifier,
   getSurfaceBlock,
-} from '@blocksuite/affine-block-surface';
-import type { BlockCaptionEditor } from '@blocksuite/affine-components/caption';
-import { whenHover } from '@blocksuite/affine-components/hover';
-import { Peekable } from '@blocksuite/affine-components/peek';
-import { ViewExtensionManagerIdentifier } from '@blocksuite/affine-ext-loader';
-import { RefNodeSlotsProvider } from '@blocksuite/affine-inline-reference';
+} from '@labre/affine-block-surface';
+import type { BlockCaptionEditor } from '@labre/affine-components/caption';
+import { whenHover } from '@labre/affine-components/hover';
+import { Peekable } from '@labre/affine-components/peek';
+import { ViewExtensionManagerIdentifier } from '@labre/affine-ext-loader';
+import { RefNodeSlotsProvider } from '@labre/affine-inline-reference';
 import {
   FrameBlockModel,
   type SurfaceRefBlockModel,
-} from '@blocksuite/affine-model';
+} from '@labre/affine-model';
 import {
   BlockCommentManager,
   DocModeProvider,
@@ -20,12 +20,12 @@ import {
   ThemeProvider,
   ToolbarRegistryIdentifier,
   ViewportElementExtension,
-} from '@blocksuite/affine-shared/services';
-import { unsafeCSSVarV2 } from '@blocksuite/affine-shared/theme';
-import { requestConnectedFrame } from '@blocksuite/affine-shared/utils';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Bound, type SerializedXYWH } from '@blocksuite/global/gfx';
+} from '@labre/affine-shared/services';
+import { unsafeCSSVarV2 } from '@labre/affine-shared/theme';
+import { requestConnectedFrame } from '@labre/affine-shared/utils';
+import { DisposableGroup } from '@labre/global/disposable';
+import { BlockSuiteError, ErrorCode } from '@labre/global/exceptions';
+import { Bound, type SerializedXYWH } from '@labre/global/gfx';
 import {
   BlockComponent,
   BlockSelection,
@@ -33,14 +33,14 @@ import {
   type EditorHost,
   LifeCycleWatcher,
   TextSelection,
-} from '@blocksuite/std';
+} from '@labre/std';
 import {
   GfxBlockElementModel,
   GfxControllerIdentifier,
   type GfxModel,
   GfxPrimitiveElementModel,
-} from '@blocksuite/std/gfx';
-import type { BaseSelection, ExtensionType, Store } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import type { BaseSelection, ExtensionType, Store } from '@labre/store';
 import { effect, signal } from '@preact/signals-core';
 import { css, html, nothing } from 'lit';
 import { query } from 'lit/decorators.js';

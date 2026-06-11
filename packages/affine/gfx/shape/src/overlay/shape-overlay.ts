@@ -3,16 +3,16 @@ import {
   type Options,
   type RoughCanvas,
   ToolOverlay,
-} from '@blocksuite/affine-block-surface';
+} from '@labre/affine-block-surface';
 import {
   type Color,
   DefaultTheme,
   type ShapeStyle,
-} from '@blocksuite/affine-model';
-import { ThemeProvider } from '@blocksuite/affine-shared/services';
-import type { XYWH } from '@blocksuite/global/gfx';
-import { assertType } from '@blocksuite/global/utils';
-import type { GfxController } from '@blocksuite/std/gfx';
+} from '@labre/affine-model';
+import { ThemeProvider } from '@labre/affine-shared/services';
+import type { XYWH } from '@labre/global/gfx';
+import { assertType } from '@labre/global/utils';
+import type { GfxController } from '@labre/std/gfx';
 import { effect } from '@preact/signals-core';
 
 import {

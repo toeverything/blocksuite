@@ -1,13 +1,13 @@
-import { toast } from '@blocksuite/affine-components/toast';
+import { toast } from '@labre/affine-components/toast';
 import {
   copySelectedModelsCommand,
   draftSelectedModelsCommand,
-} from '@blocksuite/affine-shared/commands';
+} from '@labre/affine-shared/commands';
 import {
   ActionPlacement,
   blockCommentToolbarButton,
   type ToolbarModuleConfig,
-} from '@blocksuite/affine-shared/services';
+} from '@labre/affine-shared/services';
 import { CaptionIcon, CopyIcon, DeleteIcon } from '@blocksuite/icons/lit';
 import { html } from 'lit';
 

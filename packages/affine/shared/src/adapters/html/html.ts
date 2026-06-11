@@ -1,5 +1,5 @@
-import { DefaultTheme, NoteDisplayMode } from '@blocksuite/affine-model';
-import type { ServiceProvider } from '@blocksuite/global/di';
+import { DefaultTheme, NoteDisplayMode } from '@labre/affine-model';
+import type { ServiceProvider } from '@labre/global/di';
 import {
   type AssetsManager,
   ASTWalker,
@@ -19,7 +19,7 @@ import {
   type ToBlockSnapshotPayload,
   type ToDocSnapshotPayload,
   type Transformer,
-} from '@blocksuite/store';
+} from '@labre/store';
 import type { Root } from 'hast';
 import rehypeParse from 'rehype-parse';
 import rehypeStringify from 'rehype-stringify';

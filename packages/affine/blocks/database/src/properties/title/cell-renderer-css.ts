@@ -1,4 +1,4 @@
-import { cssVarV2 } from '@blocksuite/affine-shared/theme';
+import { cssVarV2 } from '@labre/affine-shared/theme';
 import { css } from '@emotion/css';
 
 export const titleCellStyle = css({

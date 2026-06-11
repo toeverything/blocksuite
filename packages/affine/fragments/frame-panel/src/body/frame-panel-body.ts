@@ -1,18 +1,18 @@
-import { EdgelessFrameManager } from '@blocksuite/affine-block-frame';
-import type { FrameBlockModel } from '@blocksuite/affine-model';
+import { EdgelessFrameManager } from '@labre/affine-block-frame';
+import type { FrameBlockModel } from '@labre/affine-model';
 import {
   DocModeProvider,
   EditPropsStore,
-} from '@blocksuite/affine-shared/services';
-import { DisposableGroup } from '@blocksuite/global/disposable';
-import { Bound } from '@blocksuite/global/gfx';
-import { SignalWatcher, WithDisposable } from '@blocksuite/global/lit';
-import { type EditorHost, ShadowlessElement } from '@blocksuite/std';
+} from '@labre/affine-shared/services';
+import { DisposableGroup } from '@labre/global/disposable';
+import { Bound } from '@labre/global/gfx';
+import { SignalWatcher, WithDisposable } from '@labre/global/lit';
+import { type EditorHost, ShadowlessElement } from '@labre/std';
 import {
   generateKeyBetweenV2,
   GfxControllerIdentifier,
-} from '@blocksuite/std/gfx';
-import type { Store } from '@blocksuite/store';
+} from '@labre/std/gfx';
+import type { Store } from '@labre/store';
 import { css, html, nothing, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';

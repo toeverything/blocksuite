@@ -1,9 +1,9 @@
-import { EmbedLinkedDocBlockSchema } from '@blocksuite/affine-model';
+import { EmbedLinkedDocBlockSchema } from '@labre/affine-model';
 import {
   AdapterTextUtils,
   BlockHtmlAdapterExtension,
   type BlockHtmlAdapterMatcher,
-} from '@blocksuite/affine-shared/adapters';
+} from '@labre/affine-shared/adapters';
 
 export const embedLinkedDocBlockHtmlAdapterMatcher: BlockHtmlAdapterMatcher = {
   flavour: EmbedLinkedDocBlockSchema.model.flavour,
