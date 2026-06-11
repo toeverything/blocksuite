@@ -45,18 +45,19 @@ export const estuarine: ElementRenderer<EstuarineElementModel> = (
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
 
-  // Filled triangular arrowhead: tip at (x, y), pointing along angle `a`.
+  // Filled triangular arrowhead whose BASE sits on the axis end (x, y) and whose
+  // tip extends `L` further along angle `a` — so the arrow continues the axis.
   const arrowHead = (x: number, y: number, a: number) => {
-    const L = 20; // length
-    const Wd = 10; // half-width of the base
-    const bx = x - L * Math.cos(a);
-    const by = y - L * Math.sin(a);
+    const L = 22; // length beyond the axis end
+    const Wd = 9; // half-width of the base
+    const tx = x + L * Math.cos(a);
+    const ty = y + L * Math.sin(a);
     const px = -Math.sin(a);
     const py = Math.cos(a);
     ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(bx + px * Wd, by + py * Wd);
-    ctx.lineTo(bx - px * Wd, by - py * Wd);
+    ctx.moveTo(tx, ty);
+    ctx.lineTo(x + px * Wd, y + py * Wd);
+    ctx.lineTo(x - px * Wd, y - py * Wd);
     ctx.closePath();
     ctx.fill();
   };
