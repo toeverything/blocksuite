@@ -5,6 +5,7 @@ import {
   EditorSettingExtension,
   FeatureFlagService,
   FontConfigExtension,
+  NoopTelemetryExtension,
   ParseDocUrlExtension,
 } from '@blocksuite/affine/shared/services';
 import type { ExtensionType, Store, Workspace } from '@blocksuite/affine/store';
@@ -24,6 +25,8 @@ export function getTestCommonExtensions(
 ): ExtensionType[] {
   return [
     FontConfigExtension(CommunityCanvasTextFonts),
+    // Standalone host: telemetry seam wired with the event-dropping adapter.
+    NoopTelemetryExtension,
     EditorSettingExtension({
       setting$: mockEditorSetting(),
     }),

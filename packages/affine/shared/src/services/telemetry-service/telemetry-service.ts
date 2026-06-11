@@ -4,6 +4,10 @@ import type { ExtensionType } from '@blocksuite/store';
 import type { CitationEvents } from './citation.js';
 import type { CodeBlockEvents } from './code-block.js';
 import type { OutDatabaseAllEvents } from './database.js';
+import type {
+  BlockLifecycleEvents,
+  FrameworkDiagramEvents,
+} from './lifecycle.js';
 import type { LinkToolbarEvents } from './link.js';
 import type { NoteEvents } from './note.js';
 import type { SlashMenuEvents } from './slash-menu.js';
@@ -30,7 +34,9 @@ export type TelemetryEventMap = OutDatabaseAllEvents &
   SlashMenuEvents &
   CodeBlockEvents &
   NoteEvents &
-  CitationEvents & {
+  CitationEvents &
+  BlockLifecycleEvents &
+  FrameworkDiagramEvents & {
     DocCreated: DocCreatedEvent;
     Link: TelemetryEvent;
     LinkedDocCreated: LinkedDocCreatedEvent;

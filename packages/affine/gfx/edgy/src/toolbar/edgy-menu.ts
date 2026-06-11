@@ -2,6 +2,7 @@ import { DefaultTool } from '@blocksuite/affine-block-surface';
 import { createGroupCommand } from '@blocksuite/affine-gfx-group';
 import { EmptyTool } from '@blocksuite/affine-gfx-pointer';
 import { FontFamily, ShapeStyle } from '@blocksuite/affine-model';
+import { TelemetryProvider } from '@blocksuite/affine-shared/services';
 import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
 import { Bound } from '@blocksuite/global/gfx';
 import type { GfxController } from '@blocksuite/std/gfx';
@@ -85,6 +86,7 @@ export class EdgelessEdgyMenu extends EdgelessToolbarToolMixin(LitElement) {
         height
       ).serialize(),
     });
+    this._track('facets');
     this._finish(id);
   }
 
@@ -143,6 +145,7 @@ export class EdgelessEdgyMenu extends EdgelessToolbarToolMixin(LitElement) {
       textAlign: 'center',
       xywh: new Bound(cx - w / 2, cy - h / 2, w, h).serialize(),
     });
+    this._track(`node:${kind}`);
     this._finish(id);
   }
 
@@ -171,6 +174,7 @@ export class EdgelessEdgyMenu extends EdgelessToolbarToolMixin(LitElement) {
       cy + h / 2 + LABEL_GAP
     );
 
+    this._track('node:people');
     this._finish(this._group([nodeId, labelId]));
   }
 
@@ -180,6 +184,19 @@ export class EdgelessEdgyMenu extends EdgelessToolbarToolMixin(LitElement) {
     gfx.tool.setTool(DefaultTool);
     gfx.selection.set({ elements: [id], editing: false });
     // Keep the palette open (native sub-menu behaviour).
+  }
+
+  private _track(element: string) {
+    this.edgeless.std.getOptional(TelemetryProvider)?.track(
+      'FrameworkElementAdded',
+      {
+        framework: 'edgy',
+        element,
+        page: 'whiteboard editor',
+        segment: 'edgy toolbox',
+        module: 'edgy menu',
+      }
+    );
   }
 
   override render() {

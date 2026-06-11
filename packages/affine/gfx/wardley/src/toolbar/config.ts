@@ -1,6 +1,7 @@
 import { EdgelessCRUDIdentifier } from '@blocksuite/affine-block-surface';
 import { WardleyBackgroundElementModel } from '@blocksuite/affine-model';
 import {
+  TelemetryProvider,
   type ToolbarContext,
   type ToolbarModuleConfig,
   ToolbarModuleExtension,
@@ -259,6 +260,13 @@ export const wardleyToolbarConfig = {
         const bg = models[0];
         if (!bg) return;
         createWardleyLegend(ctx.std, bg);
+        ctx.std.getOptional(TelemetryProvider)?.track('FrameworkLegendCreated', {
+          framework: 'wardley',
+          element: 'legend',
+          page: 'whiteboard editor',
+          segment: 'element toolbar',
+          module: 'wardley toolbar',
+        });
       },
     },
   ],

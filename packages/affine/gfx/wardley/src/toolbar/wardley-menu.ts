@@ -10,7 +10,10 @@ import {
   StrokeStyle,
   type WardleyBgVariant,
 } from '@blocksuite/affine-model';
-import { EditPropsStore } from '@blocksuite/affine-shared/services';
+import {
+  EditPropsStore,
+  TelemetryProvider,
+} from '@blocksuite/affine-shared/services';
 import { EdgelessToolbarToolMixin } from '@blocksuite/affine-widget-edgeless-toolbar';
 import { Bound } from '@blocksuite/global/gfx';
 import type { GfxController } from '@blocksuite/std/gfx';
@@ -167,6 +170,7 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
         height
       ).serialize(),
     });
+    this._track('FrameworkElementAdded', `background:${variant}`);
     this._finish(id);
   }
 
@@ -241,6 +245,7 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
       cy - LABEL_H / 2
     );
 
+    this._track('FrameworkElementAdded', `node:${kind}`);
     this._finish(this._group([nodeId, labelId]));
   }
 
@@ -262,6 +267,7 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
       radius: 0,
       xywh: new Bound(centerX - w / 2, centerY - h / 2, w, h).serialize(),
     });
+    this._track('FrameworkElementAdded', 'node:inertia');
     this._finish(id);
   }
 
@@ -324,6 +330,7 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
 
     // Nested groups: (handle + label), then (body + that group).
     const innerId = this._group([handleId, labelId]);
+    this._track('FrameworkElementAdded', 'node:pipeline');
     this._finish(this._group([bodyId, innerId]));
   }
 
@@ -397,6 +404,7 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
       cy - LABEL_H / 2
     );
 
+    this._track('FrameworkElementAdded', 'node:market');
     this._finish(this._group([circleId, ...dotIds, ...connIds, labelId]));
   }
 
@@ -425,6 +433,7 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
             rearEndpointStyle: PointStyle.None,
           };
     this.edgeless.std.get(EditPropsStore).recordLastProps('connector', props);
+    this._track('FrameworkToolPicked', `connector:${kind}`);
     this.gfx.tool.setTool(ConnectorTool, { mode: ConnectorMode.Straight });
     // Keep the palette open (native sub-menu behaviour): it only closes on
     // re-click of the senior button, another senior tool, or Escape.
@@ -437,6 +446,19 @@ export class EdgelessWardleyMenu extends EdgelessToolbarToolMixin(LitElement) {
     gfx.selection.set({ elements: [id], editing: false });
     // Keep the palette open (native sub-menu behaviour) so several Wardley
     // objects can be added in a row; the canvas stays selectable meanwhile.
+  }
+
+  private _track(
+    event: 'FrameworkElementAdded' | 'FrameworkToolPicked',
+    element: string
+  ) {
+    this.edgeless.std.getOptional(TelemetryProvider)?.track(event, {
+      framework: 'wardley',
+      element,
+      page: 'whiteboard editor',
+      segment: 'wardley toolbox',
+      module: 'wardley menu',
+    });
   }
 
   override render() {
