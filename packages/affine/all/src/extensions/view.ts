@@ -59,43 +59,54 @@ import { SlashMenuViewExtension } from '@blocksuite/affine-widget-slash-menu/vie
 import { ToolbarViewExtension } from '@blocksuite/affine-widget-toolbar/view';
 import { ViewportOverlayViewExtension } from '@blocksuite/affine-widget-viewport-overlay/view';
 
-export function getInternalViewExtensions() {
+import {
+  type BlockFlags,
+  isBlockEnabled,
+  type OptionalBlock,
+} from '../flags.js';
+
+/**
+ * View extensions, honoring block flags.
+ * Omitted flags default to enabled. See {@link BlockFlags}.
+ */
+export function getInternalViewExtensions(flags?: BlockFlags) {
+  const on = (block: OptionalBlock) => isBlockEnabled(flags, block);
   return [
     FoundationViewExtension,
 
     // Gfx
     PointerViewExtension,
     GfxNoteViewExtension,
-    BrushViewExtension,
+    ...(on('brush') ? [BrushViewExtension] : []),
     ShapeViewExtension,
-    MindmapViewExtension,
+    ...(on('mindmap') ? [MindmapViewExtension] : []),
     ConnectorViewExtension,
     GroupViewExtension,
     TextViewExtension,
-    TemplateViewExtension,
-    GfxLinkViewExtension,
-    WardleyViewExtension,
-    EdgyViewExtension,
+    ...(on('template') ? [TemplateViewExtension] : []),
+    ...(on('link') ? [GfxLinkViewExtension] : []),
+    ...(on('wardley') ? [WardleyViewExtension] : []),
+    ...(on('edgy') ? [EdgyViewExtension] : []),
 
     // Block
-    AttachmentViewExtension,
-    BookmarkViewExtension,
-    CalloutViewExtension,
-    CodeBlockViewExtension,
-    DataViewViewExtension,
-    DatabaseViewExtension,
-    DividerViewExtension,
-    EdgelessTextViewExtension,
-    EmbedViewExtension,
-    EmbedDocViewExtension,
-    FrameViewExtension,
-    ImageViewExtension,
-    LatexViewExtension,
-    ListViewExtension,
+    ...(on('attachment') ? [AttachmentViewExtension] : []),
+    ...(on('bookmark') ? [BookmarkViewExtension] : []),
+    ...(on('callout') ? [CalloutViewExtension] : []),
+    ...(on('code') ? [CodeBlockViewExtension] : []),
+    ...(on('data-view') ? [DataViewViewExtension] : []),
+    ...(on('database') ? [DatabaseViewExtension] : []),
+    ...(on('divider') ? [DividerViewExtension] : []),
+    ...(on('edgeless-text') ? [EdgelessTextViewExtension] : []),
+    ...(on('embed') ? [EmbedViewExtension] : []),
+    ...(on('embed-doc') ? [EmbedDocViewExtension] : []),
+    ...(on('frame') ? [FrameViewExtension] : []),
+    ...(on('image') ? [ImageViewExtension] : []),
+    ...(on('latex') ? [LatexViewExtension] : []),
+    ...(on('list') ? [ListViewExtension] : []),
     NoteViewExtension,
     ParagraphViewExtension,
-    SurfaceRefViewExtension,
-    TableViewExtension,
+    ...(on('surface-ref') ? [SurfaceRefViewExtension] : []),
+    ...(on('table') ? [TableViewExtension] : []),
     SurfaceViewExtension,
     RootViewExtension,
 
@@ -104,7 +115,7 @@ export function getInternalViewExtensions() {
     FootnoteViewExtension,
     LinkViewExtension,
     ReferenceViewExtension,
-    InlineLatexViewExtension,
+    ...(on('latex') ? [InlineLatexViewExtension] : []),
     MentionViewExtension,
     InlinePresetViewExtension,
 
@@ -129,7 +140,7 @@ export function getInternalViewExtensions() {
 
     // Fragment
     DocTitleViewExtension,
-    FramePanelViewExtension,
+    ...(on('frame') ? [FramePanelViewExtension] : []),
     OutlineViewExtension,
     AdapterPanelViewExtension,
   ];

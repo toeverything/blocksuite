@@ -31,40 +31,51 @@ import { LinkStoreExtension } from '@blocksuite/affine-inline-link/store';
 import { InlinePresetStoreExtension } from '@blocksuite/affine-inline-preset/store';
 import { ReferenceStoreExtension } from '@blocksuite/affine-inline-reference/store';
 
-export function getInternalStoreExtensions() {
+import {
+  type BlockFlags,
+  isBlockEnabled,
+  type OptionalBlock,
+} from '../flags.js';
+
+/**
+ * Store extensions, honoring block flags.
+ * Omitted flags default to enabled. See {@link BlockFlags}.
+ */
+export function getInternalStoreExtensions(flags?: BlockFlags) {
+  const on = (block: OptionalBlock) => isBlockEnabled(flags, block);
   return [
     FoundationStoreExtension,
 
-    AttachmentStoreExtension,
-    BookmarkStoreExtension,
-    CalloutStoreExtension,
-    CodeStoreExtension,
-    DataViewStoreExtension,
-    DatabaseStoreExtension,
-    DividerStoreExtension,
-    EdgelessTextStoreExtension,
-    EmbedStoreExtension,
-    EmbedDocStoreExtension,
-    FrameStoreExtension,
-    ImageStoreExtension,
-    LatexStoreExtension,
-    ListStoreExtension,
+    ...(on('attachment') ? [AttachmentStoreExtension] : []),
+    ...(on('bookmark') ? [BookmarkStoreExtension] : []),
+    ...(on('callout') ? [CalloutStoreExtension] : []),
+    ...(on('code') ? [CodeStoreExtension] : []),
+    ...(on('data-view') ? [DataViewStoreExtension] : []),
+    ...(on('database') ? [DatabaseStoreExtension] : []),
+    ...(on('divider') ? [DividerStoreExtension] : []),
+    ...(on('edgeless-text') ? [EdgelessTextStoreExtension] : []),
+    ...(on('embed') ? [EmbedStoreExtension] : []),
+    ...(on('embed-doc') ? [EmbedDocStoreExtension] : []),
+    ...(on('frame') ? [FrameStoreExtension] : []),
+    ...(on('image') ? [ImageStoreExtension] : []),
+    ...(on('latex') ? [LatexStoreExtension] : []),
+    ...(on('list') ? [ListStoreExtension] : []),
     NoteStoreExtension,
     ParagraphStoreExtension,
-    SurfaceRefStoreExtension,
-    TableStoreExtension,
+    ...(on('surface-ref') ? [SurfaceRefStoreExtension] : []),
+    ...(on('table') ? [TableStoreExtension] : []),
     SurfaceStoreExtension,
     RootStoreExtension,
 
     FootnoteStoreExtension,
     LinkStoreExtension,
     ReferenceStoreExtension,
-    InlineLatexStoreExtension,
+    ...(on('latex') ? [InlineLatexStoreExtension] : []),
     InlinePresetStoreExtension,
 
-    BrushStoreExtension,
+    ...(on('brush') ? [BrushStoreExtension] : []),
     ShapeStoreExtension,
-    MindmapStoreExtension,
+    ...(on('mindmap') ? [MindmapStoreExtension] : []),
     ConnectorStoreExtension,
     GroupStoreExtension,
     TextStoreExtension,

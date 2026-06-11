@@ -283,6 +283,7 @@
     "./shared/types": "./src/shared/types.ts",
     "./shared/utils": "./src/shared/utils.ts",
     "./schemas": "./src/schemas.ts",
+    "./flags": "./src/flags.ts",
     "./model": "./src/model/index.ts",
     "./sync": "./src/sync/index.ts",
     "./extensions/store": "./src/extensions/store.ts",
@@ -300,6 +301,7 @@
   "version": "0.22.4",
   "devDependencies": {
     "@vanilla-extract/vite-plugin": "^5.0.0",
+    "happy-dom": "^17.4.4",
     "msw": "^2.8.4",
     "vitest": "3.1.3"
   }
