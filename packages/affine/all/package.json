@@ -39,6 +39,7 @@
     "@blocksuite/affine-fragment-outline": "workspace:*",
     "@blocksuite/affine-gfx-brush": "workspace:*",
     "@blocksuite/affine-gfx-connector": "workspace:*",
+    "@blocksuite/affine-gfx-edgy": "workspace:*",
     "@blocksuite/affine-gfx-group": "workspace:*",
     "@blocksuite/affine-gfx-link": "workspace:*",
     "@blocksuite/affine-gfx-mindmap": "workspace:*",

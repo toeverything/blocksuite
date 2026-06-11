@@ -25,6 +25,7 @@ import { FramePanelViewExtension } from '@blocksuite/affine-fragment-frame-panel
 import { OutlineViewExtension } from '@blocksuite/affine-fragment-outline/view';
 import { BrushViewExtension } from '@blocksuite/affine-gfx-brush/view';
 import { ConnectorViewExtension } from '@blocksuite/affine-gfx-connector/view';
+import { EdgyViewExtension } from '@blocksuite/affine-gfx-edgy/view';
 import { GroupViewExtension } from '@blocksuite/affine-gfx-group/view';
 import { LinkViewExtension as GfxLinkViewExtension } from '@blocksuite/affine-gfx-link/view';
 import { MindmapViewExtension } from '@blocksuite/affine-gfx-mindmap/view';
@@ -74,6 +75,7 @@ export function getInternalViewExtensions() {
     TemplateViewExtension,
     GfxLinkViewExtension,
     WardleyViewExtension,
+    EdgyViewExtension,
 
     // Block
     AttachmentViewExtension,

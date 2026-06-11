@@ -1,6 +1,10 @@
 import type { EdgelessTextBlockModel } from '../blocks/edgeless-text/edgeless-text-model.js';
 import type { BrushElementModel } from './brush/index.js';
 import type { ConnectorElementModel } from './connector/index.js';
+import type {
+  EdgyFacetsElementModel,
+  EdgyNodeElementModel,
+} from './edgy/index.js';
 import type { GroupElementModel } from './group/index.js';
 import type { HighlighterElementModel } from './highlighter/index.js';
 import type { MindmapElementModel } from './mindmap/index.js';
@@ -13,6 +17,7 @@ import type {
 
 export * from './brush/index.js';
 export * from './connector/index.js';
+export * from './edgy/index.js';
 export * from './group/index.js';
 export * from './highlighter/index.js';
 export * from './mindmap/index.js';
@@ -30,6 +35,8 @@ export type SurfaceElementModelMap = {
   text: TextElementModel;
   wardley: WardleyBackgroundElementModel;
   wardleyNode: WardleyNodeElementModel;
+  edgy: EdgyFacetsElementModel;
+  edgyNode: EdgyNodeElementModel;
 };
 
 export type SurfaceTextModelMap = {
