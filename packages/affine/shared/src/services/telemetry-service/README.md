@@ -35,6 +35,12 @@ events** (this is part of the block template):
 | `BlockAbandoned`     | created then emptied/undone/deleted shortly after creation    | `flavour`, `reason` (`emptied` \| `deleted-after-create` \| `undo`), `ageMs` |
 | `BlockUsageDuration` | end of an editing session on the block                        | `flavour`, `durationMs` |
 
+`BlockEdited`, `BlockDeleted`, `BlockAbandoned` and `BlockUsageDuration` are
+emitted automatically for every flavour by `BlockLifecycleTelemetryWatcher`
+(registered in the foundation view extension, fed by store mutations, local
+changes only). `BlockCreated` stays a UI-intent event emitted at insertion
+sites — do not emit it from store plumbing.
+
 Conventions:
 
 - `flavour` is the store flavour (`affine:paragraph`, `affine:database`…).

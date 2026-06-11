@@ -10,6 +10,7 @@ import {
 import {
   AutoClearSelectionService,
   BlockCommentManager,
+  BlockLifecycleTelemetryWatcher,
   CitationService,
   DefaultOpenDocExtension,
   DNDAPIExtension,
@@ -80,6 +81,8 @@ export class FoundationViewExtension extends ViewExtensionProvider<FoundationVie
       LinkPreviewService,
       CitationService,
       BlockCommentManager,
+      // Inert without an injected TelemetryService; see telemetry README.
+      BlockLifecycleTelemetryWatcher,
     ]);
     context.register(clipboardConfigs);
     if (this.isEdgeless(context.scope)) {

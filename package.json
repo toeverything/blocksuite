@@ -12,6 +12,8 @@
   "scripts": {
     "preview": "yarn workspace @blocksuite/playground preview",
     "dev": "yarn workspace @blocksuite/playground dev",
+    "test:unit": "vitest run --coverage.enabled=false",
+    "test:integration": "yarn workspace @blocksuite/integration-test test:unit --no-file-parallelism",
     "lint:format": "prettier . --check",
     "format": "prettier . --write",
     "build": "tsc -b tsconfig.json --verbose",
@@ -53,7 +55,8 @@
     "tsx": "^4.19.0",
     "typescript": "5.8.2",
     "vite": "6.4.2",
-    "vite-plugin-web-components-hmr": "^0.1.3"
+    "vite-plugin-web-components-hmr": "^0.1.3",
+    "vitest": "3.1.3"
   },
   "stackblitz": {
     "startCommand": "yarn run dev"

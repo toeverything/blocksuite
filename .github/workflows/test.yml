@@ -3,7 +3,7 @@ name: Test
 on:
   push:
     branches:
-      - main
+      - trimed-lib
   pull_request:
   workflow_dispatch:
 
@@ -40,8 +40,8 @@ jobs:
       - name: Run format check
         run: yarn lint:format
 
-  build:
-    name: Build
+  typecheck:
+    name: Typecheck & Build
     runs-on: ubuntu-latest
     needs: install-deps
     steps:
@@ -57,12 +57,47 @@ jobs:
       - name: Run build
         run: yarn build
 
+  unit-test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: install-deps
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+
+      # framework/std runs its unit tests in browser mode (chromium).
+      - name: Install playwright chromium
+        run: yarn exec playwright install chromium --with-deps
+
+      - name: Run unit tests
+        run: yarn test:unit --retry=2
+
+  integration-test:
+    name: Integration Tests (browser)
+    runs-on: ubuntu-latest
+    needs: install-deps
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup
+
+      - name: Install playwright chromium
+        run: yarn exec playwright install chromium --with-deps
+
+      - name: Run integration tests
+        run: yarn test:integration
+
   build-and-test:
     if: ${{ always() }}
     name: Build & Test
-    needs: [lint, build]
+    needs: [lint, typecheck, unit-test, integration-test]
     runs-on: ubuntu-latest
     steps:
       - name: on error
-        if: ${{ needs.lint.result != 'success' || needs.build.result != 'success' }}
+        if: ${{ needs.lint.result != 'success' || needs.typecheck.result != 'success' || needs.unit-test.result != 'success' || needs.integration-test.result != 'success' }}
         run: exit 1

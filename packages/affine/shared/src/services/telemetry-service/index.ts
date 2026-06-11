@@ -1,3 +1,4 @@
+export * from './block-lifecycle-watcher.js';
 export * from './citation.js';
 export * from './database.js';
 export * from './lifecycle.js';
