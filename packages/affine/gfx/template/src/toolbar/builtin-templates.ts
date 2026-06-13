@@ -1,10 +1,11 @@
+import { otherTemplateCategory } from '../builtin/other.js';
 import type {
   Template,
   TemplateCategory,
   TemplateManager,
 } from './template-type.js';
 
-export const templates: TemplateCategory[] = [];
+export const templates: TemplateCategory[] = [otherTemplateCategory];
 
 function lcs(text1: string, text2: string) {
   const dp: number[][] = Array.from(

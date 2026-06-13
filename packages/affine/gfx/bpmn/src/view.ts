@@ -2,8 +2,10 @@ import {
   type ViewExtensionContext,
   ViewExtensionProvider,
 } from '@labre/affine-ext-loader';
+import { extendTemplateCategory } from '@labre/affine-gfx-template';
 
 import { effects } from './effects';
+import { bpmnTemplateCategory } from './templates';
 import { BpmnPoolRendererExtension } from './element-renderer';
 import { BpmnPoolInteraction, BpmnPoolView } from './element-view';
 import { BpmnNodeRendererExtension } from './node/node-renderer';
@@ -17,6 +19,7 @@ export class BpmnViewExtension extends ViewExtensionProvider {
   override effect(): void {
     super.effect();
     effects();
+    extendTemplateCategory(bpmnTemplateCategory);
   }
 
   override setup(context: ViewExtensionContext) {

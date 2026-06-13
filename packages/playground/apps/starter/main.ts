@@ -11,7 +11,6 @@ import * as editor from '@labre/integration-test';
 import { effects as itEffects } from '@labre/integration-test/effects';
 import { getTestStoreManager } from '@labre/integration-test/store';
 
-import { setupEdgelessTemplate } from '../_common/setup.js';
 import { effects as commentEffects } from '../comment/effects.js';
 import {
   createStarterDocCollection,
@@ -26,8 +25,6 @@ commentEffects();
 
 async function main() {
   if (window.collection) return;
-
-  setupEdgelessTemplate();
 
   const params = new URLSearchParams(location.search);
   const room = params.get('room') ?? Math.random().toString(16).slice(2, 8);

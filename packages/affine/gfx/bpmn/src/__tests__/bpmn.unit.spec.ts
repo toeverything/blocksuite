@@ -11,6 +11,13 @@ import {
 } from '../consts';
 import { bpmnPool } from '../element-renderer';
 
+// The pool renderer only reads (model, ctx, matrix); cast to call with those.
+const renderPool = bpmnPool as unknown as (
+  model: unknown,
+  ctx: CanvasRenderingContext2D,
+  matrix: DOMMatrix
+) => void;
+
 describe('bpmn style-C constants', () => {
   it('defines a size and label for every node kind', () => {
     const kinds = ['startEvent', 'endEvent', 'task', 'gatewayExclusive'] as const;
@@ -81,7 +88,7 @@ function poolModel(name: string, w = 560, h = 200) {
 describe('bpmn pool renderer', () => {
   it('draws the frame and the participant name when present', () => {
     const ctx = fakeCtx();
-    bpmnPool(poolModel('Customer'), ctx, fakeMatrix());
+    renderPool(poolModel('Customer'), ctx, fakeMatrix());
     expect(ctx.fillRect).toHaveBeenCalled(); // name band
     expect(ctx.stroke).toHaveBeenCalled(); // frame + divider
     expect(ctx.fillText).toHaveBeenCalledWith('Customer', 0, 0);
@@ -89,13 +96,13 @@ describe('bpmn pool renderer', () => {
 
   it('skips the name when empty', () => {
     const ctx = fakeCtx();
-    bpmnPool(poolModel(''), ctx, fakeMatrix());
+    renderPool(poolModel(''), ctx, fakeMatrix());
     expect(ctx.fillText).not.toHaveBeenCalled();
   });
 
   it('skips the name when the pool is too narrow for the band', () => {
     const ctx = fakeCtx();
-    bpmnPool(poolModel('Customer', 8), ctx, fakeMatrix());
+    renderPool(poolModel('Customer', 8), ctx, fakeMatrix());
     expect(ctx.fillText).not.toHaveBeenCalled();
   });
 });

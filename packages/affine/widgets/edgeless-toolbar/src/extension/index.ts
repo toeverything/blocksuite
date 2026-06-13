@@ -23,6 +23,11 @@ export interface SeniorTool {
   name: string;
   content: TemplateResult;
   enable?: boolean;
+  /**
+   * Ascending sort key for the senior-tool row (default 0). Higher renders
+   * further right; e.g. the template tool uses a high value to sit last.
+   */
+  order?: number;
 }
 
 export type ToolBuilder<T> = (options: {
