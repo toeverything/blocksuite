@@ -34,12 +34,12 @@ export type BlockLifecycleEvents = {
 
 /**
  * Events of the business framework diagrams (Wardley map, EDGY facets,
- * Cynefin / estuarine…). One event vocabulary for all frameworks: the
+ * Cynefin / estuarine, BPMN…). One event vocabulary for all frameworks: the
  * `framework` property segments, the `element` property identifies what was
  * manipulated ('background:classic', 'node:market', 'connector:link'…).
  */
 export interface FrameworkElementEvent extends TelemetryEvent {
-  framework: 'wardley' | 'edgy' | 'cynefin';
+  framework: 'wardley' | 'edgy' | 'cynefin' | 'bpmn';
   element: string;
 }
 

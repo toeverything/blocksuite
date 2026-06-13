@@ -37,6 +37,7 @@
     "@labre/affine-fragment-doc-title": "workspace:*",
     "@labre/affine-fragment-frame-panel": "workspace:*",
     "@labre/affine-fragment-outline": "workspace:*",
+    "@labre/affine-gfx-bpmn": "workspace:*",
     "@labre/affine-gfx-brush": "workspace:*",
     "@labre/affine-gfx-connector": "workspace:*",
     "@labre/affine-gfx-cynefin-estuarine": "workspace:*",

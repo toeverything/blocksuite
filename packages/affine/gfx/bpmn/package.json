@@ -1,0 +1,39 @@
+{
+  "name": "@labre/affine-gfx-bpmn",
+  "description": "Gfx BPMN process basics (events, task, gateway, sequence flow) + pool for BlockSuite.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc"
+  },
+  "sideEffects": false,
+  "keywords": [],
+  "author": "toeverything",
+  "license": "MIT",
+  "dependencies": {
+    "@labre/affine-block-surface": "workspace:*",
+    "@labre/affine-components": "workspace:*",
+    "@labre/affine-ext-loader": "workspace:*",
+    "@labre/affine-gfx-connector": "workspace:*",
+    "@labre/affine-gfx-group": "workspace:*",
+    "@labre/affine-gfx-pointer": "workspace:*",
+    "@labre/affine-gfx-shape": "workspace:*",
+    "@labre/affine-model": "workspace:*",
+    "@labre/affine-shared": "workspace:*",
+    "@labre/affine-widget-edgeless-toolbar": "workspace:*",
+    "@labre/global": "workspace:*",
+    "@labre/std": "workspace:*",
+    "@labre/store": "workspace:*",
+    "lit": "^3.2.0"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./view": "./src/view.ts"
+  },
+  "files": [
+    "src",
+    "dist",
+    "!src/__tests__",
+    "!dist/__tests__"
+  ],
+  "version": "0.22.4"
+}

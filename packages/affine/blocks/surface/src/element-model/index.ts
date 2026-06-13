@@ -1,4 +1,6 @@
 import {
+  BpmnNodeElementModel,
+  BpmnPoolElementModel,
   BrushElementModel,
   ConnectorElementModel,
   CynefinElementModel,
@@ -30,9 +32,13 @@ export const elementsCtorMap = {
   edgyNode: EdgyNodeElementModel,
   cynefin: CynefinElementModel,
   estuarine: EstuarineElementModel,
+  bpmnNode: BpmnNodeElementModel,
+  bpmnPool: BpmnPoolElementModel,
 };
 
 export {
+  BpmnNodeElementModel,
+  BpmnPoolElementModel,
   BrushElementModel,
   ConnectorElementModel,
   CynefinElementModel,
@@ -63,6 +69,8 @@ export enum CanvasElementType {
   EDGYNODE = 'edgyNode',
   CYNEFIN = 'cynefin',
   ESTUARINE = 'estuarine',
+  BPMNNODE = 'bpmnNode',
+  BPMNPOOL = 'bpmnPool',
 }
 
 export type ElementModelMap = {
@@ -79,6 +87,8 @@ export type ElementModelMap = {
   ['edgyNode']: EdgyNodeElementModel;
   ['cynefin']: CynefinElementModel;
   ['estuarine']: EstuarineElementModel;
+  ['bpmnNode']: BpmnNodeElementModel;
+  ['bpmnPool']: BpmnPoolElementModel;
 };
 
 export function isCanvasElementType(type: string): type is CanvasElementType {

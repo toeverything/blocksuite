@@ -23,6 +23,7 @@ import { AdapterPanelViewExtension } from '@labre/affine-fragment-adapter-panel/
 import { DocTitleViewExtension } from '@labre/affine-fragment-doc-title/view';
 import { FramePanelViewExtension } from '@labre/affine-fragment-frame-panel/view';
 import { OutlineViewExtension } from '@labre/affine-fragment-outline/view';
+import { BpmnViewExtension } from '@labre/affine-gfx-bpmn/view';
 import { BrushViewExtension } from '@labre/affine-gfx-brush/view';
 import { ConnectorViewExtension } from '@labre/affine-gfx-connector/view';
 import { CynefinEstuarineViewExtension } from '@labre/affine-gfx-cynefin-estuarine/view';
@@ -89,6 +90,7 @@ export function getInternalViewExtensions(flags?: BlockFlags) {
     ...(on('wardley') ? [WardleyViewExtension] : []),
     ...(on('edgy') ? [EdgyViewExtension] : []),
     ...(on('cynefin-estuarine') ? [CynefinEstuarineViewExtension] : []),
+    ...(on('bpmn') ? [BpmnViewExtension] : []),
 
     // Block
     ...(on('attachment') ? [AttachmentViewExtension] : []),

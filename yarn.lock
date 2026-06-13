@@ -2196,6 +2196,27 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@labre/affine-gfx-bpmn@workspace:*, @labre/affine-gfx-bpmn@workspace:packages/affine/gfx/bpmn":
+  version: 0.0.0-use.local
+  resolution: "@labre/affine-gfx-bpmn@workspace:packages/affine/gfx/bpmn"
+  dependencies:
+    "@labre/affine-block-surface": "workspace:*"
+    "@labre/affine-components": "workspace:*"
+    "@labre/affine-ext-loader": "workspace:*"
+    "@labre/affine-gfx-connector": "workspace:*"
+    "@labre/affine-gfx-group": "workspace:*"
+    "@labre/affine-gfx-pointer": "workspace:*"
+    "@labre/affine-gfx-shape": "workspace:*"
+    "@labre/affine-model": "workspace:*"
+    "@labre/affine-shared": "workspace:*"
+    "@labre/affine-widget-edgeless-toolbar": "workspace:*"
+    "@labre/global": "workspace:*"
+    "@labre/std": "workspace:*"
+    "@labre/store": "workspace:*"
+    lit: "npm:^3.2.0"
+  languageName: unknown
+  linkType: soft
+
 "@labre/affine-gfx-brush@workspace:*, @labre/affine-gfx-brush@workspace:packages/affine/gfx/brush":
   version: 0.0.0-use.local
   resolution: "@labre/affine-gfx-brush@workspace:packages/affine/gfx/brush"
@@ -3288,6 +3309,7 @@ __metadata:
     "@labre/affine-fragment-doc-title": "workspace:*"
     "@labre/affine-fragment-frame-panel": "workspace:*"
     "@labre/affine-fragment-outline": "workspace:*"
+    "@labre/affine-gfx-bpmn": "workspace:*"
     "@labre/affine-gfx-brush": "workspace:*"
     "@labre/affine-gfx-connector": "workspace:*"
     "@labre/affine-gfx-cynefin-estuarine": "workspace:*"

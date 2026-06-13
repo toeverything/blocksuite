@@ -34,6 +34,7 @@
     { "path": "../fragments/doc-title" },
     { "path": "../fragments/frame-panel" },
     { "path": "../fragments/outline" },
+    { "path": "../gfx/bpmn" },
     { "path": "../gfx/brush" },
     { "path": "../gfx/connector" },
     { "path": "../gfx/cynefin-estuarine" },

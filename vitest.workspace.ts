@@ -9,6 +9,7 @@ export default [
   'packages/affine/blocks/bookmark/vitest.config.ts',
   'packages/affine/data-view/vitest.config.ts',
   'packages/affine/ext-loader/vitest.config.ts',
+  'packages/affine/gfx/bpmn/vitest.config.ts',
   'packages/affine/gfx/connector/vitest.config.ts',
   'packages/affine/inlines/footnote/vitest.config.ts',
   'packages/affine/shared/vitest.config.ts',

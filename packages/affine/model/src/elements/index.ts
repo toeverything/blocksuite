@@ -1,4 +1,8 @@
 import type { EdgelessTextBlockModel } from '../blocks/edgeless-text/edgeless-text-model.js';
+import type {
+  BpmnNodeElementModel,
+  BpmnPoolElementModel,
+} from './bpmn/index.js';
 import type { BrushElementModel } from './brush/index.js';
 import type { ConnectorElementModel } from './connector/index.js';
 import type {
@@ -17,6 +21,7 @@ import type {
   WardleyNodeElementModel,
 } from './wardley/index.js';
 
+export * from './bpmn/index.js';
 export * from './brush/index.js';
 export * from './connector/index.js';
 export * from './cynefin/index.js';
@@ -30,6 +35,8 @@ export * from './text/index.js';
 export * from './wardley/index.js';
 
 export type SurfaceElementModelMap = {
+  bpmnNode: BpmnNodeElementModel;
+  bpmnPool: BpmnPoolElementModel;
   brush: BrushElementModel;
   highlighter: HighlighterElementModel;
   connector: ConnectorElementModel;
