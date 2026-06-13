@@ -2,8 +2,10 @@ import {
   type ViewExtensionContext,
   ViewExtensionProvider,
 } from '@labre/affine-ext-loader';
+import { extendTemplateCategory } from '@labre/affine-gfx-template';
 
 import { effects } from './effects';
+import { edgyTemplateCategory } from './templates';
 import { EdgyFacetsRendererExtension } from './element-renderer';
 import { EdgyInteraction, EdgyView } from './element-view';
 import { EdgyNodeRendererExtension } from './node/node-renderer';
@@ -18,6 +20,7 @@ export class EdgyViewExtension extends ViewExtensionProvider {
   override effect(): void {
     super.effect();
     effects();
+    extendTemplateCategory(edgyTemplateCategory);
   }
 
   override setup(context: ViewExtensionContext) {

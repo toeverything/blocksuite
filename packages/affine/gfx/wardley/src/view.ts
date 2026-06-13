@@ -2,8 +2,10 @@ import {
   type ViewExtensionContext,
   ViewExtensionProvider,
 } from '@labre/affine-ext-loader';
+import { extendTemplateCategory } from '@labre/affine-gfx-template';
 
 import { effects } from './effects';
+import { wardleyTemplateCategory } from './templates';
 import { WardleyElementRendererExtension } from './element-renderer';
 import { WardleyInteraction, WardleyView } from './element-view';
 import { WardleyNodeRendererExtension } from './node/node-renderer';
@@ -18,6 +20,7 @@ export class WardleyViewExtension extends ViewExtensionProvider {
   override effect(): void {
     super.effect();
     effects();
+    extendTemplateCategory(wardleyTemplateCategory);
   }
 
   override setup(context: ViewExtensionContext) {

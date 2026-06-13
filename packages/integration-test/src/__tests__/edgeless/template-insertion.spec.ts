@@ -14,10 +14,11 @@ describe('Framework template catalog', () => {
     return cleanup;
   });
 
-  test('the catalog exposes framework + Other categories, not cat stickers', async () => {
+  const CATEGORIES = ['Wardley', 'EDGY', 'Cynefin', 'Estuarine', 'BPMN', 'Other'];
+
+  test('the catalog exposes every framework + Other category, not cat stickers', async () => {
     const cats = await EdgelessTemplatePanel.templates.categories();
-    expect(cats).toContain('BPMN');
-    expect(cats).toContain('Other');
+    expect(cats).toEqual(expect.arrayContaining(CATEGORIES));
     expect(cats).not.toContain('Paws and pals');
 
     const other = await EdgelessTemplatePanel.templates.list('Other');
@@ -30,6 +31,24 @@ describe('Framework template catalog', () => {
         'Gantt chart',
       ])
     );
+  });
+
+  test('every template in every category inserts valid elements', async () => {
+    const surface = getSurface(window.doc, window.editor).model;
+    for (const cat of CATEGORIES) {
+      const list = await EdgelessTemplatePanel.templates.list(cat);
+      expect(list.length).toBeGreaterThan(0);
+      for (const template of list) {
+        const before = surface.elementModels.length;
+        const job = createTemplateJob(std, template.type);
+        const bound = await job.insertTemplate(template.content);
+        expect(bound, `${cat} / ${template.name}`).not.toBeNull();
+        expect(
+          surface.elementModels.length,
+          `${cat} / ${template.name}`
+        ).toBeGreaterThan(before);
+      }
+    }
   });
 
   test('the BPMN category is registered with its templates', async () => {
@@ -49,22 +68,6 @@ describe('Framework template catalog', () => {
         'Pool',
       ])
     );
-  });
-
-  test('every BPMN and Other template inserts valid elements onto the surface', async () => {
-    const surface = getSurface(window.doc, window.editor).model;
-    const all = [
-      ...(await EdgelessTemplatePanel.templates.list('BPMN')),
-      ...(await EdgelessTemplatePanel.templates.list('Other')),
-    ];
-
-    for (const template of all) {
-      const before = surface.elementModels.length;
-      const job = createTemplateJob(std, template.type);
-      const bound = await job.insertTemplate(template.content);
-      expect(bound).not.toBeNull();
-      expect(surface.elementModels.length).toBeGreaterThan(before);
-    }
   });
 
   test('the simple-process template inserts a pool, nodes and connectors', async () => {
