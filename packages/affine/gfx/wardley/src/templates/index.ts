@@ -16,6 +16,7 @@ import {
 } from '@labre/affine-model';
 
 import { REF_WIDTH } from '../consts';
+import { wardleyMaps } from './maps';
 import {
   ECOSYSTEM_SIZE,
   HANDLE_SIZE,
@@ -217,24 +218,7 @@ function tpl(name: string, preview: string, elements: SurfaceElementsJSON): Temp
 export const wardleyTemplateCategory: TemplateCategory = {
   name: 'Wardley',
   templates: [
-    tpl(
-      'Value chain map',
-      bgPreview('<circle cx="40" cy="22" r="3" fill="#fff" stroke="#1f2328"/><circle cx="64" cy="38" r="3" fill="#fff" stroke="#1f2328"/><circle cx="92" cy="54" r="3" fill="#fff" stroke="#1f2328"/><path d="M40 22 L64 38 L92 54" stroke="#666"/>'),
-      {
-        bg: bg('classic'),
-        anchor: node('anchor', 300, 150),
-        al: label(326, 145, 'Customer'),
-        c1: node('component', 560, 360),
-        c1l: label(586, 355, 'Service'),
-        c2: node('component', 880, 560),
-        c2l: label(906, 555, 'Platform'),
-        c3: node('component', 1180, 720),
-        c3l: label(1206, 715, 'Compute'),
-        k1: connect({ id: 'anchor' }, { id: 'c1' }),
-        k2: connect({ id: 'c1' }, { id: 'c2' }),
-        k3: connect({ id: 'c2' }, { id: 'c3' }),
-      }
-    ),
+    ...wardleyMaps,
     tpl('Map background', bgPreview(), { bg: bg('classic') }),
     tpl('Opportunity gradient', bgPreview('<rect x="22" y="12" width="98" height="52" fill="#eef4fb" opacity="0.6"/>'), { bg: bg('opportunity') }),
     tpl('Benefit gradient', bgPreview('<rect x="22" y="12" width="98" height="26" fill="#e6eef8" opacity="0.6"/>'), { bg: bg('benefit') }),
