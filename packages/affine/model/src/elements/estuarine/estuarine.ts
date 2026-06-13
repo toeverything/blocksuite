@@ -75,5 +75,5 @@ export class EstuarineElementModel extends GfxPrimitiveElementModel<EstuarinePro
   accessor rotate: number = 0;
 
   @field()
-  accessor xywh: SerializedXYWH = '[0,0,816,768]';
+  accessor xywh: SerializedXYWH = '[0,0,690,801]';
 }

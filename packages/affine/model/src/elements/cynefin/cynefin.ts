@@ -12,10 +12,12 @@ import { field, GfxPrimitiveElementModel } from '@labre/std/gfx';
 export type CynefinProps = BaseElementProps & {
   /** When false the resize handles are hidden — toggled from the toolbar. */
   resizeEnabled?: boolean;
-  /** When false the four domain names + "Confusion" title are hidden. */
-  showLabels?: boolean;
-  /** When false the descriptor texts under each domain are hidden. */
+  /** When false the domain titles + the A/C marker letters and names are hidden. */
+  showTitles?: boolean;
+  /** When false the explanatory text (subheadings, decisions, annotations, notes) is hidden. */
   showDescriptions?: boolean;
+  /** When false the teal "iterate" liminal curve is hidden. */
+  showLiminalLine?: boolean;
 };
 
 /**
@@ -60,10 +62,13 @@ export class CynefinElementModel extends GfxPrimitiveElementModel<CynefinProps> 
   accessor resizeEnabled: boolean = true;
 
   @field(true)
-  accessor showLabels: boolean = true;
+  accessor showTitles: boolean = true;
 
   @field(true)
   accessor showDescriptions: boolean = true;
+
+  @field(true)
+  accessor showLiminalLine: boolean = true;
 
   @field(0)
   accessor rotate: number = 0;
