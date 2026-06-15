@@ -54,17 +54,17 @@ jobs:
 
       - name: Get package version
         run: |
-          BLOCKSUITE_VERSION=$(jq -r ".version" packages/affine/all/package.json)
-          echo "BLOCKSUITE_RELEASE_TAG=v${BLOCKSUITE_VERSION}" >> "$GITHUB_ENV"
+          LABRE_VERSION=$(jq -r ".version" packages/affine/all/package.json)
+          echo "LABRE_RELEASE_TAG=v${LABRE_VERSION}" >> "$GITHUB_ENV"
 
       - name: Create GitHub release
         id: release
         uses: ncipollo/release-action@v1
         with:
           commit: blocksuite-labre-main
-          tag: '${{ env.BLOCKSUITE_RELEASE_TAG }}'
-          # We dont' have changelog now. Need to add it back.
-          # body: 'Please refer to [CHANGELOG.md](https://github.com/toeverything/blocksuite/blob/${{ env.BLOCKSUITE_RELEASE_TAG }}/packages/blocks/CHANGELOG.md) for details.'
+          tag: '${{ env.LABRE_RELEASE_TAG }}'
+          # We don't have a changelog now. Need to add it back.
+          # body: 'See CHANGELOG.md for details.'
           token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
@@ -76,4 +76,4 @@ jobs:
           webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
           payload: |
-            { "message": "[BlockSuite Release]: New BlockSuite version ${{ env.BLOCKSUITE_RELEASE_TAG }} has been released to NPM." }
+            { "message": "[Labre Release]: New Labre version ${{ env.LABRE_RELEASE_TAG }} has been released to NPM." }

@@ -9,13 +9,10 @@
 '@labre/affine-shared': patch
 '@labre/affine-widget-scroll-anchoring': patch
 '@labre/data-view': patch
-'@blocksuite/blocks': patch
-'@blocksuite/block-std': patch
+'@labre/std': patch
 '@labre/global': patch
-'@blocksuite/inline': patch
 '@labre/store': patch
 '@labre/sync': patch
-'@blocksuite/presets': patch
 ---
 
 Release a snapshot version.
