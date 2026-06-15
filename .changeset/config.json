@@ -5,7 +5,7 @@
   "fixed": [["@labre/*"]],
   "linked": [],
   "access": "public",
-  "baseBranch": "main",
+  "baseBranch": "blocksuite-labre-main",
   "updateInternalDependencies": "patch",
   "ignore": ["@labre/playground", "@labre/integration-test"],
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {

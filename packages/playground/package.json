@@ -34,7 +34,7 @@
     "yjs": "^13.6.21",
     "zod": "^3.23.8"
   },
-  "license": "MIT",
+  "license": "MPL-2.0",
   "devDependencies": {
     "@tweakpane/core": "^2.0.4",
     "@types/micromatch": "^4.0.9",

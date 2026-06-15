@@ -7,8 +7,9 @@
   },
   "sideEffects": false,
   "keywords": [],
-  "author": "toeverything",
-  "license": "MIT",
+  "author": "lajola",
+  "contributors": ["toeverything"],
+  "license": "MPL-2.0",
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.4.0",
     "@blocksuite/icons": "^2.2.12",

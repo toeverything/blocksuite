@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     branches:
-      - main
+      - blocksuite-labre-main
   workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
@@ -61,7 +61,7 @@ jobs:
         id: release
         uses: ncipollo/release-action@v1
         with:
-          commit: main
+          commit: blocksuite-labre-main
           tag: '${{ env.BLOCKSUITE_RELEASE_TAG }}'
           # We dont' have changelog now. Need to add it back.
           # body: 'Please refer to [CHANGELOG.md](https://github.com/toeverything/blocksuite/blob/${{ env.BLOCKSUITE_RELEASE_TAG }}/packages/blocks/CHANGELOG.md) for details.'

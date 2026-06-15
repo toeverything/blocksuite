@@ -7,8 +7,9 @@
   },
   "sideEffects": false,
   "keywords": [],
-  "author": "toeverything",
-  "license": "MIT",
+  "author": "lajola",
+  "contributors": ["toeverything"],
+  "license": "MPL-2.0",
   "dependencies": {
     "@blocksuite/icons": "^2.2.12",
     "@labre/affine-block-frame": "workspace:*",

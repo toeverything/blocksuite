@@ -45,8 +45,9 @@
       ]
     }
   },
-  "author": "toeverything",
-  "license": "MIT",
+  "author": "lajola",
+  "contributors": ["toeverything"],
+  "license": "MPL-2.0",
   "files": [
     "src",
     "dist",
