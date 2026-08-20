@@ -34,6 +34,8 @@ export class BlockModel<Props extends object = object> {
 
   private readonly _onDeleted: Disposable;
 
+  private _unobserveYjs: (() => void) | null = null;
+
   childMap = computed(() =>
     this._children.value.reduce((map, id, index) => {
       map.set(id, index);
@@ -116,15 +118,23 @@ export class BlockModel<Props extends object = object> {
   constructor() {
     this._onCreated = {
       dispose: this.created.pipe(take(1)).subscribe(() => {
-        this._children.value = this.yBlock.get('sys:children').toArray();
-        this.yBlock.get('sys:children').observe(event => {
+        const yChildren = this.yBlock.get('sys:children');
+        this._children.value = yChildren.toArray();
+        const onYChildren = (event: { target: { toArray: () => string[] } }) => {
           this._children.value = event.target.toArray();
-        });
-        this.yBlock.observe(event => {
+        };
+        const onYBlock = (event: { keysChanged: Set<string> }) => {
           if (event.keysChanged.has('sys:children')) {
             this._children.value = this.yBlock.get('sys:children').toArray();
           }
-        });
+        };
+        yChildren.observe(onYChildren);
+        this.yBlock.observe(onYBlock);
+        this._unobserveYjs = () => {
+          yChildren.unobserve(onYChildren);
+          this.yBlock.unobserve(onYBlock);
+          this._unobserveYjs = null;
+        };
       }).unsubscribe,
     };
     this._onDeleted = {
@@ -135,6 +145,7 @@ export class BlockModel<Props extends object = object> {
   }
 
   dispose() {
+    this._unobserveYjs?.();
     this.created.complete();
     this.deleted.complete();
     this.propsUpdated.complete();
@@ -152,6 +163,7 @@ export class BlockModel<Props extends object = object> {
   }
 
   [Symbol.dispose]() {
+    this._unobserveYjs?.();
     this._onCreated.dispose();
     this._onDeleted.dispose();
   }

@@ -252,6 +252,35 @@ describe('block model should has signal props', () => {
   });
 });
 
+test('disposed model should not react to yjs children updates', () => {
+  const doc = createTestDoc();
+  const yDoc = new Y.Doc();
+  const yBlock = yDoc.getMap('yBlock') as YBlock;
+  yBlock.set('sys:id', '0');
+  yBlock.set('sys:flavour', 'page');
+  const yChildren = new Y.Array<string>();
+  yBlock.set('sys:children', yChildren);
+
+  const block = new Block(doc.schema, yBlock, doc);
+  const model = block.model as RootModel;
+  model.created.next();
+
+  yChildren.push(['child-a']);
+  expect(model.childMap.value.get('child-a')).toBe(0);
+
+  model.dispose();
+
+  yChildren.push(['child-b']);
+  expect(model.childMap.value.has('child-b')).toBe(false);
+  expect([...model.childMap.value.keys()]).toEqual(['child-a']);
+
+  const replaced = new Y.Array<string>();
+  replaced.push(['child-c']);
+  yBlock.set('sys:children', replaced);
+  expect(model.childMap.value.has('child-c')).toBe(false);
+  expect([...model.childMap.value.keys()]).toEqual(['child-a']);
+});
+
 test('on change', () => {
   const doc = createTestDoc();
   const yDoc = new Y.Doc();
