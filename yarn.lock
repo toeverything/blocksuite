@@ -6540,14 +6540,14 @@ __metadata:
   linkType: hard
 
 "dompurify@npm:^3.2.4":
-  version: 3.2.6
-  resolution: "dompurify@npm:3.2.6"
+  version: 3.4.15
+  resolution: "dompurify@npm:3.4.15"
   dependencies:
     "@types/trusted-types": "npm:^2.0.7"
   dependenciesMeta:
     "@types/trusted-types":
       optional: true
-  checksum: 10/b91631ed0e4d17fae950ef53613cc009ed7e73adc43ac94a41dd52f35483f7538d13caebdafa7626e0da145fc8184e7ac7935f14f25b7e841b32fda777e40447
+  checksum: 10/159f592307578405c5217ba40ab467d4ac35f23eb20abc7f32b85698b8c1aff92f71b00c80779f891a8e463edafab05d9a4db53052d5c67005240ac4fff7fc72
   languageName: node
   linkType: hard
 
